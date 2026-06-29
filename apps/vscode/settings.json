@@ -343,4 +343,5 @@
         "bigframes.options.bigquery.project = \"gen-lang-client-0254110631\"",
         "bigframes.options.bigquery.application_name = \"datacloud.visual studio code\""
     ],
+    "chat.unifiedAgentsBar.enabled": true,
 }
