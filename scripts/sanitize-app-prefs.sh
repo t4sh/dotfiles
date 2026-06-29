@@ -4,6 +4,8 @@
 # - VS Code: drop yaml.schemas entries with machine-specific file:// paths
 # - Binary plists: remove keys that store local home paths, file bookmarks, or
 #   account-revealing cloud folder names.
+# - Plist format: `defaults export` writes binary on modern macOS; convert to
+#   XML so git and diff viewers show line-oriented text diffs.
 set -euo pipefail
 
 DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
@@ -93,3 +95,11 @@ if [[ -f "$DOTFILES/macos/dock-backup.plist" ]]; then
     awk '/^    Dict \{$/ { print n++ }')
 fi
 plist_delete "$DOTFILES/macos/dock-backup.plist" "persistent-others"
+
+# Normalize plist on-disk format after PlistBuddy edits (may leave binary).
+for root in "$APPS" "$DOTFILES/macos"; do
+  [[ -d "$root" ]] || continue
+  while IFS= read -r -d '' f; do
+    plutil -convert xml1 -o "$f" "$f"
+  done < <(find "$root" -type f -name '*.plist' -print0 2>/dev/null)
+done
