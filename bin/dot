@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+# dot — dispatcher for dotfiles scripts. Discovers scripts under $DOTFILES/scripts
+# and $DOTFILES/macos and runs them by name. Inspired by CodelyTV/dotly.
+#
+#   dot                          list everything
+#   dot <name>                   run scripts/<name>.sh
+#   dot <group> <name>           run <group>/<name>.sh   (e.g. `dot macos dock`)
+#   dot -h | --help | help       show help
+set -euo pipefail
+
+DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
+
+# (display-name → directory) pairs. Add new contexts here.
+CONTEXTS=(
+    "scripts:$DOTFILES/scripts"
+    "macos:$DOTFILES/macos"
+)
+
+list_group() {
+    local name="$1" dir="$2"
+    [ -d "$dir" ] || return 0
+    local any=0
+    for f in "$dir"/*.sh; do
+        [ -f "$f" ] || continue
+        any=1
+        local base
+        base="$(basename "$f" .sh)"
+        if [ "$name" = "scripts" ]; then
+            printf "  dot %-22s → %s\n" "$base" "${f#"$DOTFILES"/}"
+        else
+            printf "  dot %-22s → %s\n" "$name $base" "${f#"$DOTFILES"/}"
+        fi
+    done
+    [ $any -eq 1 ] && echo ""
+}
+
+usage() {
+    cat <<EOF
+dot — dotfiles script dispatcher
+
+Usage:
+  dot <name>              run scripts/<name>.sh
+  dot <group> <name>      run <group>/<name>.sh
+  dot                     list available scripts
+  dot -h | help           show this help
+
+Available scripts:
+
+EOF
+    for pair in "${CONTEXTS[@]}"; do
+        list_group "${pair%%:*}" "${pair#*:}"
+    done
+    cat <<EOF
+Also available via Make (repo root):
+  make link | unlink | brew | macos | dock | terminal | services | hooks
+  make restore-apps | ssh-setup | backup | secrets-backup | secrets-mount | secrets-pass
+  make skills | all
+EOF
+}
+
+resolve_context() {
+    # Prints the resolved grouped script path on stdout, or returns non-zero.
+    local group="$1" name="$2"
+    local pair context dir
+    for pair in "${CONTEXTS[@]}"; do
+        context="${pair%%:*}" dir="${pair#*:}"
+        if [ "$group" = "$context" ] && [ -f "$dir/$name.sh" ]; then
+            printf '%s\n' "$dir/$name.sh"
+            return 0
+        fi
+    done
+    return 1
+}
+
+resolve_script() {
+    # Prints the resolved scripts/<name>.sh-style path on stdout, or returns non-zero.
+    local name="$1"
+    local pair dir
+    for pair in "${CONTEXTS[@]}"; do
+        dir="${pair#*:}"
+        [ -f "$dir/$name.sh" ] && { printf '%s\n' "$dir/$name.sh"; return 0; }
+    done
+    return 1
+}
+
+if [ $# -eq 0 ] || [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ] || [ "${1:-}" = "help" ]; then
+    usage
+    exit 0
+fi
+
+if [ $# -ge 2 ] && script="$(resolve_context "$1" "$2")"; then
+    shift 2
+    exec bash "$script" "$@"
+fi
+
+if script="$(resolve_script "$1")"; then
+    shift
+    exec bash "$script" "$@"
+fi
+
+echo "dot: unknown script '$*'" >&2
+echo "run 'dot' to list available scripts" >&2
+exit 1

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>MainWindowLastPosition</key>
+	<string>{{960, 548}, {640, 360}}</string>
+	<key>NSFullScreenMenuItemEverywhere</key>
+	<false/>
+	<key>NSNavPanelExpandedSizeForOpenMode</key>
+	<string>{800, 448}</string>
+	<key>NSSplitView Subview Frames NSColorPanelSplitView</key>
+	<array>
+		<string>0.000000, 0.000000, 230.000000, 281.000000, NO, NO</string>
+		<string>0.000000, 282.000000, 230.000000, 48.000000, NO, NO</string>
+	</array>
+	<key>NSToolbar Configuration com.apple.NSColorPanel</key>
+	<dict>
+		<key>TB Is Shown</key>
+		<integer>1</integer>
+	</dict>
+	<key>NSWindow Frame IINAMiniPlayerWindow</key>
+	<string>193 50 300 372 0 0 2560 1410 </string>
+	<key>NSWindow Frame IINAOpenURLWindow</key>
+	<string>992 578 576 262 0 0 2560 1410 </string>
+	<key>NSWindow Frame IINAPreferenceWindow</key>
+	<string>752 156 940 480 0 0 2304 1271 </string>
+	<key>NSWindow Frame IINAWelcomeWindow</key>
+	<string>704 364 640 400 0 0 2048 1127 </string>
+	<key>NSWindow Frame NSColorPanel</key>
+	<string>0 64 250 316 0 0 2560 1410 </string>
+	<key>NSWindow Frame NSNavPanelAutosaveName</key>
+	<string>822 172 800 448 0 0 2304 1271 </string>
+	<key>PluginEnabled.io.iina.opensub</key>
+	<true/>
+	<key>PluginEnabled.io.iina.user-script</key>
+	<true/>
+	<key>PluginEnabled.io.iina.ytdl</key>
+	<true/>
+	<key>PluginOrder</key>
+	<array>
+		<string>io.iina.ytdl</string>
+		<string>io.iina.opensub</string>
+		<string>io.iina.user-script</string>
+	</array>
+	<key>SUAutomaticallyUpdate</key>
+	<true/>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUHasLaunchedBefore</key>
+	<true/>
+	<key>SULastCheckTime</key>
+	<date>2026-06-27T07:23:56Z</date>
+	<key>SUSendProfileInfo</key>
+	<false/>
+	<key>SUUpdateGroupIdentifier</key>
+	<integer>1301834094</integer>
+	<key>controlBarPositionHorizontal</key>
+	<real>0.5</real>
+	<key>controlBarPositionVertical</key>
+	<real>0.054796006944444448</real>
+	<key>iinaLastPlayedFilePosition</key>
+	<real>4.2716666666666665</real>
+	<key>playlistAutoPlayNext</key>
+	<false/>
+	<key>quitWhenNoOpenedWindow</key>
+	<true/>
+	<key>recordPlaybackHistory</key>
+	<false/>
+	<key>recordRecentFiles</key>
+	<false/>
+	<key>softVolume</key>
+	<real>64</real>
+</dict>
+</plist>

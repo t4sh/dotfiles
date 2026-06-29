@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "shadcn": {
+      "command": "~/.local/bin/npx-stable",
+      "args": [
+        "shadcn@latest",
+        "mcp"
+      ]
+    }
+  }
+}

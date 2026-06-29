@@ -1,0 +1,35 @@
+# Template for the real manifest.
+#
+# Copy to ~/.dotfiles-local/backup.manifest (NOT into the repo) and edit.
+# One path per line. `#` starts a comment. `~` and $VARS are expanded.
+# Missing paths are warned and skipped, not fatal.
+#
+# Recommended (single canonical tree — see README § Secrets layout):
+#
+~/.secrets
+#
+# ~/.secrets/ layout (all vault-backed, never in git):
+#
+#   ~/.secrets/
+#   ├── env.sh                          # sourced by zsh (API keys, exports)
+#   ├── ssh/                            # → ~/.ssh/* via symlinks.tsv
+#   ├── config/
+#   │   ├── gh/hosts.yml                # → ~/.config/gh/hosts.yml
+#   │   └── moltbook/credentials.json   # → ~/.config/moltbook/credentials.json
+#   └── apps/
+#       ├── raycast/                    # manual .rayconfig / export bundles
+#       └── transmit/                   # manual .transmitservers exports
+#
+# Shottr license prefs: add a manifest line for the sandbox plist path if you
+# vault-back it directly (see restore-apps.sh comment), or restore from a
+# dated snapshot after mounting the vault.
+#
+# Monokai Pro (Sublime): license file is NOT in the repo — keep under:
+#   ~/.secrets/apps/sublime-text/Theme - Monokai Pro.sublime-settings
+# Covered by the ~/.secrets line above when using the recommended manifest.
+#
+# Canary Mail: make backup-canary → ~/.secrets/apps/canary-mail/ (realms + plist).
+# Also covered by ~/.secrets when using the recommended manifest.
+#
+# Migrating from an old manifest that listed ~/.config/* or ~/.ssh/* paths?
+# Move files into the ~/.secrets/ tree above, then `make link`.

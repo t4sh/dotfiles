@@ -1,0 +1,178 @@
+# Timeout for commands executed by starship (ms)
+command_timeout = 2500
+
+# newline between commands
+add_newline = true
+
+# You can also replace your username with a neat symbol like   or disable this
+[username]
+show_always = true
+style_user = "bold cyan"
+style_root = "bold red"
+format = '[$user ]($style)'
+disabled = false
+
+# An alternative to the username module which displays a symbol that
+# represents the current operating system
+[os]
+style = "bold yellow"
+disabled = false # Disabled by default
+
+# Replace the '❯' symbol in the prompt with '➜'
+[character] # The name of the module we are configuring is 'character'
+success_symbol = '[◉](bold green)'
+error_symbol = '[◉](bold red)'
+
+# Nerd Font Symbols from https://starship.rs/presets/nerd-font.html
+[aws]
+symbol = "  "
+
+[buf]
+symbol = " "
+
+[c]
+symbol = " "
+
+[conda]
+symbol = " "
+
+[cmd_duration]
+min_time = 500
+format = '[$duration](bold yellow)'
+
+[dart]
+symbol = " "
+
+[directory]
+read_only = " "
+truncation_length = 10
+truncation_symbol = "…/"
+truncate_to_repo = true
+
+[directory.substitutions]
+"Documents" = "󰈙 "
+"Downloads" = " "
+"Music" = " "
+"Pictures" = " "
+
+[docker_context]
+symbol = " "
+
+[gcloud]
+format = 'on [$symbol(\($region\))]($style) '
+symbol = "☁️  "
+style = "bold blue"
+
+[elixir]
+symbol = " "
+
+[elm]
+symbol = " "
+
+[env_var.SHELL]
+variable = "SHELL"
+default = "unknown shell"
+disabled = true
+
+[fossil_branch]
+symbol = " "
+
+[git_branch]
+symbol = " "
+
+[git_status]
+conflicted = "⚔️ "
+ahead = "🏎️ 💨 ×${count}"
+behind = "🐢 ×${count}"
+diverged = "🔱 🏎️ 💨 ×${ahead_count} 🐢 ×${behind_count}"
+untracked = "🛤️  ×${count}"
+stashed = "📦 "
+modified = "📝 ×${count}"
+staged = "🗃️  ×${count}"
+renamed = "📛 ×${count}"
+deleted = "🗑️  ×${count}"
+style = "bold #FCA17D"
+format = '([$all_status$ahead_behind]($style) )'
+
+[golang]
+symbol = " "
+
+[guix_shell]
+symbol = " "
+
+[haskell]
+symbol = " "
+
+[haxe]
+symbol = "⌘ "
+
+[hg_branch]
+symbol = " "
+
+[hostname]
+ssh_symbol = " "
+ssh_only = false
+format = "<[$hostname]($style)>"
+trim_at = "-"
+style = "bold dimmed white"
+disabled = true
+
+[java]
+symbol = " "
+
+[julia]
+symbol = " "
+
+[lua]
+symbol = " "
+
+[memory_usage]
+symbol = " "
+threshold = 70
+style = "bold dimmed white"
+disabled = false
+
+[meson]
+symbol = "󰔷 "
+
+[nim]
+symbol = " "
+
+[nix_shell]
+symbol = " "
+
+[nodejs]
+symbol = " "
+
+[os.symbols]
+Macos = " "
+Linux = " "
+Windows = "󰍲 "
+
+[package]
+symbol = " "
+# format = '[$symbol--> $version]($style) '
+format = '[$symbol: \[$version\]]($style) '
+
+[pijul_channel]
+symbol = "🪺 "
+
+[python]
+symbol = " "
+python_binary = ["./venv/bin/python", "python3", "python", "python2"]
+
+[rlang]
+symbol = "󰟔 "
+
+[ruby]
+symbol = " "
+
+[rust]
+symbol = " "
+
+[scala]
+symbol = " "
+
+[spack]
+symbol = "🅢 "
+

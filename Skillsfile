@@ -1,0 +1,130 @@
+#!/usr/bin/env bash
+# Skillsfile — declarative global skill manifest (Brewfile pattern).
+#
+# GENERATED 2026-06-29T15:21:01+05:30 from agents/.skill-lock.json by
+# scripts/gen-skillsfile.py — DO NOT EDIT BY HAND. To change skills:
+#   npx skills add/remove ...   then   make skills-manifest
+#
+# Install everything:  make skills   (or: bash Skillsfile)
+# 112 skills — 36 github sources + 2 local.
+#
+# Prereqs (fresh Mac): node + git + network access must be set up first.
+
+set -euo pipefail
+
+command -v npx >/dev/null || { echo "npx not found — set up node first" >&2; exit 1; }
+
+echo "→ ComposioHQ/awesome-claude-skills"
+npx skills add ComposioHQ/awesome-claude-skills --skill file-organizer -g -y
+
+echo "→ Jakubantalik/transitions.dev"
+npx skills add Jakubantalik/transitions.dev --skill transitions-dev -g -y
+
+echo "→ Leonxlnx/taste-skill"
+npx skills add Leonxlnx/taste-skill --skill brandkit,design-taste-frontend,full-output-enforcement,gpt-taste,high-end-visual-design,industrial-brutalist-ui,minimalist-ui,redesign-existing-projects,stitch-design-taste -g -y
+
+echo "→ anthropics/claude-code"
+npx skills add anthropics/claude-code --skill skill-development -g -y
+
+echo "→ anthropics/knowledge-work-plugins"
+npx skills add anthropics/knowledge-work-plugins --skill accessibility-review,architecture,code-review,debug,deploy-checklist,design-critique,design-handoff,design-system,documentation,research-synthesis,system-design,tech-debt,user-research,ux-copy -g -y
+
+echo "→ anthropics/skills"
+npx skills add anthropics/skills --skill canvas-design,frontend-design,theme-factory -g -y
+
+echo "→ benjitaylor/agentation"
+npx skills add benjitaylor/agentation --skill agentation,agentation-self-driving -g -y
+
+echo "→ cerico/macfair"
+npx skills add cerico/macfair --skill creative-design -g -y
+
+echo "→ coreyhaines31/marketingskills"
+npx skills add coreyhaines31/marketingskills --skill copywriting -g -y
+
+echo "→ emilkowalski/skill"
+npx skills add emilkowalski/skill --skill emil-design-eng -g -y
+
+echo "→ firebenders/sync-figma-token-skill"
+npx skills add firebenders/sync-figma-token-skill --skill sync-figma-token -g -y
+
+echo "→ github/awesome-copilot"
+npx skills add github/awesome-copilot --skill git-commit -g -y
+
+echo "→ index-how/vocabulary"
+npx skills add index-how/vocabulary --skill vocabulary -g -y
+
+echo "→ josiahsiegel/claude-plugin-marketplace"
+npx skills add josiahsiegel/claude-plugin-marketplace --skill tailwindcss-advanced-design-systems -g -y
+
+echo "→ julianoczkowski/designer-skills"
+npx skills add julianoczkowski/designer-skills --skill design-tokens -g -y
+
+echo "→ mattpocock/skills"
+npx skills add mattpocock/skills --skill ask-matt,codebase-design,decision-mapping,design-an-interface,diagnosing-bugs,domain-modeling,edit-article,git-guardrails-claude-code,grill-me,grill-with-docs,grilling,handoff,implement,improve-codebase-architecture,loop-me,migrate-to-shoehorn,obsidian-vault,prototype,qa,request-refactor-plan,resolving-merge-conflicts,review,scaffold-exercises,setup-matt-pocock-skills,setup-pre-commit,tdd,teach,to-issues,to-prd,triage,ubiquitous-language,writing-beats,writing-fragments,writing-great-skills,writing-shape -g -y
+
+echo "→ mblode/agent-skills"
+npx skills add mblode/agent-skills --skill ui-animation -g -y
+
+echo "→ mindmorass/reflex"
+npx skills add mindmorass/reflex --skill pdf-harvester -g -y
+
+echo "→ nextlevelbuilder/ui-ux-pro-max-skill"
+npx skills add nextlevelbuilder/ui-ux-pro-max-skill --skill ui-ux-pro-max -g -y
+
+echo "→ nodnarbnitram/claude-code-extensions"
+npx skills add nodnarbnitram/claude-code-extensions --skill tauri-v2 -g -y
+
+echo "→ notedit/happy-skills"
+npx skills add notedit/happy-skills --skill feature-dev -g -y
+
+echo "→ obra/superpowers"
+npx skills add obra/superpowers --skill brainstorming,executing-plans,finishing-a-development-branch,systematic-debugging,using-git-worktrees,writing-plans,writing-skills -g -y
+
+echo "→ openai/skills"
+npx skills add openai/skills --skill playwright,skill-creator -g -y
+
+echo "→ owl-listener/designer-skills"
+npx skills add owl-listener/designer-skills --skill design-token-audit -g -y
+
+echo "→ owl-listener/designpowers"
+npx skills add owl-listener/designpowers --skill design-system-alignment -g -y
+
+echo "→ pbakaus/impeccable"
+npx skills add pbakaus/impeccable --skill impeccable -g -y
+
+echo "→ referodesign/refero_skill"
+npx skills add referodesign/refero_skill --skill refero-design -g -y
+
+echo "→ shadcn/improve"
+npx skills add shadcn/improve --skill improve -g -y
+
+echo "→ sorcerai/moltbook-skill"
+npx skills add sorcerai/moltbook-skill --skill moltbook -g -y
+
+echo "→ squirrelscan/skills"
+npx skills add squirrelscan/skills --skill audit-website -g -y
+
+echo "→ t4sh/skills4sh"
+npx skills add t4sh/skills4sh --skill agent-memory,code-to-figma,discord-harvest,eleventy-nunjucks,figma-to-code,localhost-screenshots,skill-architect -g -y
+
+echo "→ vercel-labs/agent-browser"
+npx skills add vercel-labs/agent-browser --skill agent-browser -g -y
+
+echo "→ vercel-labs/agent-skills"
+npx skills add vercel-labs/agent-skills --skill web-design-guidelines -g -y
+
+echo "→ vercel-labs/skills"
+npx skills add vercel-labs/skills --skill find-skills -g -y
+
+echo "→ wondelai/skills"
+npx skills add wondelai/skills --skill refactoring-ui,top-design,web-typography -g -y
+
+echo "→ wshobson/agents"
+npx skills add wshobson/agents --skill monorepo-management,tailwind-design-system -g -y
+
+# Local / repo-native skills (vendored in agents/skills/,
+# no upstream — they ship with the dotfiles repo itself):
+#   code-review-nextjs
+#   init-rulebook
+
+echo "✓ Skillsfile applied"

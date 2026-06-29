@@ -1,0 +1,43 @@
+# Declarative manifest of `defaults`-managed app + macOS system preferences.
+# Consumed by `make backup` (defaults export) and scripts/restore-apps.sh
+# (defaults import). Mirrors the symlinks.tsv pattern.
+#
+# Format:   <domain>\t<label>\t<repo-relative plist>
+# Placeholder: $DOTFILES expands in restore-apps.sh; paths are repo-root-relative.
+# Lines starting with `#` and blank lines are ignored.
+#
+# NOTE: apps needing container copies / exclusions / sanitize steps (Dato,
+# Sublime Text, VS Code) stay as explicit blocks in their consumers — they carry
+# irregular logic that does not fit a flat row. This manifest is for the
+# homogeneous `defaults import/export <domain> <plist>` case only.
+
+com.knollsoft.Rectangle	Rectangle	apps/rectangle/rectangle.plist
+pro.betterdisplay.BetterDisplay	BetterDisplay	apps/betterdisplay/betterdisplay.plist
+com.macitbetter.betterzip	BetterZip	apps/betterzip/betterzip.plist
+com.lowtechguys.Clop	Clop	apps/clop/clop.plist
+com.ethanbills.DockDoor	DockDoor	apps/dockdoor/dockdoor.plist
+com.colliderli.iina	IINA	apps/iina/iina.plist
+net.pornel.ImageOptim	ImageOptim	apps/imageoptim/imageoptim.plist
+io.github.keycastr	KeyCastr	apps/keycastr/keycastr.plist
+com.max-langer.Latest	Latest	apps/latest/latest.plist
+org.p0deje.Maccy	Maccy	apps/maccy/maccy.plist
+com.titanium.OnyX	OnyX	apps/onyx/onyx.plist
+com.stonerl.Thaw	Thaw	apps/thaw/thaw.plist
+org.upscayl.Upscayl	Upscayl	apps/upscayl/upscayl.plist
+com.sindresorhus.Velja	Velja	apps/velja/velja.plist
+com.sindresorhus.Color-Picker	Color Picker	apps/color-picker/color-picker.plist
+com.sindresorhus.Gifski	Gifski	apps/gifski/gifski.plist
+com.sindresorhus.Battery-Indicator	Battery Indicator	apps/battery-indicator/battery-indicator.plist
+com.sindresorhus.Lungo	Lungo	apps/lungo/lungo.plist
+com.wolfrosch.Gapplin	Gapplin	apps/gapplin/gapplin.plist
+com.valerijs.boguckis.store.TextSniper	TextSniper	apps/textsniper/textsniper.plist
+com.devtoys	DevToys	apps/devtoys/devtoys.plist
+com.alienator88.Pearcleaner	Pearcleaner	apps/pearcleaner/pearcleaner.plist
+
+# macOS system UX domains — too deeply nested to hand-write in macos/defaults.sh,
+# so snapshotted whole. Plists live in macos/ (next to dock-backup.plist), not
+# apps/. Changes need a logout (or killall cfprefsd) to take effect on import.
+com.apple.symbolichotkeys	Keyboard Shortcuts	macos/symbolichotkeys.plist
+com.apple.HIToolbox	Input Sources	macos/hitoolbox.plist
+
+# Shottr + Monokai Pro license settings are NOT kept in the repo — vault only

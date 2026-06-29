@@ -1,0 +1,6 @@
+{
+    /*
+     * The location of the ImageMagic convert script.
+     */
+    "convert_path" : "/usr/local/bin/convert",
+}
