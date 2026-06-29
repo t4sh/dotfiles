@@ -1,0 +1,4 @@
+# Render plist files as text in `git diff`, `git log -p`, `git show`, and
+# diff viewers that honor git attributes. Requires matching textconv in
+# .git/config (set by `git config diff.plist.textconv "plutil -p"`).
+*.plist diff=plist

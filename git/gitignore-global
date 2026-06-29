@@ -1,0 +1,14 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+
+# Thumbnails
+Thumbs.db
+
+# Claude Code
+**/.claude/settings.local.json

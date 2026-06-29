@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>AVDesktopPlaybackControlsControllerShowsDurationInsteadOfTimeRemainingDefaultsKey</key>
+	<true/>
+	<key>NSNavPanelExpandedSizeForSaveMode</key>
+	<string>{800, 448}</string>
+	<key>NSWindow Frame NSNavPanelAutosaveName</key>
+	<string>752 391 800 448 0 0 2304 1271 </string>
+	<key>SSApp_requestReview</key>
+	<integer>3</integer>
+	<key>SS_App_runOnce__fpsWarning</key>
+	<true/>
+	<key>SS_App_runOnce__showOpenButtonLabel</key>
+	<true/>
+	<key>SS_hasLaunched</key>
+	<true/>
+	<key>__Tooltip__conversionCompletedTips</key>
+	<integer>1</integer>
+	<key>__Tooltip__savePanelArrowKeys</key>
+	<integer>1</integer>
+	<key>firebase-sessions-cache-key</key>
+	<data>
+	eyJnb29nbGVBcHBJRCI6IjE6MTA1MzA3OTQ4MTE1NDppb3M6ZDVlNDBiODI3OTkwMDgx
+	YWE0NzZkYiIsImNyZWF0ZWRBdCI6NzYwOTU3MjE3LjY5MDg5OSwiYXBwVmVyc2lvbiI6
+	IjIuMjMuMSAoNzMpIn0=
+	</data>
+	<key>firebase-sessions-settings</key>
+	<dict>
+		<key>app</key>
+		<dict>
+			<key>report_upload_variant</key>
+			<integer>2</integer>
+			<key>status</key>
+			<string>activated</string>
+			<key>update_required</key>
+			<false/>
+		</dict>
+		<key>app_quality</key>
+		<dict>
+			<key>sampling_rate</key>
+			<real>1</real>
+			<key>session_timeout_seconds</key>
+			<integer>1800</integer>
+			<key>sessions_enabled</key>
+			<true/>
+		</dict>
+		<key>cache_duration</key>
+		<integer>167412</integer>
+		<key>fabric</key>
+		<dict>
+			<key>bundle_id</key>
+			<string>com.sindresorhus.gifski</string>
+			<key>org_id</key>
+			<string>58b0d3dd858cbd9e0a00008b</string>
+		</dict>
+		<key>features</key>
+		<dict>
+			<key>collect_analytics</key>
+			<false/>
+			<key>collect_anrs</key>
+			<true/>
+			<key>collect_build_ids</key>
+			<true/>
+			<key>collect_logged_exceptions</key>
+			<true/>
+			<key>collect_metric_kit</key>
+			<false/>
+			<key>collect_reports</key>
+			<true/>
+			<key>firebase_crashlytics_enabled</key>
+			<false/>
+			<key>prompt_enabled</key>
+			<false/>
+			<key>push_enabled</key>
+			<false/>
+		</dict>
+		<key>on_demand_backoff_base</key>
+		<real>1.2</real>
+		<key>on_demand_backoff_step_duration_seconds</key>
+		<integer>60</integer>
+		<key>on_demand_upload_rate_per_minute</key>
+		<real>10</real>
+		<key>settings_version</key>
+		<integer>3</integer>
+	</dict>
+	<key>outputFPS</key>
+	<integer>10</integer>
+	<key>outputQuality</key>
+	<real>1</real>
+</dict>
+</plist>

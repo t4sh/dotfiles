@@ -1,0 +1,27 @@
+# Topgrade configuration
+# Docs: https://github.com/topgrade-rs/topgrade/blob/main/config.example.toml
+
+
+[misc]
+assume_yes = true
+ask_retry = false
+cleanup = true
+pre_sudo = true
+
+# End notification only when something failed (success runs stay quiet).
+notify_end = "on_failure"
+
+# system: macOS softwareupdate — slow, reboot prompts; run manually when needed.
+# yarn / pnpm: npm + corepack cover globals; no global pnpm packages installed.
+disable = ["system", "emacs", "git_repos", "yarn", "pnpm"]
+
+# Non-fatal when the engine is down or the vendor check is slow/no-op.
+ignore_failures = ["containers", "microsoft_office"]
+
+[brew]
+greedy_auto_updates = true
+autoremove = true
+
+[commands]
+# After brew/npm/etc.: fail the run if Brewfile declarations drift from system state.
+"Brewfile audit" = "bash ~/.dotfiles/scripts/audit-brewfile.sh --check"

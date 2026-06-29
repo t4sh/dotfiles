@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NSNavPanelExpandedSizeForOpenMode</key>
+	<string>{800, 448}</string>
+	<key>NSNavPanelExpandedSizeForSaveMode</key>
+	<string>{800, 448}</string>
+	<key>NSSplitView Subview Frames settings, SidebarNavigationSplitView</key>
+	<array>
+		<string>0.000000, 0.000000, 148.000000, 782.000000, NO, NO</string>
+		<string>0.000000, 0.000000, 900.000000, 782.000000, NO, NO</string>
+	</array>
+	<key>NSStatusItem Preferred Position Item-0</key>
+	<real>64</real>
+	<key>NSWindow Frame NSNavPanelAutosaveName</key>
+	<string>752 628 800 448 0 0 2304 1271 </string>
+	<key>NSWindow Frame SUUpdateAlert2</key>
+	<string>1014 767 532 402 0 0 2560 1410 </string>
+	<key>NSWindow Frame settings</key>
+	<string>653 255 900 782 0 0 2560 1410 </string>
+	<key>Paddle-Clop-841006-SD</key>
+	<string>8e96cae23aeef2e0f69383912e8154748f005489225e94797d2e6b4ccb6af3d8</string>
+	<key>SUAutomaticallyUpdate</key>
+	<true/>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUHasLaunchedBefore</key>
+	<true/>
+	<key>SULastCheckTime</key>
+	<date>2026-06-27T07:23:53Z</date>
+	<key>SUSendProfileInfo</key>
+	<false/>
+	<key>SUUpdateGroupIdentifier</key>
+	<integer>3956280001</integer>
+	<key>ZephyrSyncKey</key>
+	<date>2026-06-26T11:24:04Z</date>
+	<key>allowClopToAppearInScreenshots</key>
+	<false/>
+	<key>alwaysShowCompactResults</key>
+	<false/>
+	<key>audioCompression</key>
+	<string>{"factor":34,"tier":"custom"}</string>
+	<key>autoClearAllCompactResultsAfter</key>
+	<integer>60</integer>
+	<key>autoCopyToClipboard</key>
+	<false/>
+	<key>autoHideClipboardResultAfter</key>
+	<integer>10</integer>
+	<key>autoHideFloatingResults</key>
+	<true/>
+	<key>autoHideFloatingResultsAfter</key>
+	<integer>60</integer>
+	<key>builtinPipelinesSeededVersion</key>
+	<integer>1</integer>
+	<key>cliInstalled</key>
+	<true/>
+	<key>compactResultActions</key>
+	<array>
+		<string>"downscale"</string>
+		<string>"compression"</string>
+		<string>"crop"</string>
+		<string>"quickLook"</string>
+		<string>"restoreOptimise"</string>
+		<string>"showInFinder"</string>
+		<string>"saveAs"</string>
+		<string>"copyToClipboard"</string>
+		<string>"share"</string>
+	</array>
+	<key>compressionModelMigratedVersion</key>
+	<integer>4</integer>
+	<key>copyImageFilePath</key>
+	<false/>
+	<key>dismissCompactResultOnDrop</key>
+	<true/>
+	<key>enableClipboardOptimiser</key>
+	<false/>
+	<key>enableDragAndDrop</key>
+	<true/>
+	<key>enableFloatingResults</key>
+	<true/>
+	<key>finishedOnboarding</key>
+	<true/>
+	<key>floatingResultActions</key>
+	<array>
+		<string>"downscale"</string>
+		<string>"restoreOptimise"</string>
+		<string>"compression"</string>
+		<string>"share"</string>
+		<string>"sendSecurely"</string>
+	</array>
+	<key>floatingResultsCorner</key>
+	<string>1</string>
+	<key>formatsToConvertToJPEG</key>
+	<array>
+		<string>{"identifier":"public.heic","constantIndex":68}</string>
+		<string>{"identifier":"com.microsoft.bmp","constantIndex":62}</string>
+		<string>"public.avif"</string>
+		<string>{"identifier":"org.webmproject.webp","constantIndex":70}</string>
+	</array>
+	<key>formatsToConvertToMP4</key>
+	<array>
+		<string>{"identifier":"com.apple.quicktime-movie","constantIndex":84}</string>
+		<string>{"identifier":"public.mpeg-2-video","constantIndex":86}</string>
+		<string>{"identifier":"public.mpeg","constantIndex":85}</string>
+		<string>"org.webmproject.webm"</string>
+	</array>
+	<key>formatsToConvertToOutputAudio</key>
+	<array>
+		<string>"org.xiph.flac"</string>
+		<string>{"constantIndex":94,"identifier":"public.aiff-audio"}</string>
+		<string>{"constantIndex":95,"identifier":"com.microsoft.waveform-audio"}</string>
+	</array>
+	<key>formatsToConvertToPNG</key>
+	<array>
+		<string>{"identifier":"public.tiff","constantIndex":58}</string>
+	</array>
+	<key>imageCompression</key>
+	<string>{"factor":64,"tier":"custom"}</string>
+	<key>imageFormatsToSkip</key>
+	<array>
+		<string>{"identifier":"public.tiff","constantIndex":58}</string>
+	</array>
+	<key>lastLaunchVersion</key>
+	<string>3.1.0</string>
+	<key>launchCount</key>
+	<integer>122</integer>
+	<key>neverShowProError</key>
+	<true/>
+	<key>optimiseImagePathClipboard</key>
+	<true/>
+	<key>optimiseTIFF</key>
+	<false/>
+	<key>pauseAutomaticOptimisations</key>
+	<false/>
+	<key>pipelinesMigrated</key>
+	<true/>
+	<key>preserveDates</key>
+	<true/>
+	<key>sameFolderNameTemplateImage</key>
+	<string>%f-optimised.%e</string>
+	<key>sameFolderNameTemplatePDF</key>
+	<string>%f-optimised.%e</string>
+	<key>sameFolderNameTemplateVideo</key>
+	<string>%f-optimised.%e</string>
+	<key>savedCropSizes</key>
+	<array>
+		<string>{"height":1080,"longEdge":false,"smartCrop":false,"isAspectRatio":false,"name":"1080p","width":1920}</string>
+		<string>{"height":720,"longEdge":false,"smartCrop":false,"isAspectRatio":false,"name":"720p","width":1280}</string>
+		<string>{"height":900,"longEdge":false,"smartCrop":false,"isAspectRatio":false,"name":"Mac App Store","width":1440}</string>
+		<string>{"height":630,"longEdge":false,"smartCrop":false,"isAspectRatio":false,"name":"OpenGraph","width":1200}</string>
+		<string>{"height":900,"longEdge":false,"smartCrop":false,"isAspectRatio":false,"name":"Twitter","width":1600}</string>
+		<string>{"height":128,"longEdge":false,"smartCrop":false,"isAspectRatio":false,"name":"Small Square","width":128}</string>
+		<string>{"height":512,"longEdge":false,"smartCrop":false,"isAspectRatio":false,"name":"Medium Square","width":512}</string>
+		<string>{"height":1024,"longEdge":false,"smartCrop":false,"isAspectRatio":false,"name":"Large Square","width":1024}</string>
+	</array>
+	<key>savedPipelines</key>
+	<array>
+		<string>{"fileType":"image","hideResult":false,"id":"builtin-image-webp","name":"to WebP","rawText":"convert(to: webp)","skipOptimisation":true,"steps":[{"convert":{"location":"sameFolder","to":"webp"}}]}</string>
+		<string>{"fileType":"image","hideResult":false,"id":"builtin-image-sort-screenshots","name":"Sort screenshots","rawText":"if(regex: \"^(screen\\s?shot|cleanshot)\") -&gt; optimise() -&gt; move(to: \"~\/Pictures\/Screenshots\/%y\/%m\/\")","skipOptimisation":true,"steps":[{"filterIf":{"_0":{"regex":"^(screen\\s?shot|cleanshot)"}}},{"optimise":{"adaptive":false,"encoder":"medium","location":"inPlace"}},{"move":{"to":"~\/Pictures\/Screenshots\/%y\/%m\/"}}]}</string>
+		<string>{"fileType":"image","hideResult":false,"id":"builtin-image-half","name":"0.5×","rawText":"downscale(factor: 0.5)","skipOptimisation":true,"steps":[{"downscale":{"factor":0.5,"location":"inPlace"}}]}</string>
+		<string>{"fileType":"image","hideResult":false,"id":"builtin-image-watermark","name":"Watermark","rawText":"watermark(image: \"%P\/watermark.png\")","skipOptimisation":true,"steps":[{"watermark":{"image":"%P\/watermark.png","location":"inPlace","opacity":1,"position":"bottomRight","scale":0.15}}]}</string>
+		<string>{"fileType":"video","hideResult":false,"id":"builtin-video-1080p","name":"1080p","rawText":"crop(width: 1920) -&gt; optimise(encoder: slowHighQuality)","skipOptimisation":true,"steps":[{"crop":{"location":"inPlace","width":1920}},{"optimise":{"adaptive":false,"encoder":"medium","location":"inPlace","videoEncoder":"slowHighQuality"}}]}</string>
+		<string>{"fileType":"video","hideResult":false,"id":"builtin-video-to-gif","name":"to GIF","rawText":"crop(longEdge: 800) -&gt; convert(to: gif)","skipOptimisation":true,"steps":[{"crop":{"location":"inPlace","longEdge":800}},{"convert":{"location":"sameFolder","to":"gif"}}]}</string>
+		<string>{"fileType":"video","hideResult":false,"id":"builtin-video-2x-silent","name":"2× silent","rawText":"changeSpeed(factor: 2.0) -&gt; removeAudio -&gt; optimise(encoder: fast)","skipOptimisation":true,"steps":[{"changeSpeed":{"factor":2}},{"removeAudio":{}},{"optimise":{"adaptive":false,"encoder":"medium","location":"inPlace","videoEncoder":"fast"}}]}</string>
+		<string>{"fileType":"video","hideResult":false,"id":"builtin-video-half","name":"0.5×","rawText":"downscale(factor: 0.5)","skipOptimisation":true,"steps":[{"downscale":{"factor":0.5,"location":"inPlace"}}]}</string>
+		<string>{"fileType":"video","hideResult":false,"id":"builtin-video-watermark","name":"Watermark","rawText":"watermark(image: \"%P\/watermark.png\")","skipOptimisation":true,"steps":[{"watermark":{"image":"%P\/watermark.png","location":"inPlace","opacity":1,"position":"bottomRight","scale":0.15}}]}</string>
+		<string>{"fileType":"pdf","hideResult":false,"id":"builtin-pdf-as-images","name":"as images","rawText":"extractPagesAsImages(format: jpeg, quality: high)","skipOptimisation":true,"steps":[{"extractPagesAsImages":{"format":"jpeg","location":"sameFolder","quality":"high"}}]}</string>
+		<string>{"fileType":"audio","hideResult":false,"id":"builtin-audio-to-mp3","name":"to MP3","rawText":"convert(to: mp3)","skipOptimisation":true,"steps":[{"convert":{"location":"sameFolder","to":"mp3"}}]}</string>
+	</array>
+	<key>showCompactImages</key>
+	<true/>
+	<key>showImages</key>
+	<true/>
+	<key>showMenubarIcon</key>
+	<true/>
+	<key>shownPaddleTrialEnded</key>
+	<true/>
+	<key>specificFolderNameTemplateImage</key>
+	<string>%P/optimised/%f.%e</string>
+	<key>specificFolderNameTemplatePDF</key>
+	<string>%P/optimised/%f.%e</string>
+	<key>specificFolderNameTemplateVideo</key>
+	<string>%P/optimised/%f.%e</string>
+	<key>useAggressiveOptimisationPNG</key>
+	<true/>
+	<key>videoCompression</key>
+	<string>{"factor":50,"tier":"fast"}</string>
+	<key>videoFormatsToSkip</key>
+	<array>
+		<string>"com.apple.m4v-video"</string>
+	</array>
+	<key>workdirCleanupInterval</key>
+	<string>604800</string>
+</dict>
+</plist>

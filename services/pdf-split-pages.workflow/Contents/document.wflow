@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>AMApplicationBuild</key>
+	<string>528</string>
+	<key>AMApplicationVersion</key>
+	<string>2.10</string>
+	<key>AMDocumentVersion</key>
+	<string>2</string>
+	<key>actions</key>
+	<array>
+		<dict>
+			<key>action</key>
+			<dict>
+				<key>AMAccepts</key>
+				<dict>
+					<key>Container</key>
+					<string>List</string>
+					<key>Optional</key>
+					<false/>
+					<key>Types</key>
+					<array>
+						<string>com.apple.cocoa.path</string>
+					</array>
+				</dict>
+				<key>AMActionVersion</key>
+				<string>2.0.3</string>
+				<key>AMApplication</key>
+				<array>
+					<string>Automator</string>
+				</array>
+				<key>AMParameterProperties</key>
+				<dict/>
+				<key>AMProvides</key>
+				<dict>
+					<key>Container</key>
+					<string>List</string>
+					<key>Types</key>
+					<array>
+						<string>com.apple.cocoa.string</string>
+					</array>
+				</dict>
+				<key>AMRequiredResources</key>
+				<array/>
+				<key>ActionBundlePath</key>
+				<string>/System/Library/Automator/Run Shell Script.action</string>
+				<key>ActionName</key>
+				<string>Run Shell Script</string>
+				<key>ActionParameters</key>
+				<dict>
+					<key>COMMAND_STRING</key>
+					<string>#!/bin/zsh
+set -u
+
+export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+
+escape_applescript() {
+  local s="$1"
+  s="${s//\\/\\\\}"
+  s="${s//\"/\\\"}"
+  print -r -- "$s"
+}
+
+notify() {
+  local msg="$(escape_applescript "$1")"
+  /usr/bin/osascript -e "display notification \"$msg\" with title \"pdf-split-pages\"" &gt;/dev/null 2&gt;&amp;1 || true
+}
+
+alert() {
+  local msg="$(escape_applescript "$1")"
+  /usr/bin/osascript -e "display alert \"pdf-split-pages\" message \"$msg\" as warning" &gt;/dev/null 2&gt;&amp;1 || true
+}
+
+missing=()
+for cmd in pdfseparate pdfinfo; do
+  if ! command -v "$cmd" &gt;/dev/null 2&gt;&amp;1; then
+    missing+=("$cmd")
+  fi
+done
+
+if (( ${#missing[@]} &gt; 0 )); then
+  alert "Missing required command(s): ${missing[*]}. Run: brew bundle install --file ~/.dotfiles/Brewfile"
+  exit 0
+fi
+
+if (( $# == 0 )); then
+  alert "Select one or more PDF files in Finder, then run pdf-split-pages."
+  exit 0
+fi
+
+created=0
+failed=0
+
+for input in "$@"; do
+  tmpdir=""
+
+  if [[ ! -f "$input" ]]; then
+    alert "Not a file: $(basename "$input")"
+    (( failed++ ))
+    continue
+  fi
+
+  if [[ "${input:e:l}" != "pdf" ]]; then
+    alert "Not a PDF: $(basename "$input")"
+    (( failed++ ))
+    continue
+  fi
+
+  if ! pdfinfo "$input" &gt;/dev/null 2&gt;&amp;1; then
+    alert "Cannot read PDF: $(basename "$input"). File may be corrupt, encrypted, or not a valid PDF."
+    (( failed++ ))
+    continue
+  fi
+
+  dir="${input:h}"
+  base="${input:t}"
+  stem="${base:r}"
+  outdir="$dir/$stem"
+
+  # Avoid overwriting an existing split; keep the requested /&lt;filename&gt;/ folder
+  # for the first run, then use /&lt;filename&gt;-2/, /&lt;filename&gt;-3/, etc.
+  if [[ -d "$outdir" &amp;&amp; -n "$(find "$outdir" -mindepth 1 -maxdepth 1 -print -quit 2&gt;/dev/null)" ]]; then
+    n=2
+    while [[ -e "$dir/$stem-$n" ]]; do
+      (( n++ ))
+    done
+    outdir="$dir/$stem-$n"
+  fi
+
+  trap '[[ -n "${tmpdir:-}" &amp;&amp; -d "$tmpdir" ]] &amp;&amp; rm -rf "$tmpdir"' EXIT INT TERM
+
+  tmpdir="$(mktemp -d "${TMPDIR:-/tmp}/split-pdf.XXXXXX")" || {
+    alert "Could not create temporary directory for $(basename "$input")."
+    (( failed++ ))
+    trap - EXIT INT TERM
+    continue
+  }
+
+  pattern="$tmpdir/${stem}-page-%d.pdf"
+
+  if pdfseparate "$input" "$pattern"; then
+    if mv "$tmpdir" "$outdir"; then
+      tmpdir=""
+      trap - EXIT INT TERM
+      (( created++ ))
+    else
+      alert "Could not move split output to $outdir."
+      (( failed++ ))
+    fi
+  else
+    alert "Failed to split $(basename "$input"). File may be corrupt or password-protected."
+    (( failed++ ))
+  fi
+
+  [[ -n "${tmpdir:-}" &amp;&amp; -d "$tmpdir" ]] &amp;&amp; rm -rf "$tmpdir"
+  tmpdir=""
+  trap - EXIT INT TERM
+done
+
+
+if (( created &gt; 0 &amp;&amp; failed == 0 )); then
+  notify "Split $created PDF(s)."
+elif (( created &gt; 0 )); then
+  notify "Split $created PDF(s); $failed failed."
+else
+  alert "No PDFs were split successfully."
+  exit 0
+fi
+</string>
+					<key>CheckedForUserDefaultShell</key>
+					<false/>
+					<key>inputMethod</key>
+					<integer>1</integer>
+					<key>shell</key>
+					<string>/bin/zsh</string>
+					<key>source</key>
+					<string></string>
+				</dict>
+				<key>BundleIdentifier</key>
+				<string>com.apple.RunShellScript</string>
+				<key>CFBundleVersion</key>
+				<string>2.0.3</string>
+				<key>CanShowSelectedItemsWhenRun</key>
+				<false/>
+				<key>CanShowWhenRun</key>
+				<true/>
+				<key>Category</key>
+				<array>
+					<string>AMCategoryUtilities</string>
+				</array>
+				<key>Class Name</key>
+				<string>RunShellScriptAction</string>
+				<key>InputUUID</key>
+				<string>3E76F0B4-7F94-40D9-AF49-A65167B52E93</string>
+				<key>Keywords</key>
+				<array>
+					<string>Shell</string>
+					<string>Script</string>
+					<string>Command</string>
+					<string>Run</string>
+					<string>Unix</string>
+					<string>PDF</string>
+					<string>Split</string>
+				</array>
+				<key>OutputUUID</key>
+				<string>E40C062F-19E4-4951-B20C-107B3E028355</string>
+				<key>UUID</key>
+				<string>8D0B12B2-6D7D-4975-91DB-7B35DD93D5F6</string>
+				<key>UnlocalizedApplications</key>
+				<array>
+					<string>Automator</string>
+				</array>
+				<key>arguments</key>
+				<dict/>
+				<key>conversionLabel</key>
+				<integer>0</integer>
+				<key>isViewVisible</key>
+				<integer>1</integer>
+				<key>location</key>
+				<string>309.000000:224.000000</string>
+				<key>nibPath</key>
+				<string>/System/Library/Automator/Run Shell Script.action/Contents/Resources/Base.lproj/main.nib</string>
+			</dict>
+			<key>isViewVisible</key>
+			<integer>1</integer>
+		</dict>
+	</array>
+	<key>connectors</key>
+	<dict/>
+	<key>workflowMetaData</key>
+	<dict>
+		<key>applicationBundleID</key>
+		<string>com.apple.finder</string>
+		<key>applicationBundleIDsByPath</key>
+		<dict>
+			<key>/System/Library/CoreServices/Finder.app</key>
+			<string>com.apple.finder</string>
+		</dict>
+		<key>applicationPath</key>
+		<string>/System/Library/CoreServices/Finder.app</string>
+		<key>applicationPaths</key>
+		<array>
+			<string>/System/Library/CoreServices/Finder.app</string>
+		</array>
+		<key>inputTypeIdentifier</key>
+		<string>com.apple.Automator.fileSystemObject.PDF</string>
+		<key>outputTypeIdentifier</key>
+		<string>com.apple.Automator.nothing</string>
+		<key>presentationMode</key>
+		<integer>15</integer>
+		<key>processesInput</key>
+		<true/>
+		<key>serviceApplicationBundleID</key>
+		<string>com.apple.finder</string>
+		<key>serviceApplicationPath</key>
+		<string>/System/Library/CoreServices/Finder.app</string>
+		<key>serviceInputTypeIdentifier</key>
+		<string>com.apple.Automator.fileSystemObject.PDF</string>
+		<key>serviceOutputTypeIdentifier</key>
+		<string>com.apple.Automator.nothing</string>
+		<key>serviceProcessesInput</key>
+		<true/>
+		<key>systemImageName</key>
+		<string>NSActionTemplate</string>
+		<key>useAutomaticInputType</key>
+		<false/>
+		<key>workflowTypeIdentifier</key>
+		<string>com.apple.Automator.servicesMenu</string>
+	</dict>
+</dict>
+</plist>

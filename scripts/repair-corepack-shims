@@ -1,0 +1,90 @@
+#!/usr/bin/env zsh
+set -euo pipefail
+
+usage() {
+  cat <<'USAGE'
+Usage: repair-corepack-shims <repo-or-worktree> [...]
+
+Repairs public npm/npx/corepack/pnpm/pnpx shims for the NVM Node version named
+by each repo's .nvmrc. This is intentionally local and does not install pnpm
+with Homebrew.
+USAGE
+}
+
+if (( $# == 0 )); then
+  usage >&2
+  exit 64
+fi
+
+NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+if [[ ! -s "$NVM_DIR/nvm.sh" ]]; then
+  echo "error: missing nvm at $NVM_DIR/nvm.sh" >&2
+  exit 1
+fi
+
+source "$NVM_DIR/nvm.sh"
+
+find_corepack_dist() {
+  local dist
+  for dist in "$NVM_DIR"/versions/node/*/lib/node_modules/corepack/dist; do
+    [[ -x "$dist/corepack.js" && -x "$dist/pnpm.js" ]] || continue
+    print -r -- "$dist"
+    return 0
+  done
+  return 1
+}
+
+corepack_dist="$(find_corepack_dist)" || {
+  echo "error: no usable Corepack dist found under $NVM_DIR/versions/node" >&2
+  exit 1
+}
+
+repair_version() {
+  local version="$1"
+  local node_prefix="$NVM_DIR/versions/node/$version"
+  local bin="$node_prefix/bin"
+
+  [[ -x "$bin/node" ]] || {
+    echo "error: missing node binary for $version at $bin/node" >&2
+    return 1
+  }
+
+  [[ -x "$node_prefix/lib/node_modules/npm/bin/npm-cli.js" ]] && \
+    ln -sfn ../lib/node_modules/npm/bin/npm-cli.js "$bin/npm"
+  [[ -x "$node_prefix/lib/node_modules/npm/bin/npx-cli.js" ]] && \
+    ln -sfn ../lib/node_modules/npm/bin/npx-cli.js "$bin/npx"
+
+  ln -sfn "$corepack_dist/corepack.js" "$bin/corepack"
+  ln -sfn "$corepack_dist/pnpm.js" "$bin/pnpm"
+  ln -sfn "$corepack_dist/pnpx.js" "$bin/pnpx"
+  [[ -x "$corepack_dist/yarn.js" ]] && ln -sfn "$corepack_dist/yarn.js" "$bin/yarn"
+  [[ -x "$corepack_dist/yarnpkg.js" ]] && ln -sfn "$corepack_dist/yarnpkg.js" "$bin/yarnpkg"
+}
+
+typeset -A seen_versions
+for repo in "$@"; do
+  if [[ ! -f "$repo/.nvmrc" ]]; then
+    echo "skip: $repo has no .nvmrc" >&2
+    continue
+  fi
+
+  requested="$(< "$repo/.nvmrc")"
+  requested="${requested##[[:space:]]}"
+  requested="${requested%%[[:space:]]}"
+  resolved="$(nvm version "$requested")"
+
+  if [[ "$resolved" == "N/A" ]]; then
+    echo "error: $repo requests Node $requested, but it is not installed" >&2
+    exit 1
+  fi
+
+  if [[ -z "${seen_versions[$resolved]-}" ]]; then
+    repair_version "$resolved"
+    seen_versions[$resolved]=1
+  fi
+
+  bin="$NVM_DIR/versions/node/$resolved/bin"
+  package_manager="$(env PATH="$bin:/usr/bin:/bin" node -e "try{const p=require(process.argv[1]+'/package.json'); console.log(p.packageManager||'') }catch{}" "$repo")"
+  version_output="$(env PATH="$bin:/usr/bin:/bin" pnpm --version)"
+  echo "$repo -> $resolved, pnpm $version_output${package_manager:+, packageManager $package_manager}"
+done

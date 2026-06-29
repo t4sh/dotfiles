@@ -1,0 +1,54 @@
+# Declarative symlink manifest. Consumed by scripts/link.sh and scripts/unlink.sh.
+#
+# Format:   <source>\t<target>
+# Placeholders: $DOTFILES (repo root), $HOME
+# Lines starting with `#` and blank lines are ignored.
+# Order is preserved — put parent-directory symlinks (e.g. ~/.agents) before
+# children that traverse them (e.g. ~/.claude/CLAUDE.md → ~/.agents/AGENTS.md).
+
+# Shell
+$DOTFILES/zsh/zshrc	$HOME/.zshrc
+$DOTFILES/zsh/zprofile	$HOME/.zprofile
+$DOTFILES/zsh/zshenv	$HOME/.zshenv
+$DOTFILES/zsh/z-monokai	$HOME/.z-monokai
+$DOTFILES/zsh/bashrc	$HOME/.bashrc
+$DOTFILES/zsh/profile	$HOME/.profile
+$DOTFILES/Brewfile	$HOME/.Brewfile
+
+# Git
+$DOTFILES/git/gitconfig	$HOME/.gitconfig
+$DOTFILES/git/gitignore-global	$HOME/.config/git/ignore
+
+# SSH — config + keys live under ~/.secrets/ssh/ (vault-backed, never in repo);
+# config exposes prod infra so it stays out of git. Only allowed_signers
+# (public key, non-secret) is repo-tracked. Symlink everything to ~/.ssh/<name>.
+$HOME/.secrets/ssh/config	$HOME/.ssh/config
+$DOTFILES/ssh/allowed_signers	$HOME/.ssh/allowed_signers
+$HOME/.secrets/ssh/github_ed25519	$HOME/.ssh/github_ed25519
+$HOME/.secrets/ssh/github_ed25519.pub	$HOME/.ssh/github_ed25519.pub
+
+# Tool auth — canonical files under ~/.secrets/config/; consumer paths symlinked
+# (vault rsync restores the tree; `make link` wires consumers after restore)
+$HOME/.secrets/config/gh/hosts.yml	$HOME/.config/gh/hosts.yml
+$HOME/.secrets/config/moltbook/credentials.json	$HOME/.config/moltbook/credentials.json
+
+# Starship
+$DOTFILES/starship/starship.toml	$HOME/.config/starship.toml
+$DOTFILES/starship/gruvbox-rainbow.toml	$HOME/.config/gruvbox-rainbow.toml
+$DOTFILES/starship/jetpack.toml	$HOME/.config/jetpack.toml
+
+# Config
+$DOTFILES/config/gh-config.yml	$HOME/.config/gh/config.yml
+$DOTFILES/config/topgrade.toml	$HOME/.config/topgrade.toml
+$DOTFILES/config/mcp.json	$HOME/.mcp.json
+$DOTFILES/config/bat/config	$HOME/.config/bat/config
+$DOTFILES/config/lazygit/config.yml	$HOME/.config/lazygit/config.yml
+
+# Agents — whole-directory symlink (must precede ~/.claude/* entries below)
+$DOTFILES/agents	$HOME/.agents
+$HOME/.agents/skills	$HOME/.claude/skills
+
+# Claude Code / Craft Agent — wire ~/.claude/ into the agents tree
+$HOME/.agents/AGENTS.md	$HOME/.claude/CLAUDE.md
+$HOME/.agents/agents	$HOME/.claude/agents
+$HOME/.agents/commands	$HOME/.claude/commands

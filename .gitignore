@@ -1,0 +1,46 @@
+# OS
+.DS_Store
+._*
+Thumbs.db
+
+# Local-only secrets and machine state
+*.secret*
+*.pem
+id_*
+known_hosts*
+*.env
+!*.env.example
+credentials.json
+secrets-*.tar.gz*
+backup.manifest
+backup.destination
+.dotfiles-local/
+
+# Vault-backed app exports and licensed prefs
+ssh/config
+config/gh-hosts.yml
+apps/transmit/
+apps/raycast/
+apps/shottr/
+apps/sublime-text/Theme - Monokai Pro.sublime-settings
+
+# Editor
+*.swp
+*.swo
+*~
+
+# Node / Python
+node_modules/
+__pycache__/
+*.pyc
+
+# Symlink/tool compatibility paths
+**/.claude/
+**/.pi/
+
+# Per-machine zsh overrides
+zsh/lib/99-local.zsh
+zsh/lib/42-aliases-git.local.zsh
+
+# Git LFS auto-installed hooks (per-clone, not dotfiles-managed)
+git/hooks/

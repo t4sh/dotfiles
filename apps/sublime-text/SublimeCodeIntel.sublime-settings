@@ -1,0 +1,30 @@
+{
+    "codeintel_live_disabled_languages": [
+        "markup",
+        "markdown",
+        "html",
+    ],
+    "codeintel_exclude_scopes_from_complete_triggers": [
+        "comment",
+        "markup",
+        "markdown",
+        "html",
+    ],
+    "codeintel_enabled_languages": [
+        "JavaScript",
+        "SCSS",
+        "Python",
+        "Ruby",
+        "Python3",
+        "XML",
+        "Sass",
+        "HTML5",
+        "Perl",
+        "CSS",
+        "Twig",
+        "Less",
+        "Node.js",
+        "TemplateToolkit",
+        "PHP"
+    ],
+}

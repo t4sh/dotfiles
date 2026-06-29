@@ -1,0 +1,13 @@
+<snippet>
+  <content>
+    <![CDATA[
+| Col  | Col  |
+| ---  | ---  |
+| Cell | Cell |
+| Cell | Cell |
+]]>
+  </content>
+  <tabTrigger>my-MD-Table</tabTrigger>
+  <scope>text.html.markdown</scope>
+  <description>MarkdownTable</description>
+</snippet>
