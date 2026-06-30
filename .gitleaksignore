@@ -1,0 +1,7 @@
+# False positives audited 2026-06-30.
+# These are base64-encoded embedded IEC sRGB ICC/color profile chunks in
+# apps/thaw/thaw.plist. After one decode they begin with an EAAA... prefix that
+# matches the Square access-token rule; after a second decode they identify as
+# binary ICC profile data (mntrRGB XYZ / acspMSFT / IEC sRGB), not credentials.
+apps/thaw/thaw.plist:square-access-token:1447
+apps/thaw/thaw.plist:square-access-token:2355
