@@ -2,6 +2,13 @@
 
 alias lis='command ls -lahtGFp'
 alias dstClean="find . -name '.DS_Store' -delete"
+alias mkdir='mkdir -p'
+alias path='print -l ${(s.:.)PATH}'
+
+# Easier parent navigation.
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias .....='cd ../../../..'
 
 # Modern CLI replacements. Keep the original commands available by calling them
 # with `command <name>` or their absolute paths.

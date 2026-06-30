@@ -1,0 +1,19 @@
+[files]
+extend-exclude = [
+  "agents/skills/**",
+  "apps/**/*.plist",
+  "macos/*.plist",
+  "services/**/*.workflow/**",
+]
+
+[default.extend-words]
+IST = "IST"
+ue = "ue"
+Dato = "Dato"
+Moltbook = "Moltbook"
+Monokai = "Monokai"
+Shottr = "Shottr"
+erphq = "erphq"
+erpai = "erpai"
+gh4sh = "gh4sh"
+krawler = "krawler"

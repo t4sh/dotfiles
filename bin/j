@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+# Open a project from ~/Projects with Cursor/VS Code/$EDITOR, or print its path.
+set -euo pipefail
+
+ROOT="${PROJECTS_DIR:-$HOME/Projects}"
+MODE="open"
+QUERY=""
+EDITOR_CMD="${PROJECT_OPENER:-}"
+
+usage() {
+  cat <<'USAGE'
+Usage: j [--print] [--editor CMD] [query]
+
+Find a project under ~/Projects (or $PROJECTS_DIR) and open it in Cursor,
+VS Code, $EDITOR, or print the path.
+USAGE
+}
+
+exec_with_arg() {
+  local command_string="$1"
+  local target="$2"
+  local -a command_parts=()
+  # Supports common values like "code --reuse-window" or "vim". This is not a
+  # shell parser; use PROJECT_OPENER for simple command + flag combinations.
+  read -r -a command_parts <<< "$command_string"
+  if [ "${#command_parts[@]}" -eq 0 ]; then
+    echo "j: empty editor command" >&2
+    exit 1
+  fi
+  exec "${command_parts[@]}" "$target"
+}
+
+while (($# > 0)); do
+  case "$1" in
+    --print|-p)
+      MODE="print"; shift ;;
+    --editor)
+      [[ -n "${2:-}" ]] || { echo "j: --editor requires a command" >&2; exit 1; }
+      EDITOR_CMD="$2"; shift 2 ;;
+    -h|--help|help)
+      usage; exit 0 ;;
+    *)
+      QUERY="$*"; break ;;
+  esac
+done
+
+[ -d "$ROOT" ] || { echo "Projects directory not found: $ROOT" >&2; exit 1; }
+
+if command -v fd >/dev/null 2>&1; then
+  finder=(fd . "$ROOT" --type d --max-depth 3 --hidden --exclude .git --exclude node_modules)
+else
+  finder=(find "$ROOT" -maxdepth 3 -type d)
+fi
+
+if [ -n "$QUERY" ]; then
+  project="$("${finder[@]}" | grep -i -F -- "$QUERY" | head -n 1 || true)"
+elif command -v fzf >/dev/null 2>&1; then
+  project="$("${finder[@]}" | fzf --prompt='project> ' || true)"
+else
+  "${finder[@]}"
+  exit 0
+fi
+
+[ -n "${project:-}" ] || { echo "No project selected" >&2; exit 1; }
+
+if [ "$MODE" = "print" ]; then
+  printf '%s\n' "$project"
+  exit 0
+fi
+
+if [ -n "$EDITOR_CMD" ]; then
+  exec_with_arg "$EDITOR_CMD" "$project"
+elif command -v cursor >/dev/null 2>&1; then
+  exec cursor "$project"
+elif command -v code >/dev/null 2>&1; then
+  exec code "$project"
+elif [ -n "${EDITOR:-}" ]; then
+  exec_with_arg "$EDITOR" "$project"
+else
+  printf '%s\n' "$project"
+fi

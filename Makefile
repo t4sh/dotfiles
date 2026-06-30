@@ -1,47 +1,57 @@
-.PHONY: all link unlink brew brewfile-audit macos dock terminal services restore-apps restore-canary backup backup-canary audit-apps hooks ssh-setup skills-audit skills skills-manifest secrets-backup secrets-mount secrets-pass rules-audit
+.PHONY: all help link unlink brew brew-check brewfile-audit macos dock terminal services restore-apps restore-canary restore-shottr backup backup-canary backup-shottr audit-apps hooks ssh-setup skills-audit skills skills-manifest secrets-backup secrets-mount secrets-pass rules-audit default-apps capture-default-apps doctor docs-audit
 
-all: link skills-audit brew services restore-apps dock hooks ssh-setup macos
+# Make targets operate on this checkout, even when reviewing/developing from a
+# path other than ~/.dotfiles. Fresh installs still clone to ~/.dotfiles.
+export DOTFILES := $(CURDIR)
+
+all: link rules-audit skills-audit brew services restore-apps dock hooks ssh-setup macos ## Re-apply the full existing-Mac setup
 	@echo "Full setup complete."
 # macos last: defaults.sh has interactive prompts; a Ctrl-C there previously
 # aborted the sequence before dock/hooks/ssh-setup could run.
 # terminal is NOT in `all` (would kill parent Terminal.app shell).
+# default-apps, doctor, docs-audit, skills, and terminal stay manual.
 
-restore-apps:
+help: ## Show available make targets
+	@awk 'BEGIN {FS = ":.*## "; printf "Usage: make <target>\n\nTargets:\n"} /^[a-zA-Z0-9_-]+:.*## / {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+
+restore-apps: ## Restore repo-tracked app preference snapshots
 	@bash scripts/restore-apps.sh
 
-restore-canary:
+restore-canary: ## Restore Canary Mail prefs from the secrets vault
 	@bash scripts/restore-canary-vault.sh
 
-backup-canary:
+restore-shottr: ## Restore Shottr prefs from the secrets vault
+	@bash scripts/restore-shottr-vault.sh
+
+backup-canary: ## Back up Canary Mail prefs into ~/.secrets
 	@bash scripts/backup-canary-vault.sh
 
-ssh-setup:
+backup-shottr: ## Back up Shottr prefs into ~/.secrets
+	@bash scripts/backup-shottr-vault.sh
+
+ssh-setup: ## Generate/register the GitHub SSH key if needed
 	@bash scripts/ssh-setup.sh
 
-# Not in `all`: network-heavy, needs gh auth + GitLab keychain after secrets restore.
-projects:
-	@bash/sync.sh
-
-skills-audit:
+skills-audit: ## Check tracked agent skills for redistribution/license safety
 	@bash scripts/audit-skill-licenses.sh --check
 
 # Assert agents/AGENTS.md @-includes and agents/rules/*.md stay 1:1 in sync.
-rules-audit:
+rules-audit: ## Check agent rule includes stay in sync
 	@bash scripts/audit-rules.sh
 
-brewfile-audit:
+brewfile-audit: ## Check Brewfile consistency rules
 	@bash scripts/audit-brewfile.sh --check
 
 # Regenerate ./Skillsfile from agents/.skill-lock.json (the `bundle dump`).
-skills-manifest:
+skills-manifest: ## Regenerate Skillsfile from the skill lockfile
 	@python3 scripts/gen-skillsfile.py
 
 # Install all global skills from the manifest (the `brew bundle`). Not in
-# `make all`: needs node, git, and network access set up first.
-skills: skills-manifest
+# `make all`: needs node + GitHub auth (private sources) set up first.
+skills: skills-manifest ## Install global agent skills from Skillsfile
 	@bash Skillsfile
 
-hooks:
+hooks: ## Install local git hooks and diff drivers
 	@git config --local core.hooksPath .githooks
 	@chmod +x .githooks/*
 	@echo "  ✓ git hooks path → .githooks/ (tracked, dotfiles-managed)"
@@ -49,26 +59,29 @@ hooks:
 	@git config --local diff.plist.binary true
 	@echo "  ✓ plist diff driver (.gitattributes wires *.plist → plist)"
 
-link:
+link: ## Apply symlinks from symlinks.tsv
 	@bash scripts/link.sh
 
-unlink:
+unlink: ## Remove only symlinks managed by symlinks.tsv
 	@bash scripts/unlink.sh
 
-brew:
+brew: ## Install packages from Brewfile
 	brew bundle --file=Brewfile
 
-macos:
+brew-check: ## Check whether Brewfile entries are installed
+	brew bundle check --file=Brewfile
+
+macos: ## Apply interactive macOS defaults
 	@bash macos/defaults.sh
 
-dock:
+dock: ## Restore Dock layout from macos/dock-backup.plist
 	@bash macos/dock.sh
 
 # terminal is NOT part of `make all` because `osascript ... to quit` would
 # kill the parent shell when invoked from Terminal.app. Run manually from
 # iTerm / Ghostty / VS Code integrated terminal, or accept that you'll need
 # to reopen Terminal.app afterwards.
-terminal:
+terminal: ## Import Terminal.app profiles (quits Terminal.app)
 	@if [ -f apps/terminal/terminal.plist ]; then \
 		osascript -e 'tell application "Terminal" to quit' 2>/dev/null || true; \
 		defaults import com.apple.Terminal apps/terminal/terminal.plist && \
@@ -77,15 +90,31 @@ terminal:
 		echo "  - apps/terminal/terminal.plist not found; skipping"; \
 	fi
 
-services:
+services: ## Install Automator Quick Actions into ~/Library/Services
 	@mkdir -p ~/Library/Services
 	@cp -R services/*.workflow ~/Library/Services/ 2>/dev/null || true
 	@echo "Automator services installed."
 
-audit-apps:
+default-apps: ## Apply repo default-app policy from config/duti
+	@bash scripts/apply-duti.sh
+
+capture-default-apps: ## Refresh config/duti from current handlers on this Mac
+	@bash scripts/capture-duti.sh
+
+doctor: ## Run read-only bootstrap preflight checks
+	@bash scripts/doctor.sh
+
+docs-audit: ## Check docs/scripts for typos when typos is installed
+	@if command -v typos >/dev/null 2>&1; then \
+		typos README.md AGENTS.md Makefile install.sh scripts macos zsh config hammerspoon bin; \
+	else \
+		echo "  - typos not installed; run 'make brew' first"; \
+	fi
+
+audit-apps: ## Scan app preference snapshots for secrets/local paths
 	@bash scripts/audit-app-prefs.sh
 
-backup:
+backup: ## Refresh repo-tracked app prefs, Dock, services, and Brewfile
 	@echo "Backing up app configs..."
 	@# Bulk `defaults`-managed apps — driven by apps.tsv. Container-copy apps
 	@# (Dato, Sublime, VS Code) stay as explicit lines below.
@@ -121,6 +150,7 @@ backup:
 	@echo "Done. Manual exports still needed (sensitive — into the secret"
 	@echo "store, NOT the repo; ~/.secrets is vault-backed via 'make secrets-backup'):"
 	@echo "  - Canary Mail: make backup-canary"
+	@echo "  - Shottr: make backup-shottr"
 	@echo "  - Transmit: Servers > Export → ~/.secrets/apps/transmit/"
 	@echo "  - Raycast: Settings > Advanced > Export → ~/.secrets/apps/raycast/"
 	@echo ""
@@ -128,11 +158,11 @@ backup:
 	@echo ""
 	@echo "Now commit: git add -A && git commit -m 'chore: backup configs'"
 
-secrets-backup:
+secrets-backup: ## Snapshot ~/.secrets into the encrypted sparseimage vault
 	@bash scripts/secrets-backup.sh
 
-secrets-mount:
+secrets-mount: ## Mount the encrypted secrets sparseimage
 	@bash scripts/secrets-mount.sh
 
-secrets-pass:
+secrets-pass: ## Copy the secrets vault password from Keychain
 	@security find-generic-password -s DotfilesSecretsVault -a "$(USER)" -w | tr -d '\n' | pbcopy && echo "vault password → clipboard"

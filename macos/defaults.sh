@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
+trap 'printf "  ✗ macos/defaults.sh failed at line %s: %s\n" "$LINENO" "$BASH_COMMAND" >&2' ERR
+
 warn_on_fail() {
     local msg="$1"
     shift
@@ -167,6 +169,9 @@ defaults write com.apple.finder "AppleShowAllFiles" -bool "true"
 
 # Show path bar in the bottom of the Finder windows (default value is "false")
 defaults write com.apple.finder "ShowPathbar" -bool "true"
+
+# Display full POSIX path as Finder window title
+defaults write com.apple.finder "_FXShowPosixPathInTitle" -bool "true"
 
 # Show status bar in the bottom of the Finder windows (default value is "false")
 defaults write com.apple.finder "ShowStatusBar" -bool "true"
@@ -368,16 +373,55 @@ defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
 # Prevent .DS_Store files on USB volumes
 defaults write com.apple.desktopservices DSDontWriteUSBStores -bool true
 
+# Enable spring loading for directories and remove the delay
+defaults write NSGlobalDomain com.apple.springing.enabled -bool true
+defaults write NSGlobalDomain com.apple.springing.delay -float 0
 
 ###############################################################################
 # Safari                      https://macos-defaults.com/#💻-list-of-commands #
 ###############################################################################
+
+# Privacy: don't send search queries to Apple
+defaults write com.apple.Safari UniversalSearchEnabled -bool false
+defaults write com.apple.Safari SuppressSearchSuggestions -bool true
 
 # Enable the Develop menu and the Web Inspector in Safari
 defaults write com.apple.Safari IncludeDevelopMenu -bool "true"
 defaults write com.apple.Safari WebKitDeveloperExtrasEnabledPreferenceKey -bool "true"
 defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled -bool "true"
 defaults write com.apple.Safari "ShowFullURLInSmartSearchField" -bool "true"
+
+# Safer downloads and form handling
+defaults write com.apple.Safari AutoOpenSafeDownloads -bool false
+defaults write com.apple.Safari AutoFillFromAddressBook -bool false
+defaults write com.apple.Safari AutoFillPasswords -bool false
+defaults write com.apple.Safari AutoFillCreditCardData -bool false
+defaults write com.apple.Safari AutoFillMiscellaneousForms -bool false
+defaults write com.apple.Safari WarnAboutFraudulentWebsites -bool true
+defaults write com.apple.Safari InstallExtensionUpdatesAutomatically -bool true
+
+###############################################################################
+# Chrome / Chrome Canary                                                       #
+###############################################################################
+
+# Disable oversensitive back-swipe navigation and use the native print dialog
+defaults write com.google.Chrome AppleEnableSwipeNavigateWithScrolls -bool false
+defaults write com.google.Chrome.canary AppleEnableSwipeNavigateWithScrolls -bool false
+defaults write com.google.Chrome AppleEnableMouseSwipeNavigateWithScrolls -bool false
+defaults write com.google.Chrome.canary AppleEnableMouseSwipeNavigateWithScrolls -bool false
+defaults write com.google.Chrome DisablePrintPreview -bool true
+defaults write com.google.Chrome.canary DisablePrintPreview -bool true
+defaults write com.google.Chrome PMPrintingExpandedStateForPrint2 -bool true
+defaults write com.google.Chrome.canary PMPrintingExpandedStateForPrint2 -bool true
+
+###############################################################################
+# Microsoft Edge                                                              #
+###############################################################################
+
+# Use the native macOS print dialog and expand it by default.
+# Installed Edge domain verified on this Mac: com.microsoft.edgemac.
+defaults write com.microsoft.edgemac DisablePrintPreview -bool true
+defaults write com.microsoft.edgemac PMPrintingExpandedStateForPrint2 -bool true
 
 ###############################################################################
 # Time Machine                https://macos-defaults.com/#💻-list-of-commands #
@@ -400,7 +444,8 @@ sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on
 sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setstealthmode on
 
 # Disable guest account login
-defaults write /Library/Preferences/com.apple.loginwindow GuestEnabled -bool false
+warn_on_fail "could not disable guest account login (sudo/defaults permission issue)" \
+    sudo defaults write /Library/Preferences/com.apple.loginwindow GuestEnabled -bool false
 
 # Require password immediately after sleep or screen saver
 defaults write com.apple.screensaver askForPassword -int 1
@@ -409,9 +454,16 @@ defaults write com.apple.screensaver askForPasswordDelay -int 0
 # Disable AirDrop for file transfers (reduce attack surface)
 # defaults write com.apple.NetworkBrowser DisableAirDrop -bool true
 
-# Disable remote Apple events
-warn_on_fail "could not disable remote Apple events (sudo/systemsetup permission issue)" \
-    sudo systemsetup -setremoteappleevents off
+# Disable remote Apple events. `systemsetup` may return non-zero when the
+# setting is already off, so treat that state as success instead of aborting
+# the rest of the macOS defaults run.
+remote_events_output="$(sudo systemsetup -setremoteappleevents off 2>&1)" || {
+    case "$remote_events_output" in
+        *"already off"*) printf '  ✓ remote Apple events already off\n' ;;
+        *) printf '  ⚠ could not disable remote Apple events: %s\n' "$remote_events_output" >&2 ;;
+    esac
+}
+unset remote_events_output
 
 # Enable Secure Keyboard Entry in Terminal.app
 # Domain is com.apple.Terminal (capital T); the lowercase variant was a
@@ -503,6 +555,18 @@ defaults write com.apple.ActivityMonitor "UpdatePeriod" -int "1"
 # Choose what information should be shown in the app's Dock icon, if any (default value is "0")
 defaults write com.apple.ActivityMonitor "IconType" -int "6"
 
+# Show all processes and sort by CPU usage
+defaults write com.apple.ActivityMonitor "ShowCategory" -int "0"
+defaults write com.apple.ActivityMonitor "SortColumn" -string "CPUUsage"
+defaults write com.apple.ActivityMonitor "SortDirection" -int "0"
+
+###############################################################################
+# Photos / Image Capture                                                       #
+###############################################################################
+
+# Prevent Photos from opening automatically when devices are plugged in
+defaults -currentHost write com.apple.ImageCapture disableHotPlug -bool true
+
 ###############################################################################
 # Menu Bar — Clock                                                            #
 ###############################################################################
@@ -537,7 +601,7 @@ for app in "Activity Monitor" \
 	"Finder" \
 	"WindowManager" \
 	"TextEdit"; do
-	killall "${app}" &> /dev/null
+	killall "${app}" &> /dev/null || true
 done
 
 echo "macOS Configuration Applied."

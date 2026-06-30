@@ -3,8 +3,8 @@
 # and $DOTFILES/macos and runs them by name. Inspired by CodelyTV/dotly.
 #
 #   dot                          list everything
-#   dot <name>                   run scripts/<name>.sh
-#   dot <group> <name>           run <group>/<name>.sh   (e.g. `dot macos dock`)
+#   dot <name>                   run scripts/<name>.sh or executable scripts/<name>
+#   dot <group> <name>           run <group>/<name>.sh or executable <group>/<name>
 #   dot -h | --help | help       show help
 set -euo pipefail
 
@@ -20,11 +20,16 @@ list_group() {
     local name="$1" dir="$2"
     [ -d "$dir" ] || return 0
     local any=0
-    for f in "$dir"/*.sh; do
+    for f in "$dir"/*; do
         [ -f "$f" ] || continue
+        case "$f" in
+            *.sh) ;;
+            *) [ -x "$f" ] || continue ;;
+        esac
         any=1
         local base
-        base="$(basename "$f" .sh)"
+        base="$(basename "$f")"
+        base="${base%.sh}"
         if [ "$name" = "scripts" ]; then
             printf "  dot %-22s → %s\n" "$base" "${f#"$DOTFILES"/}"
         else
@@ -39,8 +44,8 @@ usage() {
 dot — dotfiles script dispatcher
 
 Usage:
-  dot <name>              run scripts/<name>.sh
-  dot <group> <name>      run <group>/<name>.sh
+  dot <name>              run scripts/<name>.sh or executable scripts/<name>
+  dot <group> <name>      run <group>/<name>.sh or executable <group>/<name>
   dot                     list available scripts
   dot -h | help           show this help
 
@@ -52,8 +57,11 @@ EOF
     done
     cat <<EOF
 Also available via Make (repo root):
-  make link | unlink | brew | macos | dock | terminal | services | hooks
-  make restore-apps | ssh-setup | backup | secrets-backup | secrets-mount | secrets-pass
+  make help | link | unlink | brew | brew-check | macos | dock | terminal | services | hooks
+  make default-apps | capture-default-apps | doctor | docs-audit
+  make rules-audit | brewfile-audit | skills-audit
+  make restore-apps | restore-shottr | restore-canary | ssh-setup
+  make backup | backup-shottr | backup-canary | secrets-backup | secrets-mount | secrets-pass
   make skills | all
 EOF
 }
@@ -68,19 +76,33 @@ resolve_context() {
             printf '%s\n' "$dir/$name.sh"
             return 0
         fi
+        if [ "$group" = "$context" ] && [ -x "$dir/$name" ] && [ -f "$dir/$name" ]; then
+            printf '%s\n' "$dir/$name"
+            return 0
+        fi
     done
     return 1
 }
 
 resolve_script() {
-    # Prints the resolved scripts/<name>.sh-style path on stdout, or returns non-zero.
+    # Prints the resolved script path on stdout, or returns non-zero.
     local name="$1"
     local pair dir
     for pair in "${CONTEXTS[@]}"; do
         dir="${pair#*:}"
         [ -f "$dir/$name.sh" ] && { printf '%s\n' "$dir/$name.sh"; return 0; }
+        [ -x "$dir/$name" ] && [ -f "$dir/$name" ] && { printf '%s\n' "$dir/$name"; return 0; }
     done
     return 1
+}
+
+run_script() {
+    local script="$1"
+    shift
+    case "$script" in
+        *.sh) exec bash "$script" "$@" ;;
+        *)    exec "$script" "$@" ;;
+    esac
 }
 
 if [ $# -eq 0 ] || [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ] || [ "${1:-}" = "help" ]; then
@@ -90,12 +112,12 @@ fi
 
 if [ $# -ge 2 ] && script="$(resolve_context "$1" "$2")"; then
     shift 2
-    exec bash "$script" "$@"
+    run_script "$script" "$@"
 fi
 
 if script="$(resolve_script "$1")"; then
     shift
-    exec bash "$script" "$@"
+    run_script "$script" "$@"
 fi
 
 echo "dot: unknown script '$*'" >&2

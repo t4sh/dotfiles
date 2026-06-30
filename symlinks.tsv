@@ -13,6 +13,7 @@ $DOTFILES/zsh/zshenv	$HOME/.zshenv
 $DOTFILES/zsh/z-monokai	$HOME/.z-monokai
 $DOTFILES/zsh/bashrc	$HOME/.bashrc
 $DOTFILES/zsh/profile	$HOME/.profile
+$DOTFILES/zsh/hushlogin	$HOME/.hushlogin
 $DOTFILES/Brewfile	$HOME/.Brewfile
 
 # Git
@@ -43,6 +44,16 @@ $DOTFILES/config/topgrade.toml	$HOME/.config/topgrade.toml
 $DOTFILES/config/mcp.json	$HOME/.mcp.json
 $DOTFILES/config/bat/config	$HOME/.config/bat/config
 $DOTFILES/config/lazygit/config.yml	$HOME/.config/lazygit/config.yml
+$DOTFILES/config/duti	$HOME/.duti
+$DOTFILES/config/editorconfig	$HOME/.editorconfig
+$DOTFILES/config/inputrc	$HOME/.inputrc
+$DOTFILES/config/lldb/lldbinit	$HOME/.lldbinit
+$DOTFILES/config/gdb/gdbinit	$HOME/.gdbinit
+$DOTFILES/config/ccache/ccache.conf	$HOME/.ccache/ccache.conf
+$DOTFILES/config/valgrindrc	$HOME/.valgrindrc
+
+# Hammerspoon
+$DOTFILES/hammerspoon	$HOME/.hammerspoon
 
 # Agents — whole-directory symlink (must precede ~/.claude/* entries below)
 $DOTFILES/agents	$HOME/.agents
