@@ -1,0 +1,31 @@
+# GDB defaults for native debugging.
+set print pretty on
+set print object on
+set print vtbl on
+set history save on
+set history filename ~/.gdb_history
+set height 0
+set width 0
+set disassembly-flavor intel
+
+define lsb
+  info breakpoints
+end
+
+define argv
+  show args
+end
+
+define frame
+  info frame
+  info args
+  info locals
+end
+
+define lib
+  info sharedlibrary
+end
+
+define thread
+  info threads
+end

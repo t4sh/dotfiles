@@ -1,0 +1,7 @@
+# LLDB defaults for native debugging.
+settings set target.load-script-from-symbol-file true
+settings set show-progress true
+settings set show-autosuggestion true
+settings set show-autosuggestion-ansi-prefix "${ansi.fg.bright.yellow}"
+settings set -e symbols.experimental.enable-background-lookup true
+settings set -e symbols.auto-download background

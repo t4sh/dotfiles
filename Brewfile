@@ -12,6 +12,8 @@ brew "bat"
 brew "bun"
 # Powerful, enterprise-ready, open source web server with automatic HTTPS
 brew "caddy"
+# Object-file caching compiler wrapper
+brew "ccache"
 # Container runtimes on MacOS (and Linux) with minimal setup
 brew "colima"
 # GNU File, Shell, and Text utilities
@@ -66,6 +68,8 @@ brew "lazygit"
 brew "lcdf-typetools"
 # Mac App Store command-line interface
 brew "mas"
+# Deep clean and optimize your Mac
+brew "mole"
 # Collection of tools that nobody wrote when UNIX was young
 brew "moreutils"
 # Manage multiple Node.js versions
@@ -90,6 +94,8 @@ brew "tldr"
 brew "topgrade"
 # Display directories as trees (with optional color/HTML output)
 brew "tree"
+# Source code spell checker
+brew "typos-cli"
 # Vulnerability scanner for container images, file systems, and Git repos
 brew "trivy"
 # Extremely fast Python package installer and resolver, written in Rust
@@ -213,6 +219,8 @@ cask "google-chrome"
 cask "google-gemini"
 # Open-source video transcoder
 cask "handbrake-app"
+# Desktop automation with Lua
+cask "hammerspoon"
 # Free and open-source media player
 cask "iina"
 # Tool to optimise images to a smaller size
