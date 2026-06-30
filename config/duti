@@ -18,8 +18,8 @@ com.todesktop.230313mzl4w4u92 .jsx all
 com.todesktop.230313mzl4w4u92 .lua all
 com.sublimetext.4 .mjs all
 com.sublimetext.4 .md all
-com.apple.dt.Xcode .py all
-com.apple.dt.Xcode .rb all
+com.sublimetext.4 .py all
+com.sublimetext.4 .rb all
 com.todesktop.230313mzl4w4u92 .rs all
 com.sublimetext.4 .sh all
 com.todesktop.230313mzl4w4u92 .sql all
@@ -27,9 +27,9 @@ com.todesktop.230313mzl4w4u92 .toml all
 com.todesktop.230313mzl4w4u92 .ts all
 com.todesktop.230313mzl4w4u92 .tsx all
 com.sublimetext.4 .txt all
-com.apple.dt.Xcode .xml all
-com.apple.dt.Xcode .yaml all
-com.apple.dt.Xcode .yml all
+com.sublimetext.4 .xml all
+com.sublimetext.4 .yaml all
+com.sublimetext.4 .yml all
 com.apple.Preview .pdf all
 com.apple.Preview .png all
 com.apple.Preview .jpg all
