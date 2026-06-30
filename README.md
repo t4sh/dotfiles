@@ -170,7 +170,7 @@ Shell helper `jcd` (in `zsh/lib/50-functions.zsh`) fuzzy-cds into `~/Projects`.
 
 ## Default app policy
 
-[`config/duti`](config/duti) declares which app opens which extension or URL scheme for the **same app set** in the Brewfile — repo policy, not a blind machine snapshot.
+[`config/duti`](config/duti) declares which app opens which extension or URL scheme for the **same app set** in the Brewfile — repo policy, not a blind machine snapshot. Optional handlers (for example full Xcode.app) are skipped with a warning when the app is not installed; `make default-apps` still applies everything else.
 
 1. Fresh Mac: `make brew` → `make default-apps`
 2. Changed preferences on your reference Mac: `make capture-default-apps` → review diff → commit
