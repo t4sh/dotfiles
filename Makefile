@@ -96,7 +96,7 @@ services: ## Install Automator Quick Actions into ~/Library/Services
 	@echo "Automator services installed."
 
 default-apps: ## Apply repo default-app policy from config/duti
-	@bash scripts/apply-duti.sh
+	@bash scripts/apply-duti.sh "$(DOTFILES)/config/duti"
 
 capture-default-apps: ## Refresh config/duti from current handlers on this Mac
 	@bash scripts/capture-duti.sh
