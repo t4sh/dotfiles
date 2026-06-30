@@ -34,7 +34,7 @@ for f in \
 done
 
 VSCODE="$APPS/vscode/settings.json"
-if [[ -f "$VSCODE" ]] && grep -q '/Users/' "$VSCODE" 2>/dev/null; then
+if [[ -f "$VSCODE" ]]; then
   if [[ ! -x "$NODE_STABLE" ]]; then
     echo "sanitize-app-prefs: $NODE_STABLE not found; skipping VS Code JSON sanitizer" >&2
   else
@@ -42,23 +42,49 @@ if [[ -f "$VSCODE" ]] && grep -q '/Users/' "$VSCODE" 2>/dev/null; then
 const fs = require("fs");
 const path = process.env.VSCODE_SETTINGS;
 if (!path) process.exit(1);
+
 let s = fs.readFileSync(path, "utf8");
-const re = /\n(\s*)"yaml\.schemas"\s*:\s*\{/;
-const m = re.exec(s);
-if (!m || !s.includes("/Users/")) process.exit(0);
-const start = m.index;
-let i = m.index + m[0].length;
-let depth = 1;
-while (i < s.length && depth > 0) {
-  const ch = s[i++];
-  if (ch === "{") depth++;
-  else if (ch === "}") depth--;
+
+function stripTopLevelKey(source, key) {
+  const re = new RegExp(`\\n(\\s*)"${key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"\\s*:\\s*`);
+  const m = re.exec(source);
+  if (!m) return source;
+  const start = m.index;
+  let i = m.index + m[0].length;
+  if (source[i] === "{") {
+    let depth = 1;
+    while (i < source.length && depth > 0) {
+      const ch = source[i++];
+      if (ch === "{") depth++;
+      else if (ch === "}") depth--;
+    }
+  } else if (source[i] === "[") {
+    let depth = 1;
+    while (i < source.length && depth > 0) {
+      const ch = source[i++];
+      if (ch === "[") depth++;
+      else if (ch === "]") depth--;
+    }
+  } else {
+    while (i < source.length && source[i] !== "," && source[i] !== "\n") i++;
+  }
+  while (source[i] === " " || source[i] === "\t") i++;
+  if (source[i] === ",") i++;
+  if (source[i] === "\r") i++;
+  if (source[i] === "\n") i++;
+  return source.slice(0, start) + source.slice(i);
 }
-while (s[i] === " " || s[i] === "\t") i++;
-if (s[i] === ",") i++;
-if (s[i] === "\r") i++;
-if (s[i] === "\n") i++;
-fs.writeFileSync(path, s.slice(0, start) + s.slice(i));
+
+for (const key of [
+  "yaml.schemas",
+  "google.cloud.project",
+  "jupyter.runStartupCommands",
+  "chat.tools.terminal.autoApprove",
+]) {
+  s = stripTopLevelKey(s, key);
+}
+
+fs.writeFileSync(path, s);
 NODE
   fi
 fi

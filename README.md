@@ -52,6 +52,8 @@ cd ~/.dotfiles
 bash install.sh
 ```
 
+`install.sh` resolves the repo root from its own location (or `DOTFILES` if set), so a non-default clone path works: `DOTFILES=~/src/dotfiles bash ~/src/dotfiles/install.sh`.
+
 `install.sh` installs Xcode CLI tools (if needed), Homebrew, symlinks, Brewfile packages, NVM/Node, app prefs, Automator services, optional macOS/Dock/SSH prompts, git hooks, and Terminal profiles (quits Terminal — expected once).
 
 It does **not** run: `rules-audit`, `skills-audit`, `make dock` (unless you answer yes), `make default-apps`, `make doctor`, `make docs-audit`, or `make skills`. Those are documented manual follow-ups.
@@ -71,6 +73,8 @@ make all
 ```
 
 `make all` runs: `link` → `rules-audit` → `skills-audit` → `brew` → `services` → `restore-apps` → `dock` → `hooks` → `ssh-setup` → `macos` (interactive, last).
+
+`ssh-setup` generates or registers an SSH key with GitHub when `gh` is available — skip or run manually if you already have keys.
 
 Manual targets (not in `all`): `terminal`, `default-apps`, `capture-default-apps`, `doctor`, `docs-audit`, `skills`.
 
@@ -182,10 +186,10 @@ HTTPS default-browser mapping is omitted (`duti` returns error -54 for direct `h
 The [`agents/`](agents/) directory symlinks to `~/.agents` and wires into Claude Code (`~/.claude/`). It includes:
 
 - `AGENTS.md` and rule files
-- A large **public-redistributable** skills tree
+- A large **vendored skills** tree with upstream attribution in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md)
 - `Skillsfile` / `.skill-lock.json` for reproducible global skill installs
 
-Non-redistributable or private skills must **not** be committed — `make skills-audit` enforces the license gate (also in `make all`).
+Non-redistributable or private skills must **not** be committed — `make skills-audit` enforces the license gate (also in `make all`). Third-party skills without a local `LICENSE` file must appear in `THIRD_PARTY_NOTICES.md`.
 
 Install global skills after bootstrap:
 
@@ -261,6 +265,10 @@ Create `~/.dotfiles/zsh/lib/99-local.zsh` for anything that must not be committe
 | [`macos/`](macos/) | System defaults and Dock |
 | [`services/`](services/) | Automator Quick Actions |
 | [`scripts/`](scripts/) | Bootstrap, backup, restore, audit, vault |
+
+## License
+
+This repository is [MIT licensed](LICENSE). Vendored agent skills retain their upstream licenses — see [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
 
 ## Forking & updating
 

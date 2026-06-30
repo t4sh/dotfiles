@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DOTFILES="$HOME/.dotfiles"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+DOTFILES="${DOTFILES:-$(cd -- "$SCRIPT_DIR" && pwd -P)}"
 
 echo "╔══════════════════════════════════════╗"
 echo "║      Mac Bootstrap — dotfiles        ║"
