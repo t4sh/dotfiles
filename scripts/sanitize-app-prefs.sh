@@ -4,8 +4,6 @@
 # - VS Code: drop yaml.schemas entries with machine-specific file:// paths
 # - Binary plists: remove keys that store local home paths, file bookmarks, or
 #   account-revealing cloud folder names.
-# - Plist format: `defaults export` writes binary on modern macOS; convert to
-#   XML so git and diff viewers show line-oriented text diffs.
 set -euo pipefail
 
 DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
@@ -23,6 +21,13 @@ plist_delete() {
   "$PLISTBUDDY" -c "Delete :$key" "$plist" >/dev/null 2>&1 || true
 }
 
+plist_set_bool() {
+  local plist="$1" key="$2" value="$3"
+  [[ -f "$plist" ]] || return 0
+  "$PLISTBUDDY" -c "Set :$key $value" "$plist" 2>/dev/null ||
+    "$PLISTBUDDY" -c "Add :$key bool $value" "$plist"
+}
+
 for f in \
   "$APPS/sublime-text/Formatter.sublime-settings" \
   "$APPS/sublime-text/SublimeLinter.sublime-settings"; do
@@ -33,60 +38,65 @@ for f in \
   ' "$f"
 done
 
-VSCODE="$APPS/vscode/settings.json"
-if [[ -f "$VSCODE" ]]; then
-  if [[ ! -x "$NODE_STABLE" ]]; then
-    echo "sanitize-app-prefs: $NODE_STABLE not found; skipping VS Code JSON sanitizer" >&2
-  else
-    VSCODE_SETTINGS="$VSCODE" "$NODE_STABLE" <<'NODE'
-const fs = require("fs");
-const path = process.env.VSCODE_SETTINGS;
-if (!path) process.exit(1);
-
-let s = fs.readFileSync(path, "utf8");
-
-function stripTopLevelKey(source, key) {
-  const re = new RegExp(`\\n(\\s*)"${key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"\\s*:\\s*`);
-  const m = re.exec(source);
-  if (!m) return source;
-  const start = m.index;
-  let i = m.index + m[0].length;
-  if (source[i] === "{") {
-    let depth = 1;
-    while (i < source.length && depth > 0) {
-      const ch = source[i++];
-      if (ch === "{") depth++;
-      else if (ch === "}") depth--;
-    }
-  } else if (source[i] === "[") {
-    let depth = 1;
-    while (i < source.length && depth > 0) {
-      const ch = source[i++];
-      if (ch === "[") depth++;
-      else if (ch === "]") depth--;
-    }
-  } else {
-    while (i < source.length && source[i] !== "," && source[i] !== "\n") i++;
-  }
-  while (source[i] === " " || source[i] === "\t") i++;
-  if (source[i] === ",") i++;
-  if (source[i] === "\r") i++;
-  if (source[i] === "\n") i++;
-  return source.slice(0, start) + source.slice(i);
-}
-
-for (const key of [
-  "yaml.schemas",
-  "google.cloud.project",
-  "jupyter.runStartupCommands",
-  "chat.tools.terminal.autoApprove",
-]) {
-  s = stripTopLevelKey(s, key);
-}
-
-fs.writeFileSync(path, s);
-NODE
+resolve_node() {
+  if [[ -x "$NODE_STABLE" ]]; then
+    printf '%s' "$NODE_STABLE"
+    return 0
   fi
+  # Broken shim (e.g. nvm upgraded past .node-version) — fall back to PATH.
+  if command -v node >/dev/null 2>&1; then
+    command -v node
+    return 0
+  fi
+  return 1
+}
+
+sanitize_editor_settings() {
+  local path="$1" node_bin
+  [[ -f "$path" ]] && grep -q '/Users/' "$path" 2>/dev/null || return 0
+  if ! node_bin="$(resolve_node)"; then
+    echo "sanitize-app-prefs: need node to strip machine paths from $path" >&2
+    echo "  fix: ln -sf \"\$NVM_DIR/versions/node/\$(<.node-version)/bin/node\" ~/.local/bin/node-stable" >&2
+    exit 1
+  fi
+  if [[ "$node_bin" != "$NODE_STABLE" ]]; then
+    echo "sanitize-app-prefs: node-stable missing/broken; using $node_bin" >&2
+  fi
+  EDITOR_SETTINGS="$path" "$node_bin" <<'NODE'
+const fs = require("fs");
+const path = process.env.EDITOR_SETTINGS;
+if (!path) process.exit(1);
+let s = fs.readFileSync(path, "utf8");
+const re = /\n(\s*)"yaml\.schemas"\s*:\s*\{/;
+const m = re.exec(s);
+if (!m || !s.includes("/Users/")) process.exit(0);
+const start = m.index;
+let i = m.index + m[0].length;
+let depth = 1;
+while (i < s.length && depth > 0) {
+  const ch = s[i++];
+  if (ch === "{") depth++;
+  else if (ch === "}") depth--;
+}
+while (s[i] === " " || s[i] === "\t") i++;
+if (s[i] === ",") i++;
+if (s[i] === "\r") i++;
+if (s[i] === "\n") i++;
+fs.writeFileSync(path, s.slice(0, start) + s.slice(i));
+NODE
+}
+
+sanitize_editor_settings "$APPS/vscode/settings.json"
+sanitize_editor_settings "$APPS/cursor/settings.json"
+
+# Tower stores license state and home-directory quick-open exclusions.
+for key in GTLicenseActivationLastUpdatedDate GTLicenseActivationState; do
+  plist_delete "$APPS/tower/tower.plist" "$key"
+done
+if [[ -f "$APPS/tower/tower.plist" ]]; then
+  "$PLISTBUDDY" -c "Set :GTUserDefaultsDefaultCloningDirectory ~/Projects" \
+    "$APPS/tower/tower.plist" 2>/dev/null || true
+  plist_delete "$APPS/tower/tower.plist" "GTUserDefaultsQuickOpenIgnoredFilePaths"
 fi
 
 # Clop stores output folders, recent directories, and security-scoped bookmarks.
@@ -115,17 +125,19 @@ plist_delete "$APPS/pearcleaner/pearcleaner.plist" "settings.lipo.excludedApps"
 # scanners. Keep app tile URLs and bundle identifiers, but drop bookmark blobs
 # and right-side folder tiles from the committed backup.
 if [[ -f "$DOTFILES/macos/dock-backup.plist" ]]; then
-  while IFS= read -r idx; do
+  # Preserve the declared locked-Dock policy even if macOS rewrites these flags
+  # before a backup: fixed size/position/items and auto-hide permanently off.
+  plist_set_bool "$DOTFILES/macos/dock-backup.plist" "size-immutable" true
+  plist_set_bool "$DOTFILES/macos/dock-backup.plist" "position-immutable" true
+  plist_set_bool "$DOTFILES/macos/dock-backup.plist" "contents-immutable" true
+  plist_set_bool "$DOTFILES/macos/dock-backup.plist" "autohide" false
+  plist_set_bool "$DOTFILES/macos/dock-backup.plist" "autohide-immutable" true
+
+  idx=0
+  while "$PLISTBUDDY" -c "Print :persistent-apps:$idx" "$DOTFILES/macos/dock-backup.plist" \
+    >/dev/null 2>&1; do
     plist_delete "$DOTFILES/macos/dock-backup.plist" "persistent-apps:$idx:tile-data:book"
-  done < <("$PLISTBUDDY" -c "Print :persistent-apps" "$DOTFILES/macos/dock-backup.plist" 2>/dev/null |
-    awk '/^    Dict \{$/ { print n++ }')
+    idx=$((idx + 1))
+  done
 fi
 plist_delete "$DOTFILES/macos/dock-backup.plist" "persistent-others"
-
-# Normalize plist on-disk format after PlistBuddy edits (may leave binary).
-for root in "$APPS" "$DOTFILES/macos"; do
-  [[ -d "$root" ]] || continue
-  while IFS= read -r -d '' f; do
-    plutil -convert xml1 -o "$f" "$f"
-  done < <(find "$root" -type f -name '*.plist' -print0 2>/dev/null)
-done

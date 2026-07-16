@@ -1,18 +1,23 @@
 #!/usr/bin/env bash
 # Apply symlinks declared in symlinks.tsv. Idempotent — re-run safe.
-# Existing non-matching files are moved to ~/.dotfiles-backup/<timestamp>/<absolute-path-mirror>.
+# Missing sources leave destinations untouched. Existing destinations for valid
+# sources move to ~/.dotfiles-backup/<timestamp>/<absolute-path-mirror>.
 set -euo pipefail
 
 DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
 MANIFEST="$DOTFILES/symlinks.tsv"
 BACKUP_DIR="$HOME/.dotfiles-backup/$(date +%Y%m%d-%H%M%S)"
 DRY_RUN=0
+CHECK=0
+MISSING_SOURCES=0
+DRIFTED_DESTINATIONS=0
 
 usage() {
     cat <<'EOF'
-Usage: link.sh [--dry-run]
+Usage: link.sh [--dry-run | --check]
 
   --dry-run   Show what would be linked/backed up without changing files.
+  --check     Exit non-zero when a source is missing or a destination has drifted.
 EOF
 }
 
@@ -20,6 +25,11 @@ while (($# > 0)); do
     case "$1" in
         -n | --dry-run)
             DRY_RUN=1
+            shift
+            ;;
+        -c | --check)
+            DRY_RUN=1
+            CHECK=1
             shift
             ;;
         -h | --help | help)
@@ -62,8 +72,20 @@ backup_path_for() {
 
 link_one() {
     local src="$1" dst="$2" backup
+    if [[ ! -e "$src" ]]; then
+        echo "  ⚠ source missing for $dst: $src"
+        MISSING_SOURCES=$((MISSING_SOURCES + 1))
+        echo "    leaving the destination untouched; restore the source and re-run"
+        return
+    fi
     if [ -L "$dst" ] && [ "$(readlink "$dst")" = "$src" ]; then
         echo "  ✓ $dst (already linked)"
+        return
+    fi
+
+    DRIFTED_DESTINATIONS=$((DRIFTED_DESTINATIONS + 1))
+    if (( CHECK )); then
+        echo "  ✗ $dst (expected link to $src)"
         return
     fi
     if [ -e "$dst" ] || [ -L "$dst" ]; then
@@ -83,7 +105,9 @@ link_one() {
     echo "  ✓ $dst → $src"
 }
 
-if (( DRY_RUN )); then
+if (( CHECK )); then
+    echo "Checking managed links from $MANIFEST..."
+elif (( DRY_RUN )); then
     echo "Dry-run: linking dotfiles from $MANIFEST..."
 else
     echo "Linking dotfiles from $MANIFEST..."
@@ -96,7 +120,18 @@ while IFS=$'\t' read -r src dst; do
 done < "$MANIFEST"
 
 echo ""
-if (( DRY_RUN )); then
+if (( MISSING_SOURCES > 0 )); then
+    echo "Warning: $MISSING_SOURCES declared source(s) are missing; no destination was changed for them."
+    echo "Restore ~/.secrets from the vault and re-run this script if these are secret-backed paths."
+    echo ""
+fi
+if (( CHECK )); then
+    if (( MISSING_SOURCES > 0 || DRIFTED_DESTINATIONS > 0 )); then
+        echo "Check failed: $MISSING_SOURCES missing source(s), $DRIFTED_DESTINATIONS drifted destination(s)."
+        exit 1
+    fi
+    echo "Check complete. All managed links are healthy."
+elif (( DRY_RUN )); then
     echo "Dry-run complete. No files changed."
 elif [ -d "$BACKUP_DIR" ]; then
     echo "Done. Backups in $BACKUP_DIR"

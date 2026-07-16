@@ -19,7 +19,7 @@ Upgrade path: rename config as needed → remove Browsersync assumptions → fix
 
 ## Canonical config skeletons
 
-### CJS (Eleventy site lineage)
+### CJS (legacy site lineage)
 
 ```js
 const markdownIt = require("markdown-it");

@@ -1,151 +1,321 @@
 ---
-generated: 2026-06-29T15:21:01+05:30
-skills_count: 112
+generated: 2026-07-16T07:54:00+05:30
+skills_count: 266
 gated_count: 0
 lock_file: ../.skill-lock.json
 lock_version: 4
 ---
 
+# Usage
+
+When this file is asked to be updated. Update the following
+- the front-matter for `generated`, `skills_count`, `gated_count` and `lock_version` whatever has changed/updated
+- the content after "# Skills Inventory — Generated <date>"
+	- Summary of skills count
+	- Table with `Skill Name`, `Source`, `Disk Location`, `Remark`
+- Leave rest of the content under other headings untouched.
+
 # Skills Inventory
 
-> **112 skills** installed — public-safe set
+> **266 skills** installed — 246 remote + 20 local
 
 | # | Skill Name | Source | Disk Location | Remark |
 |---|-----------|--------|---------------|--------|
-| 1 | accessibility-review | anthropics/knowledge-work-plugins | `~/.agents/skills/accessibility-review/` | — |
-| 2 | agent-browser | vercel-labs/agent-browser | `~/.agents/skills/agent-browser/` | — |
-| 3 | agent-memory | t4sh/skills4sh | `~/.agents/skills/agent-memory/` | — |
-| 4 | agentation | benjitaylor/agentation | `~/.agents/skills/agentation/` | — |
-| 5 | agentation-self-driving | benjitaylor/agentation | `~/.agents/skills/agentation-self-driving/` | — |
-| 6 | architecture | anthropics/knowledge-work-plugins | `~/.agents/skills/architecture/` | — |
-| 7 | ask-matt | mattpocock/skills | `~/.agents/skills/ask-matt/` | — |
-| 8 | audit-website | squirrelscan/skills | `~/.agents/skills/audit-website/` | — |
-| 9 | brainstorming | obra/superpowers | `~/.agents/skills/brainstorming/` | — |
-| 10 | brandkit | Leonxlnx/taste-skill | `~/.agents/skills/brandkit/` | — |
-| 11 | canvas-design | anthropics/skills | `~/.agents/skills/canvas-design/` | — |
-| 12 | code-review | anthropics/knowledge-work-plugins | `~/.agents/skills/code-review/` | — |
-| 13 | code-review-nextjs | local | `~/.agents/skills/code-review-nextjs/` | — |
-| 14 | code-to-figma | t4sh/skills4sh | `~/.agents/skills/code-to-figma/` | — |
-| 15 | codebase-design | mattpocock/skills | `~/.agents/skills/codebase-design/` | — |
-| 16 | copywriting | coreyhaines31/marketingskills | `~/.agents/skills/copywriting/` | — |
-| 17 | creative-design | cerico/macfair | `~/.agents/skills/creative-design/` | — |
-| 18 | debug | anthropics/knowledge-work-plugins | `~/.agents/skills/debug/` | — |
-| 19 | decision-mapping | mattpocock/skills | `~/.agents/skills/decision-mapping/` | — |
-| 20 | deploy-checklist | anthropics/knowledge-work-plugins | `~/.agents/skills/deploy-checklist/` | — |
-| 21 | design-an-interface | mattpocock/skills | `~/.agents/skills/design-an-interface/` | — |
-| 22 | design-critique | anthropics/knowledge-work-plugins | `~/.agents/skills/design-critique/` | — |
-| 23 | design-handoff | anthropics/knowledge-work-plugins | `~/.agents/skills/design-handoff/` | — |
-| 24 | design-system | anthropics/knowledge-work-plugins | `~/.agents/skills/design-system/` | — |
-| 25 | design-system-alignment | owl-listener/designpowers | `~/.agents/skills/design-system-alignment/` | — |
-| 26 | design-taste-frontend | Leonxlnx/taste-skill | `~/.agents/skills/design-taste-frontend/` | — |
-| 27 | design-token-audit | owl-listener/designer-skills | `~/.agents/skills/design-token-audit/` | — |
-| 28 | design-tokens | julianoczkowski/designer-skills | `~/.agents/skills/design-tokens/` | — |
-| 29 | diagnosing-bugs | mattpocock/skills | `~/.agents/skills/diagnosing-bugs/` | — |
-| 30 | discord-harvest | t4sh/skills4sh | `~/.agents/skills/discord-harvest/` | — |
-| 31 | documentation | anthropics/knowledge-work-plugins | `~/.agents/skills/documentation/` | — |
-| 32 | domain-modeling | mattpocock/skills | `~/.agents/skills/domain-modeling/` | — |
-| 33 | edit-article | mattpocock/skills | `~/.agents/skills/edit-article/` | — |
-| 34 | eleventy-nunjucks | t4sh/skills4sh | `~/.agents/skills/eleventy-nunjucks/` | — |
-| 35 | emil-design-eng | emilkowalski/skill | `~/.agents/skills/emil-design-eng/` | — |
-| 36 | executing-plans | obra/superpowers | `~/.agents/skills/executing-plans/` | — |
-| 37 | feature-dev | notedit/happy-skills | `~/.agents/skills/feature-dev/` | — |
-| 38 | figma-to-code | t4sh/skills4sh | `~/.agents/skills/figma-to-code/` | — |
-| 39 | file-organizer | ComposioHQ/awesome-claude-skills | `~/.agents/skills/file-organizer/` | — |
-| 40 | find-skills | vercel-labs/skills | `~/.agents/skills/find-skills/` | — |
-| 41 | finishing-a-development-branch | obra/superpowers | `~/.agents/skills/finishing-a-development-branch/` | — |
-| 42 | frontend-design | anthropics/skills | `~/.agents/skills/frontend-design/` | — |
-| 43 | full-output-enforcement | Leonxlnx/taste-skill | `~/.agents/skills/full-output-enforcement/` | — |
-| 44 | git-commit | github/awesome-copilot | `~/.agents/skills/git-commit/` | — |
-| 45 | git-guardrails-claude-code | mattpocock/skills | `~/.agents/skills/git-guardrails-claude-code/` | — |
-| 46 | gpt-taste | Leonxlnx/taste-skill | `~/.agents/skills/gpt-taste/` | — |
-| 47 | grill-me | mattpocock/skills | `~/.agents/skills/grill-me/` | — |
-| 48 | grill-with-docs | mattpocock/skills | `~/.agents/skills/grill-with-docs/` | — |
-| 49 | grilling | mattpocock/skills | `~/.agents/skills/grilling/` | — |
-| 50 | handoff | mattpocock/skills | `~/.agents/skills/handoff/` | — |
-| 51 | high-end-visual-design | Leonxlnx/taste-skill | `~/.agents/skills/high-end-visual-design/` | — |
-| 52 | impeccable | pbakaus/impeccable | `~/.agents/skills/impeccable/` | — |
-| 53 | implement | mattpocock/skills | `~/.agents/skills/implement/` | — |
-| 54 | improve | shadcn/improve | `~/.agents/skills/improve/` | — |
-| 55 | improve-codebase-architecture | mattpocock/skills | `~/.agents/skills/improve-codebase-architecture/` | — |
-| 56 | industrial-brutalist-ui | Leonxlnx/taste-skill | `~/.agents/skills/industrial-brutalist-ui/` | — |
-| 57 | init-rulebook | local | `~/.agents/skills/init-rulebook/` | — |
-| 58 | localhost-screenshots | t4sh/skills4sh | `~/.agents/skills/localhost-screenshots/` | — |
-| 59 | loop-me | mattpocock/skills | `~/.agents/skills/loop-me/` | — |
-| 60 | migrate-to-shoehorn | mattpocock/skills | `~/.agents/skills/migrate-to-shoehorn/` | — |
-| 61 | minimalist-ui | Leonxlnx/taste-skill | `~/.agents/skills/minimalist-ui/` | — |
-| 62 | moltbook | sorcerai/moltbook-skill | `~/.agents/skills/moltbook/` | — |
-| 63 | monorepo-management | wshobson/agents | `~/.agents/skills/monorepo-management/` | — |
-| 64 | obsidian-vault | mattpocock/skills | `~/.agents/skills/obsidian-vault/` | — |
-| 65 | pdf-harvester | mindmorass/reflex | `~/.agents/skills/pdf-harvester/` | — |
-| 66 | playwright | openai/skills | `~/.agents/skills/playwright/` | — |
-| 67 | prototype | mattpocock/skills | `~/.agents/skills/prototype/` | — |
-| 68 | qa | mattpocock/skills | `~/.agents/skills/qa/` | — |
-| 69 | redesign-existing-projects | Leonxlnx/taste-skill | `~/.agents/skills/redesign-existing-projects/` | — |
-| 70 | refactoring-ui | wondelai/skills | `~/.agents/skills/refactoring-ui/` | — |
-| 71 | refero-design | referodesign/refero_skill | `~/.agents/skills/refero-design/` | — |
-| 72 | request-refactor-plan | mattpocock/skills | `~/.agents/skills/request-refactor-plan/` | — |
-| 73 | research-synthesis | anthropics/knowledge-work-plugins | `~/.agents/skills/research-synthesis/` | — |
-| 74 | resolving-merge-conflicts | mattpocock/skills | `~/.agents/skills/resolving-merge-conflicts/` | — |
-| 75 | review | mattpocock/skills | `~/.agents/skills/review/` | — |
-| 76 | scaffold-exercises | mattpocock/skills | `~/.agents/skills/scaffold-exercises/` | — |
-| 77 | setup-matt-pocock-skills | mattpocock/skills | `~/.agents/skills/setup-matt-pocock-skills/` | — |
-| 78 | setup-pre-commit | mattpocock/skills | `~/.agents/skills/setup-pre-commit/` | — |
-| 79 | skill-architect | t4sh/skills4sh | `~/.agents/skills/skill-architect/` | — |
-| 80 | skill-creator | openai/skills | `~/.agents/skills/skill-creator/` | — |
-| 81 | skill-development | anthropics/claude-code | `~/.agents/skills/skill-development/` | — |
-| 82 | stitch-design-taste | Leonxlnx/taste-skill | `~/.agents/skills/stitch-design-taste/` | — |
-| 83 | sync-figma-token | firebenders/sync-figma-token-skill | `~/.agents/skills/sync-figma-token/` | — |
-| 84 | system-design | anthropics/knowledge-work-plugins | `~/.agents/skills/system-design/` | — |
-| 85 | systematic-debugging | obra/superpowers | `~/.agents/skills/systematic-debugging/` | — |
-| 86 | tailwind-design-system | wshobson/agents | `~/.agents/skills/tailwind-design-system/` | — |
-| 87 | tailwindcss-advanced-design-systems | josiahsiegel/claude-plugin-marketplace | `~/.agents/skills/tailwindcss-advanced-design-systems/` | — |
-| 88 | tauri-v2 | nodnarbnitram/claude-code-extensions | `~/.agents/skills/tauri-v2/` | — |
-| 89 | tdd | mattpocock/skills | `~/.agents/skills/tdd/` | — |
-| 90 | teach | mattpocock/skills | `~/.agents/skills/teach/` | — |
-| 91 | tech-debt | anthropics/knowledge-work-plugins | `~/.agents/skills/tech-debt/` | — |
-| 92 | theme-factory | anthropics/skills | `~/.agents/skills/theme-factory/` | — |
-| 93 | to-issues | mattpocock/skills | `~/.agents/skills/to-issues/` | — |
-| 94 | to-prd | mattpocock/skills | `~/.agents/skills/to-prd/` | — |
-| 95 | top-design | wondelai/skills | `~/.agents/skills/top-design/` | — |
-| 96 | transitions-dev | Jakubantalik/transitions.dev | `~/.agents/skills/transitions-dev/` | — |
-| 97 | triage | mattpocock/skills | `~/.agents/skills/triage/` | — |
-| 98 | ubiquitous-language | mattpocock/skills | `~/.agents/skills/ubiquitous-language/` | — |
-| 99 | ui-animation | mblode/agent-skills | `~/.agents/skills/ui-animation/` | — |
-| 100 | ui-ux-pro-max | nextlevelbuilder/ui-ux-pro-max-skill | `~/.agents/skills/ui-ux-pro-max/` | — |
-| 101 | user-research | anthropics/knowledge-work-plugins | `~/.agents/skills/user-research/` | — |
-| 102 | using-git-worktrees | obra/superpowers | `~/.agents/skills/using-git-worktrees/` | — |
-| 103 | ux-copy | anthropics/knowledge-work-plugins | `~/.agents/skills/ux-copy/` | — |
-| 104 | vocabulary | index-how/vocabulary | `~/.agents/skills/vocabulary/` | — |
-| 105 | web-design-guidelines | vercel-labs/agent-skills | `~/.agents/skills/web-design-guidelines/` | — |
-| 106 | web-typography | wondelai/skills | `~/.agents/skills/web-typography/` | — |
-| 107 | writing-beats | mattpocock/skills | `~/.agents/skills/writing-beats/` | — |
-| 108 | writing-fragments | mattpocock/skills | `~/.agents/skills/writing-fragments/` | — |
-| 109 | writing-great-skills | mattpocock/skills | `~/.agents/skills/writing-great-skills/` | — |
-| 110 | writing-plans | obra/superpowers | `~/.agents/skills/writing-plans/` | — |
-| 111 | writing-shape | mattpocock/skills | `~/.agents/skills/writing-shape/` | — |
-| 112 | writing-skills | obra/superpowers | `~/.agents/skills/writing-skills/` | — |
+| 1 | 3d-spatial | dylantarre/animation-principles | `~/.agents/skills/3d-spatial/` | — |
+| 2 | accessibility-advocate | dylantarre/animation-principles | `~/.agents/skills/accessibility-advocate/` | — |
+| 3 | accessibility-issues | dylantarre/animation-principles | `~/.agents/skills/accessibility-issues/` | — |
+| 4 | accessibility-review | anthropics/knowledge-work-plugins | `~/.agents/skills/accessibility-review/` | WCAG 2.1 AA audit template |
+| 5 | accessible-motion | dylantarre/animation-principles | `~/.agents/skills/accessible-motion/` | — |
+| 6 | accordions-dropdowns | dylantarre/animation-principles | `~/.agents/skills/accordions-dropdowns/` | — |
+| 7 | after-effects | dylantarre/animation-principles | `~/.agents/skills/after-effects/` | — |
+| 8 | agent-browser | vercel-labs/agent-browser | `~/.agents/skills/agent-browser/` | — |
+| 9 | agent-memory | t4sh/skills4sh | `~/.agents/skills/agent-memory/` | — |
+| 10 | agentation | benjitaylor/agentation | `~/.agents/skills/agentation/` | — |
+| 11 | agentation-self-driving | benjitaylor/agentation | `~/.agents/skills/agentation-self-driving/` | — |
+| 12 | animation-principles-absolute-beginner | local | `~/.agents/skills/animation-principles-absolute-beginner/` | — |
+| 13 | animation-principles-advanced | local | `~/.agents/skills/animation-principles-advanced/` | — |
+| 14 | animation-principles-deep-dive | local | `~/.agents/skills/animation-principles-deep-dive/` | — |
+| 15 | animation-principles-expert | local | `~/.agents/skills/animation-principles-expert/` | — |
+| 16 | animation-principles-intermediate | local | `~/.agents/skills/animation-principles-intermediate/` | — |
+| 17 | animation-principles-master | local | `~/.agents/skills/animation-principles-master/` | — |
+| 18 | animation-principles-novice | local | `~/.agents/skills/animation-principles-novice/` | — |
+| 19 | animation-principles-quick-start | local | `~/.agents/skills/animation-principles-quick-start/` | — |
+| 20 | animation-principles-refresher | local | `~/.agents/skills/animation-principles-refresher/` | — |
+| 21 | animation-principles-teaching-others | local | `~/.agents/skills/animation-principles-teaching-others/` | — |
+| 22 | animation-principles-troubleshooting | local | `~/.agents/skills/animation-principles-troubleshooting/` | — |
+| 23 | animation-principles-universal-reference | local | `~/.agents/skills/animation-principles-universal-reference/` | — |
+| 24 | animation-vocabulary | emilkowalski/skills | `~/.agents/skills/animation-vocabulary/` | — |
+| 25 | animator-traditional | dylantarre/animation-principles | `~/.agents/skills/animator-traditional/` | — |
+| 26 | anime-js | dylantarre/animation-principles | `~/.agents/skills/anime-js/` | — |
+| 27 | anticipation-mastery | dylantarre/animation-principles | `~/.agents/skills/anticipation-mastery/` | — |
+| 28 | anticipation-payoff | dylantarre/animation-principles | `~/.agents/skills/anticipation-payoff/` | — |
+| 29 | appeal-mastery | dylantarre/animation-principles | `~/.agents/skills/appeal-mastery/` | — |
+| 30 | apple-design | emilkowalski/skills | `~/.agents/skills/apple-design/` | — |
+| 31 | arc-mastery | dylantarre/animation-principles | `~/.agents/skills/arc-mastery/` | — |
+| 32 | architecture | anthropics/knowledge-work-plugins | `~/.agents/skills/architecture/` | — |
+| 33 | ask-matt | mattpocock/skills | `~/.agents/skills/ask-matt/` | — |
+| 34 | attention-direction | dylantarre/animation-principles | `~/.agents/skills/attention-direction/` | — |
+| 35 | attention-grabbers | dylantarre/animation-principles | `~/.agents/skills/attention-grabbers/` | — |
+| 36 | attention-management | dylantarre/animation-principles | `~/.agents/skills/attention-management/` | — |
+| 37 | brainstorming | obra/superpowers | `~/.agents/skills/brainstorming/` | — |
+| 38 | brand-consistency | dylantarre/animation-principles | `~/.agents/skills/brand-consistency/` | — |
+| 39 | brand-marketing | dylantarre/animation-principles | `~/.agents/skills/brand-marketing/` | — |
+| 40 | brand-strategist | dylantarre/animation-principles | `~/.agents/skills/brand-strategist/` | — |
+| 41 | brandkit | Leonxlnx/taste-skill | `~/.agents/skills/brandkit/` | — |
+| 42 | buttons-ctas | dylantarre/animation-principles | `~/.agents/skills/buttons-ctas/` | — |
+| 43 | calm-relaxation | dylantarre/animation-principles | `~/.agents/skills/calm-relaxation/` | — |
+| 44 | canvas-design | anthropics/skills | `~/.agents/skills/canvas-design/` | — |
+| 45 | cards-containers | dylantarre/animation-principles | `~/.agents/skills/cards-containers/` | — |
+| 46 | carousels-sliders | dylantarre/animation-principles | `~/.agents/skills/carousels-sliders/` | — |
+| 47 | character-appeal | dylantarre/animation-principles | `~/.agents/skills/character-appeal/` | — |
+| 48 | claude-handoff | mattpocock/skills | `~/.agents/skills/claude-handoff/` | — |
+| 49 | code-review | mattpocock/skills | `~/.agents/skills/code-review/` | — |
+| 50 | code-review-nextjs | local | `~/.agents/skills/code-review-nextjs/` | Custom Next.js review skill |
+| 51 | code-to-figma | t4sh/skills4sh | `~/.agents/skills/code-to-figma/` | — |
+| 52 | codebase-design | mattpocock/skills | `~/.agents/skills/codebase-design/` | — |
+| 53 | comfort-safety | dylantarre/animation-principles | `~/.agents/skills/comfort-safety/` | — |
+| 54 | continuous-infinite | dylantarre/animation-principles | `~/.agents/skills/continuous-infinite/` | — |
+| 55 | continuous-loops | dylantarre/animation-principles | `~/.agents/skills/continuous-loops/` | — |
+| 56 | copywriting | coreyhaines31/marketingskills | `~/.agents/skills/copywriting/` | — |
+| 57 | creative-design | cerico/macfair | `~/.agents/skills/creative-design/` | — |
+| 58 | creative-director | dylantarre/animation-principles | `~/.agents/skills/creative-director/` | — |
+| 59 | css-native | dylantarre/animation-principles | `~/.agents/skills/css-native/` | — |
+| 60 | data-visualization | dylantarre/animation-principles | `~/.agents/skills/data-visualization/` | — |
+| 61 | debug | anthropics/knowledge-work-plugins | `~/.agents/skills/debug/` | — |
+| 62 | deliberate-1200-2000ms | dylantarre/animation-principles | `~/.agents/skills/deliberate-1200-2000ms/` | — |
+| 63 | deploy-checklist | anthropics/knowledge-work-plugins | `~/.agents/skills/deploy-checklist/` | — |
+| 64 | design-an-interface | mattpocock/skills | `~/.agents/skills/design-an-interface/` | — |
+| 65 | design-critique | anthropics/knowledge-work-plugins | `~/.agents/skills/design-critique/` | Design feedback framework |
+| 66 | design-handoff | anthropics/knowledge-work-plugins | `~/.agents/skills/design-handoff/` | Dev handoff spec template |
+| 67 | design-system | anthropics/knowledge-work-plugins | `~/.agents/skills/design-system/` | — |
+| 68 | design-system-alignment | owl-listener/designpowers | `~/.agents/skills/design-system-alignment/` | — |
+| 69 | design-taste-frontend | Leonxlnx/taste-skill | `~/.agents/skills/design-taste-frontend/` | — |
+| 70 | design-token-audit | owl-listener/designer-skills | `~/.agents/skills/design-token-audit/` | — |
+| 71 | design-tokens | julianoczkowski/designer-skills | `~/.agents/skills/design-tokens/` | — |
+| 72 | diagnosing-bugs | mattpocock/skills | `~/.agents/skills/diagnosing-bugs/` | — |
+| 73 | discord-harvest | t4sh/skills4sh | `~/.agents/skills/discord-harvest/` | — |
+| 74 | documentation | anthropics/knowledge-work-plugins | `~/.agents/skills/documentation/` | — |
+| 75 | domain-modeling | mattpocock/skills | `~/.agents/skills/domain-modeling/` | — |
+| 76 | dramatic-2000ms-plus | dylantarre/animation-principles | `~/.agents/skills/dramatic-2000ms-plus/` | — |
+| 77 | e-commerce-retail | dylantarre/animation-principles | `~/.agents/skills/e-commerce-retail/` | — |
+| 78 | edit-article | mattpocock/skills | `~/.agents/skills/edit-article/` | — |
+| 79 | education-learning | dylantarre/animation-principles | `~/.agents/skills/education-learning/` | — |
+| 80 | educator-teacher | dylantarre/animation-principles | `~/.agents/skills/educator-teacher/` | — |
+| 81 | elegance-sophistication | dylantarre/animation-principles | `~/.agents/skills/elegance-sophistication/` | — |
+| 82 | eleventy-nunjucks | t4sh/skills4sh | `~/.agents/skills/eleventy-nunjucks/` | — |
+| 83 | emil-design-eng | emilkowalski/skills | `~/.agents/skills/emil-design-eng/` | — |
+| 84 | emotional-disconnect | dylantarre/animation-principles | `~/.agents/skills/emotional-disconnect/` | — |
+| 85 | emotional-narrative | dylantarre/animation-principles | `~/.agents/skills/emotional-narrative/` | — |
+| 86 | enterprise-b2b | dylantarre/animation-principles | `~/.agents/skills/enterprise-b2b/` | — |
+| 87 | entrance-animations | dylantarre/animation-principles | `~/.agents/skills/entrance-animations/` | — |
+| 88 | exaggerated-clarity | dylantarre/animation-principles | `~/.agents/skills/exaggerated-clarity/` | — |
+| 89 | exaggeration-mastery | dylantarre/animation-principles | `~/.agents/skills/exaggeration-mastery/` | — |
+| 90 | excitement-energy | dylantarre/animation-principles | `~/.agents/skills/excitement-energy/` | — |
+| 91 | executing-plans | obra/superpowers | `~/.agents/skills/executing-plans/` | — |
+| 92 | exit-animations | dylantarre/animation-principles | `~/.agents/skills/exit-animations/` | — |
+| 93 | feature-dev | notedit/happy-skills | `~/.agents/skills/feature-dev/` | — |
+| 94 | feedback-indicators | dylantarre/animation-principles | `~/.agents/skills/feedback-indicators/` | — |
+| 95 | figma-prototyping | dylantarre/animation-principles | `~/.agents/skills/figma-prototyping/` | — |
+| 96 | figma-to-code | t4sh/skills4sh | `~/.agents/skills/figma-to-code/` | Custom Figma-to-code workflow |
+| 97 | file-organizer | ComposioHQ/awesome-claude-skills | `~/.agents/skills/file-organizer/` | — |
+| 98 | filmmaker | dylantarre/animation-principles | `~/.agents/skills/filmmaker/` | — |
+| 99 | find-skills | vercel-labs/skills | `~/.agents/skills/find-skills/` | Skill discovery meta-skill |
+| 100 | finishing-a-development-branch | obra/superpowers | `~/.agents/skills/finishing-a-development-branch/` | — |
+| 101 | fintech-banking | dylantarre/animation-principles | `~/.agents/skills/fintech-banking/` | — |
+| 102 | fitness-wellness | dylantarre/animation-principles | `~/.agents/skills/fitness-wellness/` | — |
+| 103 | follow-through-overlapping | dylantarre/animation-principles | `~/.agents/skills/follow-through-overlapping/` | — |
+| 104 | forms-inputs | dylantarre/animation-principles | `~/.agents/skills/forms-inputs/` | — |
+| 105 | framer-motion | dylantarre/animation-principles | `~/.agents/skills/framer-motion/` | — |
+| 106 | friendliness-approachability | dylantarre/animation-principles | `~/.agents/skills/friendliness-approachability/` | — |
+| 107 | frontend-design | anthropics/skills | `~/.agents/skills/frontend-design/` | — |
+| 108 | frontend-developer | dylantarre/animation-principles | `~/.agents/skills/frontend-developer/` | — |
+| 109 | full-output-enforcement | Leonxlnx/taste-skill | `~/.agents/skills/full-output-enforcement/` | — |
+| 110 | game-designer | dylantarre/animation-principles | `~/.agents/skills/game-designer/` | — |
+| 111 | game-development | dylantarre/animation-principles | `~/.agents/skills/game-development/` | — |
+| 112 | gaming-entertainment | dylantarre/animation-principles | `~/.agents/skills/gaming-entertainment/` | — |
+| 113 | gesture-responses | dylantarre/animation-principles | `~/.agents/skills/gesture-responses/` | — |
+| 114 | git-commit | github/awesome-copilot | `~/.agents/skills/git-commit/` | Only awesome-copilot skill retained |
+| 115 | git-guardrails-claude-code | mattpocock/skills | `~/.agents/skills/git-guardrails-claude-code/` | — |
+| 116 | gpt-taste | Leonxlnx/taste-skill | `~/.agents/skills/gpt-taste/` | — |
+| 117 | grill-me | mattpocock/skills | `~/.agents/skills/grill-me/` | — |
+| 118 | grill-with-docs | mattpocock/skills | `~/.agents/skills/grill-with-docs/` | — |
+| 119 | grilling | mattpocock/skills | `~/.agents/skills/grilling/` | — |
+| 120 | gsap-greensock | dylantarre/animation-principles | `~/.agents/skills/gsap-greensock/` | — |
+| 121 | handoff | mattpocock/skills | `~/.agents/skills/handoff/` | — |
+| 122 | healthcare-medical | dylantarre/animation-principles | `~/.agents/skills/healthcare-medical/` | — |
+| 123 | high-end-visual-design | Leonxlnx/taste-skill | `~/.agents/skills/high-end-visual-design/` | — |
+| 124 | hover-interactions | dylantarre/animation-principles | `~/.agents/skills/hover-interactions/` | — |
+| 125 | icons-badges | dylantarre/animation-principles | `~/.agents/skills/icons-badges/` | — |
+| 126 | impeccable | pbakaus/impeccable | `~/.agents/skills/impeccable/` | — |
+| 127 | implement | mattpocock/skills | `~/.agents/skills/implement/` | — |
+| 128 | implementation-debugging | dylantarre/animation-principles | `~/.agents/skills/implementation-debugging/` | — |
+| 129 | improve | shadcn/improve | `~/.agents/skills/improve/` | — |
+| 130 | improve-animations | emilkowalski/skills | `~/.agents/skills/improve-animations/` | — |
+| 131 | improve-codebase-architecture | mattpocock/skills | `~/.agents/skills/improve-codebase-architecture/` | — |
+| 132 | industrial-brutalist-ui | Leonxlnx/taste-skill | `~/.agents/skills/industrial-brutalist-ui/` | — |
+| 133 | init-rulebook | local | `~/.agents/skills/init-rulebook/` | — |
+| 134 | instant-0-100ms | dylantarre/animation-principles | `~/.agents/skills/instant-0-100ms/` | — |
+| 135 | joy-delight | dylantarre/animation-principles | `~/.agents/skills/joy-delight/` | — |
+| 136 | large-500-800ms | dylantarre/animation-principles | `~/.agents/skills/large-500-800ms/` | — |
+| 137 | lists-grids | dylantarre/animation-principles | `~/.agents/skills/lists-grids/` | — |
+| 138 | loaders-spinners | dylantarre/animation-principles | `~/.agents/skills/loaders-spinners/` | — |
+| 139 | loading-states | dylantarre/animation-principles | `~/.agents/skills/loading-states/` | — |
+| 140 | localhost-screenshots | t4sh/skills4sh | `~/.agents/skills/localhost-screenshots/` | — |
+| 141 | loop-me | mattpocock/skills | `~/.agents/skills/loop-me/` | — |
+| 142 | lottie-bodymovin | dylantarre/animation-principles | `~/.agents/skills/lottie-bodymovin/` | — |
+| 143 | media-publishing | dylantarre/animation-principles | `~/.agents/skills/media-publishing/` | — |
+| 144 | medium-300-500ms | dylantarre/animation-principles | `~/.agents/skills/medium-300-500ms/` | — |
+| 145 | micro-100-200ms | dylantarre/animation-principles | `~/.agents/skills/micro-100-200ms/` | — |
+| 146 | micro-interactions | dylantarre/animation-principles | `~/.agents/skills/micro-interactions/` | — |
+| 147 | migrate-to-shoehorn | mattpocock/skills | `~/.agents/skills/migrate-to-shoehorn/` | — |
+| 148 | minimalist-ui | Leonxlnx/taste-skill | `~/.agents/skills/minimalist-ui/` | — |
+| 149 | mobile-touch | dylantarre/animation-principles | `~/.agents/skills/mobile-touch/` | — |
+| 150 | modals-dialogs | dylantarre/animation-principles | `~/.agents/skills/modals-dialogs/` | — |
+| 151 | moltbook | sorcerai/moltbook-skill | `~/.agents/skills/moltbook/` | External agent social network (see warning below) |
+| 152 | monorepo-management | wshobson/agents | `~/.agents/skills/monorepo-management/` | — |
+| 153 | motion-designer | dylantarre/animation-principles | `~/.agents/skills/motion-designer/` | — |
+| 154 | motion-one | dylantarre/animation-principles | `~/.agents/skills/motion-one/` | — |
+| 155 | motion-sickness | dylantarre/animation-principles | `~/.agents/skills/motion-sickness/` | — |
+| 156 | naturalistic-motion | dylantarre/animation-principles | `~/.agents/skills/naturalistic-motion/` | — |
+| 157 | navigation-menus | dylantarre/animation-principles | `~/.agents/skills/navigation-menus/` | — |
+| 158 | notifications-toasts | dylantarre/animation-principles | `~/.agents/skills/notifications-toasts/` | — |
+| 159 | obsidian-vault | mattpocock/skills | `~/.agents/skills/obsidian-vault/` | — |
+| 160 | orchestrated-sequences | dylantarre/animation-principles | `~/.agents/skills/orchestrated-sequences/` | — |
+| 161 | page-transitions | dylantarre/animation-principles | `~/.agents/skills/page-transitions/` | — |
+| 162 | paseo | local | `~/.agents/skills/paseo/` | — |
+| 163 | paseo-advisor | local | `~/.agents/skills/paseo-advisor/` | — |
+| 164 | paseo-committee | local | `~/.agents/skills/paseo-committee/` | — |
+| 165 | paseo-handoff | local | `~/.agents/skills/paseo-handoff/` | — |
+| 166 | paseo-loop | local | `~/.agents/skills/paseo-loop/` | — |
+| 167 | pdf-harvester | mindmorass/reflex | `~/.agents/skills/pdf-harvester/` | — |
+| 168 | performance-optimization | dylantarre/animation-principles | `~/.agents/skills/performance-optimization/` | — |
+| 169 | physics-intuition | dylantarre/animation-principles | `~/.agents/skills/physics-intuition/` | — |
+| 170 | playfulness-fun | dylantarre/animation-principles | `~/.agents/skills/playfulness-fun/` | — |
+| 171 | playwright | openai/skills | `~/.agents/skills/playwright/` | — |
+| 172 | popmotion | dylantarre/animation-principles | `~/.agents/skills/popmotion/` | — |
+| 173 | power-confidence | dylantarre/animation-principles | `~/.agents/skills/power-confidence/` | — |
+| 174 | presentations | dylantarre/animation-principles | `~/.agents/skills/presentations/` | — |
+| 175 | problem-diagnosis | dylantarre/animation-principles | `~/.agents/skills/problem-diagnosis/` | — |
+| 176 | product-manager | dylantarre/animation-principles | `~/.agents/skills/product-manager/` | — |
+| 177 | professionalism-credibility | dylantarre/animation-principles | `~/.agents/skills/professionalism-credibility/` | — |
+| 178 | prototype | mattpocock/skills | `~/.agents/skills/prototype/` | — |
+| 179 | qa | mattpocock/skills | `~/.agents/skills/qa/` | — |
+| 180 | react-spring | dylantarre/animation-principles | `~/.agents/skills/react-spring/` | — |
+| 181 | redesign-existing-projects | Leonxlnx/taste-skill | `~/.agents/skills/redesign-existing-projects/` | — |
+| 182 | refactoring-ui | wondelai/skills | `~/.agents/skills/refactoring-ui/` | — |
+| 183 | refero-design | referodesign/refero_skill | `~/.agents/skills/refero-design/` | — |
+| 184 | request-refactor-plan | mattpocock/skills | `~/.agents/skills/request-refactor-plan/` | — |
+| 185 | research | mattpocock/skills | `~/.agents/skills/research/` | — |
+| 186 | research-synthesis | anthropics/knowledge-work-plugins | `~/.agents/skills/research-synthesis/` | UX research synthesis template |
+| 187 | resolving-merge-conflicts | mattpocock/skills | `~/.agents/skills/resolving-merge-conflicts/` | — |
+| 188 | responsive-adaptive | dylantarre/animation-principles | `~/.agents/skills/responsive-adaptive/` | — |
+| 189 | review-animations | emilkowalski/skills | `~/.agents/skills/review-animations/` | — |
+| 190 | rhythm-pacing | dylantarre/animation-principles | `~/.agents/skills/rhythm-pacing/` | — |
+| 191 | rive-animations | dylantarre/animation-principles | `~/.agents/skills/rive-animations/` | — |
+| 192 | saas-productivity | dylantarre/animation-principles | `~/.agents/skills/saas-productivity/` | — |
+| 193 | scaffold-exercises | mattpocock/skills | `~/.agents/skills/scaffold-exercises/` | — |
+| 194 | scroll-animations | dylantarre/animation-principles | `~/.agents/skills/scroll-animations/` | — |
+| 195 | secondary-action-mastery | dylantarre/animation-principles | `~/.agents/skills/secondary-action-mastery/` | — |
+| 196 | setup-matt-pocock-skills | mattpocock/skills | `~/.agents/skills/setup-matt-pocock-skills/` | — |
+| 197 | setup-pre-commit | mattpocock/skills | `~/.agents/skills/setup-pre-commit/` | — |
+| 198 | skill-architect | t4sh/skills4sh | `~/.agents/skills/skill-architect/` | — |
+| 199 | skill-creator | openai/skills | `~/.agents/skills/skill-creator/` | — |
+| 200 | skill-development | local | `~/.agents/skills/skill-development/` | — |
+| 201 | slow-800-1200ms | dylantarre/animation-principles | `~/.agents/skills/slow-800-1200ms/` | — |
+| 202 | slow-in-out-mastery | dylantarre/animation-principles | `~/.agents/skills/slow-in-out-mastery/` | — |
+| 203 | small-200-300ms | dylantarre/animation-principles | `~/.agents/skills/small-200-300ms/` | — |
+| 204 | social-media | dylantarre/animation-principles | `~/.agents/skills/social-media/` | — |
+| 205 | solid-drawing-mastery | dylantarre/animation-principles | `~/.agents/skills/solid-drawing-mastery/` | — |
+| 206 | spatial-thinking | dylantarre/animation-principles | `~/.agents/skills/spatial-thinking/` | — |
+| 207 | squash-stretch-mastery | dylantarre/animation-principles | `~/.agents/skills/squash-stretch-mastery/` | — |
+| 208 | staging-mastery | dylantarre/animation-principles | `~/.agents/skills/staging-mastery/` | — |
+| 209 | state-changes | dylantarre/animation-principles | `~/.agents/skills/state-changes/` | — |
+| 210 | stitch-design-taste | Leonxlnx/taste-skill | `~/.agents/skills/stitch-design-taste/` | — |
+| 211 | straight-ahead-pose-mastery | dylantarre/animation-principles | `~/.agents/skills/straight-ahead-pose-mastery/` | — |
+| 212 | sync-figma-token | firebenders/sync-figma-token-skill | `~/.agents/skills/sync-figma-token/` | — |
+| 213 | system-design | anthropics/knowledge-work-plugins | `~/.agents/skills/system-design/` | — |
+| 214 | systematic-debugging | obra/superpowers | `~/.agents/skills/systematic-debugging/` | — |
+| 215 | tailwind-design-system | wshobson/agents | `~/.agents/skills/tailwind-design-system/` | — |
+| 216 | tailwindcss-advanced-design-systems | josiahsiegel/claude-plugin-marketplace | `~/.agents/skills/tailwindcss-advanced-design-systems/` | — |
+| 217 | tauri-v2 | nodnarbnitram/claude-code-extensions | `~/.agents/skills/tauri-v2/` | — |
+| 218 | tdd | mattpocock/skills | `~/.agents/skills/tdd/` | — |
+| 219 | teach | mattpocock/skills | `~/.agents/skills/teach/` | — |
+| 220 | tech-debt | anthropics/knowledge-work-plugins | `~/.agents/skills/tech-debt/` | — |
+| 221 | technical-constraints | dylantarre/animation-principles | `~/.agents/skills/technical-constraints/` | — |
+| 222 | theme-factory | anthropics/skills | `~/.agents/skills/theme-factory/` | — |
+| 223 | timing-calibration | dylantarre/animation-principles | `~/.agents/skills/timing-calibration/` | — |
+| 224 | timing-mastery | dylantarre/animation-principles | `~/.agents/skills/timing-mastery/` | — |
+| 225 | timing-principle-mastery | dylantarre/animation-principles | `~/.agents/skills/timing-principle-mastery/` | — |
+| 226 | to-spec | mattpocock/skills | `~/.agents/skills/to-spec/` | — |
+| 227 | to-tickets | mattpocock/skills | `~/.agents/skills/to-tickets/` | — |
+| 228 | top-design | wondelai/skills | `~/.agents/skills/top-design/` | — |
+| 229 | transition-sequences | dylantarre/animation-principles | `~/.agents/skills/transition-sequences/` | — |
+| 230 | transitions-dev | Jakubantalik/transitions.dev | `~/.agents/skills/transitions-dev/` | — |
+| 231 | travel-hospitality | dylantarre/animation-principles | `~/.agents/skills/travel-hospitality/` | — |
+| 232 | triage | mattpocock/skills | `~/.agents/skills/triage/` | — |
+| 233 | trust-reliability | dylantarre/animation-principles | `~/.agents/skills/trust-reliability/` | — |
+| 234 | ubiquitous-language | mattpocock/skills | `~/.agents/skills/ubiquitous-language/` | — |
+| 235 | ui-animation | mblode/agent-skills | `~/.agents/skills/ui-animation/` | — |
+| 236 | ui-ux-pro-max | nextlevelbuilder/ui-ux-pro-max-skill | `~/.agents/skills/ui-ux-pro-max/` | — |
+| 237 | universal-elements | dylantarre/animation-principles | `~/.agents/skills/universal-elements/` | — |
+| 238 | universal-emotion | dylantarre/animation-principles | `~/.agents/skills/universal-emotion/` | — |
+| 239 | universal-fallback | dylantarre/animation-principles | `~/.agents/skills/universal-fallback/` | — |
+| 240 | universal-industry | dylantarre/animation-principles | `~/.agents/skills/universal-industry/` | — |
+| 241 | universal-mindset | dylantarre/animation-principles | `~/.agents/skills/universal-mindset/` | — |
+| 242 | universal-patterns | dylantarre/animation-principles | `~/.agents/skills/universal-patterns/` | — |
+| 243 | universal-practitioner | dylantarre/animation-principles | `~/.agents/skills/universal-practitioner/` | — |
+| 244 | universal-solutions | dylantarre/animation-principles | `~/.agents/skills/universal-solutions/` | — |
+| 245 | universal-timing | dylantarre/animation-principles | `~/.agents/skills/universal-timing/` | — |
+| 246 | universal-tool | dylantarre/animation-principles | `~/.agents/skills/universal-tool/` | — |
+| 247 | urgency-action | dylantarre/animation-principles | `~/.agents/skills/urgency-action/` | — |
+| 248 | user-feedback-clarity | dylantarre/animation-principles | `~/.agents/skills/user-feedback-clarity/` | — |
+| 249 | user-research | anthropics/knowledge-work-plugins | `~/.agents/skills/user-research/` | — |
+| 250 | using-git-worktrees | obra/superpowers | `~/.agents/skills/using-git-worktrees/` | — |
+| 251 | ux-copy | anthropics/knowledge-work-plugins | `~/.agents/skills/ux-copy/` | — |
+| 252 | ux-friction | dylantarre/animation-principles | `~/.agents/skills/ux-friction/` | — |
+| 253 | ux-researcher | dylantarre/animation-principles | `~/.agents/skills/ux-researcher/` | — |
+| 254 | video-motion-graphics | dylantarre/animation-principles | `~/.agents/skills/video-motion-graphics/` | — |
+| 255 | vocabulary | index-how/vocabulary | `~/.agents/skills/vocabulary/` | — |
+| 256 | wayfinder | mattpocock/skills | `~/.agents/skills/wayfinder/` | — |
+| 257 | web-design-guidelines | vercel-labs/agent-skills | `~/.agents/skills/web-design-guidelines/` | — |
+| 258 | web-motion-design | dylantarre/animation-principles | `~/.agents/skills/web-motion-design/` | — |
+| 259 | web-typography | wondelai/skills | `~/.agents/skills/web-typography/` | — |
+| 260 | wizard | mattpocock/skills | `~/.agents/skills/wizard/` | — |
+| 261 | writing-beats | mattpocock/skills | `~/.agents/skills/writing-beats/` | — |
+| 262 | writing-fragments | mattpocock/skills | `~/.agents/skills/writing-fragments/` | — |
+| 263 | writing-great-skills | mattpocock/skills | `~/.agents/skills/writing-great-skills/` | — |
+| 264 | writing-plans | obra/superpowers | `~/.agents/skills/writing-plans/` | — |
+| 265 | writing-shape | mattpocock/skills | `~/.agents/skills/writing-shape/` | — |
+| 266 | writing-skills | obra/superpowers | `~/.agents/skills/writing-skills/` | — |
+
+---
+
+### Lock File vs Disk
+
+- **In lock file but missing from disk:** none
+- **On disk but not in lock file:** animation-principles-absolute-beginner, animation-principles-advanced, animation-principles-deep-dive, animation-principles-expert, animation-principles-intermediate, animation-principles-master, animation-principles-novice, animation-principles-quick-start, animation-principles-refresher, animation-principles-teaching-others, animation-principles-troubleshooting, animation-principles-universal-reference, paseo, paseo-advisor, paseo-committee, paseo-handoff, paseo-loop, skill-development
 
 ---
 
 ### By Source
 
-- **mattpocock/skills** (35): ask-matt, codebase-design, decision-mapping, design-an-interface, diagnosing-bugs, domain-modeling, edit-article, git-guardrails-claude-code, grill-me, grill-with-docs, grilling, handoff, implement, improve-codebase-architecture, loop-me, migrate-to-shoehorn, obsidian-vault, prototype, qa, request-refactor-plan, resolving-merge-conflicts, review, scaffold-exercises, setup-matt-pocock-skills, setup-pre-commit, tdd, teach, to-issues, to-prd, triage, ubiquitous-language, writing-beats, writing-fragments, writing-great-skills, writing-shape
-- **anthropics/knowledge-work-plugins** (14): accessibility-review, architecture, code-review, debug, deploy-checklist, design-critique, design-handoff, design-system, documentation, research-synthesis, system-design, tech-debt, user-research, ux-copy
+- **dylantarre/animation-principles** (132): 3d-spatial, accessibility-advocate, accessibility-issues, accessible-motion, accordions-dropdowns, after-effects, animator-traditional, anime-js, anticipation-mastery, anticipation-payoff, appeal-mastery, arc-mastery, attention-direction, attention-grabbers, attention-management, brand-consistency, brand-marketing, brand-strategist, buttons-ctas, calm-relaxation, cards-containers, carousels-sliders, character-appeal, comfort-safety, continuous-infinite, continuous-loops, creative-director, css-native, data-visualization, deliberate-1200-2000ms, dramatic-2000ms-plus, e-commerce-retail, education-learning, educator-teacher, elegance-sophistication, emotional-disconnect, emotional-narrative, enterprise-b2b, entrance-animations, exaggerated-clarity, exaggeration-mastery, excitement-energy, exit-animations, feedback-indicators, figma-prototyping, filmmaker, fintech-banking, fitness-wellness, follow-through-overlapping, forms-inputs, framer-motion, friendliness-approachability, frontend-developer, game-designer, game-development, gaming-entertainment, gesture-responses, gsap-greensock, healthcare-medical, hover-interactions, icons-badges, implementation-debugging, instant-0-100ms, joy-delight, large-500-800ms, lists-grids, loaders-spinners, loading-states, lottie-bodymovin, media-publishing, medium-300-500ms, micro-100-200ms, micro-interactions, mobile-touch, modals-dialogs, motion-designer, motion-one, motion-sickness, naturalistic-motion, navigation-menus, notifications-toasts, orchestrated-sequences, page-transitions, performance-optimization, physics-intuition, playfulness-fun, popmotion, power-confidence, presentations, problem-diagnosis, product-manager, professionalism-credibility, react-spring, responsive-adaptive, rhythm-pacing, rive-animations, saas-productivity, scroll-animations, secondary-action-mastery, slow-800-1200ms, slow-in-out-mastery, small-200-300ms, social-media, solid-drawing-mastery, spatial-thinking, squash-stretch-mastery, staging-mastery, state-changes, straight-ahead-pose-mastery, technical-constraints, timing-calibration, timing-mastery, timing-principle-mastery, transition-sequences, travel-hospitality, trust-reliability, universal-elements, universal-emotion, universal-fallback, universal-industry, universal-mindset, universal-patterns, universal-practitioner, universal-solutions, universal-timing, universal-tool, urgency-action, user-feedback-clarity, ux-friction, ux-researcher, video-motion-graphics, web-motion-design
+- **mattpocock/skills** (38): ask-matt, claude-handoff, code-review, codebase-design, design-an-interface, diagnosing-bugs, domain-modeling, edit-article, git-guardrails-claude-code, grill-me, grill-with-docs, grilling, handoff, implement, improve-codebase-architecture, loop-me, migrate-to-shoehorn, obsidian-vault, prototype, qa, request-refactor-plan, research, resolving-merge-conflicts, scaffold-exercises, setup-matt-pocock-skills, setup-pre-commit, tdd, teach, to-spec, to-tickets, triage, ubiquitous-language, wayfinder, wizard, writing-beats, writing-fragments, writing-great-skills, writing-shape
+- **local** (20): animation-principles-absolute-beginner, animation-principles-advanced, animation-principles-deep-dive, animation-principles-expert, animation-principles-intermediate, animation-principles-master, animation-principles-novice, animation-principles-quick-start, animation-principles-refresher, animation-principles-teaching-others, animation-principles-troubleshooting, animation-principles-universal-reference, code-review-nextjs, init-rulebook, paseo, paseo-advisor, paseo-committee, paseo-handoff, paseo-loop, skill-development
+- **anthropics/knowledge-work-plugins** (13): accessibility-review, architecture, debug, deploy-checklist, design-critique, design-handoff, design-system, documentation, research-synthesis, system-design, tech-debt, user-research, ux-copy
 - **Leonxlnx/taste-skill** (9): brandkit, design-taste-frontend, full-output-enforcement, gpt-taste, high-end-visual-design, industrial-brutalist-ui, minimalist-ui, redesign-existing-projects, stitch-design-taste
 - **obra/superpowers** (7): brainstorming, executing-plans, finishing-a-development-branch, systematic-debugging, using-git-worktrees, writing-plans, writing-skills
 - **t4sh/skills4sh** (7): agent-memory, code-to-figma, discord-harvest, eleventy-nunjucks, figma-to-code, localhost-screenshots, skill-architect
+- **emilkowalski/skills** (5): animation-vocabulary, apple-design, emil-design-eng, improve-animations, review-animations
 - **anthropics/skills** (3): canvas-design, frontend-design, theme-factory
 - **wondelai/skills** (3): refactoring-ui, top-design, web-typography
 - **benjitaylor/agentation** (2): agentation, agentation-self-driving
-- **local** (2): code-review-nextjs, init-rulebook
 - **openai/skills** (2): playwright, skill-creator
 - **wshobson/agents** (2): monorepo-management, tailwind-design-system
 - **ComposioHQ/awesome-claude-skills** (1): file-organizer
 - **Jakubantalik/transitions.dev** (1): transitions-dev
-- **anthropics/claude-code** (1): skill-development
 - **cerico/macfair** (1): creative-design
 - **coreyhaines31/marketingskills** (1): copywriting
-- **emilkowalski/skill** (1): emil-design-eng
 - **firebenders/sync-figma-token-skill** (1): sync-figma-token
 - **github/awesome-copilot** (1): git-commit
 - **index-how/vocabulary** (1): vocabulary
@@ -162,12 +332,27 @@ lock_version: 4
 - **referodesign/refero_skill** (1): refero-design
 - **shadcn/improve** (1): improve
 - **sorcerai/moltbook-skill** (1): moltbook
-- **squirrelscan/skills** (1): audit-website
 - **vercel-labs/agent-browser** (1): agent-browser
 - **vercel-labs/agent-skills** (1): web-design-guidelines
 - **vercel-labs/skills** (1): find-skills
 
-# Help - List and Manage Skills
 
-* View global skills: `npx skills list -g`
-* Refresh all: `npx skills update`
+# Compatibility Note
+
+This README.md is a conventional location for documenting skills collection, and is a personal tracker. It won't interfere with skill discovery or validation for the following reasons:
+
+1. **The spec only cares about subdirectories** — each skill is defined as "a directory containing at minimum a `SKILL.md`." The system scans for subdirectories with `SKILL.md` files. A `README.md` at the root level (`~/.agents/skills/README.md`) is not inside any skill directory, so it won't be picked up or misinterpreted as a skill.
+
+2. **No prohibited files** — neither the [Claude docs](https://claude.com/docs/skills/how-to) nor the [agentskills.io spec](https://agentskills.io/specification) mention any restrictions on files placed alongside skill folders. The spec explicitly shows `└── ...  # Any additional files or directories` as valid.
+
+3. **The `name` validation only applies inside `SKILL.md` frontmatter** — it must match its parent directory name. A `README.md` at the root has no frontmatter to conflict with.
+
+4. **The validation tool (`skills-ref validate`) works per-skill** — it validates individual skill directories, not the parent folder.
+
+# Help - List and Manage the skills
+
+* View global skills: `~/.local/bin/npx-stable skills list -g`
+
+* Clear globals if needed: `~/.local/bin/npx-stable skills remove --all -y -g`
+
+* Refresh all: `~/.local/bin/npx-stable skills update`

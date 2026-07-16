@@ -57,7 +57,7 @@ brew "git-lfs"
 # Audit git repos for secrets
 brew "gitleaks"
 # Apache HTTP server
-brew "httpd"
+brew "httpd", restart_service: :changed
 # Tools and libraries to manipulate images in select formats
 brew "imagemagick"
 # Lightweight and flexible command-line JSON processor
@@ -74,8 +74,12 @@ brew "mole"
 brew "moreutils"
 # Manage multiple Node.js versions
 brew "nvm"
+# AI agent toolkit
+brew "pi-coding-agent"
 # PDF rendering library (based on the xpdf-3.0 code base)
 brew "poppler"
+# Convert bitmaps to vector graphics
+brew "potrace"
 # Generic syntax highlighter
 brew "pygments"
 # Easily download, build, install, upgrade, and uninstall Python packages
@@ -88,16 +92,16 @@ brew "ripgrep"
 brew "rtk"
 # Cross-shell prompt for astronauts
 brew "starship"
-# Simplified and community-driven man pages
-brew "tldr"
+# Official tldr client (Rust; replaces deprecated Homebrew tldr)
+brew "tlrc"
 # Upgrade all the things
 brew "topgrade"
 # Display directories as trees (with optional color/HTML output)
 brew "tree"
-# Source code spell checker
-brew "typos-cli"
 # Vulnerability scanner for container images, file systems, and Git repos
 brew "trivy"
+# Source code spell checker
+brew "typos-cli"
 # Extremely fast Python package installer and resolver, written in Rust
 brew "uv"
 # Executes a program periodically, showing output fullscreen
@@ -140,8 +144,6 @@ cask "clop"
 cask "cloudflare-warp"
 # OpenAI's coding agent that runs in your terminal
 cask "codex"
-# OpenAI's Codex desktop app for managing coding agents
-cask "codex-app"
 # Web browser with integrated AI assistant
 cask "comet"
 # Claude code parallelisation
@@ -217,10 +219,10 @@ cask "gcloud-cli"
 cask "google-chrome"
 # Native desktop AI assistant from Google
 cask "google-gemini"
+# Desktop automation application
+cask "hammerspoon"
 # Open-source video transcoder
 cask "handbrake-app"
-# Desktop automation with Lua
-cask "hammerspoon"
 # Free and open-source media player
 cask "iina"
 # Tool to optimise images to a smaller size
@@ -251,6 +253,8 @@ cask "microsoft-excel"
 cask "microsoft-powerpoint"
 # Meet, chat, call, and collaborate in just one place
 cask "microsoft-teams"
+# Visual workspace for building with Codex and Claude Code
+cask "nimbalyst"
 # App to write, plan, collaborate, and get organised
 cask "notion"
 # Calendar for professionals and teams
@@ -267,8 +271,11 @@ cask "open-video-downloader"
 cask "opencode-desktop"
 # Design tool for creating interfaces and prototypes
 cask "paper-design"
+# Self-hosted daemon for AI coding agents
+cask "paseo"
 # Utility to uninstall apps and remove leftover files from old/uninstalled apps
 cask "pearcleaner"
+# Codex-style desktop shell for pi
 # All-in-one bookmark manager
 cask "raindropio"
 # Control your tools with a few keystrokes
@@ -311,6 +318,7 @@ cask "whatsapp"
 cask "zen"
 # Video communication and virtual meeting platform
 cask "zoom"
+mas "Arattai", id: 1522469944
 mas "Battery Indicator", id: 1206020918
 mas "Canary Mail", id: 1236045954
 mas "CDRViewer", id: 600067300
@@ -322,15 +330,14 @@ mas "Gifski", id: 1351639930
 mas "Hidden Bar", id: 1452453066
 mas "HP", id: 1474276998
 mas "HP Easy Scan", id: 967004861
-mas "iMovie", id: 408981434
-mas "Keynote", id: 409183694
 mas "Keynote", id: 361285480
+mas "Keynote", id: 409183694
 mas "Kindle", id: 302584613
 mas "Lungo", id: 1263070803
 mas "Numbers", id: 409203825
 mas "Numbers", id: 361304891
-mas "Pages", id: 361309726
 mas "Pages", id: 409201541
+mas "Pages", id: 361309726
 mas "Perplexity", id: 6714467650
 mas "Prime Video", id: 545519333
 mas "uBlock Origin Lite", id: 6745342698
@@ -448,6 +455,3 @@ vscode "yoavbls.pretty-ts-errors"
 vscode "yzhang.markdown-all-in-one"
 vscode "zignd.html-css-class-completion"
 npm "corepack"
-npm "ghost-cli"
-npm "gscan"
-npm "guardskills"

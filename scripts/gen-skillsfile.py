@@ -4,11 +4,11 @@ gen-skillsfile.py — regenerate ./Skillsfile from agents/.skill-lock.json.
 
 Brewfile pattern:  this script is the `brew bundle dump`; `make skills` is
 the `brew bundle`. Skillsfile is GENERATED — never hand-edit; change skills
-with `npx skills add/remove` then re-run this.
+with `~/.local/bin/npx-stable skills add/remove` then re-run this.
 
-GitHub-sourced skills are grouped by repo into one `npx skills add` line
-each (with --skill <comma-list>). `local` skills are repo-native (vendored
-in agents/skills/, no upstream) and listed as comments only.
+GitHub-sourced skills are grouped by repo into one skills add line each (with
+--skill <comma-list>). `local` skills are repo-native (vendored in
+agents/skills/, no upstream) and listed as comments only.
 """
 
 import argparse
@@ -18,23 +18,24 @@ import re
 import sys
 from collections import defaultdict
 from datetime import datetime, timezone, timedelta
+from pathlib import Path
 
-REPO_ROOT = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-BASE_DIR = os.path.join(REPO_ROOT, "agents")
-LOCK_FILE = os.path.join(BASE_DIR, ".skill-lock.json")
-SKILLSFILE = os.path.join(REPO_ROOT, "Skillsfile")
+SCRIPT_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(SCRIPT_DIR))
+from skill_lock_names import installed_name
+
+REPO_ROOT = SCRIPT_DIR.parent
+BASE_DIR = REPO_ROOT / "agents"
+LOCK_FILE = BASE_DIR / ".skill-lock.json"
+SKILLS_DIR = BASE_DIR / "skills"
+SKILLSFILE = REPO_ROOT / "Skillsfile"
 IST = timezone(timedelta(hours=5, minutes=30))
 GENERATED_RE = re.compile(r"^# GENERATED (?P<stamp>.+) from agents/\.skill-lock\.json by$", re.M)
 
 
-def norm(key):
-    """Lock key → installed skill name (matches compareskills.py)."""
-    return key if key == key.lower().replace(" ", "-") else key.lower().replace(" ", "-")
-
-
 def existing_timestamp():
     try:
-        text = open(SKILLSFILE).read()
+        text = SKILLSFILE.read_text()
     except FileNotFoundError:
         return None
     match = GENERATED_RE.search(text)
@@ -42,13 +43,13 @@ def existing_timestamp():
 
 
 def build_skillsfile(timestamp):
-    with open(LOCK_FILE) as f:
+    with LOCK_FILE.open() as f:
         data = json.load(f)
 
     by_source = defaultdict(list)   # source repo -> [skill names]
     local = []
     for key, meta in data.get("skills", {}).items():
-        name = norm(key)
+        name = installed_name(key, SKILLS_DIR)
         if meta.get("sourceType") == "github":
             by_source[meta["source"]].append(name)
         else:
@@ -62,23 +63,27 @@ def build_skillsfile(timestamp):
         "#",
         f"# GENERATED {timestamp} from agents/.skill-lock.json by",
         "# scripts/gen-skillsfile.py — DO NOT EDIT BY HAND. To change skills:",
-        "#   npx skills add/remove ...   then   make skills-manifest",
+        "#   ~/.local/bin/npx-stable skills add/remove ...   then   make skills-manifest",
+        "#   (regenerates Skillsfile + agents/skills/README.md)",
         "#",
-        f"# Install everything:  make skills   (or: bash Skillsfile)",
+        "# Install everything:  make skills   (or: bash Skillsfile)",
         f"# {total} skills — {len(by_source)} github sources + {len(local)} local.",
         "#",
-        "# Prereqs (fresh Mac): node + git + network access must be set up first.",
+        "# Prereqs (fresh Mac): node + git + GitHub auth (SSH/gh) must be set",
+        "# up first — GitHub-authenticated skill sources need repo access.",
+        "# Agents and MCP tooling use the stable npx shim from ~/.local/bin.",
         "",
         "set -euo pipefail",
         "",
-        'command -v npx >/dev/null || { echo "npx not found — set up node first" >&2; exit 1; }',
+        'NPX="${NPX:-$HOME/.local/bin/npx-stable}"',
+        '[[ -x "$NPX" ]] || { echo "npx stable shim not found or not executable: $NPX" >&2; exit 1; }',
         "",
     ]
 
     for src in sorted(by_source):
         skills = ",".join(sorted(by_source[src]))
         lines.append(f'echo "→ {src}"')
-        lines.append(f'npx skills add {src} --skill {skills} -g -y')
+        lines.append(f'"$NPX" skills add {src} --skill {skills} -g -y')
         lines.append("")
 
     if local:
@@ -107,7 +112,7 @@ def main():
 
     if args.check:
         try:
-            current = open(SKILLSFILE).read()
+            current = SKILLSFILE.read_text()
         except FileNotFoundError:
             print(f"Skillsfile missing: {SKILLSFILE}", file=sys.stderr)
             return 1
@@ -117,8 +122,7 @@ def main():
         print(f"Skillsfile is in sync ({total} skills — {github_sources} github sources, {local_count} local)")
         return 0
 
-    with open(SKILLSFILE, "w") as f:
-        f.write(content)
+    SKILLSFILE.write_text(content)
     os.chmod(SKILLSFILE, 0o755)
 
     print(f"Wrote {SKILLSFILE}")

@@ -33,25 +33,24 @@ fi
 # Lints staged *.sh files plus any extensionless script with a bash/sh shebang
 # (e.g. bin/dot). To make blocking, remove the `|| true` at the end.
 if command -v shellcheck >/dev/null 2>&1; then
-  staged_sh=""
+  staged_sh=()
   while IFS= read -r -d '' f; do
     [ -z "$f" ] && continue
     case "$f" in
       *.sh)
-        staged_sh="$staged_sh $f"
+        staged_sh+=("$f")
         ;;
       *)
         # extensionless: sniff the shebang
         if [ -f "$f" ] && head -n1 "$f" 2>/dev/null | grep -Eq '^#!.*(bash|sh)\b'; then
-          staged_sh="$staged_sh $f"
+          staged_sh+=("$f")
         fi
         ;;
     esac
   done < <(git diff --cached --name-only --diff-filter=ACMR -z)
 
-  if [ -n "$staged_sh" ]; then
-    # shellcheck disable=SC2086
-    shellcheck -S warning $staged_sh || {
+  if ((${#staged_sh[@]} > 0)); then
+    shellcheck -S warning "${staged_sh[@]}" || {
       printf '\033[33m  ⚠ shellcheck reported issues (non-blocking)\033[0m\n' >&2
     }
   fi
@@ -64,7 +63,7 @@ fi
 # Blocks the commit if a skill with a restrictive license is not gitignored —
 # it would otherwise leak into the public split. Self-skips pre-bootstrap.
 if [ -x scripts/audit-skill-licenses.sh ]; then
-  DOTFILES="$(git rev-parse --show-toplevel)" scripts/audit-skill-licenses.sh --check || {
+  scripts/audit-skill-licenses.sh --check || {
     printf '\n\033[31m✗ commit blocked: restrictive-licensed skill not gitignored\033[0m\n' >&2
     printf '  fix:    dot audit-skill-licenses   (gates it in .gitignore)\n' >&2
     printf '  bypass: git commit --no-verify     (only if you are certain)\n' >&2

@@ -1,7 +1,8 @@
 # Mac-specific aliases — dock, brew, cleanup
 # Heavy pipelines live in ~/.dotfiles/scripts/ so they are shellcheck-able and grep-friendly.
 
-alias cleanMac='sudo bash ~/.dotfiles/scripts/clean-mac.sh'
+alias cleanMac='bash ~/.dotfiles/scripts/clean-mac.sh --dry-run'
+alias cleanMacNow='sudo bash ~/.dotfiles/scripts/clean-mac.sh --yes'
 
 # Homebrew update + cleanup
 alias reBrew='echo "Update, Cleanup and Doctoring the HomeBrew"; brew outdated; brew update; brew upgrade; brew upgrade --cask $(brew list --cask); brew cleanup; brew autoremove; brew doctor'

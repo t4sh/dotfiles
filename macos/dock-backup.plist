@@ -6,6 +6,8 @@
 	<false/>
 	<key>autohide-delay</key>
 	<real>0.0</real>
+	<key>autohide-immutable</key>
+	<true/>
 	<key>autohide-time-modifier</key>
 	<real>0.0</real>
 	<key>contents-immutable</key>
@@ -20,7 +22,7 @@
 	<real>16</real>
 	<key>last-analytics-stamp</key>
 	<array>
-		<real>804348156.96794403</real>
+		<real>805746463.00190198</real>
 	</array>
 	<key>lastShowIndicatorTime</key>
 	<real>751594425.36655796</real>
@@ -35,7 +37,7 @@
 	<key>minimize-to-application</key>
 	<true/>
 	<key>mod-count</key>
-	<integer>5298</integer>
+	<integer>5480</integer>
 	<key>mru-spaces</key>
 	<false/>
 	<key>orientation</key>
@@ -61,13 +63,13 @@
 				<key>file-label</key>
 				<string>Mail</string>
 				<key>file-mod-date</key>
-				<integer>3862198622</integer>
+				<integer>3865199343</integer>
 				<key>file-type</key>
 				<integer>41</integer>
 				<key>is-beta</key>
 				<false/>
 				<key>parent-mod-date</key>
-				<integer>3862198622</integer>
+				<integer>3865199343</integer>
 			</dict>
 			<key>tile-type</key>
 			<string>file-tile</string>
@@ -100,13 +102,13 @@
 				<key>file-label</key>
 				<string>WhatsApp</string>
 				<key>file-mod-date</key>
-				<integer>143494427739549</integer>
+				<integer>267971171450252</integer>
 				<key>file-type</key>
 				<integer>41</integer>
 				<key>is-beta</key>
 				<false/>
 				<key>parent-mod-date</key>
-				<integer>16483654908873</integer>
+				<integer>233538418649103</integer>
 			</dict>
 			<key>tile-type</key>
 			<string>file-tile</string>
@@ -130,13 +132,13 @@
 				<key>file-label</key>
 				<string>Discord</string>
 				<key>file-mod-date</key>
-				<integer>1945190383912</integer>
+				<integer>156375036165961</integer>
 				<key>file-type</key>
 				<integer>41</integer>
 				<key>is-beta</key>
 				<false/>
 				<key>parent-mod-date</key>
-				<integer>19533081844175</integer>
+				<integer>233538418649103</integer>
 			</dict>
 			<key>tile-type</key>
 			<string>file-tile</string>
@@ -175,7 +177,7 @@
 				<key>is-beta</key>
 				<false/>
 				<key>parent-mod-date</key>
-				<integer>16483654908873</integer>
+				<integer>79950388161173</integer>
 			</dict>
 			<key>tile-type</key>
 			<string>file-tile</string>
@@ -205,7 +207,7 @@
 				<key>is-beta</key>
 				<false/>
 				<key>parent-mod-date</key>
-				<integer>156873250641082</integer>
+				<integer>101120281995759</integer>
 			</dict>
 			<key>tile-type</key>
 			<string>file-tile</string>
@@ -221,7 +223,7 @@
 		</dict>
 		<dict>
 			<key>GUID</key>
-			<integer>2971418918</integer>
+			<integer>4120286654</integer>
 			<key>tile-data</key>
 			<dict>
 				<key>bundle-identifier</key>
@@ -231,20 +233,80 @@
 				<key>file-data</key>
 				<dict>
 					<key>_CFURLString</key>
-					<string>file:///Applications/Codex.app/</string>
+					<string>file:///Applications/ChatGPT.app/</string>
 					<key>_CFURLStringType</key>
 					<integer>15</integer>
 				</dict>
 				<key>file-label</key>
-				<string>Codex</string>
+				<string>ChatGPT</string>
 				<key>file-mod-date</key>
-				<integer>25915403112494</integer>
+				<integer>276080069705062</integer>
 				<key>file-type</key>
 				<integer>41</integer>
 				<key>is-beta</key>
 				<false/>
 				<key>parent-mod-date</key>
-				<integer>16483654908873</integer>
+				<integer>79950388161173</integer>
+			</dict>
+			<key>tile-type</key>
+			<string>file-tile</string>
+		</dict>
+		<dict>
+			<key>GUID</key>
+			<integer>3203933742</integer>
+			<key>tile-data</key>
+			<dict>
+				<key>bundle-identifier</key>
+				<string>sh.paseo.desktop</string>
+				<key>dock-extra</key>
+				<false/>
+				<key>file-data</key>
+				<dict>
+					<key>_CFURLString</key>
+					<string>file:///Applications/Paseo.app/</string>
+					<key>_CFURLStringType</key>
+					<integer>15</integer>
+				</dict>
+				<key>file-label</key>
+				<string>Paseo</string>
+				<key>file-mod-date</key>
+				<integer>76110687027462</integer>
+				<key>file-type</key>
+				<integer>41</integer>
+				<key>is-beta</key>
+				<false/>
+				<key>parent-mod-date</key>
+				<integer>429068275102</integer>
+			</dict>
+			<key>tile-type</key>
+			<string>file-tile</string>
+		</dict>
+		<dict>
+			<key>GUID</key>
+			<integer>3203933743</integer>
+			<key>tile-data</key>
+			<dict>
+				<key>bundle-identifier</key>
+				<string>com.lukilabs.craft-agent</string>
+				<key>dock-extra</key>
+				<false/>
+				<key>file-data</key>
+				<dict>
+					<key>_CFURLString</key>
+					<string>file:///Applications/Craft%20Agents.app/</string>
+					<key>_CFURLStringType</key>
+					<integer>15</integer>
+				</dict>
+				<key>file-label</key>
+				<string>Craft Agents</string>
+				<key>file-mod-date</key>
+				<integer>155846754910759</integer>
+				<key>file-type</key>
+				<integer>41</integer>
+				<key>is-beta</key>
+				<false/>
+				<key>parent-mod-date</key>
+				<integer>105625702702386</integer>
 			</dict>
 			<key>tile-type</key>
 			<string>file-tile</string>
@@ -274,7 +336,7 @@
 				<key>is-beta</key>
 				<false/>
 				<key>parent-mod-date</key>
-				<integer>16483654908873</integer>
+				<integer>79950388161173</integer>
 			</dict>
 			<key>tile-type</key>
 			<string>file-tile</string>
@@ -307,13 +369,13 @@
 				<key>file-label</key>
 				<string>Microsoft Edge</string>
 				<key>file-mod-date</key>
-				<integer>163277047141848</integer>
+				<integer>98152459148836</integer>
 				<key>file-type</key>
 				<integer>41</integer>
 				<key>is-beta</key>
 				<false/>
 				<key>parent-mod-date</key>
-				<integer>16483654908873</integer>
+				<integer>201450718015259</integer>
 			</dict>
 			<key>tile-type</key>
 			<string>file-tile</string>
@@ -343,7 +405,7 @@
 				<key>is-beta</key>
 				<false/>
 				<key>parent-mod-date</key>
-				<integer>16483654908873</integer>
+				<integer>169307182821406</integer>
 			</dict>
 			<key>tile-type</key>
 			<string>file-tile</string>
@@ -367,13 +429,13 @@
 				<key>file-label</key>
 				<string>DuckDuckGo</string>
 				<key>file-mod-date</key>
-				<integer>181599377270840</integer>
+				<integer>111222044371415</integer>
 				<key>file-type</key>
 				<integer>41</integer>
 				<key>is-beta</key>
 				<false/>
 				<key>parent-mod-date</key>
-				<integer>55795490517070</integer>
+				<integer>17157966156169</integer>
 			</dict>
 			<key>tile-type</key>
 			<string>file-tile</string>
@@ -436,13 +498,13 @@
 				<key>file-label</key>
 				<string>Terminal</string>
 				<key>file-mod-date</key>
-				<integer>3862198622</integer>
+				<integer>3865199343</integer>
 				<key>file-type</key>
 				<integer>41</integer>
 				<key>is-beta</key>
 				<false/>
 				<key>parent-mod-date</key>
-				<integer>3862198622</integer>
+				<integer>3865199343</integer>
 			</dict>
 			<key>tile-type</key>
 			<string>file-tile</string>
@@ -532,7 +594,7 @@
 				<key>is-beta</key>
 				<false/>
 				<key>parent-mod-date</key>
-				<integer>147862408778425</integer>
+				<integer>74929570219418</integer>
 			</dict>
 			<key>tile-type</key>
 			<string>file-tile</string>

@@ -12,8 +12,9 @@ Symlink this file (or its expanded form) into each tool's expected location:
 ## First Steps
 
 1. Read this file completely.
-2. Read all `.md` files in `~/.agents/rules/` (global rules that apply to every project).
-   Read all files, but only apply activated sections when their trigger condition matches.
+2. Read the always-on rule files, then read only the activated rule files whose trigger condition matches the current task.
+   The always-on rule files are the files listed under the `## Always on` heading below.
+   Do not load inactive rule files just because they exist in `~/.agents/rules/`.
 3. Read `.agent-memory/index.yaml` to discover available project context. If `.agent-memory/` is absent, proceed without it — don't create it.
 4. Load relevant memory files based on the current task.
 
@@ -25,6 +26,7 @@ Symlink this file (or its expanded form) into each tool's expected location:
 @./rules/01-authorization.md
 @./rules/02-attribution.md
 @./rules/03-worktree-hygiene.md
+@./rules/04-codex-host-tooling.md
 @./rules/10-design-posture.md
 @./rules/99-anti-patterns.md
 
@@ -45,6 +47,10 @@ Trigger signals: a package manifest (`package.json`, `pyproject.toml`, `Cargo.to
 
 @./rules/25-tech-stack-discovery.md
 
+## Activate when using Paseo agents, worktrees, loops, schedules, or daemon tooling
+
+@./rules/05-paseo-orchestration.md
+
 ## Activate for research validation projects
 
 @./rules/30-research-mode.md
@@ -63,5 +69,3 @@ Trigger signals: a package manifest (`package.json`, `pyproject.toml`, `Cargo.to
 - If you're unsure, say so in one line. Don't hedge for three paragraphs.
 - For design work, prefer a token map or component spec over prose descriptions of a UI.
 - **Present findings as structured output, not prose.** Use tables (severity, effort, file:line), bullet lists, or fenced code blocks — not paragraphs. Output should be copy-pasteable as markdown so the user can annotate, comment, and expand directly.
-
-****

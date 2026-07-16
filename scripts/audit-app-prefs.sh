@@ -30,13 +30,16 @@ echo "Auditing app/macOS preference snapshots …"
 APPS="$DOTFILES/apps"
 if [[ -d "$APPS" ]]; then
   # Never track these (gitignore); flag if they appear anyway.
-  for forbidden in \
-    "sublime-text/Theme - Monokai Pro.sublime-settings" \
-    shottr; do
-    if [[ -e "$APPS/$forbidden" ]]; then
-      report "forbidden path present (vault-only): apps/$forbidden"
-    fi
-  done
+  if [[ -e "$APPS/sublime-text/Theme - Monokai Pro.sublime-settings" ]]; then
+    report "forbidden path present (vault-only): apps/sublime-text/Theme - Monokai Pro.sublime-settings"
+  fi
+  if [[ -d "$APPS/shottr" ]]; then
+    while IFS= read -r -d '' f; do
+      rel="${f#"$DOTFILES/"}"
+      [[ "$rel" == "apps/shottr/README.md" ]] && continue
+      report "forbidden path present (vault-only): $rel"
+    done < <(/usr/bin/find "$APPS/shottr" -mindepth 1 -type f -print0 2>/dev/null)
+  fi
 fi
 
 DOCK_PLIST="$DOTFILES/macos/dock-backup.plist"
@@ -74,7 +77,7 @@ for root in "${ROOTS[@]}"; do
       */shottr/*) continue ;;
     esac
     scan_file "$f"
-  done < <(find "$root" -type f \( \
+  done < <(/usr/bin/find "$root" -type f \( \
     -name '*.json' -o -name '*.sublime-settings' -o -name '*.plist' -o -name '*.xml' -o -name '*.sh' -o -name 'document.wflow' \
   \) -print0 2>/dev/null)
 done

@@ -40,7 +40,7 @@ if [ -d "$DOTFILES/apps/sublime-text" ] && [ -n "$(ls -A "$DOTFILES/apps/sublime
         [[ -e "$f" ]] || continue
         base="${f##*/}"
         [[ "$base" == "Theme - Monokai Pro.sublime-settings" ]] && continue
-        cp "$f" "$SUBLIME_USER/" 2>/dev/null || true
+        cp "$f" "$SUBLIME_USER/"
     done
     echo "  ✓ Sublime Text"
 fi
@@ -58,11 +58,16 @@ if [ -f "$DOTFILES/apps/vscode/settings.json" ]; then
     echo "  ✓ VS Code"
 fi
 
-# Shottr — prefs contain a paid kc-license key, so they live in the vault
-# (see ~/.dotfiles-local/backup.manifest), not the repo. Restore manually:
-#   mount vault → defaults import cc.ffitch.shottr <snapshot>/…/cc.ffitch.shottr.plist
+# Cursor settings.json (defaults domain is in apps.tsv; User/settings.json is copied)
+CURSOR_USER="$HOME/Library/Application Support/Cursor/User"
+if [ -f "$DOTFILES/apps/cursor/settings.json" ]; then
+    mkdir -p "$CURSOR_USER"
+    cp "$DOTFILES/apps/cursor/settings.json" "$CURSOR_USER/settings.json"
+    echo "  ✓ Cursor"
+fi
 
-# Canary Mail — sandbox realms + plist; vault via make backup-canary / restore-canary
+# Shottr — license prefs live in the vault (make restore-shottr after secrets restore).
+# Canary Mail — sandbox realms + plist; vault via make restore-canary
 # (see apps/canary-mail/README.md). Not part of restore-apps.
 
 echo "Done. Terminal.app is handled separately: run 'make terminal' from a"

@@ -39,7 +39,7 @@
 	<key>NSWindow Frame SwiftUI.ModifiedContent&lt;SwiftUI.ModifiedContent&lt;SwiftUI.ModifiedContent&lt;SwiftUI.(unknown context at $1cf401f58).SceneBridgeReader&lt;SwiftUI.SubscriptionView&lt;Combine.PassthroughSubject&lt;Any, Swift.Never&gt;, SwiftUI.ModifiedContent&lt;SwiftUI.ModifiedContent&lt;SwiftUI.ModifiedContent&lt;SwiftUI.ModifiedContent&lt;SwiftUI.ModifiedContent&lt;SwiftUI.ModifiedContent&lt;SwiftUI.ModifiedContent&lt;SwiftUI.ModifiedContent&lt;SwiftUI.ModifiedContent&lt;SwiftUI.ModifiedContent&lt;SwiftUI.Group&lt;SwiftUI._ConditionalContent&lt;Pearcleaner.MiniMode, Pearcleaner.RegularMode&gt;&gt;, SwiftUI.ToolbarModifier&lt;(), SwiftUI.TupleToolbarContent&lt;SwiftUI.ToolbarItemGroup&lt;SwiftUI.Color&gt;&gt;&gt;&gt;, SwiftUI._EnvironmentKeyWritingModifier&lt;Swift.Optional&lt;Pearcleaner.AppState&gt;&gt;&gt;, SwiftUI._EnvironmentKeyWritingModifier&lt;Swift.Optional&lt;Pearcleaner.Locations&gt;&gt;&gt;, SwiftUI._EnvironmentKeyWritingModifier&lt;Swift.Optional&lt;Pearcleaner.FolderSettingsManager&gt;&gt;&gt;, SwiftUI._EnvironmentKeyWritingModifier&lt;Swift.Optional&lt;AlinFoundation.ThemeManager&gt;&gt;&gt;, SwiftUI._EnvironmentKeyWritingModifier&lt;Swift.Optional&lt;AlinFoundation.Updater&gt;&gt;&gt;, SwiftUI._EnvironmentKeyWritingModifier&lt;Swift.Optional&lt;AlinFoundation.PermissionManager&gt;&gt;&gt;, SwiftUI._PreferenceWritingModifier&lt;SwiftUI.PreferredColorSchemeKey&gt;&gt;, SwiftUI._PreferenceTransformModifier&lt;SwiftUI.SceneBridge.ActivationConditionsPreferenceKey&gt;&gt;, SwiftUI.DropModifier&gt;&gt;&gt;, SwiftUI.AlertTransformModifier&lt;SwiftUI.Alert.Presentation.Key&gt;&gt;, SwiftUI.(unknown context at $1cf416744).SheetPresentationModifier&lt;SwiftUI.ModifiedContent&lt;AlinFoundation.UpdateContentView, SwiftUI._EnvironmentKeyWritingModifier&lt;Swift.Optional&lt;AlinFoundation.ThemeManager&gt;&gt;&gt;, SwiftUI.(unknown context at $1cf4167d4).NullSheetAnchor&lt;SwiftUI.SheetPreference.Key&gt;&gt;&gt;, SwiftUI._AppearanceActionModifier&gt;-1-AppWindow-1</key>
 	<string>999 99 399 855 0 0 2560 1415 </string>
 	<key>NSWindow Frame SwiftUI.ModifiedContent&lt;SwiftUI.ModifiedContent&lt;SwiftUI.ModifiedContent&lt;SwiftUI.ModifiedContent&lt;SwiftUI.ModifiedContent&lt;Pearcleaner.MainWindow, SwiftUI._EnvironmentKeyWritingModifier&lt;Swift.Optional&lt;Pearcleaner.AppState&gt;&gt;&gt;, SwiftUI._EnvironmentKeyWritingModifier&lt;Swift.Optional&lt;Pearcleaner.Locations&gt;&gt;&gt;, SwiftUI._EnvironmentKeyWritingModifier&lt;Swift.Optional&lt;Pearcleaner.FolderSettingsManager&gt;&gt;&gt;, SwiftUI._EnvironmentKeyWritingModifier&lt;Swift.Optional&lt;AlinFoundation.Updater&gt;&gt;&gt;, SwiftUI._EnvironmentKeyWritingModifier&lt;Swift.Optional&lt;Pearcleaner.PermissionManagerLocal&gt;&gt;&gt;-1-AppWindow-1</key>
-	<string>741 261 1369 902 0 0 2560 1410 </string>
+	<string>646 241 1369 902 0 0 2560 1410 </string>
 	<key>NSWindow Frame SwiftUI.ModifiedContent&lt;SwiftUI.ModifiedContent&lt;SwiftUI.ModifiedContent&lt;SwiftUI.ModifiedContent&lt;SwiftUI.ModifiedContent&lt;SwiftUI.ModifiedContent&lt;Pearcleaner.MainWindow, SwiftUI._EnvironmentKeyWritingModifier&lt;Swift.Optional&lt;Pearcleaner.AppState&gt;&gt;&gt;, SwiftUI._EnvironmentKeyWritingModifier&lt;Swift.Optional&lt;Pearcleaner.Locations&gt;&gt;&gt;, SwiftUI._EnvironmentKeyWritingModifier&lt;Swift.Optional&lt;Pearcleaner.FolderSettingsManager&gt;&gt;&gt;, SwiftUI._EnvironmentKeyWritingModifier&lt;Swift.Optional&lt;AlinFoundation.Updater&gt;&gt;&gt;, SwiftUI._EnvironmentKeyWritingModifier&lt;Swift.Optional&lt;Pearcleaner.PermissionManagerLocal&gt;&gt;&gt;, SwiftUI._AppearanceActionModifier&gt;-1-AppWindow-1</key>
 	<string>1300 72 1239 757 0 0 2560 1415 </string>
 	<key>NSWindow Frame com_apple_SwiftUI_Settings_window</key>
@@ -87,13 +87,15 @@
 	<key>settings.general.mini</key>
 	<true/>
 	<key>settings.general.selectedSort</key>
-	<string>name</string>
+	<string>size</string>
 	<key>settings.general.selectedSortAppsList</key>
 	<integer>1</integer>
 	<key>settings.general.selectedTab</key>
 	<integer>4</integer>
 	<key>settings.general.sidebarWidth</key>
 	<real>261.578125</real>
+	<key>settings.general.sidebarWidthGeneric</key>
+	<real>305.046875</real>
 	<key>settings.general.sizeType</key>
 	<string>Real</string>
 	<key>settings.interface.fileListViewMode</key>

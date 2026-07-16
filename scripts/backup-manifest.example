@@ -15,20 +15,20 @@
 #   ├── ssh/                            # → ~/.ssh/* via symlinks.tsv
 #   ├── config/
 #   │   ├── gh/hosts.yml                # → ~/.config/gh/hosts.yml
-#   │   └── moltbook/credentials.json   # → ~/.config/moltbook/credentials.json
+#   │   ├── moltbook/credentials.json   # → ~/.config/moltbook/credentials.json
+#   │   └── env/                        # → ~/.config/env/ (per-tool env files)
 #   └── apps/
 #       ├── raycast/                    # manual .rayconfig / export bundles
 #       └── transmit/                   # manual .transmitservers exports
 #
-# Shottr license prefs: add a manifest line for the sandbox plist path if you
-# vault-back it directly (see restore-apps.sh comment), or restore from a
-# dated snapshot after mounting the vault.
+# Shottr license prefs: make backup-shottr (or restore from a dated vault snapshot).
 #
 # Monokai Pro (Sublime): license file is NOT in the repo — keep under:
 #   ~/.secrets/apps/sublime-text/Theme - Monokai Pro.sublime-settings
 # Covered by the ~/.secrets line above when using the recommended manifest.
 #
 # Canary Mail: make backup-canary → ~/.secrets/apps/canary-mail/ (realms + plist).
+# Shottr: make backup-shottr → ~/.secrets/apps/shottr/cc.ffitch.shottr.plist
 # Also covered by ~/.secrets when using the recommended manifest.
 #
 # Migrating from an old manifest that listed ~/.config/* or ~/.ssh/* paths?

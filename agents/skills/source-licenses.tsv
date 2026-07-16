@@ -1,0 +1,41 @@
+# Source-level license metadata for remote skills whose installed skill folders
+# omit the upstream repository LICENSE file.
+#
+# Format: <source>\t<license>\t<evidence>
+# The audit uses this only for sourceType=github skills without a local
+# LICENSE*/COPYING* file. Prefer local license files when available.
+#
+# Existing sources are kept explicit so future no-license remote additions do
+# not silently become public-split-safe without review.
+ComposioHQ/awesome-claude-skills	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+Jakubantalik/transitions.dev	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+Leonxlnx/taste-skill	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+anthropics/claude-code	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+anthropics/knowledge-work-plugins	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+benjitaylor/agentation	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+cerico/macfair	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+coreyhaines31/marketingskills	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+dylantarre/animation-principles	MIT	GitHub repo root LICENSE; fetched 2026-07-03
+emilkowalski/skills	MIT	GitHub repo root LICENSE; fetched 2026-07-03
+firebenders/sync-figma-token-skill	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+github/awesome-copilot	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+index-how/vocabulary	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+josiahsiegel/claude-plugin-marketplace	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+julianoczkowski/designer-skills	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+mattpocock/skills	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+mblode/agent-skills	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+mindmorass/reflex	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+nextlevelbuilder/ui-ux-pro-max-skill	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+nodnarbnitram/claude-code-extensions	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+notedit/happy-skills	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+obra/superpowers	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+owl-listener/designer-skills	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+owl-listener/designpowers	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+pbakaus/impeccable	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+shadcn/improve	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+squirrelscan/skills	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+vercel-labs/agent-browser	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+vercel-labs/agent-skills	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+vercel-labs/skills	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+wondelai/skills	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+wshobson/agents	reviewed	pre-existing tracked source before 2026-07-03 audit hardening

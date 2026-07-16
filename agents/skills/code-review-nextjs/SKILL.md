@@ -1,154 +1,135 @@
 ---
 name: code-review-nextjs
-description: Review Next.js 16 front-end code as a senior software architect, evaluating code quality, accessibility, performance, and adherence to Next.js conventions. Use when reviewing pull requests, code changes, components, or when the user asks for a code review.
+description: This skill should be used when the user asks to "review Next.js code", "review this Next.js pull request", "check my App Router changes", "audit a Next.js component", or evaluate Next.js code quality, accessibility, security, performance, routing, caching, or framework conventions.
+version: 0.2.0
 ---
 
-# Code Review — Next.js 16 Front-End
+# Next.js Code Review
 
-## Role
+Review Next.js 16 code as a senior software architect. Prioritize verified, actionable defects in the requested diff over generic advice or whole-codebase linting.
 
-You are a **senior software architect** with deep expertise in React, Next.js, accessibility standards, and front-end performance. Approach every review with a constructive, mentor-like tone — explain the *why* behind each finding so the team learns, not just fixes.
+## 1. Establish the review boundary
 
-## Review Process
+1. Read repository instructions before evaluating code.
+2. Resolve the review range from the user, pull request, staged changes, commit range, or current branch comparison.
+3. Focus on changed files and the smallest set of callers, consumers, layouts, styles, and contracts needed to understand their behavior.
+4. Read the package manager lockfile, `package.json`, Next.js config, TypeScript config, lint config, and relevant test configuration.
+5. Identify the installed Next.js and React versions. Check current official documentation for version-sensitive claims.
 
-1. Read the code under review (files, diff, or PR).
-2. Run `npx tsc --noEmit --pretty` to validate TypeScript types. Report any type errors as findings.
-3. Walk through each section of the checklist below.
-4. Output findings using the **report template** at the bottom.
+Do not turn a scoped review into a whole-codebase audit. Report pre-existing issues only when the reviewed change directly depends on or worsens them, and label that relationship clearly.
 
-## Checklist
+## 2. Verify with project-defined commands
 
-### 1. Code Quality
+- Detect the repository package manager and use it consistently.
+- Prefer project scripts such as `check-types`, `lint`, `test`, and `build` over direct tool invocations.
+- Run the narrowest meaningful checks first. Run a production build when reviewing routing, rendering boundaries, configuration, static generation, or compile-time behavior.
+- Do not delete `.next`, `out`, caches, snapshots, or generated artifacts as a routine precondition for type-checking.
+- Do not run fixers, formatters, codemods, dependency upgrades, or other mutating commands during a review.
+- Attribute failures to the reviewed change, pre-existing state, or the environment before reporting them.
+- Report exactly which checks passed, failed, or were skipped.
 
-- Readability: clear naming, small focused functions, no dead code.
-- Proper use of React hooks (dependency arrays, custom hooks for shared logic).
-- Functional components preferred; class components flagged as legacy.
-- Consistent code style (formatting, imports order, naming conventions).
-- DRY — repeated markup or logic should be extracted into reusable components or utilities.
-- TypeScript: strict types preferred over `any`; discriminated unions over loose objects.
-- Error boundaries where async or third-party code may throw.
+## 3. Apply the finding bar
 
-### 2. Next.js 16 Conventions
+Report a finding only when all of these are true:
 
-- Correct use of App Router (`app/` directory) layouts, pages, loading, and error files.
-- Server Components by default; `"use client"` directive only where truly needed (event handlers, hooks, browser APIs).
-- Data fetching via `async` Server Components or Route Handlers — not legacy `getServerSideProps` / `getStaticProps`.
-- Metadata API (`generateMetadata` / `metadata` export) for SEO instead of `<Head>`.
-- Image optimization with `next/image` (explicit `width`/`height` or `fill`, `priority` for LCP).
-- Font optimization with `next/font`.
-- Route groups, parallel routes, and intercepting routes used appropriately.
-- Proper streaming and Suspense boundaries for progressive rendering.
-- Middleware used correctly and sparingly.
+1. The reviewed change introduces or exposes it.
+2. A concrete execution path, framework contract, rendered state, or tool result supports it.
+3. The impact is material to correctness, security, accessibility, performance, or maintainability.
+4. The recommendation is specific and implementable.
 
-### 3. Performance
+Avoid style-only findings already enforced by automated tooling. Avoid speculative claims based only on component length, nested `div` count, inline functions, object literals, or personal abstraction preferences.
 
-- Bundle size: no unnecessary client-side JS; heavy libraries lazy-loaded with `next/dynamic` or `React.lazy`.
-- Images: correct format (WebP/AVIF via `next/image`), responsive `sizes` attribute, lazy loading below the fold.
-- Avoid layout shifts (explicit dimensions, font `display: swap`).
-- Memoization (`React.memo`, `useMemo`, `useCallback`) used where profiling shows benefit — not prematurely.
-- Minimize client-side state; prefer server-derived data.
-- No N+1 data fetching patterns; colocate or batch requests.
-- Check for unnecessary re-renders via key prop misuse or inline object/function creation in JSX.
+## 4. Review checklist
 
-### 4. TypeScript Type Safety
+Apply only the sections relevant to the change.
 
-- Run `rimraf .next .swc out` to clean build artifacts before type-checking.
-- Run `npx tsc --noEmit --pretty` and report every error with file, line, and error code.
-- No `any` types — use `unknown` with type guards, generics, or specific types instead.
-- No `@ts-ignore` / `@ts-expect-error` without an accompanying explanation comment.
-- Props interfaces/types defined for every component; avoid inline anonymous types for public APIs.
-- Prefer `interface` for component props and object shapes; use `type` for unions and intersections.
-- Strict null checks honoured — no non-null assertions (`!`) unless safety is proven and commented.
-- Return types explicit on exported functions; inferred types acceptable for internal/private helpers.
-- Enums avoided in favour of `as const` objects or string literal unions (better tree-shaking).
-- Generic constraints used where applicable (`T extends SomeBase`) to keep APIs tight.
-- Shared types co-located in a `types/` directory or adjacent `.types.ts` file — not duplicated across modules.
+### Next.js 16 and App Router
 
-### 5. Accessibility (WCAG 2.2 AA)
+- Keep Server Components as the default. Require `'use client'` only for hooks, event handlers, browser APIs, or client-only dependencies.
+- Prevent server-only modules, credentials, privileged data, and non-serializable values from crossing into Client Components.
+- Validate pages, layouts, templates, Route Handlers, loading, error, not-found, metadata, route groups, parallel routes, and intercepting routes against App Router conventions.
+- Verify current request APIs, caching, revalidation, dynamic rendering, Server Functions, Suspense, and streaming behavior against the installed Next.js version.
+- Review `proxy.ts` for Next.js 16. Treat `middleware.ts` and the `middleware` export as deprecated unless an explicit runtime constraint justifies them.
+- Check redirects, rewrites, locale handling, cookie mutation, matcher scope, and authorization boundaries in Proxy or Route Handlers.
+- Check static versus dynamic rendering decisions and guard against accidental opt-outs from caching or static generation.
 
-- Semantic HTML: `<nav>`, `<main>`, `<section>`, `<article>`, `<button>` vs `<div onClick>`.
-- Interactive elements are focusable and have visible focus indicators.
-- ARIA attributes only when native semantics are insufficient; no redundant roles (e.g., `role="button"` on `<button>`).
-- All images have meaningful `alt` text (or `alt=""` for decorative images).
-- Form inputs have associated `<label>` elements or `aria-label`.
-- Keyboard navigation: all interactive paths reachable and operable without a mouse.
-- Color contrast meets 4.5:1 for normal text, 3:1 for large text.
-- Motion/animation respects `prefers-reduced-motion`.
-- Live regions (`aria-live`) for dynamic content updates.
-- Skip-navigation link present for main content.
+### Images, fonts, scripts, and bundles
 
-### 6. UI/UX Audit
-- grep through the codebase and find inconsistent buttons, orphaned actions, duplicate components and broken user flows.
-- grep through the codebase and find usage of color that does not use variables from globals.css
-- grep through the codebase and find deeply nested DIVs, more that 7 are severe, 4 to 7 are critical
-- grep through the codebase and find empty event handlers
+- Use `next/image` with meaningful `alt`, explicit dimensions or `fill`, and accurate responsive `sizes`.
+- Apply current Next.js 16 LCP guidance. Prefer `preload`, `loading="eager"`, or `fetchPriority="high"` when appropriate; do not recommend the deprecated `priority` prop.
+- Use `next/font` and `next/script` where they provide measurable loading, privacy, or layout benefits.
+- Identify unnecessary Client Component boundaries, browser-only dependencies in server code, and heavy libraries shipped on initial routes.
+- Recommend lazy loading or dynamic imports only when the bundle or interaction path supports the tradeoff.
+- Require a plausible render or profiling impact before recommending memoization.
 
-### 7. Best Practices
+### React and TypeScript
 
-- Environment variables: public vars prefixed with `NEXT_PUBLIC_`, secrets never exposed to the client.
-- Security: user-generated content sanitized; no `dangerouslySetInnerHTML` without sanitization.
-- Error handling: graceful degradation, user-friendly error messages, `error.tsx` boundaries.
-- Testing: components have or should have unit/integration tests; test IDs (`data-testid`) present where needed.
-- Consistent file/folder structure following project conventions.
-- No TODO/FIXME items left untracked.
+- Check hook dependencies, effect cleanup, stale closures, race conditions, state ownership, keys, and controlled versus uncontrolled behavior.
+- Follow repository conventions for `type` versus `interface`, import ordering, component APIs, and file organization.
+- Flag `any`, non-null assertions, suppression comments, unsafe casts, and duplicated types when they create concrete risk in changed code.
+- Validate public component props and cross-boundary data shapes. Prefer specific types, discriminated unions, generics, or `unknown` with narrowing as appropriate.
+- Check error handling where asynchronous, network, parsing, or third-party operations can fail.
 
-## Severity Levels
+### Accessibility and user experience
 
-Tag every finding:
+- Use semantic elements and native controls before ARIA.
+- Verify accessible names, labels, alt text, heading order, landmarks, focus visibility, keyboard operation, and status announcements.
+- Check color contrast against WCAG 2.2 AA and ensure color is not the only state indicator.
+- Respect `prefers-reduced-motion`; ensure reduced motion removes or substantially reduces non-essential movement.
+- For UI changes, inspect affected desktop and narrow layouts plus relevant hover, focus, active, disabled, loading, empty, and error states when feasible.
+- Report broken flows from actual navigation and interaction evidence, not grep counts or DOM depth alone.
 
-| Tag | Meaning |
-|-----|---------|
-| **CRITICAL** | Must fix — broken behavior, security flaw, or accessibility blocker. |
-| **WARNING** | Should fix — deviation from convention, performance risk, or maintainability concern. |
-| **SUGGESTION** | Nice to have — optional improvement or polish. |
-| **POSITIVE** | Highlight something done well to reinforce good patterns. |
+### Security and data handling
 
-## Report Template
+- Keep secrets out of client bundles and require `NEXT_PUBLIC_` only for intentionally public values.
+- Validate and authorize untrusted inputs at the server boundary.
+- Review Server Functions and Route Handlers for authentication, authorization, CSRF exposure, unsafe redirects, and excessive data return.
+- Require sanitization or a trusted source for `dangerouslySetInnerHTML`; trace the data origin before assigning severity.
+- Check remote image, content security, cookie, and header configuration when touched by the change.
 
-Structure every review output like this:
+### Maintainability and tests
 
-```
-# Code Review Report
+- Check clarity, naming, cohesion, duplication, dead code introduced by the change, and alignment with existing primitives.
+- Require tests for important logic, regression-prone behavior, and user-critical flows when the repository has an established testing pattern.
+- Do not require `data-testid` when semantic queries are sufficient.
+- Do not require new abstractions or shared type folders when local colocation is clearer and consistent with the project.
 
-## Summary
-[1–3 sentence overview: what was reviewed, overall impression, and top priority items.]
+## 5. Severity
 
-## Code Quality
-- [SEVERITY] Finding description.
-  Recommendation and/or code example.
+| Severity | Meaning |
+|---|---|
+| **CRITICAL** | Exploitable security flaw, data loss, broken primary behavior, or accessibility blocker. |
+| **WARNING** | Likely bug, framework violation, meaningful regression risk, or significant maintainability issue. |
+| **SUGGESTION** | Bounded improvement that is helpful but not required for correctness. |
 
-## Next.js 16 Conventions
-- [SEVERITY] Finding description.
-  Recommendation and/or code example.
+Do not inflate severity for formatting, preference, or hypothetical future scale.
 
-## Performance
-- [SEVERITY] Finding description.
-  Recommendation and/or code example.
+## 6. Report format
 
-## TypeScript Type Safety
-- [SEVERITY] Finding description.
-  Recommendation and/or code example.
+Lead with findings, ordered by severity:
 
-## Accessibility
-- [SEVERITY] Finding description.
-  Reference: [WCAG criterion or guideline link if applicable].
+```markdown
+## Findings
 
-## UI/UX Audit
-- [SEVERITY] Finding description.
-  Recommendation and/or code example.
+### [WARNING] Short actionable title
+`path/to/file.tsx:42`
 
-## Best Practices
-- [SEVERITY] Finding description.
-  Recommendation and/or code example.
+Explain the concrete failure path and user or system impact.
 
-## Verdict
-[APPROVE / REQUEST CHANGES / NEEDS DISCUSSION]
-Key items to address before merge (if any).
+Recommendation: describe the smallest appropriate fix.
+
+## Assessment
+
+- Scope: reviewed range or files
+- Verification: commands and outcomes
+- Residual gaps: checks or runtime states not verified
+- Verdict: APPROVE | REQUEST CHANGES | NEEDS DISCUSSION
 ```
 
-## Guidelines
+Include exact file and tight line references. Consolidate repeated instances of one root cause. Omit empty categories and generic praise. If no actionable findings exist, state that directly and list only meaningful residual risks or unrun checks.
 
-- Be specific: reference file names and line numbers.
-- Provide brief code examples for non-trivial suggestions.
-- Limit the report to actionable findings — skip restating obvious correct code.
-- When referencing standards, link to the official Next.js docs (https://nextjs.org/docs) or WCAG guidelines (https://www.w3.org/WAI/WCAG22/quickref/).
+Reference official sources when framework behavior or standards are central:
+
+- Next.js documentation: <https://nextjs.org/docs>
+- Next.js 16 upgrade guide: <https://nextjs.org/docs/app/guides/upgrading/version-16>
+- WCAG 2.2 quick reference: <https://www.w3.org/WAI/WCAG22/quickref/>
