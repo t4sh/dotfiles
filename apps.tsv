@@ -7,7 +7,7 @@
 # Lines starting with `#` and blank lines are ignored.
 #
 # NOTE: apps needing container copies / exclusions / sanitize steps (Dato,
-# Sublime Text, VS Code) stay as explicit blocks in their consumers — they carry
+# Sublime Text, VS Code, Cursor settings.json) stay as explicit blocks in their consumers — they carry
 # irregular logic that does not fit a flat row. This manifest is for the
 # homogeneous `defaults import/export <domain> <plist>` case only.
 
@@ -33,6 +33,9 @@ com.wolfrosch.Gapplin	Gapplin	apps/gapplin/gapplin.plist
 com.valerijs.boguckis.store.TextSniper	TextSniper	apps/textsniper/textsniper.plist
 com.devtoys	DevToys	apps/devtoys/devtoys.plist
 com.alienator88.Pearcleaner	Pearcleaner	apps/pearcleaner/pearcleaner.plist
+com.fournova.Tower3	Tower	apps/tower/tower.plist
+md.obsidian	Obsidian	apps/obsidian/obsidian.plist
+com.todesktop.230313mzl4w4u92	Cursor	apps/cursor/cursor.plist
 
 # macOS system UX domains — too deeply nested to hand-write in macos/defaults.sh,
 # so snapshotted whole. Plists live in macos/ (next to dock-backup.plist), not
@@ -40,4 +43,5 @@ com.alienator88.Pearcleaner	Pearcleaner	apps/pearcleaner/pearcleaner.plist
 com.apple.symbolichotkeys	Keyboard Shortcuts	macos/symbolichotkeys.plist
 com.apple.HIToolbox	Input Sources	macos/hitoolbox.plist
 
-# Shottr + Monokai Pro license settings are NOT kept in the repo — vault only
+# Shottr license prefs (kc-license) — vault via make backup-shottr / restore-shottr.
+# Monokai Pro license settings are NOT kept in the repo — vault only

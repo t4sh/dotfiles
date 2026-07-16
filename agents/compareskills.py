@@ -1,20 +1,26 @@
 #!/usr/bin/env python3
 """
-compareskills.py — Inventory ~/.agents/skills/ against .skill-lock.json
-and regenerate ~/.agents/skills/README.md.
+compareskills.py — Inventory agents/skills/ against .skill-lock.json
+and regenerate agents/skills/README.md.
 
-Usage:  python3 ~/.agents/compareskills.py
+Usage:  python3 agents/compareskills.py
+        make skills-manifest   (also runs this after gen-skillsfile.py)
 """
 
-import os
 import json
 import re
+import sys
 from datetime import datetime, timezone, timedelta
+from pathlib import Path
 
-BASE_DIR = os.path.dirname(os.path.realpath(__file__))
-SKILLS_DIR = os.path.join(BASE_DIR, "skills")
-LOCK_FILE = os.path.join(BASE_DIR, ".skill-lock.json")
-README_FILE = os.path.join(SKILLS_DIR, "README.md")
+REPO_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
+from skill_lock_names import installed_name
+
+BASE_DIR = REPO_ROOT / "agents"
+SKILLS_DIR = BASE_DIR / "skills"
+LOCK_FILE = BASE_DIR / ".skill-lock.json"
+README_FILE = SKILLS_DIR / "README.md"
 
 IST = timezone(timedelta(hours=5, minutes=30))
 
@@ -22,26 +28,18 @@ IST = timezone(timedelta(hours=5, minutes=30))
 def get_disk_skills():
     """Sorted list of skill directory names on disk."""
     return sorted(
-        f for f in os.listdir(SKILLS_DIR)
-        if os.path.isdir(os.path.join(SKILLS_DIR, f)) and not f.startswith(".")
+        f.name for f in SKILLS_DIR.iterdir()
+        if f.is_dir() and not f.name.startswith(".")
     )
 
 
 def get_gitignored_skills():
-    """Skill dir names excluded from the dotfiles git repo via .gitignore.
-
-    These are on disk and load normally, but are intentionally NOT tracked:
-    org/proprietary skills whose canonical home is another repo, or
-    license-restricted ones kept out of the public split. Parsing .gitignore
-    keeps this self-maintaining — it mirrors exactly what git excludes, with
-    no hardcoded skill list to drift.
-    """
-    repo_root = os.path.dirname(os.path.dirname(os.path.realpath(SKILLS_DIR)))
-    gitignore = os.path.join(repo_root, ".gitignore")
+    """Skill dir names excluded from the dotfiles git repo via .gitignore."""
+    gitignore = REPO_ROOT / ".gitignore"
     gated = set()
-    if not os.path.exists(gitignore):
+    if not gitignore.exists():
         return gated
-    with open(gitignore) as f:
+    with gitignore.open() as f:
         for line in f:
             line = line.strip()
             if not line or line.startswith("#"):
@@ -54,16 +52,14 @@ def get_gitignored_skills():
 
 def get_lock_skills():
     """Parse lock file → (version, {dir_name: {source, sourceType, lock_key}})."""
-    with open(LOCK_FILE) as f:
+    with LOCK_FILE.open() as f:
         data = json.load(f)
 
     version = data.get("version", 0)
     skills = {}
 
     for key, meta in data.get("skills", {}).items():
-        # Lock key is the directory name; normalize only if it has spaces/caps
-        dir_name = key if key == key.lower().replace(" ", "-") else key.lower().replace(" ", "-")
-
+        dir_name = installed_name(key, SKILLS_DIR)
         skills[dir_name] = {
             "source": meta.get("source", "unknown"),
             "sourceType": meta.get("sourceType", "unknown"),
@@ -76,10 +72,10 @@ def get_lock_skills():
 def parse_existing_remarks():
     """Extract remarks from the current README table (preserves manual annotations)."""
     remarks = {}
-    if not os.path.exists(README_FILE):
+    if not README_FILE.exists():
         return remarks
 
-    with open(README_FILE) as f:
+    with README_FILE.open() as f:
         for line in f:
             m = re.match(r"\|\s*\d+\s*\|\s*(\S+)\s*\|[^|]*\|[^|]*\|\s*(.*?)\s*\|", line)
             if m:
@@ -101,14 +97,12 @@ def build_readme(disk_skills, lock_version, lock_skills, remarks, gated):
     on_disk_only = sorted(s for s in disk_skills if s not in lock_skills)
     in_lock_only = sorted(s for s in lock_skills if s not in set(disk_skills))
 
-    # --- table rows ---
     rows = []
     for i, name in enumerate(disk_skills, 1):
         source = lock_skills[name]["source"] if name in lock_skills else "local"
         remark = remarks.get(name, "\u2014")
         rows.append(f"| {i} | {name} | {source} | `~/.agents/skills/{name}/` | {remark} |")
 
-    # --- by source ---
     groups = {}
     for name in disk_skills:
         src = lock_skills[name]["source"] if name in lock_skills else "local"
@@ -118,7 +112,6 @@ def build_readme(disk_skills, lock_version, lock_skills, remarks, gated):
         for src, lst in sorted(groups.items(), key=lambda x: (-len(x[1]), x[0]))
     )
 
-    # --- lock vs disk ---
     lock_miss = ", ".join(in_lock_only) if in_lock_only else "none"
     disk_miss = ", ".join(on_disk_only) if on_disk_only else f"none (all {total} skills tracked)"
 
@@ -195,11 +188,11 @@ This README.md is a conventional location for documenting skills collection, and
 
 # Help - List and Manage the skills
 
-* View global skills: `npx skills list -g`
+* View global skills: `~/.local/bin/npx-stable skills list -g`
 
-* Clear globals if needed: `npx skills remove --all -y -g`
+* Clear globals if needed: `~/.local/bin/npx-stable skills remove --all -y -g`
 
-* Refresh all: `npx skills update`
+* Refresh all: `~/.local/bin/npx-stable skills update`
 """
 
 
@@ -213,7 +206,6 @@ def main():
     in_lock_only = sorted(s for s in lock_skills if s not in set(disk_skills))
     matched = len([s for s in disk_skills if s in lock_skills])
 
-    # --- console summary ---
     print(f"Skills inventory  (lock version {lock_version})")
     print(f"  Disk:    {len(disk_skills)} folders")
     print(f"  Lock:    {len(lock_skills)} entries")
@@ -230,10 +222,8 @@ def main():
     if gated_on_disk:
         print(f"  Gated (on disk, excluded from git): {', '.join(gated_on_disk)}")
 
-    # --- write README ---
     content = build_readme(disk_skills, lock_version, lock_skills, remarks, gated)
-    with open(README_FILE, "w") as f:
-        f.write(content)
+    README_FILE.write_text(content)
 
     print(f"\n  Wrote {README_FILE}")
     print(f"  {len(disk_skills)} skills total")

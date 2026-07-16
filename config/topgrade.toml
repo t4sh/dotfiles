@@ -13,7 +13,9 @@ notify_end = "on_failure"
 
 # system: macOS softwareupdate — slow, reboot prompts; run manually when needed.
 # yarn / pnpm: npm + corepack cover globals; no global pnpm packages installed.
-disable = ["system", "emacs", "git_repos", "yarn", "pnpm"]
+# pi: installed as the Homebrew pi-coding-agent formula; avoid its redundant
+# self-updater (`pi update --self`), which cannot reliably resolve Brew installs.
+disable = ["system", "emacs", "git_repos", "yarn", "pnpm", "pi"]
 
 # Non-fatal when the engine is down or the vendor check is slow/no-op.
 ignore_failures = ["containers", "microsoft_office"]

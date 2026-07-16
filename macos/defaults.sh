@@ -88,6 +88,14 @@ plist_set() {
 FINDER_PLIST=~/Library/Preferences/com.apple.finder.plist
 
 ###############################################################################
+# Appearance                  https://macos-defaults.com/#💻-list-of-commands #
+###############################################################################
+
+# System Settings → Appearance → Show scroll bars
+# Automatic | WhenScrolling | Always
+defaults write NSGlobalDomain AppleShowScrollBars -string "Automatic"
+
+###############################################################################
 # Dock                        https://macos-defaults.com/#💻-list-of-commands #
 ###############################################################################
 
@@ -97,8 +105,14 @@ defaults write com.apple.dock "orientation" -string "bottom"
 # Set the icon size of Dock items in pixels (default value is 48)
 defaults write com.apple.dock "tilesize" -int "26"
 
-# Autohides the Dock (default value is "false")
+# Lock the declared Dock layout: no resizing, repositioning, or item changes.
+defaults write com.apple.dock "size-immutable" -bool "true"
+defaults write com.apple.dock "position-immutable" -bool "true"
+defaults write com.apple.dock "contents-immutable" -bool "true"
+
+# Keep the Dock visible and prevent changing the auto-hide setting.
 defaults write com.apple.dock "autohide" -bool "false"
+defaults write com.apple.dock "autohide-immutable" -bool "true"
 
 # Change the Dock opening and closing animation times (default value is 0.5)
 defaults write com.apple.dock "autohide-time-modifier" -float "0"
@@ -141,9 +155,14 @@ defaults write com.apple.screencapture "disable-shadow" -bool "false"
 # Include date and time in screenshot filenames (default value is "true")
 defaults write com.apple.screencapture "include-date" -bool "true"
 
-# Set default screenshot location (default value is "~/Desktop")
-mkdir -p "$HOME/Downloads/Screengrabs"
-defaults write com.apple.screencapture "location" -string "$HOME/Downloads/Screengrabs"
+# Save screenshots and screen recordings to the same custom location.
+# `location-last` preserves Screenshot.app's Options → Save to → Other Location
+# choice, while `target=file` prevents an app/clipboard target from taking over.
+CAPTURE_DIR="$HOME/odrive/ash.a.t@live/Workspace/Screengrabs"
+mkdir -p "$CAPTURE_DIR"
+defaults write com.apple.screencapture "location" -string "$CAPTURE_DIR"
+defaults write com.apple.screencapture "location-last" -string "$CAPTURE_DIR"
+defaults write com.apple.screencapture "target" -string "file"
 
 # Choose whether to display a thumbnail after taking a screenshot (default value is "true")
 defaults write com.apple.screencapture "show-thumbnail" -bool "true"
@@ -231,10 +250,10 @@ defaults write com.apple.WindowManager EnableStandardClickToShowDesktop -bool fa
 # Show hard disks on desktop (default value is "false")
 defaults write com.apple.finder "ShowHardDrivesOnDesktop" -bool "false"
 
-# Hide external disks on desktop (default value is "true")
+# Show external disks on desktop (default value is "true")
 defaults write com.apple.finder "ShowExternalHardDrivesOnDesktop" -bool "true"
 
-# Hide removable media on desktop (default value is "true")
+# Show removable media on desktop (default value is "true")
 defaults write com.apple.finder "ShowRemovableMediaOnDesktop" -bool "true"
 
 # Show connected servers on desktop (default value is "false")
@@ -457,12 +476,12 @@ defaults write com.apple.screensaver askForPasswordDelay -int 0
 # Disable remote Apple events. `systemsetup` may return non-zero when the
 # setting is already off, so treat that state as success instead of aborting
 # the rest of the macOS defaults run.
-remote_events_output="$(sudo systemsetup -setremoteappleevents off 2>&1)" || {
+if ! remote_events_output="$(sudo systemsetup -setremoteappleevents off 2>&1)"; then
     case "$remote_events_output" in
         *"already off"*) printf '  ✓ remote Apple events already off\n' ;;
         *) printf '  ⚠ could not disable remote Apple events: %s\n' "$remote_events_output" >&2 ;;
     esac
-}
+fi
 unset remote_events_output
 
 # Enable Secure Keyboard Entry in Terminal.app
@@ -596,6 +615,7 @@ warn_on_fail "could not set Accessibility zoom hotkeys (Full Disk Access/Accessi
 
 for app in "Activity Monitor" \
 	"Dock" \
+	"Screenshot" \
 	"SystemUIServer" \
 	"ControlCenter" \
 	"Finder" \

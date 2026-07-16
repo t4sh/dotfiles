@@ -18,8 +18,7 @@
 #   dot audit-brewfile                    same, via the dispatcher (scripts/audit-brewfile.sh)
 set -euo pipefail
 
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
-DOTFILES="${DOTFILES:-$(cd -- "$SCRIPT_DIR/.." && pwd -P)}"
+DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
 BREWFILE="${BREWFILE:-$DOTFILES/Brewfile}"
 
 CHECK=0
@@ -56,6 +55,20 @@ normalize_brewfile() {
     | sed '/^[[:space:]]*$/d' \
     | LC_ALL=C sort
 }
+
+prefer_nvm_npm_for_dump() {
+  # brew bundle dump discovers npm globals via `npm` on PATH. Topgrade runs
+  # custom commands as `zsh -c`, which loads ~/.zshenv and prefers Homebrew
+  # npm over nvm — false-positive drift vs interactive shells / make.
+  local node_stable="$HOME/.local/bin/node-stable"
+  [[ -x "$node_stable" ]] || return 0
+  local node_bin
+  node_bin="$(dirname "$(readlink "$node_stable")")"
+  PATH="$node_bin:$PATH"
+  export PATH
+}
+
+prefer_nvm_npm_for_dump
 
 if ! brew bundle dump --file="$tmp" --force >"$dump_log" 2>&1; then
   warn "brew bundle dump failed:"

@@ -3,7 +3,7 @@
 # Excludes mail cache (emls2.ldb, caches) — vault stays ~5MB, not ~1.6GB.
 #
 # Usage: bash scripts/backup-canary-vault.sh
-# Then:  make secrets-backup
+# Then run: make secrets-backup
 set -euo pipefail
 
 CONTAINER="$HOME/Library/Containers/io.canarymail.mac/Data/Library"
@@ -18,6 +18,9 @@ ok()   { printf '\033[32m  ✓\033[0m %s\n' "$*"; }
 die()  { printf '\033[31merror:\033[0m %s\n' "$*" >&2; exit 1; }
 
 [[ -d "$CONTAINER" ]] || die "Canary container not found — install Canary Mail first (Brewfile mas)"
+if pgrep -xq "Canary Mail" 2>/dev/null || pgrep -xf ".*Canary Mail.*" 2>/dev/null; then
+  die "Canary Mail is running — quit it before copying realm state"
+fi
 
 REALM_FILES=(
   accounts.v2.realm
@@ -41,15 +44,17 @@ for name in "${REALM_FILES[@]}"; do
   [[ -f "$src" ]] || continue
   cp -f "$src" "$DEST_REALMS/$name"
   ok "realms/$name"
-done
 
-# PGP realm sidecar dirs (small; needed for some PGP state)
-for extra in pgp.v2.realm.management pgp.v2.realm.note; do
-  src="$DB_SRC/$extra"
-  [[ -e "$src" ]] || continue
-  rm -rf "${DEST_REALMS:?}/$extra"
-  cp -a "$src" "$DEST_REALMS/$extra"
-  ok "realms/$extra"
+  # Realm sidecars evolve with Canary. Stage management/note state for every
+  # declared realm instead of maintaining a second, PGP-only allowlist.
+  for suffix in management note; do
+    extra="$name.$suffix"
+    src="$DB_SRC/$extra"
+    [[ -e "$src" ]] || continue
+    rm -rf "${DEST_REALMS:?}/$extra"
+    cp -a "$src" "$DEST_REALMS/$extra"
+    ok "realms/$extra"
+  done
 done
 
 # Optional small LevelDB helpers for PGP domain/mailbox maps
@@ -62,5 +67,5 @@ for ldb in pgp.domain.ldb pgp.mailbox.ldb; do
 done
 
 echo ""
-ok "Canary vault snapshot ready under ~/.secrets/apps/canary-mail/"
-echo "  next: make secrets-backup"
+ok "Canary config staged under ~/.secrets/apps/canary-mail/"
+echo "  next: run make secrets-backup to write the encrypted sparseimage snapshot"

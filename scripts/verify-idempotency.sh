@@ -29,7 +29,8 @@
 #         is absent: Homebrew install, keygen, plist import, shell change).
 #      c. Run `scripts/verify-idempotency.sh diff`. On a fresh Mac the diff
 #         will be LARGE — that's expected. What matters:
-#            - every MISSING in the link snapshot should now be a LINK
+#            - every repo-backed MISSING link should now be a LINK
+#            - secret-backed links remain MISSING safely until vault restore + make link
 #            - brew check should flip from "missing X, Y, Z" to clean
 #            - `defaults` domains should fill in with declared values
 #      d. Run `make all` a SECOND time and re-diff. This second run is the
@@ -198,6 +199,10 @@ phase_diff() {
     echo ""
     echo "=== skill license gate (no restrictive-licensed skill un-gitignored) ==="
     if ! bash "$DOTFILES/scripts/audit-skill-licenses.sh" --check; then any=1; fi
+
+    echo ""
+    echo "=== rulebook sync (AGENTS.md @-includes match agents/rules/*.md) ==="
+    if ! bash "$DOTFILES/scripts/audit-rules.sh"; then any=1; fi
 
     echo ""
     echo "=== Skillsfile sync (generated manifest matches .skill-lock.json) ==="

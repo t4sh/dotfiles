@@ -20,7 +20,7 @@ referenced="$(grep -oE '@\./rules/[A-Za-z0-9._-]+\.md' "$AGENTS_MD" \
     | sed 's#@\./rules/##' | sort -u)"
 
 # On disk: basenames of agents/rules/*.md, sorted.
-on_disk="$(find "$RULES_DIR" -maxdepth 1 -type f -name '*.md' -exec basename {} \; | sort -u)"
+on_disk="$(/usr/bin/find "$RULES_DIR" -maxdepth 1 -type f -name '*.md' -exec basename {} \; | sort -u)"
 
 missing="$(comm -23 <(printf '%s\n' "$referenced") <(printf '%s\n' "$on_disk"))"
 orphan="$(comm -13 <(printf '%s\n' "$referenced") <(printf '%s\n' "$on_disk"))"

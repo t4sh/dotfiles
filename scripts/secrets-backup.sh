@@ -50,10 +50,16 @@ DEST_DEFAULT=""
 if [[ -n "${DOTFILES_BACKUP_DEST:-}" ]]; then
   DEST="$DOTFILES_BACKUP_DEST"
 elif [[ -n "$DEST_DEFAULT" ]]; then
-  read -r -p "Vault destination folder [$DEST_DEFAULT]: " DEST
-  DEST="${DEST:-$DEST_DEFAULT}"
-else
+  if [[ -t 0 ]]; then
+    read -r -p "Vault destination folder [$DEST_DEFAULT]: " DEST || DEST=""
+    DEST="${DEST:-$DEST_DEFAULT}"
+  else
+    DEST="$DEST_DEFAULT"
+  fi
+elif [[ -t 0 ]]; then
   read -r -p "Vault destination folder: " DEST
+else
+  die "vault destination is not configured; set DOTFILES_BACKUP_DEST or run interactively once"
 fi
 
 # Sanitize Finder-pasted paths (strip escapes + surrounding quotes, expand ~)
@@ -77,7 +83,10 @@ VAULT="$DEST/DotfilesSecrets.sparseimage"
 # Use $() to strip the trailing newline and printf '%s' to emit raw bytes.
 get_pass() {
   local p
-  p="$(security find-generic-password -s "$KC_SERVICE" -a "$USER" -w 2>/dev/null)"
+  if ! p="$(security find-generic-password -s "$KC_SERVICE" -a "$USER" -w 2>/dev/null)"; then
+    return 1
+  fi
+  [[ -n "$p" ]] || return 1
   printf '%s' "$p"
 }
 
@@ -125,12 +134,65 @@ cleanup() {
 }
 trap cleanup EXIT
 
+prune_snapshots() {
+  info "retention: keep newest $KEEP (override: DOTFILES_BACKUP_KEEP=<n> make secrets-backup)"
+  /usr/bin/find "$MOUNT" -maxdepth 1 -type d \
+    -name '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9][0-9][0-9]' \
+    | sort -r | tail -n +"$((KEEP + 1))" \
+    | while IFS= read -r d; do
+        [[ -z "$d" ]] && continue
+        rm -rf "$d"
+        ok "pruned $(basename "$d")"
+      done
+}
+
+estimate_manifest_kb() {
+  local total=0 line src kb
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    line="${line%%#*}"
+    line="${line#"${line%%[![:space:]]*}"}"
+    line="${line%"${line##*[![:space:]]}"}"
+    [[ -z "$line" ]] && continue
+    if ! src="$(expand_manifest_path "$line")"; then
+      continue
+    fi
+    if [[ ! -e "$src" && ! -L "$src" ]]; then
+      continue
+    fi
+    # The snapshot uses rsync -L, so estimate the dereferenced target too.
+    if ! kb="$(du -skL "$src" 2>/dev/null | awk '{print $1}')"; then
+      warn "could not measure manifest path: $src" >&2
+      return 1
+    fi
+    [[ -n "$kb" ]] || {
+      warn "empty size result for manifest path: $src" >&2
+      return 1
+    }
+    total=$((total + kb))
+  done < "$MANIFEST"
+  printf '%s' "$total"
+}
+
+check_vault_space() {
+  local needed_kb avail_kb needed_mb avail_mb
+  needed_kb="$(estimate_manifest_kb)"
+  avail_kb="$(df -k "$MOUNT" | awk 'NR==2 {print $4}')"
+  needed_mb=$(( (needed_kb + 1023) / 1024 ))
+  avail_mb=$(( avail_kb / 1024 ))
+  # ~10% headroom for APFS metadata and concurrent writes
+  if (( needed_kb * 11 / 10 > avail_kb )); then
+    die "vault low on space: manifest needs ~${needed_mb}Mi free, mount has ~${avail_mb}Mi
+  prune: lower retention and re-run, e.g. DOTFILES_BACKUP_KEEP=5 make secrets-backup
+  grow:  hdiutil resize -size 8g \"$VAULT\"  (then re-run)"
+  fi
+}
+
 expand_manifest_path() {
   local s="$1"
   local secrets_dir="${DOTFILES_SECRETS_DIR:-$HOME/.secrets}"
 
-  # Literal tilde patterns are expanded manually below.
-  # shellcheck disable=SC2088
+  # Literal tilde/variable patterns are expanded manually below.
+  # shellcheck disable=SC2088,SC2016
   case "$s" in
     '~') printf '%s' "$HOME" ;;
     '~/'*) printf '%s/%s' "$HOME" "${s#\~/}" ;;
@@ -150,6 +212,10 @@ expand_manifest_path() {
     *) printf '%s' "$s" ;;
   esac
 }
+
+# --- prune first so a full snapshot always has room (prune-after left partials when full) ---
+prune_snapshots
+check_vault_space
 
 # --- snapshot into dated folder, preserving absolute paths ---
 SNAP="$MOUNT/$STAMP"
@@ -171,11 +237,15 @@ while IFS= read -r line || [[ -n "$line" ]]; do
   fi
   dst_parent="$SNAP${src%/*}"
   mkdir -p "$dst_parent"
-  rsync -aL --quiet \
+  if ! rsync -aL --quiet \
         --exclude='.DS_Store' --exclude='*.sock' --exclude='sockets' \
         --exclude='node_modules' --exclude='__pycache__' --exclude='*.pyc' \
         --exclude='com.microsoft.appcenter' \
-        "$src" "$dst_parent/"
+        "$src" "$dst_parent/"; then
+    rm -rf "${SNAP:?}"
+    die "rsync failed copying $src — removed partial snapshot $STAMP
+  if the vault was full, prune or resize before retrying (see check_vault_space hints above)"
+  fi
   COUNT=$((COUNT + 1))
 done < "$MANIFEST"
 if (( COUNT == 0 )); then
@@ -183,17 +253,6 @@ if (( COUNT == 0 )); then
   die "manifest produced 0 snapshot paths; removed empty snapshot $STAMP"
 fi
 ok "snapshotted $COUNT path(s)"
-
-# --- prune older snapshots inside the vault ---
-info "retention: keep newest $KEEP (override: DOTFILES_BACKUP_KEEP=<n> make secrets-backup)"
-find "$MOUNT" -maxdepth 1 -type d \
-  -name '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9][0-9][0-9]' \
-  | sort -r | tail -n +"$((KEEP + 1))" \
-  | while IFS= read -r d; do
-      [[ -z "$d" ]] && continue
-      rm -rf "$d"
-      ok "pruned $(basename "$d")"
-    done
 
 # --- unmount + compact so iCloud uploads stay small ---
 if [[ $MOUNTED_BY_US -eq 1 ]]; then

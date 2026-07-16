@@ -32,6 +32,7 @@ backup-shottr: ## Back up Shottr prefs into ~/.secrets
 ssh-setup: ## Generate/register the GitHub SSH key if needed
 	@bash scripts/ssh-setup.sh
 
+
 skills-audit: ## Check tracked agent skills for redistribution/license safety
 	@bash scripts/audit-skill-licenses.sh --check
 
@@ -42,9 +43,10 @@ rules-audit: ## Check agent rule includes stay in sync
 brewfile-audit: ## Check Brewfile consistency rules
 	@bash scripts/audit-brewfile.sh --check
 
-# Regenerate ./Skillsfile from agents/.skill-lock.json (the `bundle dump`).
-skills-manifest: ## Regenerate Skillsfile from the skill lockfile
+# Regenerate ./Skillsfile and agents/skills/README.md from agents/.skill-lock.json.
+skills-manifest: ## Regenerate Skillsfile and skills README from the skill lockfile
 	@python3 scripts/gen-skillsfile.py
+	@python3 agents/compareskills.py
 
 # Install all global skills from the manifest (the `brew bundle`). Not in
 # `make all`: needs node + GitHub auth (private sources) set up first.
@@ -91,9 +93,22 @@ terminal: ## Import Terminal.app profiles (quits Terminal.app)
 	fi
 
 services: ## Install Automator Quick Actions into ~/Library/Services
-	@mkdir -p ~/Library/Services
-	@cp -R services/*.workflow ~/Library/Services/ 2>/dev/null || true
-	@echo "Automator services installed."
+	@set -e; \
+	mkdir -p ~/Library/Services; \
+	count=0; \
+	for workflow in services/*.workflow; do \
+		[ -e "$$workflow" ] || continue; \
+		name=$$(basename "$$workflow"); \
+		tmp="$$HOME/Library/Services/.$$name.dotfiles-tmp"; \
+		rm -rf "$$tmp"; \
+		cp -R "$$workflow" "$$tmp"; \
+		rm -rf "$$HOME/Library/Services/$$name"; \
+		mv "$$tmp" "$$HOME/Library/Services/$$name"; \
+		echo "  ✓ $$name"; \
+		count=$$((count + 1)); \
+	done; \
+	[ "$$count" -gt 0 ] || { echo "  ✗ no Automator workflows found" >&2; exit 1; }; \
+	echo "Automator services installed ($$count)."
 
 default-apps: ## Apply repo default-app policy from config/duti
 	@bash scripts/apply-duti.sh "$(DOTFILES)/config/duti"
@@ -118,21 +133,27 @@ backup: ## Refresh repo-tracked app prefs, Dock, services, and Brewfile
 	@echo "Backing up app configs..."
 	@# Bulk `defaults`-managed apps — driven by apps.tsv. Container-copy apps
 	@# (Dato, Sublime, VS Code) stay as explicit lines below.
-	@while IFS=$$'\t' read -r domain label plist; do \
+	@captured=0; skipped=0; \
+	while IFS=$$'\t' read -r domain label plist; do \
 		case "$$domain" in ''|\#*) continue ;; esac; \
-		defaults export "$$domain" "$$plist" 2>/dev/null && echo "  ✓ $$label" || true; \
-	done < apps.tsv
-	@cp ~/Library/Group\ Containers/group.com.sindresorhus.Dato/Library/Preferences/group.com.sindresorhus.Dato.plist apps/dato/dato.plist 2>/dev/null && echo "  ✓ Dato" || true
-	@cp ~/Library/Application\ Support/Sublime\ Text/Packages/User/*.sublime-settings apps/sublime-text/ 2>/dev/null && echo "  ✓ Sublime Text settings" || true
-	@rm -f "apps/sublime-text/Theme - Monokai Pro.sublime-settings" 2>/dev/null || true
-	@cp ~/Library/Application\ Support/Sublime\ Text/Packages/User/*.sublime-keymap apps/sublime-text/ 2>/dev/null && echo "  ✓ Sublime Text keybindings" || true
-	@cp ~/Library/Application\ Support/Sublime\ Text/Packages/User/*.sublime-snippet apps/sublime-text/ 2>/dev/null && echo "  ✓ Sublime Text snippets" || true
-	@cp ~/Library/Application\ Support/Sublime\ Text/Packages/User/*.sublime-macro apps/sublime-text/ 2>/dev/null && echo "  ✓ Sublime Text macros" || true
-	@cp ~/Library/Application\ Support/Sublime\ Text/Packages/User/*.palettes apps/sublime-text/ 2>/dev/null && echo "  ✓ Sublime Text palettes" || true
-	@cp ~/Library/Application\ Support/Sublime\ Text/Packages/User/*.py apps/sublime-text/ 2>/dev/null && echo "  ✓ Sublime Text user plugins" || true
-	@cp ~/Library/Application\ Support/Code/User/settings.json apps/vscode/settings.json 2>/dev/null && echo "  ✓ VS Code" || true
-	@defaults export com.apple.dock macos/dock-backup.plist 2>/dev/null && echo "  ✓ Dock layout" || true
-	@defaults export com.apple.Terminal apps/terminal/terminal.plist 2>/dev/null && echo "  ✓ Terminal.app profiles" || true
+		if defaults export "$$domain" "$$plist" 2>/dev/null; then \
+			echo "  ✓ $$label"; captured=$$((captured + 1)); \
+		else \
+			echo "  ⚠ $$label not captured (app/domain unavailable)"; skipped=$$((skipped + 1)); \
+		fi; \
+	done < apps.tsv; \
+	echo "  defaults snapshots: $$captured captured, $$skipped skipped"
+	@cp ~/Library/Group\ Containers/group.com.sindresorhus.Dato/Library/Preferences/group.com.sindresorhus.Dato.plist apps/dato/dato.plist 2>/dev/null && echo "  ✓ Dato" || echo "  ⚠ Dato not captured"
+	@cp ~/Library/Application\ Support/Sublime\ Text/Packages/User/*.sublime-settings apps/sublime-text/ 2>/dev/null && echo "  ✓ Sublime Text settings" || echo "  - no Sublime Text settings to capture"
+	@rm -f "apps/sublime-text/Theme - Monokai Pro.sublime-settings"
+	@cp ~/Library/Application\ Support/Sublime\ Text/Packages/User/*.sublime-keymap apps/sublime-text/ 2>/dev/null && echo "  ✓ Sublime Text keybindings" || echo "  - no Sublime Text keybindings to capture"
+	@cp ~/Library/Application\ Support/Sublime\ Text/Packages/User/*.sublime-snippet apps/sublime-text/ 2>/dev/null && echo "  ✓ Sublime Text snippets" || echo "  - no Sublime Text snippets to capture"
+	@cp ~/Library/Application\ Support/Sublime\ Text/Packages/User/*.sublime-macro apps/sublime-text/ 2>/dev/null && echo "  ✓ Sublime Text macros" || echo "  - no Sublime Text macros to capture"
+	@cp ~/Library/Application\ Support/Sublime\ Text/Packages/User/*.palettes apps/sublime-text/ 2>/dev/null && echo "  ✓ Sublime Text palettes" || echo "  - no Sublime Text palettes to capture"
+	@cp ~/Library/Application\ Support/Sublime\ Text/Packages/User/*.py apps/sublime-text/ 2>/dev/null && echo "  ✓ Sublime Text user plugins" || echo "  - no Sublime Text user plugins to capture"
+	@cp ~/Library/Application\ Support/Code/User/settings.json apps/vscode/settings.json 2>/dev/null && echo "  ✓ VS Code" || echo "  ⚠ VS Code settings not captured"
+	@defaults export com.apple.dock macos/dock-backup.plist 2>/dev/null && echo "  ✓ Dock layout" || { echo "  ✗ Dock layout export failed" >&2; exit 1; }
+	@defaults export com.apple.Terminal apps/terminal/terminal.plist 2>/dev/null && echo "  ✓ Terminal.app profiles" || echo "  ⚠ Terminal.app profiles not captured"
 	@# Shottr + Monokai Pro license settings are NOT kept in the repo — vault only
 	@# (~/.secrets/apps/…). Monokai is stripped above; copy license file to vault
 	@# after purchase/renewal, then make secrets-backup.

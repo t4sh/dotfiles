@@ -2,7 +2,7 @@
     "debug": "status",
     "environ": {
         "PATH": [
-            "~/.nvm/versions/node/v22.22.0/bin",
+            "~/.nvm/versions/node/v22.23.1/bin",
             "/opt/homebrew/bin",
             "/opt/homebrew/sbin"
         ]

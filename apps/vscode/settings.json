@@ -274,6 +274,38 @@
     "atlascode.bitbucket.enabled": false,
     "atlascode.jira.enabled": true,
     "workbench.activityBar.location": "bottom",
+    "chat.tools.terminal.autoApprove": {
+        "true": true,
+        "/^git --no-pager diff --name-only dev\\.\\.\\.origin/update/legal-in-strapi \\|\\| true$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^git fetch --all --prune && git --no-pager diff --name-only dev\\.\\.\\.origin/update/legal-in-strapi \\|\\| true$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^git fetch --all --prune$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^git rev-parse --verify origin/update/legal-in-strapi && git --no-pager diff --name-only dev\\.\\.\\.origin/update/legal-in-strapi \\|\\| true$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^git --no-pager diff dev\\.\\.\\.origin/update/legal-in-strapi$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^git --no-pager diff --name-only dev\\.\\.\\.origin/update/legal-in-strapi$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^git fetch origin update/legal-in-strapi 2>&1 && git diff HEAD origin/update/legal-in-strapi --stat$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "git fetch": true
+    },
     "svg.preview.mode": "svg",
     "claudeCode.preferredLocation": "sidebar",
     "python.defaultInterpreterPath": "/opt/homebrew/bin/python3",
@@ -304,5 +336,20 @@
     "chat.viewSessions.orientation": "stacked",
     "workbench.preferredHighContrastLightColorTheme": "Monokai Pro Light",
     "workbench.preferredLightColorTheme": "Monokai Pro Light (Filter Sun)",
+    "google.cloud.project": "gen-lang-client-0254110631",
+    "jupyter.runStartupCommands": [
+        "import bigframes",
+        "%load_ext bigframes",
+        "bigframes.options.bigquery.project = \"gen-lang-client-0254110631\"",
+        "bigframes.options.bigquery.application_name = \"datacloud.visual studio code\""
+    ],
     "chat.unifiedAgentsBar.enabled": true,
+    "yaml.disableSchemaDetection": [
+        "**/.github/workflows/*.yml",
+        "**/.github/workflows/*.yaml",
+        "**/.gitea/workflows/*.yml",
+        "**/.gitea/workflows/*.yaml",
+        "**/.forgejo/workflows/*.yml",
+        "**/.forgejo/workflows/*.yaml"
+    ],
 }

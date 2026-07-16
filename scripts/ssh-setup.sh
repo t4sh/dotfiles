@@ -3,8 +3,8 @@
 #   1. Generate Ed25519 at ~/.secrets/ssh/github_ed25519 (if missing)
 #   2. chmod tightly
 #   3. Add to ssh-agent with Apple Keychain integration
-#   4. Upload public key to GitHub via gh CLI
-#   5. Verify with `ssh -T git@github.com`
+#   4. Verify the exact key with GitHub
+#   5. Upload via gh only when verification proves registration is missing
 #
 # Tower, VS Code, Cursor, and any CLI git will all pick up the same key through
 # the macOS ssh-agent — no separate "sync to Tower" step is needed.
@@ -43,30 +43,73 @@ fi
 # 3. Add to ssh-agent + Apple Keychain (Ed25519 without passphrase is a no-op
 #    for Keychain; kept for future keys that may carry one).
 info "registering with ssh-agent"
-ssh-add --apple-use-keychain "$KEY" 2>/dev/null || true
-ok "ssh-agent updated"
-
-# 4. Upload public key to GitHub via gh (skip if already registered)
-if ! command -v gh >/dev/null 2>&1; then
-  die "gh CLI not found — install via: brew install gh"
-fi
-if ! gh auth status >/dev/null 2>&1; then
-  warn "gh not authenticated — skipping GitHub key upload"
-  warn "after GitHub auth, re-run: make ssh-setup"
+if ssh-add --apple-use-keychain "$KEY" >/dev/null 2>&1; then
+  ok "ssh-agent updated with Apple Keychain integration"
+elif ssh-add "$KEY" >/dev/null 2>&1; then
+  warn "ssh-agent updated without Apple Keychain integration"
 else
-  # Match on `ssh-ed25519 <base64>` — the comment (email) field isn't stored by
-  # GitHub, so we compare only the type + body. gh ssh-key list is tab-separated;
-  # field 2 is the key itself.
-  PUB_PREFIX="$(awk '{print $1, $2}' "$KEY.pub")"
-  if gh ssh-key list 2>/dev/null | cut -f2 | grep -qxF "$PUB_PREFIX"; then
-    ok "public key already registered on GitHub — skipping upload"
+  die "could not add $KEY to ssh-agent"
+fi
+
+verify_github_key() {
+  local output status
+  set +e
+  output="$(ssh -T -i "$KEY" -o IdentitiesOnly=yes -o BatchMode=yes \
+    -o ConnectTimeout=10 git@github.com 2>&1)"
+  status=$?
+  set -e
+  VERIFY_OUTPUT="$output"
+  VERIFY_STATUS=$status
+  [[ "$output" == *"successfully authenticated"* ]]
+}
+
+# 4. Verify the exact key before using the API. This avoids requiring the
+# admin:public_key scope when the key is already registered.
+SSH_VERIFIED=0
+info "verifying the exact key with GitHub"
+if verify_github_key; then
+  printf '%s\n' "$VERIFY_OUTPUT" | sed -n '1,2p'
+  ok "public key already registered and authenticating"
+  SSH_VERIFIED=1
+fi
+
+# 5. Upload only when verification proves the key is not registered.
+if (( ! SSH_VERIFIED )); then
+  if ! command -v gh >/dev/null 2>&1; then
+    die "gh CLI not found — install via: brew install gh"
+  fi
+  if ! gh auth status >/dev/null 2>&1; then
+    warn "gh not authenticated — GitHub key upload and verification pending"
+    warn "after GitHub auth, re-run: make ssh-setup"
   else
-    info "uploading public key to GitHub (label: $LABEL)"
-    gh ssh-key add "$KEY.pub" --title "$LABEL" && ok "key added to GitHub"
+    if ! key_list="$(gh ssh-key list 2>&1)"; then
+      printf '%s\n' "$key_list" >&2
+      die "cannot query GitHub SSH keys; run: gh auth refresh -h github.com -s admin:public_key"
+    fi
+
+    PUB_PREFIX="$(awk '{print $1, $2}' "$KEY.pub")"
+    if printf '%s\n' "$key_list" | cut -f2 | grep -qxF "$PUB_PREFIX"; then
+      ok "public key already listed on GitHub"
+    else
+      info "uploading public key to GitHub (label: $LABEL)"
+      gh ssh-key add "$KEY.pub" --title "$LABEL" || \
+        die "GitHub key upload failed; refresh gh's admin:public_key scope and retry"
+      ok "key added to GitHub"
+    fi
+
+    info "verifying uploaded key with GitHub"
+    if verify_github_key; then
+      printf '%s\n' "$VERIFY_OUTPUT" | sed -n '1,2p'
+      ok "GitHub SSH authentication verified"
+      SSH_VERIFIED=1
+    else
+      die "GitHub SSH verification failed (status $VERIFY_STATUS)"
+    fi
   fi
 fi
 
-# 5. Verify
-info "verifying ssh -T git@github.com"
-ssh -T git@github.com 2>&1 | head -2 || true
-ok "done — Tower / VS Code / git CLI will all share this key via ssh-agent"
+if (( SSH_VERIFIED )); then
+  ok "Tower / VS Code / git CLI share this verified key via ssh-agent"
+else
+  warn "local key is loaded, but GitHub registration is still pending"
+fi
