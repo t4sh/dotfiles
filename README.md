@@ -35,8 +35,8 @@ Most [awesome-dotfiles](https://github.com/webpro/awesome-dotfiles) examples sto
 - **Shell** — modular zsh ([`zsh/lib/`](zsh/lib/)), Starship themes, [`bin/dot`](bin/dot) script dispatcher, [`bin/j`](bin/j) project opener
 - **Packages** — [`Brewfile`](Brewfile): CLI tools, casks, fonts, Mac App Store apps, VS Code extensions
 - **Git** — global config, gitignore, useful aliases
-- **macOS** — [`macos/defaults.sh`](macos/defaults.sh), Dock layout plist, optional Hammerspoon center-window hotkey
-- **Apps** — non-secret preference snapshots (Rectangle, Dato, Sublime, VS Code, Terminal, Velja, …)
+- **macOS** — [`macos/defaults.sh`](macos/defaults.sh), Dock layout plist, Hammerspoon window management
+- **Apps** — non-secret preference snapshots (Dato, Sublime, VS Code, Cursor, Terminal, Velja, Rectangle fallback prefs, …)
 - **Services** — Automator Quick Actions (open in editor, PDF helpers, …)
 - **Agents** — public-safe rules, skills, commands, and agent definitions under [`agents/`](agents/)
 - **Safety** — gitleaks pre-commit, app-pref audit, skill license audit, Brewfile drift audit
@@ -166,11 +166,24 @@ Shell helper `jcd` (in `zsh/lib/50-functions.zsh`) fuzzy-cds into `~/Projects`.
 
 ## Hammerspoon
 
-[`hammerspoon/init.lua`](hammerspoon/init.lua) is symlinked to `~/.hammerspoon`. After `make brew`, open Hammerspoon once and grant Accessibility.
+[`hammerspoon/init.lua`](hammerspoon/init.lua) is symlinked to `~/.hammerspoon` by `make link`. After `make brew`:
 
-- **Hyper** (`⌘⌥⌃⇧`) + `c` — center focused window at 1440×900 (capped to visible monitor frame)
+1. Open Hammerspoon and enable **Launch Hammerspoon at login**.
+2. Enable Hammerspoon in **System Settings → Privacy & Security → Accessibility**.
+3. Run `make doctor` to verify the config link, runtime, and permission.
 
-[Rectangle](https://rectangleapp.com/) remains the primary window manager; Hammerspoon is intentionally minimal.
+Window management:
+
+- `⌃⌥Return` → almost maximize (90%, centered)
+- `⌃⌥⇧Return` → maximize
+- `⌃⌥Delete` → restore the pre-Hammerspoon frame
+- `⌃⌥C` → center without changing size
+- `⌃⌥-` / `⌃⌥=` → make smaller / bigger in 30 px steps
+- `⌃⌥⌘←` / `⌃⌥⌘→` → previous / next display
+- Hyper (`⌘⌥⌃⇧`) + `C` → center at `1440x900` px, capped to the monitor frame
+- Drag a window title bar to a display's top edge → preview and almost maximize
+
+Hammerspoon is the primary window manager. [Rectangle](https://rectangleapp.com/) remains installed as a manually launched fallback (`launchOnLogin` disabled in the tracked prefs).
 
 ## Default app policy
 
@@ -259,7 +272,7 @@ Create `~/.dotfiles/zsh/lib/99-local.zsh` for anything that must not be committe
 | [`git/`](git/) | Git config and global ignore |
 | [`starship/`](starship/) | Prompt themes |
 | [`config/`](config/) | Tool configs, duti, EditorConfig, inputrc, topgrade, MCP |
-| [`hammerspoon/`](hammerspoon/) | Minimal window helper |
+| [`hammerspoon/`](hammerspoon/) | Primary window manager (Rectangle-style shortcuts + top-edge Almost Maximize) |
 | [`agents/`](agents/) | Agent rules, skills, commands |
 | [`apps/`](apps/) | App preference snapshots |
 | [`macos/`](macos/) | System defaults and Dock |
