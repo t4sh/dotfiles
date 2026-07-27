@@ -67,22 +67,204 @@ const fs = require("fs");
 const path = process.env.EDITOR_SETTINGS;
 if (!path) process.exit(1);
 let s = fs.readFileSync(path, "utf8");
-const re = /\n(\s*)"yaml\.schemas"\s*:\s*\{/;
-const m = re.exec(s);
-if (!m || !s.includes("/Users/")) process.exit(0);
-const start = m.index;
-let i = m.index + m[0].length;
-let depth = 1;
-while (i < s.length && depth > 0) {
-  const ch = s[i++];
-  if (ch === "{") depth++;
-  else if (ch === "}") depth--;
+
+function skipTrivia(pos) {
+  while (pos < s.length) {
+    if (/\s/.test(s[pos])) { pos++; continue; }
+    if (s[pos] === "/" && s[pos + 1] === "/") {
+      pos += 2;
+      while (pos < s.length && s[pos] !== "\n") pos++;
+      continue;
+    }
+    if (s[pos] === "/" && s[pos + 1] === "*") {
+      pos += 2;
+      while (pos + 1 < s.length && !(s[pos] === "*" && s[pos + 1] === "/")) pos++;
+      pos += 2;
+      continue;
+    }
+    break;
+  }
+  return pos;
 }
-while (s[i] === " " || s[i] === "\t") i++;
-if (s[i] === ",") i++;
-if (s[i] === "\r") i++;
-if (s[i] === "\n") i++;
-fs.writeFileSync(path, s.slice(0, start) + s.slice(i));
+
+function findSchemasOpen() {
+  let pos = 0;
+  while (pos < s.length) {
+    if (s[pos] === "/" && s[pos + 1] === "/") {
+      pos += 2;
+      while (pos < s.length && s[pos] !== "\n") pos++;
+      continue;
+    }
+    if (s[pos] === "/" && s[pos + 1] === "*") {
+      pos += 2;
+      while (pos + 1 < s.length && !(s[pos] === "*" && s[pos + 1] === "/")) pos++;
+      pos += 2;
+      continue;
+    }
+    if (s[pos] !== '"' && s[pos] !== "'") { pos++; continue; }
+
+    const start = pos;
+    const delimiter = s[pos++];
+    let escaped = false;
+    while (pos < s.length) {
+      const ch = s[pos++];
+      if (escaped) escaped = false;
+      else if (ch === "\\") escaped = true;
+      else if (ch === delimiter) break;
+    }
+    if (delimiter !== '"' || s.slice(start, pos) !== '"yaml.schemas"') continue;
+
+    let next = skipTrivia(pos);
+    if (s[next] !== ":") continue;
+    next = skipTrivia(next + 1);
+    if (s[next] === "{") return next;
+  }
+  return -1;
+}
+
+const open = findSchemasOpen();
+if (open < 0) {
+  const output = redactLocalPathsInComments(s);
+  if (output !== s) fs.writeFileSync(path, output);
+  process.exit(0);
+}
+let i = open + 1;
+let depth = 1;
+let quote = "";
+let escaped = false;
+let lineComment = false;
+let blockComment = false;
+while (i < s.length && depth > 0) {
+  const ch = s[i];
+  const next = s[i + 1] || "";
+  if (lineComment) {
+    if (ch === "\n") lineComment = false;
+  } else if (blockComment) {
+    if (ch === "*" && next === "/") { blockComment = false; i++; }
+  } else if (quote) {
+    if (escaped) escaped = false;
+    else if (ch === "\\") escaped = true;
+    else if (ch === quote) quote = "";
+  } else if (ch === '"' || ch === "'") {
+    quote = ch;
+  } else if (ch === "/" && next === "/") {
+    lineComment = true; i++;
+  } else if (ch === "/" && next === "*") {
+    blockComment = true; i++;
+  } else if (ch === "{") depth++;
+  else if (ch === "}") depth--;
+  i++;
+}
+if (depth !== 0) process.exit(1);
+
+const close = i - 1;
+const body = s.slice(open + 1, close);
+const entries = [];
+let start = 0;
+depth = 0; quote = ""; escaped = false; lineComment = false; blockComment = false;
+for (let j = 0; j < body.length; j++) {
+  const ch = body[j];
+  const next = body[j + 1] || "";
+  if (lineComment) {
+    if (ch === "\n") lineComment = false;
+  } else if (blockComment) {
+    if (ch === "*" && next === "/") { blockComment = false; j++; }
+  } else if (quote) {
+    if (escaped) escaped = false;
+    else if (ch === "\\") escaped = true;
+    else if (ch === quote) quote = "";
+  } else if (ch === '"' || ch === "'") {
+    quote = ch;
+  } else if (ch === "/" && next === "/") {
+    lineComment = true; j++;
+  } else if (ch === "/" && next === "*") {
+    blockComment = true; j++;
+  } else if (ch === "{" || ch === "[") depth++;
+  else if (ch === "}" || ch === "]") depth--;
+  else if (ch === "," && depth === 0) {
+    entries.push(body.slice(start, j));
+    start = j + 1;
+  }
+}
+entries.push(body.slice(start));
+
+function withoutComments(text) {
+  let result = "";
+  let pos = 0;
+  let delimiter = "";
+  let escaped = false;
+  while (pos < text.length) {
+    const ch = text[pos];
+    const next = text[pos + 1] || "";
+    if (delimiter) {
+      result += ch;
+      if (escaped) escaped = false;
+      else if (ch === "\\") escaped = true;
+      else if (ch === delimiter) delimiter = "";
+      pos++;
+    } else if (ch === '"' || ch === "'") {
+      delimiter = ch;
+      result += ch;
+      pos++;
+    } else if (ch === "/" && next === "/") {
+      pos += 2;
+      while (pos < text.length && text[pos] !== "\n") pos++;
+    } else if (ch === "/" && next === "*") {
+      pos += 2;
+      while (pos + 1 < text.length && !(text[pos] === "*" && text[pos + 1] === "/")) pos++;
+      pos += 2;
+    } else {
+      result += ch;
+      pos++;
+    }
+  }
+  return result;
+}
+
+function redactLocalPathsInComments(text) {
+  const localPath = /\/Users\/[^\/\s<"']+/g;
+  let result = "";
+  let pos = 0;
+  let delimiter = "";
+  let escaped = false;
+  while (pos < text.length) {
+    const ch = text[pos];
+    const next = text[pos + 1] || "";
+    if (delimiter) {
+      result += ch;
+      if (escaped) escaped = false;
+      else if (ch === "\\") escaped = true;
+      else if (ch === delimiter) delimiter = "";
+      pos++;
+    } else if (ch === '"' || ch === "'") {
+      delimiter = ch;
+      result += ch;
+      pos++;
+    } else if (ch === "/" && next === "/") {
+      const end = text.indexOf("\n", pos);
+      const stop = end < 0 ? text.length : end;
+      result += text.slice(pos, stop).replace(localPath, "~");
+      pos = stop;
+    } else if (ch === "/" && next === "*") {
+      const end = text.indexOf("*/", pos + 2);
+      const stop = end < 0 ? text.length : end + 2;
+      result += text.slice(pos, stop).replace(localPath, "~");
+      pos = stop;
+    } else {
+      result += ch;
+      pos++;
+    }
+  }
+  return result;
+}
+
+const kept = entries.filter((entry) => !withoutComments(entry).includes("/Users/"));
+let output = s;
+if (kept.length !== entries.length) {
+  output = s.slice(0, open + 1) + kept.join(",") + s.slice(close);
+}
+output = redactLocalPathsInComments(output);
+if (output !== s) fs.writeFileSync(path, output);
 NODE
 }
 

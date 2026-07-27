@@ -166,8 +166,7 @@ for input in "$@"; do
     &amp;&amp; exiftool -q -q -overwrite_original -all:all= "$compressed" \
     &amp;&amp; qpdf --linearize "$compressed" "$rebuilt" \
     &amp;&amp; mv "$rebuilt" "$output"; then
-      tmpdir=""
-      trap - EXIT INT TERM
+      # Keep tmpdir set until the shared cleanup below removes compressed.pdf.
       (( created++ ))
   else
       alert "Failed to compress $(basename "$input"). File may be corrupt or password-protected."

@@ -1,8 +1,9 @@
 # Template for the real manifest.
 #
 # Copy to ~/.dotfiles-local/backup.manifest (NOT into the repo) and edit.
-# One path per line. `#` starts a comment. `~` and $VARS are expanded.
-# Missing paths are warned and skipped, not fatal.
+# One path per line. `#` starts a comment. Supported prefixes: ~, $HOME,
+# $DOTFILES_SECRETS_DIR, and $DOTFILES_LOCAL_DIR (also ${…} forms).
+# Other variable/command expansion is rejected; missing paths are warned/skipped.
 #
 # Recommended (single canonical tree — see README § Secrets layout):
 #

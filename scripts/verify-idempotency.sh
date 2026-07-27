@@ -52,8 +52,7 @@
 #     - GoToField / GoToFieldHistory (Cmd-Shift-G history)
 #
 #   NSGlobalDomain:
-#     - AppleAntiAliasingThreshold, AppleLanguages reorderings, and various
-#       keys macOS rewrites on login / screen change
+#     - AppleAntiAliasingThreshold and AppleLanguages reorderings
 #
 #   Anywhere:
 #     - `book = { length = N, bytes = 0x... }` entries — binary bookmark
@@ -81,9 +80,10 @@
 #   [ ] `xcode-select -p` returns a path (was step 1 of install.sh)
 #   [ ] `command -v brew` resolves (Homebrew installed)
 #   [ ] `echo $SHELL` returns /bin/zsh (default shell change took)
-#   [ ] `ssh -T git@github.com` greets by username (key generated + uploaded)
+#   [ ] `ssh -T git@github.com` greets by username (restored key validated and registered)
 #   [ ] `gh ssh-key list` has exactly ONE entry for this host. `make ssh-setup`
-#       skips this key if already registered; prune older manual duplicates.
+#       skips this key if already registered; generation requires explicit
+#       `scripts/ssh-setup.sh --generate`. Prune older manual duplicates.
 #   [ ] `ls ~/.secrets/` is populated (vault restored from sparseimage)
 #   [ ] `gh auth status` reports logged in
 #   [ ] Touch ID for sudo works in a NEW terminal tab (/etc/pam.d/sudo_local)
@@ -99,7 +99,7 @@
 # correctness.
 set -euo pipefail
 
-SNAPDIR="/tmp/dotfiles-idempotency-$USER"
+SNAPDIR="${DOTFILES_IDEMPOTENCY_SNAPSHOT_DIR:-/tmp/dotfiles-idempotency-$USER}"
 mkdir -p "$SNAPDIR"
 
 DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
@@ -126,8 +126,39 @@ snapshot_links() {
     done
 }
 
+normalize_defaults_plist() {
+    local domain="$1" plist="$2"
+    python3 - "$domain" "$plist" <<'PY'
+import plistlib
+import sys
+
+DOMAIN = sys.argv[1]
+DROP = {"book", "file-bookmark"}
+if DOMAIN == "com.apple.dock":
+    DROP.update({"GUID", "mod-count", "parent-mod-date"})
+elif DOMAIN == "com.apple.finder":
+    DROP.update({"FXRecentFolders", "GoToField", "GoToFieldHistory"})
+elif DOMAIN == "NSGlobalDomain":
+    DROP.update({"AppleAntiAliasingThreshold", "AppleLanguages"})
+
+
+def clean(value):
+    if isinstance(value, dict):
+        return {key: clean(child) for key, child in value.items() if key not in DROP}
+    if isinstance(value, list):
+        return [clean(child) for child in value]
+    return value
+
+
+with open(sys.argv[2], "rb") as handle:
+    data = plistlib.load(handle)
+sys.stdout.buffer.write(plistlib.dumps(clean(data), fmt=plistlib.FMT_XML, sort_keys=True))
+PY
+}
+
 snapshot_defaults() {
-    # Domains our scripts actually touch. Full `defaults read` is too noisy.
+    # Export deterministic plists and remove only the documented runtime-noise
+    # keys. Any remaining difference is actionable idempotency drift.
     local domains=(
         com.apple.dock
         com.apple.finder
@@ -138,9 +169,16 @@ snapshot_defaults() {
         com.apple.symbolichotkeys
         NSGlobalDomain
     )
+    local d raw
     for d in "${domains[@]}"; do
         printf '=== %s ===\n' "$d"
-        defaults read "$d" 2>/dev/null || echo "(domain absent)"
+        raw="$(mktemp)"
+        if defaults export "$d" - > "$raw" 2>/dev/null; then
+            normalize_defaults_plist "$d" "$raw"
+        else
+            echo "(domain absent)"
+        fi
+        rm -f "$raw"
     done
 }
 
@@ -176,46 +214,51 @@ phase_diff() {
     snapshot_repo     > "$tmp/repo.txt"
     snapshot_brew     > "$tmp/brew.txt"
 
-    local any=0
+    local actionable=0
     echo "=== symlink / file drift ==="
-    if ! diff -u "$SNAPDIR/links.txt" "$tmp/links.txt"; then any=1; fi
+    if ! diff -u "$SNAPDIR/links.txt" "$tmp/links.txt"; then actionable=1; fi
 
     echo ""
     echo "=== repo drift (should be empty — make all must not modify tracked files) ==="
-    if ! diff -u "$SNAPDIR/repo.txt" "$tmp/repo.txt"; then any=1; fi
+    if ! diff -u "$SNAPDIR/repo.txt" "$tmp/repo.txt"; then actionable=1; fi
 
     echo ""
     echo "=== brew drift ==="
-    if ! diff -u "$SNAPDIR/brew.txt" "$tmp/brew.txt"; then any=1; fi
+    if ! diff -u "$SNAPDIR/brew.txt" "$tmp/brew.txt"; then actionable=1; fi
 
     echo ""
     echo "=== brewfile audit (declared vs current system — catches rg-style gaps) ==="
-    if ! bash "$DOTFILES/scripts/audit-brewfile.sh" --check; then any=1; fi
+    if ! bash "$DOTFILES/scripts/audit-brewfile.sh" --check; then actionable=1; fi
 
     echo ""
-    echo "=== defaults drift (filtered to our domains; expect some noise) ==="
-    if ! diff -u "$SNAPDIR/defaults.txt" "$tmp/defaults.txt"; then any=1; fi
+    echo "=== defaults drift (documented runtime-noise keys normalized) ==="
+    if ! diff -u "$SNAPDIR/defaults.txt" "$tmp/defaults.txt"; then actionable=1; fi
+
+    echo ""
+    echo "=== captured app preference safety ==="
+    if ! bash "$DOTFILES/scripts/audit-app-prefs.sh" --check; then actionable=1; fi
 
     echo ""
     echo "=== skill license gate (no restrictive-licensed skill un-gitignored) ==="
-    if ! bash "$DOTFILES/scripts/audit-skill-licenses.sh" --check; then any=1; fi
+    if ! bash "$DOTFILES/scripts/audit-skill-licenses.sh" --check; then actionable=1; fi
 
     echo ""
     echo "=== rulebook sync (AGENTS.md @-includes match agents/rules/*.md) ==="
-    if ! bash "$DOTFILES/scripts/audit-rules.sh"; then any=1; fi
+    if ! bash "$DOTFILES/scripts/audit-rules.sh"; then actionable=1; fi
 
     echo ""
     echo "=== Skillsfile sync (generated manifest matches .skill-lock.json) ==="
-    if ! python3 "$DOTFILES/scripts/gen-skillsfile.py" --check; then any=1; fi
+    if ! python3 "$DOTFILES/scripts/gen-skillsfile.py" --check; then actionable=1; fi
 
     echo ""
-    if [ "$any" -eq 0 ]; then
-        echo "✓ no drift detected across links, repo, brew, defaults, or license gate."
+    if [ "$actionable" -eq 0 ]; then
+        echo "✓ no actionable drift detected across links, repo, brew, preferences, or policy gates."
     else
-        echo "⚠ drift detected — review diffs above."
+        echo "✗ actionable drift detected — review diffs above."
     fi
 
     rm -rf "$tmp"
+    return "$actionable"
 }
 
 case "${1:-}" in

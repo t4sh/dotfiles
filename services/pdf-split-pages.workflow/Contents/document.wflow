@@ -120,7 +120,7 @@ for input in "$@"; do
 
   # Avoid overwriting an existing split; keep the requested /&lt;filename&gt;/ folder
   # for the first run, then use /&lt;filename&gt;-2/, /&lt;filename&gt;-3/, etc.
-  if [[ -d "$outdir" &amp;&amp; -n "$(find "$outdir" -mindepth 1 -maxdepth 1 -print -quit 2&gt;/dev/null)" ]]; then
+  if [[ -e "$outdir" ]]; then
     n=2
     while [[ -e "$dir/$stem-$n" ]]; do
       (( n++ ))

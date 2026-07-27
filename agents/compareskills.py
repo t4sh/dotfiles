@@ -223,8 +223,22 @@ def main():
         print(f"  Gated (on disk, excluded from git): {', '.join(gated_on_disk)}")
 
     content = build_readme(disk_skills, lock_version, lock_skills, remarks, gated)
-    README_FILE.write_text(content)
+    current = README_FILE.read_text() if README_FILE.exists() else None
+    def stable(text: str) -> str:
+        return re.sub(
+            r"^generated: .+$",
+            "generated: <stable>",
+            text,
+            count=1,
+            flags=re.MULTILINE,
+        )
 
+    if current is not None and stable(current) == stable(content):
+        print(f"\n  Unchanged {README_FILE}")
+        print(f"  {len(disk_skills)} skills total")
+        return
+
+    README_FILE.write_text(content)
     print(f"\n  Wrote {README_FILE}")
     print(f"  {len(disk_skills)} skills total")
 

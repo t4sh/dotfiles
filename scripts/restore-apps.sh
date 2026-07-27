@@ -26,9 +26,13 @@ done < "$DOTFILES/apps.tsv"
 
 # Dato (cp plist into app's container)
 DATO_DST="$HOME/Library/Group Containers/group.com.sindresorhus.Dato/Library/Preferences/group.com.sindresorhus.Dato.plist"
-if [ -f "$DOTFILES/apps/dato/dato.plist" ] && [ -d "$(dirname "$DATO_DST")" ]; then
-    cp "$DOTFILES/apps/dato/dato.plist" "$DATO_DST"
-    echo "  ✓ Dato"
+if [ -f "$DOTFILES/apps/dato/dato.plist" ]; then
+    if [ -d "$(dirname "$DATO_DST")" ]; then
+        cp "$DOTFILES/apps/dato/dato.plist" "$DATO_DST"
+        echo "  ✓ Dato"
+    else
+        echo "  ⚠ Dato not restored — launch it once to create its group container, then re-run make restore-apps"
+    fi
 fi
 
 # Sublime Text (cp into Packages/User/; Monokai license file is vault-only)

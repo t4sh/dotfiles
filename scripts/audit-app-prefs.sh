@@ -57,6 +57,7 @@ scan_file() {
     *.plist)
       tmp="$TMPDIR/${rel//\//__}.xml"
       if ! plutil -convert xml1 -o "$tmp" "$f" 2>/dev/null; then
+        report "unreadable or malformed plist: $rel"
         return 0
       fi
       scan="$tmp"
@@ -78,7 +79,10 @@ for root in "${ROOTS[@]}"; do
     esac
     scan_file "$f"
   done < <(/usr/bin/find "$root" -type f \( \
-    -name '*.json' -o -name '*.sublime-settings' -o -name '*.plist' -o -name '*.xml' -o -name '*.sh' -o -name 'document.wflow' \
+    -name '*.json' -o -name '*.sublime-settings' -o -name '*.sublime-keymap' \
+    -o -name '*.sublime-snippet' -o -name '*.sublime-macro' -o -name '*.palettes' \
+    -o -name '*.py' -o -name '*.plist' -o -name '*.xml' -o -name '*.sh' \
+    -o -name 'document.wflow' \
   \) -print0 2>/dev/null)
 done
 

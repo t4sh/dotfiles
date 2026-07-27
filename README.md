@@ -54,15 +54,16 @@ bash install.sh
 
 `install.sh` resolves the repo root from its own location (or `DOTFILES` if set), so a non-default clone path works: `DOTFILES=~/src/dotfiles bash ~/src/dotfiles/install.sh`.
 
-`install.sh` installs Xcode CLI tools (if needed), Homebrew, symlinks, Brewfile packages, NVM/Node, app prefs, Automator services, optional macOS/Dock/SSH prompts, git hooks, and Terminal profiles (quits Terminal — expected once).
+`install.sh` installs Xcode CLI tools (if needed), Homebrew, non-App-Store Brewfile packages, NVM/Node, symlinks, app prefs, convergent Automator services, optional macOS/Dock settings, git hooks, and optionally Terminal profiles at the very end.
 
-It does **not** run: `rules-audit`, `skills-audit`, `make dock` (unless you answer yes), `make default-apps`, `make doctor`, `make docs-audit`, or `make skills`. Those are documented manual follow-ups.
+It does **not** run: `rules-audit`, `skills-audit`, `make dock` (unless you answer yes), `make ssh-setup`, `make default-apps`, `make doctor`, `make docs-audit`, or `make skills`. Those are documented manual follow-ups.
 
 After bootstrap:
 
-1. Sign into iCloud / App Store
-2. Restore `~/.secrets/` from your encrypted vault (if you use one) → `make link`
-3. Complete the manual steps printed at the end of `install.sh`
+1. Sign into the App Store, then run `make brew-mas`.
+2. Recover the vault password from an independent password manager, restore `~/.secrets/`, then run `make secrets-pass-import`.
+3. Run `make link && make ssh-setup` only after the existing secret-backed identity is restored.
+4. Complete the remaining manual steps printed by `install.sh`.
 
 ### Existing Mac (already has Homebrew)
 
@@ -72,11 +73,11 @@ cd ~/.dotfiles
 make all
 ```
 
-`make all` runs: `link` → `rules-audit` → `skills-audit` → `brew` → `services` → `restore-apps` → `dock` → `hooks` → `ssh-setup` → `macos` (interactive, last).
+`make all` runs: `link` → `rules-audit` → `skills-audit` → `brew` → `shims` → `services` → `restore-apps` → `dock` → `hooks` → `macos` (interactive, last).
 
-`ssh-setup` generates or registers an SSH key with GitHub when `gh` is available — skip or run manually if you already have keys.
+`ssh-setup` is deliberately manual and restore-first: it validates and registers an existing vault-backed key. Creating a new canonical identity requires the explicit `scripts/ssh-setup.sh --generate` option.
 
-Manual targets (not in `all`): `terminal`, `default-apps`, `capture-default-apps`, `doctor`, `docs-audit`, `skills`.
+Manual targets (not in `all`): `ssh-setup`, `terminal`, `default-apps`, `capture-default-apps`, `doctor`, `docs-audit`, `skills`.
 
 ```bash
 make help   # full target list with descriptions
@@ -103,14 +104,17 @@ Add a new symlink: one row in [`symlinks.tsv`](symlinks.tsv). No Stow/dotbot con
 |--------|---------|
 | `make all` | Main re-apply sequence (see above) |
 | `make link` | Apply symlinks from `symlinks.tsv` |
-| `make brew` | Install Brewfile packages |
+| `make brew` | Install the complete Brewfile on an App-Store-authenticated Mac |
+| `make brew-base` | Install Brewfile entries except App Store apps |
+| `make brew-mas` | Install App Store apps after signing in |
 | `make brew-check` | Quick install-state check |
+| `make shims` | Create or repair the pinned `node-stable` / `npx-stable` shims |
 | `make restore-apps` | Restore tracked app preference snapshots |
 | `make services` | Install Automator workflows |
 | `make macos` | Apply macOS defaults (interactive) |
 | `make dock` | Restore Dock layout |
 | `make terminal` | Import Terminal profiles (quits Terminal — run outside Terminal.app) |
-| `make ssh-setup` | Generate/register GitHub SSH key via `gh` |
+| `make ssh-setup` | Validate/register a restored GitHub SSH key via `gh` |
 | `make hooks` | Install git hooks (gitleaks) |
 
 ### Policy & audits
@@ -134,7 +138,8 @@ Add a new symlink: one row in [`symlinks.tsv`](symlinks.tsv). No Stow/dotbot con
 | `make backup-canary` / `make restore-canary` | Canary Mail vault workflow |
 | `make backup-shottr` / `make restore-shottr` | Shottr license prefs vault workflow |
 | `make secrets-backup` | Snapshot `~/.secrets/` into encrypted sparseimage |
-| `make secrets-mount` / `make secrets-pass` | Vault mount / password helper |
+| `make secrets-mount` / `make secrets-pass` | Vault mount / local password-copy helper |
+| `make secrets-pass-import` | Import a recovered vault password into the local Keychain |
 
 ### Agents
 
@@ -207,7 +212,7 @@ Non-redistributable or private skills must **not** be committed — `make skills
 Install global skills after bootstrap:
 
 ```bash
-make skills    # needs gh auth for some private skill sources
+make skills    # needs gh auth for GitHub-authenticated skill sources
 ```
 
 ## Secrets
@@ -224,10 +229,13 @@ Nothing secret lives in git. Canonical layout:
 Vault workflow:
 
 ```bash
-make secrets-backup
+make secrets-backup   # requires a separately stored, verified recovery copy
 make secrets-mount
-make secrets-pass     # copy vault password from Keychain
+make secrets-pass     # copy the local Keychain password without printing it
+make secrets-pass-import  # import a recovered password on a replacement Mac
 ```
+
+The CLI-created Keychain item is local and is not assumed to synchronize through iCloud Keychain. Store and verify a separate recovery copy in an independently synchronized password manager. Backups publish through hidden partial directories, retain complete snapshots on copy failure, and prune only finalized snapshots.
 
 ## Safety gates
 
@@ -249,7 +257,7 @@ make all
 scripts/verify-idempotency.sh diff
 ```
 
-Snapshots live under `/tmp/dotfiles-idempotency-$USER/`.
+Snapshots live under `/tmp/dotfiles-idempotency-$USER/`. The verifier normalizes only documented macOS runtime-noise keys; every remaining link, repository, Brewfile, preference, or defaults difference is actionable and returns nonzero.
 
 ## Local customizations
 
