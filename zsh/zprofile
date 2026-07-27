@@ -14,9 +14,9 @@ export HISTFILE=$HOME/.zsh_history
 export HISTSIZE=10000
 export SAVEHIST=10000
 
-# path variable
-export PATH=/usr/local/bin:/usr/local/sbin:"$PATH"
-
-# ----- Mine
-[ -x /opt/homebrew/bin/brew ] && eval "$(/opt/homebrew/bin/brew shellenv)"
+# Homebrew is already discoverable through the dual-prefix PATH in .zshenv.
+# `shellenv` supplies the matching prefix for both Apple Silicon and Intel.
+if command -v brew >/dev/null 2>&1; then
+  eval "$(brew shellenv)"
+fi
 export PATH="/Applications/Sublime Text.app/Contents/SharedSupport/bin:$PATH"

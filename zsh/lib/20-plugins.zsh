@@ -2,11 +2,16 @@
 # Install: brew install zsh-autosuggestions zsh-syntax-highlighting
 # (zsh-autocomplete is disabled; see https://formulae.brew.sh/formula/zsh-autocomplete)
 
-[[ -f /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]] && \
-  source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+HOMEBREW_SHARE="${HOMEBREW_PREFIX:-/opt/homebrew}/share"
 
-[[ -f /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] && \
-  source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+[[ -f "$HOMEBREW_SHARE/zsh-autosuggestions/zsh-autosuggestions.zsh" ]] && \
+  source "$HOMEBREW_SHARE/zsh-autosuggestions/zsh-autosuggestions.zsh"
+
+export ZSH_HIGHLIGHT_HIGHLIGHTERS_DIR="$HOMEBREW_SHARE/zsh-syntax-highlighting/highlighters"
+[[ -f "$HOMEBREW_SHARE/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]] && \
+  source "$HOMEBREW_SHARE/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+
+unset HOMEBREW_SHARE
 
 # Override syntax-highlighting defaults
 ZSH_HIGHLIGHT_STYLES[path]=

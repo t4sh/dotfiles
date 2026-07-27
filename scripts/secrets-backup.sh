@@ -25,6 +25,7 @@ KC_SERVICE="DotfilesSecretsVault"
 LOCAL_DIR="${DOTFILES_LOCAL_DIR:-$HOME/.dotfiles-local}"
 MANIFEST="${DOTFILES_BACKUP_MANIFEST:-$LOCAL_DIR/backup.manifest}"
 DEST_CACHE="$LOCAL_DIR/backup.destination"
+RECOVERY_ACK="$LOCAL_DIR/vault-recovery.confirmed"
 KEEP="${DOTFILES_BACKUP_KEEP:-10}"
 SIZE_CAP="${DOTFILES_VAULT_SIZE:-4g}"
 STAMP="$(date +%Y%m%d-%H%M%S)"
@@ -72,11 +73,41 @@ DEST="${DEST/#\~/$HOME}"
 [[ -w "$DEST" ]] || die "destination not writable: $DEST"
 
 mkdir -p "$LOCAL_DIR"
+
+LOCK_DIR="$LOCAL_DIR/secrets-backup.lock"
+LOCK_HELD=0
+release_lock() {
+  [[ $LOCK_HELD -eq 1 ]] && rm -rf -- "$LOCK_DIR"
+  LOCK_HELD=0
+}
+if ! mkdir "$LOCK_DIR" 2>/dev/null; then
+  lock_pid="$(cat "$LOCK_DIR/pid" 2>/dev/null || true)"
+  if [[ "$lock_pid" =~ ^[0-9]+$ ]]; then
+    if kill -0 "$lock_pid" 2>/dev/null; then
+      die "another secrets backup is already running (pid $lock_pid)"
+    fi
+    die "stale secrets-backup lock belongs to exited pid $lock_pid: $LOCK_DIR
+  verify no backup is starting, remove that stale directory manually, and retry"
+  else
+    die "backup lock exists without a valid pid: $LOCK_DIR
+  if no backup is starting, remove that stale directory and retry"
+  fi
+fi
+printf '%s\n' "$$" > "$LOCK_DIR/pid"
+LOCK_HELD=1
+trap release_lock EXIT
+
+# Persist the selected destination only after this process owns the backup lock;
+# a rejected concurrent invocation must not redirect future backup/mount runs.
 printf '%s\n' "$DEST" > "$DEST_CACHE"
 
 VAULT="$DEST/DotfilesSecrets.sparseimage"
 
-# --- passphrase: create-once, Keychain-stored, iCloud-Keychain-synced ---
+# --- passphrase: create once in the local login Keychain ---
+# `security add-generic-password` does not create a synchronizable Keychain
+# item. Recovery therefore requires a separately stored copy in a trusted,
+# independently synchronized password manager.
+#
 # `security -w` appends a trailing newline on stdout. `hdiutil -stdinpass`
 # would treat that newline as part of the passphrase, while Finder's typed
 # password has none — causing Finder "wrong password" errors on double-click.
@@ -91,7 +122,12 @@ get_pass() {
 }
 
 if ! get_pass >/dev/null; then
-  info "first run: generating vault passphrase → login Keychain (syncs via iCloud Keychain)"
+  if [[ -e "$VAULT" ]]; then
+    die "existing vault found but its local Keychain password is missing: $VAULT
+  recover the password from your independent password manager, then run:
+  make secrets-pass-import"
+  fi
+  info "first run: generating vault passphrase → local login Keychain"
   # macOS `security add-generic-password` accepts the secret via `-w` only; keep
   # the exposure limited to this create-once command and immediately unset it.
   PASS="$(openssl rand -base64 32)"
@@ -101,8 +137,50 @@ if ! get_pass >/dev/null; then
     -l "Dotfiles Secrets Vault" \
     -U -w "$PASS"
   unset PASS
-  ok "passphrase saved as '$KC_SERVICE' — you will never need to type it"
+  ok "passphrase saved locally as '$KC_SERVICE'"
 fi
+
+passphrase_fingerprint() {
+  # The generated passphrase has 256 bits of entropy. Its SHA-256 fingerprint
+  # is a non-secret equality check that invalidates acknowledgements after any
+  # Keychain password change without storing the password itself.
+  get_pass | shasum -a 256 | awk '{print $1}'
+}
+
+confirm_recovery_copy() {
+  local reply fingerprint recorded=""
+  if ! fingerprint="$(passphrase_fingerprint)" || [[ -z "$fingerprint" ]]; then
+    die "could not fingerprint the local vault password"
+  fi
+  if [[ -f "$RECOVERY_ACK" ]]; then
+    recorded="$(awk -F= '$1 == "passphrase_sha256" { print $2; exit }' "$RECOVERY_ACK")"
+    [[ -n "$recorded" && "$recorded" == "$fingerprint" ]] && return 0
+    warn "recovery confirmation does not match the current Keychain password; reconfirming"
+  fi
+
+  warn "the login-Keychain item is local and is not guaranteed to sync through iCloud Keychain"
+  warn "copy it with 'make secrets-pass', store it in an independently synchronized password manager,"
+  warn "and verify that recovery copy from another device before continuing"
+
+  if [[ "${DOTFILES_VAULT_RECOVERY_CONFIRMED:-}" == "1" ]]; then
+    reply="y"
+  elif [[ -t 0 ]]; then
+    read -r -p "Recovery copy stored and verified? [y/N]: " reply
+  else
+    die "vault recovery copy is not confirmed
+  after storing it safely, rerun interactively or set DOTFILES_VAULT_RECOVERY_CONFIRMED=1 once"
+  fi
+
+  [[ "$reply" =~ ^[Yy]$ ]] || die "vault creation/backup stopped until recovery is independently stored"
+  {
+    printf 'confirmed=%s\n' "$(date '+%Y-%m-%dT%H:%M:%S%z')"
+    printf 'passphrase_sha256=%s\n' "$fingerprint"
+  } > "$RECOVERY_ACK"
+  chmod 600 "$RECOVERY_ACK"
+  ok "external recovery confirmation recorded at $RECOVERY_ACK (no secret stored there)"
+}
+
+confirm_recovery_copy
 
 # --- vault: create once ---
 if [[ ! -e "$VAULT" ]]; then
@@ -120,6 +198,7 @@ is_mounted() {
 }
 
 MOUNTED_BY_US=0
+PARTIAL=""
 if [[ -d "$MOUNT" ]]; then
   is_mounted || die "$MOUNT exists but is not a mounted volume; remove the stale directory and re-run"
 else
@@ -130,18 +209,25 @@ fi
 [[ -d "$MOUNT" && -w "$MOUNT" ]] || die "vault mount is not writable: $MOUNT"
 
 cleanup() {
+  local status=$?
+  if [[ -n "$PARTIAL" && -d "$PARTIAL" ]]; then
+    rm -rf -- "$PARTIAL" || true
+  fi
   [[ $MOUNTED_BY_US -eq 1 ]] && hdiutil detach "$MOUNT" >/dev/null 2>&1 || true
+  release_lock
+  return "$status"
 }
 trap cleanup EXIT
 
 prune_snapshots() {
-  info "retention: keep newest $KEEP (override: DOTFILES_BACKUP_KEEP=<n> make secrets-backup)"
+  local target_keep="$1"
+  info "retention: keep newest $target_keep finalized snapshot(s)"
   /usr/bin/find "$MOUNT" -maxdepth 1 -type d \
     -name '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9][0-9][0-9]' \
-    | sort -r | tail -n +"$((KEEP + 1))" \
+    | sort -r | tail -n +"$((target_keep + 1))" \
     | while IFS= read -r d; do
         [[ -z "$d" ]] && continue
-        rm -rf "$d"
+        rm -rf -- "$d"
         ok "pruned $(basename "$d")"
       done
 }
@@ -213,14 +299,18 @@ expand_manifest_path() {
   esac
 }
 
-# --- prune first so a full snapshot always has room (prune-after left partials when full) ---
-prune_snapshots
+# Enforce any explicitly lowered/exceeded retention before checking capacity,
+# but never delete below KEEP merely to attempt a backup. A failed copy must
+# preserve every snapshot within policy. Normal pruning happens after publish.
+prune_snapshots "$KEEP"
 check_vault_space
 
-# --- snapshot into dated folder, preserving absolute paths ---
+# --- snapshot into a hidden partial folder, then publish atomically ---
 SNAP="$MOUNT/$STAMP"
-mkdir -p "$SNAP"
-info "snapshotting manifest → $STAMP"
+PARTIAL="$MOUNT/.$STAMP.partial"
+[[ ! -e "$SNAP" && ! -e "$PARTIAL" ]] || die "snapshot name collision for $STAMP — wait one second and retry"
+mkdir -p "$PARTIAL"
+info "snapshotting manifest → .$STAMP.partial"
 COUNT=0
 while IFS= read -r line || [[ -n "$line" ]]; do
   line="${line%%#*}"
@@ -235,31 +325,35 @@ while IFS= read -r line || [[ -n "$line" ]]; do
     warn "skip (missing): $src"
     continue
   fi
-  dst_parent="$SNAP${src%/*}"
+  dst_parent="$PARTIAL${src%/*}"
   mkdir -p "$dst_parent"
   if ! rsync -aL --quiet \
         --exclude='.DS_Store' --exclude='*.sock' --exclude='sockets' \
         --exclude='node_modules' --exclude='__pycache__' --exclude='*.pyc' \
         --exclude='com.microsoft.appcenter' \
         "$src" "$dst_parent/"; then
-    rm -rf "${SNAP:?}"
-    die "rsync failed copying $src — removed partial snapshot $STAMP
+    die "rsync failed copying $src — partial snapshot will be removed
   if the vault was full, prune or resize before retrying (see check_vault_space hints above)"
   fi
   COUNT=$((COUNT + 1))
 done < "$MANIFEST"
 if (( COUNT == 0 )); then
-  rm -rf "${SNAP:?}"
-  die "manifest produced 0 snapshot paths; removed empty snapshot $STAMP"
+  die "manifest produced 0 snapshot paths; partial snapshot will be removed"
 fi
-ok "snapshotted $COUNT path(s)"
+mv "$PARTIAL" "$SNAP"
+PARTIAL=""
+ok "published $STAMP with $COUNT path(s)"
+prune_snapshots "$KEEP"
 
-# --- unmount + compact so iCloud uploads stay small ---
+# --- unmount + compact so destination uploads stay small ---
 if [[ $MOUNTED_BY_US -eq 1 ]]; then
   info "unmounting + compacting"
   hdiutil detach "$MOUNT" >/dev/null
   MOUNTED_BY_US=0
-  get_pass | hdiutil compact "$VAULT" -stdinpass >/dev/null 2>&1 && ok "compacted"
+  if ! get_pass | hdiutil compact "$VAULT" -stdinpass >/dev/null 2>&1; then
+    die "snapshot succeeded, but vault compaction failed: $VAULT"
+  fi
+  ok "compacted"
 fi
 
 info "done — vault at $VAULT"

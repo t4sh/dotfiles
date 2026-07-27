@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Idempotent GitHub SSH bootstrap.
-#   1. Generate Ed25519 at ~/.secrets/ssh/github_ed25519 (if missing)
-#   2. chmod tightly
+# Idempotent, restore-first GitHub SSH bootstrap.
+#   1. Require the vault-restored Ed25519 key (unless --generate is explicit)
+#   2. validate the private/public pair and chmod tightly
 #   3. Add to ssh-agent with Apple Keychain integration
 #   4. Verify the exact key with GitHub
 #   5. Upload via gh only when verification proves registration is missing
@@ -15,25 +15,51 @@ SECRETS_DIR="${DOTFILES_SECRETS_DIR:-$HOME/.secrets/ssh}"
 KEY="$SECRETS_DIR/github_ed25519"
 EMAIL="${GIT_EMAIL:-$(git config --global user.email 2>/dev/null || true)}"
 LABEL="${SSH_KEY_LABEL:-$(scutil --get ComputerName 2>/dev/null || hostname -s) $(date +%Y-%m)}"
+GENERATE=0
+
+case "${1:-}" in
+  "") ;;
+  --generate) GENERATE=1 ;;
+  -h|--help)
+    echo "usage: $0 [--generate]"
+    echo "  default: restore/verify an existing vault-backed key"
+    echo "  --generate: explicitly create a new canonical GitHub key when no vault key exists"
+    exit 0
+    ;;
+  *) echo "unknown option: $1" >&2; exit 1 ;;
+esac
 
 info() { printf '\033[36m==>\033[0m %s\n' "$*"; }
 ok()   { printf '\033[32m  ✓\033[0m %s\n' "$*"; }
 warn() { printf '\033[33m  ⚠\033[0m %s\n' "$*"; }
 die()  { printf '\033[31merror:\033[0m %s\n' "$*" >&2; exit 1; }
 
-[[ -n "$EMAIL" ]] || die "git user.email is not configured — run: git config --global user.email you@example.com"
-
-# 1. Generate key if missing
+# 1. Restore-first key handling. Generation requires an explicit flag so a
+# pre-vault bootstrap cannot create and upload a throwaway canonical key.
+if [[ ! -f "$KEY" && $GENERATE -ne 1 ]]; then
+  die "vault-backed GitHub key not found: $KEY
+  restore ~/.secrets first, or explicitly create a new identity with:
+  bash scripts/ssh-setup.sh --generate"
+fi
 mkdir -p "$SECRETS_DIR" && chmod 700 "$SECRETS_DIR"
 if [[ ! -f "$KEY" ]]; then
-  info "generating Ed25519 → $KEY"
+  [[ -n "$EMAIL" ]] || die "git user.email is not configured — run: git config --global user.email you@example.com"
+  info "explicitly generating Ed25519 → $KEY"
   ssh-keygen -t ed25519 -C "$EMAIL" -f "$KEY" -N ""
   ok "key generated"
 else
   ok "key already present: $KEY"
 fi
 chmod 600 "$KEY"
+if [[ ! -f "$KEY.pub" ]]; then
+  ssh-keygen -y -f "$KEY" > "$KEY.pub"
+  ok "reconstructed missing public key"
+fi
 chmod 644 "$KEY.pub"
+
+EXPECTED_PUB="$(ssh-keygen -y -f "$KEY" | awk '{print $1, $2}')"
+STORED_PUB="$(awk '{print $1, $2}' "$KEY.pub")"
+[[ "$EXPECTED_PUB" == "$STORED_PUB" ]] || die "public key does not match private key: $KEY.pub"
 
 # 2. ~/.ssh/config sanity — should already be the symlink from make link
 if [[ ! -L "$HOME/.ssh/config" ]]; then
@@ -111,5 +137,5 @@ fi
 if (( SSH_VERIFIED )); then
   ok "Tower / VS Code / git CLI share this verified key via ssh-agent"
 else
-  warn "local key is loaded, but GitHub registration is still pending"
+  die "local key is loaded, but GitHub registration/verification is still pending"
 fi

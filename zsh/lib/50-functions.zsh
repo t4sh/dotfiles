@@ -48,7 +48,36 @@ list-ports() {
   sudo lsof -iTCP -sTCP:LISTEN -P -n | grep -E 'COMMAND|localhost|\*:' | sort -u
 }
 
-# Auto-switch node version when entering a directory with .nvmrc
+# Auto-switch Node from the nearest parent .nvmrc and restore the dotfiles pin
+# after leaving that project tree. Keep the default fast PATH untouched until a
+# project actually requires NVM.
+typeset -g AUTO_NVM_ACTIVE=0
+
+find_nvmrc_up() {
+  local dir="$PWD"
+  while [[ "$dir" != "/" ]]; do
+    if [[ -f "$dir/.nvmrc" ]]; then
+      print -r -- "$dir/.nvmrc"
+      return 0
+    fi
+    dir="${dir:h}"
+  done
+  return 1
+}
+
 auto_nvm_use() {
-  [ -f .nvmrc ] && nvm use --silent
+  local nvmrc requested default_version
+  if nvmrc="$(find_nvmrc_up)"; then
+    requested="$(tr -d '[:space:]' < "$nvmrc")"
+    if [[ -n "$requested" ]]; then
+      nvm use --silent "$requested" || return 1
+      AUTO_NVM_ACTIVE=1
+    fi
+  elif (( AUTO_NVM_ACTIVE )); then
+    default_version="$(tr -d '[:space:]' < "$HOME/.dotfiles/.node-version")"
+    if [[ -n "$default_version" ]]; then
+      nvm use --silent "$default_version" || return 1
+      AUTO_NVM_ACTIVE=0
+    fi
+  fi
 }

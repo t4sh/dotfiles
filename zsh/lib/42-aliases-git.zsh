@@ -38,15 +38,21 @@ dotbackup() {
 # -----------------------------------------------------------------------------
 pr-digest() {
   local orgs=("$@")
+  local repos=()
+  local org repo repo_output pr_output rows=""
   (( ${#orgs[@]} == 0 )) && { echo "usage: pr-digest <org> [org ...]" >&2; return 2; }
 
-  {
-    for org in "${orgs[@]}"; do
-      gh api "/orgs/$org/repos?per_page=100" --paginate \
-        --jq '.[] | select(.archived==false) | .full_name' 2>/dev/null
-    done
-  } | while IFS= read -r repo; do
-    gh pr list --repo "$repo" --state open \
+  for org in "${orgs[@]}"; do
+    if ! repo_output="$(gh api "/orgs/$org/repos?per_page=100" --paginate \
+      --jq '.[] | select(.archived==false) | .full_name')"; then
+      echo "pr-digest: failed to list repositories for $org" >&2
+      return 1
+    fi
+    [[ -n "$repo_output" ]] && repos+=("${(@f)repo_output}")
+  done
+
+  for repo in "${repos[@]}"; do
+    if ! pr_output="$(gh pr list --repo "$repo" --state open \
       --json number,url,title,author,autoMergeRequest,mergeStateStatus,statusCheckRollup,comments \
       --jq '.[] |
         (if   any(.comments[]?;         .body | startswith("dependabot-auto-merge: held")) then "1|HELD"
@@ -56,10 +62,15 @@ pr-digest() {
          elif .autoMergeRequest != null                                                    then "5|AUTO"
          else                                                                                   "6|WAIT"
          end) as $lbl |
-        "\($lbl)\t\(.url)\t\(.title)"' 2>/dev/null
-  done | sort | awk -F'\t' '
+        "\($lbl)\t\(.url)\t\(.title)"')"; then
+      echo "pr-digest: failed to list pull requests for $repo" >&2
+      return 1
+    fi
+    [[ -n "$pr_output" ]] && rows+="$pr_output"$'\n'
+  done
+
+  printf '%s' "$rows" | sort | awk -F'\t' '
     BEGIN {
-      if (NR == 0) { }
       printf "%-8s  %-55s  %s\n", "STATUS", "PR", "TITLE"
       printf "%-8s  %-55s  %s\n", "──────", "──", "─────"
     }

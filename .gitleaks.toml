@@ -1,20 +1,32 @@
-# gitleaks config — extends the default ruleset; no rule changes here, only path allowlists.
-# Audited 2026-04-18: these paths are false positives we don't want to re-litigate on every commit.
+# gitleaks config — extends the default ruleset with narrowly scoped false positives.
 
 [extend]
 useDefault = true
 
-[allowlist]
-description = "Paths with legitimate example/fixture/binary content that tripped default rules"
+[[allowlists]]
+description = "Exact Moltbook documentation placeholder in curl examples"
+targetRules = ["curl-auth-header"]
+condition = "AND"
+regexTarget = "match"
+regexes = ['''Authorization: Bearer YOUR_API_KEY''']
 paths = [
-  # Doc examples using curl -H "Authorization: Bearer ..."
   '''agents/skills/moltbook/SKILL\.md$''',
   '''agents/skills/moltbook/MESSAGING\.md$''',
   '''agents/skills/moltbook/HEARTBEAT\.md$''',
-
-  # Test fixtures with literal "test_api_key_*" style strings
-  '''agents/skills/.*/tests/.*\.py$''',
-
-  # Automator .wflow bundles — base64-encoded binary plists, broad regexes match noise
-  '''services/.*\.workflow/Contents/document\.wflow$''',
 ]
+
+[[allowlists]]
+description = "Exact Moltbook credential-manager dummy value"
+targetRules = ["generic-api-key"]
+condition = "AND"
+regexTarget = "line"
+regexes = ['''test_api_key_12345''']
+paths = ['''agents/skills/moltbook/tests/test_credential_manager\.py$''']
+
+[[allowlists]]
+description = "Exact Tower workflow icon bytes that resemble a Square access token"
+targetRules = ["square-access-token"]
+condition = "AND"
+regexTarget = "match"
+regexes = ['''^EAAAhCAAAQgAIGJCZS1I2zk3WKXtUtsZL8hnbjrOVD0MPnj$''']
+paths = ['''services/Open in Tower\.workflow/Contents/document\.wflow$''']

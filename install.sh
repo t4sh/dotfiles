@@ -23,7 +23,18 @@ fi
 if ! command -v brew &>/dev/null; then
     echo "→ Installing Homebrew..."
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    eval "$(/opt/homebrew/bin/brew shellenv)"
+    BREW_BIN=""
+    for candidate in /opt/homebrew/bin/brew /usr/local/bin/brew; do
+        if [ -x "$candidate" ]; then
+            BREW_BIN="$candidate"
+            break
+        fi
+    done
+    [ -n "$BREW_BIN" ] || {
+        echo "Homebrew installed but brew was not found under /opt/homebrew or /usr/local" >&2
+        exit 1
+    }
+    eval "$("$BREW_BIN" shellenv)"
 else
     echo "✓ Homebrew already installed"
 fi
@@ -33,11 +44,11 @@ echo ""
 echo "→ Creating symlinks..."
 bash "$DOTFILES/scripts/link.sh"
 
-# 4. Brew bundle
+# 4. Brew bundle (pre-auth phase — App Store apps are restored after sign-in)
 echo ""
-echo "→ Installing packages from Brewfile..."
-echo "  (This will take a while — formulae, casks, fonts, App Store apps, VS Code extensions)"
-brew bundle --file="$DOTFILES/Brewfile"
+echo "→ Installing Brewfile packages except App Store apps..."
+echo "  (This will take a while — formulae, casks, fonts, VS Code extensions)"
+make -C "$DOTFILES" brew-base
 
 # 5. Default shell
 if [ "$SHELL" != "/bin/zsh" ]; then
@@ -62,30 +73,17 @@ NODE_RESOLVED="$(nvm version "$NODE_PINNED")"
 
 # node-stable / npx-stable shims — required by ~/.agents/rules/22-environment.md
 # (agents invoke node through these, independent of nvm's per-dir switching).
-mkdir -p "$HOME/.local/bin"
-ln -sf "$NVM_DIR/versions/node/$NODE_RESOLVED/bin/node" "$HOME/.local/bin/node-stable"
-ln -sf "$NVM_DIR/versions/node/$NODE_RESOLVED/bin/npx" "$HOME/.local/bin/npx-stable"
+# Single source of truth: scripts/link-node-shims.sh (also `make shims`).
+make -C "$DOTFILES" shims
 
 # 7. App preferences — delegated to scripts/restore-apps.sh (single source of
 #    truth, shared with `make restore-apps` / `make all`).
 bash "$DOTFILES/scripts/restore-apps.sh"
 
-# Terminal.app — install.sh is safe to quit Terminal here (it's a one-time
-# bootstrap and you're likely running it from Terminal anyway). Ongoing
-# maintenance uses `make terminal` from a non-Terminal shell.
-if [ -f "$DOTFILES/apps/terminal/terminal.plist" ]; then
-    osascript -e 'tell application "Terminal" to quit' 2>/dev/null || true
-    defaults import com.apple.Terminal "$DOTFILES/apps/terminal/terminal.plist" && \
-        echo "  ✓ Terminal.app (reopen Terminal to see profiles)"
-fi
-
-# 8. Automator Services
+# 8. Automator Services — use the replacement-based convergent target.
 echo ""
 echo "→ Installing Automator services..."
-mkdir -p "$HOME/Library/Services"
-cp -R "$DOTFILES/services/"*.workflow "$HOME/Library/Services/" 2>/dev/null && \
-    echo "  ✓ Automator services installed" || \
-    echo "  - No services to install"
+make -C "$DOTFILES" services
 
 # 9. macOS defaults
 echo ""
@@ -102,13 +100,8 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     bash "$DOTFILES/macos/dock.sh"
 fi
 
-# 11. SSH key → GitHub
-read -p "→ Generate SSH key and register with GitHub? (y/n) " -n 1 -r
-echo ""
-if [[ $REPLY =~ ^[Yy]$ ]]; then
-    bash "$DOTFILES/scripts/ssh-setup.sh"
-fi
-
+# SSH setup is intentionally post-vault. Generating into ~/.secrets before an
+# existing vault is restored can create and upload a throwaway key.
 echo ""
 echo "→ Installing git hooks..."
 make -C "$DOTFILES" hooks
@@ -119,21 +112,40 @@ echo "║          Bootstrap Complete          ║"
 echo "╚══════════════════════════════════════╝"
 echo ""
 echo "Manual steps remaining:"
-echo "  1. Sign into iCloud & App Store (and iCloud Keychain)"
+echo "  1. Sign into the App Store, then install App Store apps:"
+echo "     → cd ~/.dotfiles && make brew-mas"
 echo "  2. Restore ~/.secrets from your DotfilesSecrets.sparseimage"
 echo "     → fetch the sparseimage from your backup destination"
-echo "     → double-click → paste passphrase from 'DotfilesSecretsVault' in Keychain Access"
+echo "     → retrieve the passphrase from an independently synchronized password manager"
+echo "     → double-click the image, paste the passphrase, and tick Remember"
 echo "     → sudo rsync -aL /Volumes/DotfilesSecrets/<latest-stamp>/ /"
-echo "     → make link   (wire ~/.secrets consumer symlinks)"
+echo "     → make secrets-pass-import"
 echo "     → echo \"<destination>\" > ~/.dotfiles-local/backup.destination"
-echo "  3. Canary Mail (if used): quit app, then make restore-canary"
-echo "  4. Raycast: import config from ~/.secrets/apps/raycast/ (Settings → Advanced → Import)"
+echo "  3. Wire restored consumers and verify/register the restored GitHub key:"
+echo "     → cd ~/.dotfiles && make link && make ssh-setup"
+echo "  4. Launch Dato once (if used), then run make restore-apps again"
+echo "  5. Canary Mail (if used): quit app, then make restore-canary"
+echo "  6. Shottr (if used): make restore-shottr"
+echo "  7. Raycast: import config from ~/.secrets/apps/raycast/ (Settings → Advanced → Import)"
 echo "     then import extensions if needed; Transmit: import from ~/.secrets/apps/transmit/"
-echo "  5. Sign into apps: VS Code sync, Figma, etc."
-echo "  6. Set default browser"
-echo "  7. Apply default app policy: cd ~/.dotfiles && make default-apps"
-echo "  8. Optional: open Hammerspoon once and allow Accessibility permissions"
-echo "  9. Run bootstrap preflight checks: cd ~/.dotfiles && make doctor"
-echo " 10. Install global agent skills: cd ~/.dotfiles && make skills"
+echo "  8. Sign into apps: VS Code sync, Figma, etc."
+echo "  9. Set default browser and run: make default-apps"
+echo " 10. Open Hammerspoon, enable Launch at Login, and allow Accessibility permissions"
+echo " 11. Run bootstrap preflight checks: cd ~/.dotfiles && make doctor"
+echo " 12. Install global agent skills: cd ~/.dotfiles && make skills"
 echo "     (needs vault restore + gh auth for skill sources that need GitHub auth)"
 echo ""
+
+# Terminal.app profile import quits Terminal.app, so keep it after all bootstrap
+# output/prompts. Ongoing maintenance uses `make terminal` from a non-Terminal shell.
+if [ -f "$DOTFILES/apps/terminal/terminal.plist" ]; then
+    read -p "→ Import Terminal.app profiles now? This quits Terminal.app. (y/n) " -n 1 -r
+    echo ""
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        osascript -e 'tell application "Terminal" to quit' 2>/dev/null || true
+        defaults import com.apple.Terminal "$DOTFILES/apps/terminal/terminal.plist" && \
+            echo "  ✓ Terminal.app (reopen Terminal to see profiles)"
+    else
+        echo "  - skipped Terminal.app profiles; run 'make terminal' later from iTerm / Ghostty / VS Code"
+    fi
+fi

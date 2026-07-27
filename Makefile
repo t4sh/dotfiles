@@ -1,13 +1,15 @@
-.PHONY: all help link unlink brew brew-check brewfile-audit macos dock terminal services restore-apps restore-canary restore-shottr backup backup-canary backup-shottr audit-apps hooks ssh-setup skills-audit skills skills-manifest secrets-backup secrets-mount secrets-pass rules-audit default-apps capture-default-apps doctor docs-audit
+.PHONY: all help link unlink brew brew-base brew-mas brew-check brewfile-audit shims macos dock terminal services restore-apps restore-canary restore-shottr backup backup-canary backup-shottr audit-apps hooks ssh-setup skills-audit skills skills-manifest secrets-backup secrets-mount secrets-pass secrets-pass-import rules-audit default-apps capture-default-apps doctor docs-audit
 
 # Make targets operate on this checkout, even when reviewing/developing from a
 # path other than ~/.dotfiles. Fresh installs still clone to ~/.dotfiles.
 export DOTFILES := $(CURDIR)
 
-all: link rules-audit skills-audit brew services restore-apps dock hooks ssh-setup macos ## Re-apply the full existing-Mac setup
+all: link rules-audit skills-audit brew shims services restore-apps dock hooks macos ## Re-apply the full existing-Mac setup
 	@echo "Full setup complete."
 # macos last: defaults.sh has interactive prompts; a Ctrl-C there previously
-# aborted the sequence before dock/hooks/ssh-setup could run.
+# aborted the sequence before dock/hooks could run.
+# ssh-setup is manual and post-vault: never generate canonical key material
+# before the existing secret tree has had a chance to be restored.
 # terminal is NOT in `all` (would kill parent Terminal.app shell).
 # default-apps, doctor, docs-audit, skills, and terminal stay manual.
 
@@ -29,9 +31,8 @@ backup-canary: ## Back up Canary Mail prefs into ~/.secrets
 backup-shottr: ## Back up Shottr prefs into ~/.secrets
 	@bash scripts/backup-shottr-vault.sh
 
-ssh-setup: ## Generate/register the GitHub SSH key if needed
+ssh-setup: ## Verify/register the restored GitHub SSH key
 	@bash scripts/ssh-setup.sh
-
 
 skills-audit: ## Check tracked agent skills for redistribution/license safety
 	@bash scripts/audit-skill-licenses.sh --check
@@ -49,7 +50,7 @@ skills-manifest: ## Regenerate Skillsfile and skills README from the skill lockf
 	@python3 agents/compareskills.py
 
 # Install all global skills from the manifest (the `brew bundle`). Not in
-# `make all`: needs node + GitHub auth (private sources) set up first.
+# `make all`: needs node + GitHub auth set up first.
 skills: skills-manifest ## Install global agent skills from Skillsfile
 	@bash Skillsfile
 
@@ -67,8 +68,19 @@ link: ## Apply symlinks from symlinks.tsv
 unlink: ## Remove only symlinks managed by symlinks.tsv
 	@bash scripts/unlink.sh
 
-brew: ## Install packages from Brewfile
+brew: ## Install all packages from Brewfile (requires App Store sign-in)
 	brew bundle --file=Brewfile
+
+brew-base: ## Install Brewfile except App Store apps (fresh-Mac pre-auth phase)
+	@awk '!/^[[:space:]]*mas[[:space:]]+/' Brewfile | brew bundle --file=-
+
+brew-mas: ## Install only App Store apps after signing into the App Store
+	@command -v mas >/dev/null 2>&1 || { echo "mas missing; run 'make brew-base' first" >&2; exit 1; }
+	@echo "Installing App Store apps (ensure the App Store is signed in)..."
+	@grep '^[[:space:]]*mas[[:space:]]' Brewfile | brew bundle --file=-
+
+shims: ## Create/repair node-stable + npx-stable shims from .node-version
+	@bash scripts/link-node-shims.sh
 
 brew-check: ## Check whether Brewfile entries are installed
 	brew bundle check --file=Brewfile
@@ -94,17 +106,33 @@ terminal: ## Import Terminal.app profiles (quits Terminal.app)
 
 services: ## Install Automator Quick Actions into ~/Library/Services
 	@set -e; \
-	mkdir -p ~/Library/Services; \
-	count=0; \
-	for workflow in services/*.workflow; do \
-		[ -e "$$workflow" ] || continue; \
-		name=$$(basename "$$workflow"); \
-		tmp="$$HOME/Library/Services/.$$name.dotfiles-tmp"; \
-		rm -rf "$$tmp"; \
-		cp -R "$$workflow" "$$tmp"; \
-		rm -rf "$$HOME/Library/Services/$$name"; \
-		mv "$$tmp" "$$HOME/Library/Services/$$name"; \
-		echo "  ✓ $$name"; \
+		mkdir -p ~/Library/Services; \
+		restore_service() { \
+			rc=$$?; \
+			trap - EXIT HUP INT TERM; \
+			if [ ! -e "$$dest" ] && [ -e "$$old" ]; then \
+				mv "$$old" "$$dest" || true; \
+			fi; \
+			rm -rf "$$tmp"; \
+			exit "$$rc"; \
+		}; \
+		count=0; \
+		for workflow in services/*.workflow; do \
+			[ -e "$$workflow" ] || continue; \
+			name=$$(basename "$$workflow"); \
+			dest="$$HOME/Library/Services/$$name"; \
+			tmp="$$HOME/Library/Services/.$$name.dotfiles-tmp"; \
+			old="$$HOME/Library/Services/.$$name.dotfiles-old"; \
+			rm -rf "$$tmp"; \
+			if [ ! -e "$$dest" ] && [ -e "$$old" ]; then mv "$$old" "$$dest"; fi; \
+			rm -rf "$$old"; \
+			cp -R "$$workflow" "$$tmp"; \
+			trap restore_service EXIT HUP INT TERM; \
+			if [ -e "$$dest" ]; then mv "$$dest" "$$old"; fi; \
+			mv "$$tmp" "$$dest"; \
+			rm -rf "$$old"; \
+			trap - EXIT HUP INT TERM; \
+			echo "  ✓ $$name"; \
 		count=$$((count + 1)); \
 	done; \
 	[ "$$count" -gt 0 ] || { echo "  ✗ no Automator workflows found" >&2; exit 1; }; \
@@ -157,13 +185,34 @@ backup: ## Refresh repo-tracked app prefs, Dock, services, and Brewfile
 	@# Shottr + Monokai Pro license settings are NOT kept in the repo — vault only
 	@# (~/.secrets/apps/…). Monokai is stripped above; copy license file to vault
 	@# after purchase/renewal, then make secrets-backup.
-	@for workflow in services/*.workflow; do \
+	@set -e; \
+	restore_backup() { \
+		rc=$$?; \
+		trap - EXIT HUP INT TERM; \
+		if [ ! -e "$$dest" ] && [ -e "$$old" ]; then \
+			mv "$$old" "$$dest" || true; \
+		fi; \
+		rm -rf "$$tmp"; \
+		exit "$$rc"; \
+	}; \
+	for workflow in services/*.workflow; do \
 		[ -e "$$workflow" ] || continue; \
 		name=$$(basename "$$workflow"); \
-		if [ -d "$$HOME/Library/Services/$$name" ]; then \
-			rm -rf "services/$$name"; \
-			cp -R "$$HOME/Library/Services/$$name" services/ && echo "  ✓ Automator workflow $$name"; \
-		fi; \
+		source="$$HOME/Library/Services/$$name"; \
+		[ -d "$$source" ] || continue; \
+		dest="services/$$name"; \
+		tmp="services/.$$name.dotfiles-backup-tmp"; \
+		old="services/.$$name.dotfiles-backup-old"; \
+		rm -rf "$$tmp"; \
+		if [ ! -e "$$dest" ] && [ -e "$$old" ]; then mv "$$old" "$$dest"; fi; \
+		rm -rf "$$old"; \
+		trap restore_backup EXIT HUP INT TERM; \
+		cp -R "$$source" "$$tmp"; \
+		if [ -e "$$dest" ]; then mv "$$dest" "$$old"; fi; \
+		mv "$$tmp" "$$dest"; \
+		rm -rf "$$old"; \
+		trap - EXIT HUP INT TERM; \
+		echo "  ✓ Automator workflow $$name"; \
 	done
 	@bash scripts/sanitize-app-prefs.sh && echo "  ✓ Sanitized portable app prefs"
 	@brew bundle dump --file=Brewfile --force && echo "  ✓ Brewfile"
@@ -185,5 +234,8 @@ secrets-backup: ## Snapshot ~/.secrets into the encrypted sparseimage vault
 secrets-mount: ## Mount the encrypted secrets sparseimage
 	@bash scripts/secrets-mount.sh
 
-secrets-pass: ## Copy the secrets vault password from Keychain
-	@security find-generic-password -s DotfilesSecretsVault -a "$(USER)" -w | tr -d '\n' | pbcopy && echo "vault password → clipboard"
+secrets-pass: ## Copy the local vault password from Keychain
+	@bash scripts/secrets-pass.sh
+
+secrets-pass-import: ## Import a recovered vault password into the local Keychain
+	@bash scripts/secrets-pass-import.sh

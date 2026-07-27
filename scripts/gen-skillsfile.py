@@ -104,16 +104,17 @@ def main():
     parser.add_argument("--check", action="store_true", help="fail if Skillsfile is out of sync")
     args = parser.parse_args()
 
-    timestamp = existing_timestamp() if args.check else None
-    if timestamp is None:
-        timestamp = datetime.now(IST).strftime("%Y-%m-%dT%H:%M:%S+05:30")
-
+    existing_stamp = existing_timestamp()
+    timestamp = existing_stamp or datetime.now(IST).strftime("%Y-%m-%dT%H:%M:%S+05:30")
     content, total, github_sources, local_count = build_skillsfile(timestamp)
 
+    try:
+        current = SKILLSFILE.read_text()
+    except FileNotFoundError:
+        current = None
+
     if args.check:
-        try:
-            current = SKILLSFILE.read_text()
-        except FileNotFoundError:
+        if current is None:
             print(f"Skillsfile missing: {SKILLSFILE}", file=sys.stderr)
             return 1
         if current != content:
@@ -122,6 +123,14 @@ def main():
         print(f"Skillsfile is in sync ({total} skills — {github_sources} github sources, {local_count} local)")
         return 0
 
+    if current == content:
+        os.chmod(SKILLSFILE, 0o755)
+        print(f"Unchanged {SKILLSFILE}")
+        print(f"  {total} skills — {github_sources} github sources, {local_count} local")
+        return 0
+
+    timestamp = datetime.now(IST).strftime("%Y-%m-%dT%H:%M:%S+05:30")
+    content, total, github_sources, local_count = build_skillsfile(timestamp)
     SKILLSFILE.write_text(content)
     os.chmod(SKILLSFILE, 0o755)
 
