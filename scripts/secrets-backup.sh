@@ -91,6 +91,7 @@ preflight_manifest() {
     [[ -z "$line" ]] && continue
     src="$(expand_manifest_path "$line")" || die "unsupported manifest expansion: $line"
     [[ "$src" == /* ]] || die "manifest paths must resolve to absolute paths: $line"
+    [[ -n "${src//\//}" ]] || die "manifest paths must not use filesystem root: $line"
     path_has_dot_segments "$src" && die "manifest paths must not contain dot segments: $line"
     MANIFEST_PATHS+=("$src")
     count=$((count + 1))
