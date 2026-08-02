@@ -1,10 +1,18 @@
-.PHONY: all help link unlink brew brew-base brew-mas brew-check brewfile-audit shims macos dock terminal services restore-apps restore-canary restore-shottr backup backup-canary backup-shottr audit-apps hooks ssh-setup skills-audit skills skills-manifest secrets-backup secrets-mount secrets-pass secrets-pass-import rules-audit default-apps capture-default-apps doctor docs-audit
+.PHONY: all help link unlink brew brew-base node brew-npm brew-mas brew-check brewfile-audit shims macos dock terminal services restore-apps restore-canary restore-shottr backup backup-canary backup-shottr audit-apps hooks ssh-setup skills-audit skills skills-manifest secrets-backup secrets-mount secrets-pass secrets-pass-import rules-audit default-apps capture-default-apps doctor docs-audit
 
-# Make targets operate on this checkout, even when reviewing/developing from a
-# path other than ~/.dotfiles. Fresh installs still clone to ~/.dotfiles.
 export DOTFILES := $(CURDIR)
 
-all: link rules-audit skills-audit brew shims services restore-apps dock hooks macos ## Re-apply the full existing-Mac setup
+all: ## Re-apply the full existing-Mac setup, including node shims, in a fixed order
+	@$(MAKE) --no-print-directory link
+	@$(MAKE) --no-print-directory rules-audit
+	@$(MAKE) --no-print-directory skills-audit
+	@$(MAKE) --no-print-directory brew
+	@$(MAKE) --no-print-directory shims
+	@$(MAKE) --no-print-directory services
+	@$(MAKE) --no-print-directory restore-apps
+	@$(MAKE) --no-print-directory dock
+	@$(MAKE) --no-print-directory hooks
+	@$(MAKE) --no-print-directory macos
 	@echo "Full setup complete."
 # macos last: defaults.sh has interactive prompts; a Ctrl-C there previously
 # aborted the sequence before dock/hooks could run.
@@ -33,6 +41,7 @@ backup-shottr: ## Back up Shottr prefs into ~/.secrets
 
 ssh-setup: ## Verify/register the restored GitHub SSH key
 	@bash scripts/ssh-setup.sh
+
 
 skills-audit: ## Check tracked agent skills for redistribution/license safety
 	@bash scripts/audit-skill-licenses.sh --check
@@ -69,21 +78,29 @@ unlink: ## Remove only symlinks managed by symlinks.tsv
 	@bash scripts/unlink.sh
 
 brew: ## Install all packages from Brewfile (requires App Store sign-in)
-	brew bundle --file=Brewfile
+	@$(MAKE) brew-base
+	@$(MAKE) node
+	@$(MAKE) brew-npm
+	@$(MAKE) brew-mas
 
-brew-base: ## Install Brewfile except App Store apps (fresh-Mac pre-auth phase)
-	@awk '!/^[[:space:]]*mas[[:space:]]+/' Brewfile | brew bundle --file=-
+brew-base: ## Install Brewfile except npm and App Store entries
+	@DOTFILES="$(CURDIR)" bash scripts/brewfile.sh base
+
+node: ## Install and activate the exact Node version from .node-version
+	@DOTFILES="$(CURDIR)" bash scripts/setup-node.sh
+
+brew-npm: ## Install Brewfile npm globals under the pinned Node runtime
+	@DOTFILES="$(CURDIR)" bash scripts/brewfile.sh npm
 
 brew-mas: ## Install only App Store apps after signing into the App Store
-	@command -v mas >/dev/null 2>&1 || { echo "mas missing; run 'make brew-base' first" >&2; exit 1; }
 	@echo "Installing App Store apps (ensure the App Store is signed in)..."
-	@grep '^[[:space:]]*mas[[:space:]]' Brewfile | brew bundle --file=-
+	@DOTFILES="$(CURDIR)" bash scripts/brewfile.sh mas
 
 shims: ## Create/repair node-stable + npx-stable shims from .node-version
 	@bash scripts/link-node-shims.sh
 
 brew-check: ## Check whether Brewfile entries are installed
-	brew bundle check --file=Brewfile
+	@DOTFILES="$(CURDIR)" bash scripts/brewfile.sh check
 
 macos: ## Apply interactive macOS defaults
 	@bash macos/defaults.sh
@@ -154,6 +171,7 @@ docs-audit: ## Check docs/scripts for typos when typos is installed
 		echo "  - typos not installed; run 'make brew' first"; \
 	fi
 
+
 audit-apps: ## Scan app preference snapshots for secrets/local paths
 	@bash scripts/audit-app-prefs.sh
 
@@ -162,7 +180,7 @@ backup: ## Refresh repo-tracked app prefs, Dock, services, and Brewfile
 	@# Bulk `defaults`-managed apps — driven by apps.tsv. Container-copy apps
 	@# (Dato, Sublime, VS Code) stay as explicit lines below.
 	@captured=0; skipped=0; \
-	while IFS=$$'\t' read -r domain label plist; do \
+	while IFS=$$'\t' read -r domain label plist app_name; do \
 		case "$$domain" in ''|\#*) continue ;; esac; \
 		if defaults export "$$domain" "$$plist" 2>/dev/null; then \
 			echo "  ✓ $$label"; captured=$$((captured + 1)); \
@@ -215,7 +233,7 @@ backup: ## Refresh repo-tracked app prefs, Dock, services, and Brewfile
 		echo "  ✓ Automator workflow $$name"; \
 	done
 	@bash scripts/sanitize-app-prefs.sh && echo "  ✓ Sanitized portable app prefs"
-	@brew bundle dump --file=Brewfile --force && echo "  ✓ Brewfile"
+	@DOTFILES="$(CURDIR)" bash scripts/brewfile.sh dump Brewfile && echo "  ✓ Brewfile"
 	@echo ""
 	@echo "Done. Manual exports still needed (sensitive — into the secret"
 	@echo "store, NOT the repo; ~/.secrets is vault-backed via 'make secrets-backup'):"

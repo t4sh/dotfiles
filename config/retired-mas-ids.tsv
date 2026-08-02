@@ -1,0 +1,8 @@
+# App Store receipts that remain installed locally but are no longer valid
+# Brewfile declarations. scripts/brewfile.sh filters these from generated dumps
+# and rejects them if they are reintroduced into Brewfile.
+#
+# Format: <id>\t<label>\t<reason>
+409183694	Keynote (legacy)	Unavailable legacy listing; replaced by 361285480
+409203825	Numbers (legacy)	Unavailable legacy listing; replaced by 361304891
+409201541	Pages (legacy)	Unavailable legacy listing; replaced by 361309726

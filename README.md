@@ -54,16 +54,18 @@ bash install.sh
 
 `install.sh` resolves the repo root from its own location (or `DOTFILES` if set), so a non-default clone path works: `DOTFILES=~/src/dotfiles bash ~/src/dotfiles/install.sh`.
 
-`install.sh` installs Xcode CLI tools (if needed), Homebrew, non-App-Store Brewfile packages, NVM/Node, symlinks, app prefs, convergent Automator services, optional macOS/Dock settings, git hooks, and optionally Terminal profiles at the very end.
+`install.sh` installs Xcode CLI tools (if needed), Homebrew, Brewfile **base** packages (excluding npm + App Store), pinned Node via `make node`, npm globals via `make brew-npm`, shims, convergent Automator services, app prefs, optional Dock, git hooks, optional macOS defaults last, and optionally Terminal profiles at the very end.
 
-It does **not** run: `rules-audit`, `skills-audit`, `make dock` (unless you answer yes), `make ssh-setup`, `make default-apps`, `make doctor`, `make docs-audit`, or `make skills`. Those are documented manual follow-ups.
+Shared automated steps match `make all`: services → restore-apps → dock → hooks → macos. Pre-vault `make link` warns and skips missing `~/.secrets` sources (exit 0 unless `DOTFILES_STRICT_LINK=1`); re-run `make link` after vault restore.
+
+It does **not** run: `rules-audit`, `skills-audit`, `make dock` / `make macos` (unless you answer yes), `make ssh-setup`, `make default-apps`, `make doctor`, `make docs-audit`, or `make skills`. Those are documented manual follow-ups.
 
 After bootstrap:
 
 1. Sign into the App Store, then run `make brew-mas`.
-2. Recover the vault password from an independent password manager, restore `~/.secrets/`, then run `make secrets-pass-import`.
+2. Sign into iCloud if needed, recover the vault password from an independent password manager, restore `~/.secrets/`, then run `make secrets-pass-import`.
 3. Run `make link && make ssh-setup` only after the existing secret-backed identity is restored.
-4. Complete the remaining manual steps printed by `install.sh`.
+4. Complete the remaining manual steps printed by `install.sh` (Canary/Shottr restore quits/reopens those apps automatically).
 
 ### Existing Mac (already has Homebrew)
 
@@ -73,7 +75,9 @@ cd ~/.dotfiles
 make all
 ```
 
-`make all` runs: `link` → `rules-audit` → `skills-audit` → `brew` → `shims` → `services` → `restore-apps` → `dock` → `hooks` → `macos` (interactive, last).
+`make all` runs serially (including under `make -j all`): `link` → `rules-audit` → `skills-audit` → `brew` → `shims` → `services` → `restore-apps` → `dock` → `hooks` → `macos` (interactive, last).
+
+`make brew` itself is phased: `brew-base` → `node` → `brew-npm` → `brew-mas`.
 
 `ssh-setup` is deliberately manual and restore-first: it validates and registers an existing vault-backed key. Creating a new canonical identity requires the explicit `scripts/ssh-setup.sh --generate` option.
 
@@ -89,7 +93,7 @@ make help   # full target list with descriptions
 symlinks.tsv          declarative manifest → scripts/link.sh
 install.sh            one-time fresh-Mac bootstrap
 Makefile              idempotent re-apply + audits + backup
-Brewfile              all packages (brew / cask / mas / vscode)
+Brewfile              all packages (brew / cask / mas / vscode / npm)
 apps.tsv              defaults-export app plists
 ~/.secrets/           local-only credentials (never in git)
 ```
@@ -104,12 +108,14 @@ Add a new symlink: one row in [`symlinks.tsv`](symlinks.tsv). No Stow/dotbot con
 |--------|---------|
 | `make all` | Main re-apply sequence (see above) |
 | `make link` | Apply symlinks from `symlinks.tsv` |
-| `make brew` | Install the complete Brewfile on an App-Store-authenticated Mac |
-| `make brew-base` | Install Brewfile entries except App Store apps |
+| `make brew` | Phased install: `brew-base` → `node` → `brew-npm` → `brew-mas` |
+| `make brew-base` | Install Brewfile except npm and App Store entries |
+| `make node` | Install/activate the exact runtime from `.node-version` |
+| `make brew-npm` | Install Brewfile npm globals under that pinned Node |
 | `make brew-mas` | Install App Store apps after signing in |
-| `make brew-check` | Quick install-state check |
+| `make brew-check` | Quick install-state check (`scripts/brewfile.sh check`) |
 | `make shims` | Create or repair the pinned `node-stable` / `npx-stable` shims |
-| `make restore-apps` | Restore tracked app preference snapshots |
+| `make restore-apps` | Restore tracked app prefs (running-app gate quits/reopens managed apps) |
 | `make services` | Install Automator workflows |
 | `make macos` | Apply macOS defaults (interactive) |
 | `make dock` | Restore Dock layout |
@@ -135,8 +141,8 @@ Add a new symlink: one row in [`symlinks.tsv`](symlinks.tsv). No Stow/dotbot con
 | Target | Purpose |
 |--------|---------|
 | `make backup` | Refresh repo-tracked app prefs, Dock, services, Brewfile |
-| `make backup-canary` / `make restore-canary` | Canary Mail vault workflow |
-| `make backup-shottr` / `make restore-shottr` | Shottr license prefs vault workflow |
+| `make backup-canary` / `make restore-canary` | Canary Mail vault workflow (restore quits/reopens Canary) |
+| `make backup-shottr` / `make restore-shottr` | Shottr license prefs vault workflow (restore quits/reopens Shottr) |
 | `make secrets-backup` | Snapshot `~/.secrets/` into encrypted sparseimage |
 | `make secrets-mount` / `make secrets-pass` | Vault mount / local password-copy helper |
 | `make secrets-pass-import` | Import a recovered vault password into the local Keychain |
@@ -217,13 +223,19 @@ make skills    # needs gh auth for GitHub-authenticated skill sources
 
 ## Secrets
 
-Nothing secret lives in git. Canonical layout:
+Nothing secret lives in git. `~/.secrets/` is the single canonical tree; tools read auth through consumer symlinks in `symlinks.tsv`.
 
 ```text
 ~/.secrets/
 ├── ssh/              → ~/.ssh/* via symlinks.tsv
 ├── config/           → gh, moltbook consumers
-└── apps/             → Raycast, Transmit, Shottr, Monokai, Canary, …
+└── apps/
+    ├── canary-mail/  # realms + plist — make backup-canary / restore-canary
+    ├── shottr/       # license prefs — make backup-shottr / restore-shottr
+    ├── raycast/      # manual import
+    ├── transmit/     # manual import
+    ├── sublime-text/ # Monokai license (optional)
+    └── vscode/       # token-bearing MCP/profile data — manual restore
 ```
 
 Vault workflow:
@@ -235,7 +247,7 @@ make secrets-pass     # copy the local Keychain password without printing it
 make secrets-pass-import  # import a recovered password on a replacement Mac
 ```
 
-The CLI-created Keychain item is local and is not assumed to synchronize through iCloud Keychain. Store and verify a separate recovery copy in an independently synchronized password manager. Backups publish through hidden partial directories, retain complete snapshots on copy failure, and prune only finalized snapshots.
+The CLI-created Keychain item is local and is not assumed to synchronize through iCloud Keychain. Store and verify a separate recovery copy in an independently synchronized password manager. Before attach, vault scripts detect the selected image at any mountpoint, reuse only the verified expected mount, and never claim an operator-owned alternate attachment. Backups stage through hidden partial directories, retain complete snapshots on copy failure, and prune only finalized snapshots.
 
 ## Safety gates
 
@@ -249,7 +261,15 @@ The CLI-created Keychain item is local and is not assumed to synchronize through
 
 ## Idempotency
 
-Every `make` target is safe to re-run. For a stronger check that a second `make all` converges:
+Every `make` target is safe to re-run. This is load-bearing — bootstrap is meant as "apply current state," not "run once."
+
+Notable contracts:
+
+- **`make brew`** — phased `brew-base` → `node` → `brew-npm` → `brew-mas` (npm never lands under Homebrew's transient Node).
+- **`make restore-apps`** — running-app gate derives apps from `apps.tsv` plus irregular settings surfaces, fails closed when process state is unknown, quits managed apps, restores, and reopens what it quit. The hosting editor is never quit; ambiguous Code-family identity skips Cursor/VS Code prefs while continuing. Override with `DOTFILES_RESTORE_FORCE=1`. Same lifecycle for `restore-shottr` / `restore-canary`.
+- **`make link`** — missing `~/.secrets` sources warn and skip (strict mode: `DOTFILES_STRICT_LINK=1`).
+
+For a stronger check that a second `make all` converges:
 
 ```bash
 scripts/verify-idempotency.sh snapshot

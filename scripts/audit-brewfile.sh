@@ -56,21 +56,8 @@ normalize_brewfile() {
     | LC_ALL=C sort
 }
 
-prefer_nvm_npm_for_dump() {
-  # brew bundle dump discovers npm globals via `npm` on PATH. Topgrade runs
-  # custom commands as `zsh -c`, which loads ~/.zshenv and prefers Homebrew
-  # npm over nvm — false-positive drift vs interactive shells / make.
-  local node_stable="$HOME/.local/bin/node-stable"
-  [[ -x "$node_stable" ]] || return 0
-  local node_bin
-  node_bin="$(dirname "$(readlink "$node_stable")")"
-  PATH="$node_bin:$PATH"
-  export PATH
-}
-
-prefer_nvm_npm_for_dump
-
-if ! brew bundle dump --file="$tmp" --force >"$dump_log" 2>&1; then
+if ! env DOTFILES="$DOTFILES" BREWFILE="$BREWFILE" \
+  bash "$DOTFILES/scripts/brewfile.sh" dump "$tmp" >"$dump_log" 2>&1; then
   warn "brew bundle dump failed:"
   sed 's/^/    /' "$dump_log" >&2
   die "brewfile audit could not compare current system state"
@@ -112,7 +99,7 @@ if [[ -s "$missing_from_system" ]]; then
   echo "  - or remove unwanted declarations from $BREWFILE"
 fi
 if [[ -s "$missing_from_brewfile" ]]; then
-  echo "  - refresh declarations from this Mac: brew bundle dump --file=\"$BREWFILE\" --force"
+  echo "  - refresh declarations from this Mac: make backup"
   echo "  - or uninstall unwanted packages/casks/extensions"
 fi
 exit 1

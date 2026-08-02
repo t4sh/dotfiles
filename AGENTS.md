@@ -45,7 +45,7 @@ De-prioritize:
 ## Key Rules
 
 - Never commit secrets. API keys, tokens, SSH keys, and credentials live under `~/.secrets/`.
-- Brewfile is the package source of truth.
+- Brewfile is the package source of truth. Install via phased targets: `brew-base` → `node` → `brew-npm` → `brew-mas` (`make brew` runs that sequence).
 - `~/.agents` is a whole-directory symlink to `~/.dotfiles/agents/`.
 - No mackup. Manual file-based backup only.
 

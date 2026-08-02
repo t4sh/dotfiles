@@ -1,0 +1,11 @@
+# Managed Canary Mail realm basenames under Application Support/CanaryDB/.
+# Consumed by backup-canary-vault.sh and restore-canary-vault.sh.
+# Sidecars (.management / .note) are derived from each basename.
+# Lines starting with # and blank lines are ignored.
+accounts.v2.realm
+encrypted.realm
+pgp.v2.realm
+enterprise.realm
+unsubscribe.realm
+appIntegration.realm
+calendar.events.realm

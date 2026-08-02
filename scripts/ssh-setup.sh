@@ -4,7 +4,7 @@
 #   2. validate the private/public pair and chmod tightly
 #   3. Add to ssh-agent with Apple Keychain integration
 #   4. Verify the exact key with GitHub
-#   5. Upload via gh only when verification proves registration is missing
+#   5. Converge GitHub authentication and SSH signing registrations separately
 #
 # Tower, VS Code, Cursor, and any CLI git will all pick up the same key through
 # the macOS ssh-agent — no separate "sync to Tower" step is needed.
@@ -13,8 +13,13 @@ set -euo pipefail
 
 SECRETS_DIR="${DOTFILES_SECRETS_DIR:-$HOME/.secrets/ssh}"
 KEY="$SECRETS_DIR/github_ed25519"
+KNOWN_HOSTS="$HOME/.ssh/known_hosts"
 EMAIL="${GIT_EMAIL:-$(git config --global user.email 2>/dev/null || true)}"
 LABEL="${SSH_KEY_LABEL:-$(scutil --get ComputerName 2>/dev/null || hostname -s) $(date +%Y-%m)}"
+GITHUB_HOST="github.com"
+# This workflow verifies git@github.com, so every gh read/write must target the
+# same service even when the caller has GH_HOST set for an enterprise session.
+export GH_HOST="$GITHUB_HOST"
 GENERATE=0
 
 case "${1:-}" in
@@ -61,12 +66,24 @@ EXPECTED_PUB="$(ssh-keygen -y -f "$KEY" | awk '{print $1, $2}')"
 STORED_PUB="$(awk '{print $1, $2}' "$KEY.pub")"
 [[ "$EXPECTED_PUB" == "$STORED_PUB" ]] || die "public key does not match private key: $KEY.pub"
 
-# 2. ~/.ssh/config sanity — should already be the symlink from make link
+# 2. Exact proof is noninteractive and ignores SSH config, so first establish
+# host trust from the vault-backed known_hosts file before touching ssh-agent or
+# GitHub's API. `ssh-keygen -F` supports both plain and hashed host entries.
+if [[ ! -f "$KNOWN_HOSTS" ]] || \
+   ! ssh-keygen -F "$GITHUB_HOST" -f "$KNOWN_HOSTS" >/dev/null 2>&1; then
+  die "GitHub host trust is missing from $KNOWN_HOSTS
+  restore ~/.secrets/ssh/known_hosts, run 'make link', and retry
+  for a deliberately new identity, verify GitHub's published SSH fingerprints,
+  establish trust for github.com once, then retry"
+fi
+ok "GitHub host trust present in $KNOWN_HOSTS"
+
+# 3. ~/.ssh/config sanity — should already be the symlink from make link
 if [[ ! -L "$HOME/.ssh/config" ]]; then
   warn "$HOME/.ssh/config is not a symlink; run 'make link' first for the dotfiles config"
 fi
 
-# 3. Add to ssh-agent + Apple Keychain (Ed25519 without passphrase is a no-op
+# 4. Add to ssh-agent + Apple Keychain (Ed25519 without passphrase is a no-op
 #    for Keychain; kept for future keys that may carry one).
 info "registering with ssh-agent"
 if ssh-add --apple-use-keychain "$KEY" >/dev/null 2>&1; then
@@ -80,17 +97,21 @@ fi
 verify_github_key() {
   local output status
   set +e
-  output="$(ssh -T -i "$KEY" -o IdentitiesOnly=yes -o BatchMode=yes \
+  output="$(ssh -F none -T -i "$KEY" -o IdentitiesOnly=yes -o BatchMode=yes \
     -o ConnectTimeout=10 git@github.com 2>&1)"
   status=$?
   set -e
   VERIFY_OUTPUT="$output"
   VERIFY_STATUS=$status
-  [[ "$output" == *"successfully authenticated"* ]]
+  VERIFY_LOGIN=""
+  if [[ "$output" == *"successfully authenticated"* ]]; then
+    VERIFY_LOGIN="$(printf '%s\n' "$output" | sed -n 's/^Hi \([^!]*\)!.*successfully authenticated.*$/\1/p' | head -n 1)"
+    return 0
+  fi
+  return 1
 }
 
-# 4. Verify the exact key before using the API. This avoids requiring the
-# admin:public_key scope when the key is already registered.
+# 5. Verify the exact authentication registration before using the API.
 SSH_VERIFIED=0
 info "verifying the exact key with GitHub"
 if verify_github_key; then
@@ -99,43 +120,80 @@ if verify_github_key; then
   SSH_VERIFIED=1
 fi
 
-# 5. Upload only when verification proves the key is not registered.
-if (( ! SSH_VERIFIED )); then
-  if ! command -v gh >/dev/null 2>&1; then
-    die "gh CLI not found — install via: brew install gh"
-  fi
-  if ! gh auth status >/dev/null 2>&1; then
-    warn "gh not authenticated — GitHub key upload and verification pending"
-    warn "after GitHub auth, re-run: make ssh-setup"
-  else
-    if ! key_list="$(gh ssh-key list 2>&1)"; then
-      printf '%s\n' "$key_list" >&2
-      die "cannot query GitHub SSH keys; run: gh auth refresh -h github.com -s admin:public_key"
-    fi
-
-    PUB_PREFIX="$(awk '{print $1, $2}' "$KEY.pub")"
-    if printf '%s\n' "$key_list" | cut -f2 | grep -qxF "$PUB_PREFIX"; then
-      ok "public key already listed on GitHub"
-    else
-      info "uploading public key to GitHub (label: $LABEL)"
-      gh ssh-key add "$KEY.pub" --title "$LABEL" || \
-        die "GitHub key upload failed; refresh gh's admin:public_key scope and retry"
-      ok "key added to GitHub"
-    fi
-
-    info "verifying uploaded key with GitHub"
-    if verify_github_key; then
-      printf '%s\n' "$VERIFY_OUTPUT" | sed -n '1,2p'
-      ok "GitHub SSH authentication verified"
-      SSH_VERIFIED=1
-    else
-      die "GitHub SSH verification failed (status $VERIFY_STATUS)"
-    fi
-  fi
+# 6. Authentication and signing are separate GitHub registrations. The same
+# public key must be present in both stores, so signing convergence always needs
+# an authenticated gh CLI even when the SSH handshake already succeeds.
+command -v gh >/dev/null 2>&1 || die "gh CLI not found — install via: brew install gh"
+gh auth status --hostname "$GITHUB_HOST" >/dev/null 2>&1 || \
+  die "gh is not authenticated for $GITHUB_HOST — run: gh auth login -h $GITHUB_HOST"
+if ! GH_LOGIN="$(gh api user --jq .login 2>&1)" || [[ -z "$GH_LOGIN" ]]; then
+  printf '%s\n' "$GH_LOGIN" >&2
+  die "cannot determine the active gh account — run: gh auth status"
 fi
-
 if (( SSH_VERIFIED )); then
-  ok "Tower / VS Code / git CLI share this verified key via ssh-agent"
-else
-  die "local key is loaded, but GitHub registration/verification is still pending"
+  [[ -n "$VERIFY_LOGIN" ]] || die "GitHub SSH authentication succeeded but its account could not be parsed"
+  [[ "$VERIFY_LOGIN" == "$GH_LOGIN" ]] || die \
+    "the exact SSH key and gh CLI use different GitHub accounts (SSH: $VERIFY_LOGIN; gh: $GH_LOGIN)
+  switch gh to $VERIFY_LOGIN or correct ~/.ssh/config before retrying"
 fi
+
+key_list_contains_expected() {
+  local key_line normalized
+  while IFS= read -r key_line; do
+    normalized="$(printf '%s\n' "$key_line" | awk '{print $1, $2}')"
+    [[ "$normalized" == "$EXPECTED_PUB" ]] && return 0
+  done
+  return 1
+}
+
+list_github_keys() {
+  local endpoint="$1" label="$2" scope="$3" output
+  if ! output="$(gh api --paginate "$endpoint" --jq '.[].key' 2>&1)"; then
+    printf '%s\n' "$output" >&2
+    die "cannot query GitHub $label keys; run: gh auth refresh -h github.com -s $scope"
+  fi
+  GITHUB_KEY_LIST="$output"
+}
+
+list_github_keys user/keys authentication read:public_key
+if key_list_contains_expected <<< "$GITHUB_KEY_LIST"; then
+  ok "authentication key already listed for gh account $GH_LOGIN"
+else
+  if (( SSH_VERIFIED )); then
+    die "the authenticating SSH key is not listed for active gh account $GH_LOGIN; refusing remote mutation"
+  else
+    info "uploading authentication key to GitHub (label: $LABEL)"
+    gh ssh-key add "$KEY.pub" --title "$LABEL" --type authentication || \
+      die "GitHub authentication-key upload failed; refresh gh's write:public_key scope and retry"
+    ok "authentication key added to GitHub"
+  fi
+fi
+
+if (( ! SSH_VERIFIED )); then
+  info "verifying authentication key with GitHub"
+  if verify_github_key; then
+    printf '%s\n' "$VERIFY_OUTPUT" | sed -n '1,2p'
+    [[ -n "$VERIFY_LOGIN" ]] || die "GitHub SSH authentication succeeded but its account could not be parsed"
+    [[ "$VERIFY_LOGIN" == "$GH_LOGIN" ]] || die \
+      "the exact SSH key and gh CLI use different GitHub accounts (SSH: $VERIFY_LOGIN; gh: $GH_LOGIN)"
+    ok "GitHub SSH authentication verified"
+    SSH_VERIFIED=1
+  else
+    die "GitHub SSH verification failed (status $VERIFY_STATUS)"
+  fi
+fi
+
+list_github_keys user/ssh_signing_keys signing read:ssh_signing_key
+if key_list_contains_expected <<< "$GITHUB_KEY_LIST"; then
+  ok "SSH signing key already registered on GitHub"
+else
+  info "uploading SSH signing key to GitHub (label: $LABEL)"
+  gh ssh-key add "$KEY.pub" --title "$LABEL (signing)" --type signing || \
+    die "GitHub signing-key upload failed; refresh gh's write:ssh_signing_key scope and retry"
+  list_github_keys user/ssh_signing_keys signing read:ssh_signing_key
+  key_list_contains_expected <<< "$GITHUB_KEY_LIST" || \
+    die "GitHub accepted the signing-key upload but it is not present on re-query"
+  ok "SSH signing key added to GitHub"
+fi
+
+ok "Tower / VS Code / git CLI share this verified authentication and signing key via ssh-agent"

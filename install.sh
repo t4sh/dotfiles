@@ -44,9 +44,9 @@ echo ""
 echo "→ Creating symlinks..."
 bash "$DOTFILES/scripts/link.sh"
 
-# 4. Brew bundle (pre-auth phase — App Store apps are restored after sign-in)
+# 4. Brew bundle base (npm waits for pinned Node; App Store waits for sign-in)
 echo ""
-echo "→ Installing Brewfile packages except App Store apps..."
+echo "→ Installing Brewfile base packages (excluding npm and App Store apps)..."
 echo "  (This will take a while — formulae, casks, fonts, VS Code extensions)"
 make -C "$DOTFILES" brew-base
 
@@ -58,42 +58,32 @@ else
     echo "✓ zsh is already default shell"
 fi
 
-# 6. NVM + Node
+# 6. NVM + Node + npm globals. Brew's npm rows are deliberately deferred until
+# the pinned runtime exists so they never land under Homebrew's transient Node.
 echo ""
 echo "→ Setting up NVM and Node..."
-NODE_PINNED="$(tr -d '[:space:]' < "$DOTFILES/.node-version")"
-export NVM_DIR="$HOME/.nvm"
-NVM_SH="${HOMEBREW_PREFIX:-$(brew --prefix 2>/dev/null)}/opt/nvm/nvm.sh"
-[ -s "$NVM_SH" ] || { echo "nvm.sh not found: $NVM_SH" >&2; exit 1; }
-# shellcheck disable=SC1090
-\. "$NVM_SH"
-nvm install "$NODE_PINNED"
-NODE_RESOLVED="$(nvm version "$NODE_PINNED")"
-[ "$NODE_RESOLVED" != "N/A" ] || { echo "Node install failed: $NODE_PINNED" >&2; exit 1; }
+make -C "$DOTFILES" node
+echo "→ Installing npm globals under pinned Node..."
+make -C "$DOTFILES" brew-npm
 
 # node-stable / npx-stable shims — required by ~/.agents/rules/22-environment.md
 # (agents invoke node through these, independent of nvm's per-dir switching).
 # Single source of truth: scripts/link-node-shims.sh (also `make shims`).
 make -C "$DOTFILES" shims
 
-# 7. App preferences — delegated to scripts/restore-apps.sh (single source of
-#    truth, shared with `make restore-apps` / `make all`).
-bash "$DOTFILES/scripts/restore-apps.sh"
-
-# 8. Automator Services — use the replacement-based convergent target.
+# 7. Automator Services — before restore-apps (same order as `make all`:
+#    services → restore-apps → dock → hooks → macos).
 echo ""
 echo "→ Installing Automator services..."
 make -C "$DOTFILES" services
 
-# 9. macOS defaults
-echo ""
-read -p "→ Run macOS system preferences setup? (y/n) " -n 1 -r
-echo ""
-if [[ $REPLY =~ ^[Yy]$ ]]; then
-    bash "$DOTFILES/macos/defaults.sh"
-fi
+# 8. App preferences — delegated to scripts/restore-apps.sh (single source of
+#    truth, shared with `make restore-apps` / `make all`).
+bash "$DOTFILES/scripts/restore-apps.sh"
 
-# 10. Dock layout
+# 9. Dock layout — before hooks/macos so Ctrl-C during interactive defaults
+#    cannot skip Dock (same relative order as `make all`: dock → hooks → macos).
+echo ""
 read -p "→ Restore Dock layout? (y/n) " -n 1 -r
 echo ""
 if [[ $REPLY =~ ^[Yy]$ ]]; then
@@ -106,6 +96,14 @@ echo ""
 echo "→ Installing git hooks..."
 make -C "$DOTFILES" hooks
 
+# 11. macOS defaults last (interactive; matches `make all`).
+echo ""
+read -p "→ Run macOS system preferences setup? (y/n) " -n 1 -r
+echo ""
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    bash "$DOTFILES/macos/defaults.sh"
+fi
+
 echo ""
 echo "╔══════════════════════════════════════╗"
 echo "║          Bootstrap Complete          ║"
@@ -114,9 +112,9 @@ echo ""
 echo "Manual steps remaining:"
 echo "  1. Sign into the App Store, then install App Store apps:"
 echo "     → cd ~/.dotfiles && make brew-mas"
-echo "  2. Restore ~/.secrets from your DotfilesSecrets.sparseimage"
+echo "  2. Sign into iCloud and restore ~/.secrets from your DotfilesSecrets.sparseimage"
 echo "     → fetch the sparseimage from your backup destination"
-echo "     → retrieve the passphrase from an independently synchronized password manager"
+echo "     → retrieve the passphrase from your independently synchronized password manager"
 echo "     → double-click the image, paste the passphrase, and tick Remember"
 echo "     → sudo rsync -aL /Volumes/DotfilesSecrets/<latest-stamp>/ /"
 echo "     → make secrets-pass-import"
@@ -124,8 +122,8 @@ echo "     → echo \"<destination>\" > ~/.dotfiles-local/backup.destination"
 echo "  3. Wire restored consumers and verify/register the restored GitHub key:"
 echo "     → cd ~/.dotfiles && make link && make ssh-setup"
 echo "  4. Launch Dato once (if used), then run make restore-apps again"
-echo "  5. Canary Mail (if used): quit app, then make restore-canary"
-echo "  6. Shottr (if used): make restore-shottr"
+echo "  5. Canary Mail (if used): make restore-canary (quits/reopens automatically)"
+echo "  6. Shottr (if used): make restore-shottr (quits/reopens automatically)"
 echo "  7. Raycast: import config from ~/.secrets/apps/raycast/ (Settings → Advanced → Import)"
 echo "     then import extensions if needed; Transmit: import from ~/.secrets/apps/transmit/"
 echo "  8. Sign into apps: VS Code sync, Figma, etc."

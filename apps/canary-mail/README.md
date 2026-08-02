@@ -19,15 +19,14 @@ make backup-canary    # → ~/.secrets/apps/canary-mail/
 make secrets-backup   # encrypt ~/.secrets/ into the sparseimage vault
 ```
 
-`make link` is not required — nothing is symlinked.
+`make backup-canary` fails closed if process state cannot be determined, Canary is still running, or CanaryDB has not initialized. It then accepts basename-only entries from `config/canary-managed-realms.tsv`, creates the snapshot with private permissions, and atomically publishes a complete preferences-plus-realms envelope. `make link` is not required — nothing is symlinked.
 
 ## Restore (new Mac or wipe)
 
 1. Install Canary (`make brew` or MAS).
 2. Restore `~/.secrets/` from the vault (`rsync` from mounted snapshot).
-3. **Quit Canary Mail.**
-4. `make restore-canary`
-5. Open Canary; re-authenticate any account that prompts.
+3. `make restore-canary` — before quitting Canary, requires both the preference plist and realms directory and validates the basename-only managed inventory. It then publishes transactionally (including removal of managed live realms absent from that complete snapshot) and reopens Canary.
+4. Re-authenticate any account that prompts.
 
 Alternative: [Canary Cross-Device Sync](https://canarymail.io/help/how-to-use-cross-device-sync-macos) (QR) — vendor cloud, not dotfiles.
 

@@ -81,9 +81,11 @@
 #   [ ] `command -v brew` resolves (Homebrew installed)
 #   [ ] `echo $SHELL` returns /bin/zsh (default shell change took)
 #   [ ] `ssh -T git@github.com` greets by username (restored key validated and registered)
-#   [ ] `gh ssh-key list` has exactly ONE entry for this host. `make ssh-setup`
-#       skips this key if already registered; generation requires explicit
-#       `scripts/ssh-setup.sh --generate`. Prune older manual duplicates.
+#   [ ] `gh ssh-key list` shows this host's restored key for authentication, and
+#       signing is registered when git signing uses the same key (`make ssh-setup`
+#       converges auth + signing separately — two list entries can be correct).
+#       Generation requires explicit `scripts/ssh-setup.sh --generate`.
+#       Prune older manual duplicates that are not this host's key.
 #   [ ] `ls ~/.secrets/` is populated (vault restored from sparseimage)
 #   [ ] `gh auth status` reports logged in
 #   [ ] Touch ID for sudo works in a NEW terminal tab (/etc/pam.d/sudo_local)
@@ -189,8 +191,8 @@ snapshot_repo() {
 }
 
 snapshot_brew() {
-    # `brew bundle check` exit code says whether everything is installed.
-    brew bundle check --file="$DOTFILES/Brewfile" 2>&1 || true
+    # The phased helper checks npm rows under the pinned Node runtime.
+    env DOTFILES="$DOTFILES" bash "$DOTFILES/scripts/brewfile.sh" check 2>&1 || true
 }
 
 phase_snapshot() {

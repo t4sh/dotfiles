@@ -5,12 +5,16 @@
 # Usage: bash scripts/backup-canary-vault.sh
 # Then run: make secrets-backup
 set -euo pipefail
+umask 077
 
+DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
 CONTAINER="$HOME/Library/Containers/io.canarymail.mac/Data/Library"
 PREFS_SRC="$CONTAINER/Preferences/io.canarymail.mac.plist"
 DB_SRC="$CONTAINER/Application Support/CanaryDB"
-DEST="$HOME/.secrets/apps/canary-mail"
+SECRETS_ROOT="$HOME/.secrets"
+DEST="$SECRETS_ROOT/apps/canary-mail"
 DEST_PARENT="$(dirname "$DEST")"
+MANAGED_REALMS="$DOTFILES/config/canary-managed-realms.tsv"
 STAGE=""
 
 info() { printf '\033[36m==>\033[0m %s\n' "$*"; }
@@ -18,19 +22,47 @@ ok()   { printf '\033[32m  ✓\033[0m %s\n' "$*"; }
 die()  { printf '\033[31merror:\033[0m %s\n' "$*" >&2; exit 1; }
 
 [[ -d "$CONTAINER" ]] || die "Canary container not found — install and launch Canary Mail first"
-if pgrep -xq "Canary Mail" 2>/dev/null || pgrep -xf ".*Canary Mail.*" 2>/dev/null; then
-  die "Canary Mail is running — quit it before copying realm state"
-fi
+[[ -d "$DB_SRC" ]] || die "Canary database not found — launch Canary Mail and let account data initialize first: $DB_SRC"
+[[ -f "$MANAGED_REALMS" ]] || die "managed realm manifest missing: $MANAGED_REALMS"
 
-REALM_FILES=(
-  accounts.v2.realm
-  encrypted.realm
-  pgp.v2.realm
-  enterprise.realm
-  unsubscribe.realm
-  appIntegration.realm
-  calendar.events.realm
-)
+canary_is_running() {
+  local status
+  pgrep -xq "Canary Mail" 2>/dev/null
+  status=$?
+  case "$status" in
+    0) return 0 ;;
+    1) ;;
+    *) return 2 ;;
+  esac
+
+  pgrep -q -f ".*Canary Mail.*" 2>/dev/null
+  status=$?
+  case "$status" in
+    0) return 0 ;;
+    1) return 1 ;;
+    *) return 2 ;;
+  esac
+}
+
+CANARY_RUNNING_STATUS=0
+canary_is_running || CANARY_RUNNING_STATUS=$?
+case "$CANARY_RUNNING_STATUS" in
+  0) die "Canary Mail is running — quit it before copying realm state" ;;
+  1) ;;
+  *) die "could not determine whether Canary Mail is running — refusing live realm backup" ;;
+esac
+
+REALM_FILES=()
+while IFS= read -r name || [[ -n "$name" ]]; do
+  name="${name%%#*}"
+  name="${name#"${name%%[![:space:]]*}"}"
+  name="${name%"${name##*[![:space:]]}"}"
+  [[ -z "$name" ]] && continue
+  [[ "$name" != */* && "$name" != "." && "$name" != ".." ]] || \
+    die "managed realm entries must be basenames: $name"
+  REALM_FILES+=("$name")
+done < "$MANAGED_REALMS"
+((${#REALM_FILES[@]} > 0)) || die "managed realm manifest is empty: $MANAGED_REALMS"
 
 cleanup() {
   local status=$?
@@ -41,6 +73,7 @@ trap cleanup EXIT
 
 info "backing up Canary Mail config to $DEST"
 mkdir -p "$DEST_PARENT"
+chmod 700 "$SECRETS_ROOT" "$SECRETS_ROOT/apps"
 STAGE="$(mktemp -d "$DEST_PARENT/.canary-mail.tmp.XXXXXX")"
 STAGE_PREFS="$STAGE/preferences/io.canarymail.mac.plist"
 STAGE_REALMS="$STAGE/realms"
@@ -74,6 +107,11 @@ for ldb in pgp.domain.ldb pgp.mailbox.ldb; do
   cp -a "$src" "$STAGE_REALMS/$ldb"
   ok "realms/$ldb"
 done
+
+# The stage becomes the canonical secret snapshot after publish. Normalize all
+# copied source modes so app-owned 0644 files or 0755 directories cannot widen
+# the ~/.secrets boundary.
+chmod -R go-rwx "$STAGE"
 
 if [[ -e "$DEST" ]]; then
   command -v python3 >/dev/null 2>&1 || die "python3 is required for atomic Canary backup replacement"

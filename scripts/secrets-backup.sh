@@ -44,6 +44,64 @@ die()  { printf '\033[31merror:\033[0m %s\n' "$*" >&2; exit 1; }
   create it at $MANIFEST (or set \$DOTFILES_BACKUP_MANIFEST)
   see scripts/backup-manifest.example for the format"
 
+expand_manifest_path() {
+  local s="$1"
+  local secrets_dir="${DOTFILES_SECRETS_DIR:-$HOME/.secrets}"
+
+  # Literal tilde/variable patterns are expanded manually below.
+  # shellcheck disable=SC2088,SC2016
+  case "$s" in
+    '~') printf '%s' "$HOME" ;;
+    '~/'*) printf '%s/%s' "$HOME" "${s#\~/}" ;;
+    '$HOME') printf '%s' "$HOME" ;;
+    '$HOME/'*) printf '%s/%s' "$HOME" "${s#\$HOME/}" ;;
+    '${HOME}') printf '%s' "$HOME" ;;
+    '${HOME}/'*) printf '%s/%s' "$HOME" "${s#\$\{HOME\}/}" ;;
+    '$DOTFILES_SECRETS_DIR') printf '%s' "$secrets_dir" ;;
+    '$DOTFILES_SECRETS_DIR/'*) printf '%s/%s' "$secrets_dir" "${s#\$DOTFILES_SECRETS_DIR/}" ;;
+    '${DOTFILES_SECRETS_DIR}') printf '%s' "$secrets_dir" ;;
+    '${DOTFILES_SECRETS_DIR}/'*) printf '%s/%s' "$secrets_dir" "${s#\$\{DOTFILES_SECRETS_DIR\}/}" ;;
+    '$DOTFILES_LOCAL_DIR') printf '%s' "$LOCAL_DIR" ;;
+    '$DOTFILES_LOCAL_DIR/'*) printf '%s/%s' "$LOCAL_DIR" "${s#\$DOTFILES_LOCAL_DIR/}" ;;
+    '${DOTFILES_LOCAL_DIR}') printf '%s' "$LOCAL_DIR" ;;
+    '${DOTFILES_LOCAL_DIR}/'*) printf '%s/%s' "$LOCAL_DIR" "${s#\$\{DOTFILES_LOCAL_DIR\}/}" ;;
+    *'$'* | *'`'*) return 1 ;;
+    *) printf '%s' "$s" ;;
+  esac
+}
+
+MANIFEST_PATHS=()
+path_has_dot_segments() {
+  local remaining="${1#/}" segment
+  while [[ -n "$remaining" ]]; do
+    segment="${remaining%%/*}"
+    [[ "$segment" == "." || "$segment" == ".." ]] && return 0
+    [[ "$remaining" == */* ]] || break
+    remaining="${remaining#*/}"
+  done
+  return 1
+}
+
+preflight_manifest() {
+  local line src count=0
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    line="${line%%#*}"
+    line="${line#"${line%%[![:space:]]*}"}"
+    line="${line%"${line##*[![:space:]]}"}"
+    [[ -z "$line" ]] && continue
+    src="$(expand_manifest_path "$line")" || die "unsupported manifest expansion: $line"
+    [[ "$src" == /* ]] || die "manifest paths must resolve to absolute paths: $line"
+    path_has_dot_segments "$src" && die "manifest paths must not contain dot segments: $line"
+    MANIFEST_PATHS+=("$src")
+    count=$((count + 1))
+  done < "$MANIFEST"
+  (( count > 0 )) || die "manifest contains no backup paths: $MANIFEST"
+}
+
+# Reject invalid or relative paths before selecting a destination, taking the
+# lock, mounting a vault, pruning snapshots, or making any other mutation.
+preflight_manifest
+
 # --- destination: env var → cache default → prompt ---
 DEST_DEFAULT=""
 [[ -f "$DEST_CACHE" ]] && DEST_DEFAULT="$(<"$DEST_CACHE")"
@@ -71,6 +129,62 @@ DEST="${DEST/#\~/$HOME}"
 
 [[ -d "$DEST" ]] || die "destination does not exist: $DEST"
 [[ -w "$DEST" ]] || die "destination not writable: $DEST"
+
+VAULT="$DEST/DotfilesSecrets.sparseimage"
+
+path_contains_or_is() {
+  local container="$1" candidate="$2"
+  [[ "$candidate" == "$container" || "$candidate" == "$container/"* ]]
+}
+
+normalize_lexical_absolute_path() {
+  local path="$1"
+  while [[ "$path" == *//* ]]; do
+    path="${path//\/\//\/}"
+  done
+  while [[ "$path" != "/" && "$path" == */ ]]; do
+    path="${path%/}"
+  done
+  printf '%s' "$path"
+}
+
+validate_manifest_containment() {
+  local src src_lexical src_real mount_lexical mount_real vault_lexical vault_real
+  mount_lexical="$(normalize_lexical_absolute_path "$MOUNT")"
+  vault_lexical="$(normalize_lexical_absolute_path "$VAULT")"
+  mount_real="$(cd "$(dirname "$MOUNT")" && pwd -P)/$(basename "$MOUNT")"
+  vault_real="$(cd "$(dirname "$VAULT")" && pwd -P)/$(basename "$VAULT")"
+  for src in "${MANIFEST_PATHS[@]}"; do
+    # Lexical containment must run even when a first-run source does not exist
+    # yet. The selected image and mount are created later in this process.
+    src_lexical="$(normalize_lexical_absolute_path "$src")"
+    if path_contains_or_is "$mount_lexical" "$src_lexical" || \
+       path_contains_or_is "$src_lexical" "$mount_lexical"; then
+      die "manifest source must not overlap the vault mount: $src"
+    fi
+    if path_contains_or_is "$src_lexical" "$vault_lexical" || \
+       path_contains_or_is "$vault_lexical" "$src_lexical"; then
+      die "manifest source must not contain or resolve to the vault image: $src"
+    fi
+
+    # Existing symlinks can hide overlap that is not visible lexically.
+    [[ -e "$src" || -L "$src" ]] || continue
+    src_real="$(realpath "$src" 2>/dev/null || true)"
+    [[ -n "$src_real" ]] || continue
+    if path_contains_or_is "$mount_real" "$src_real" || \
+       path_contains_or_is "$src_real" "$mount_real"; then
+      die "manifest source must not overlap the vault mount: $src"
+    fi
+    if path_contains_or_is "$src_real" "$vault_real" || \
+       path_contains_or_is "$vault_real" "$src_real"; then
+      die "manifest source must not contain or resolve to the vault image: $src"
+    fi
+  done
+}
+
+# Destination-aware safety still runs before lock/cache creation, mounting, or
+# retention pruning. `rsync -L` follows links, so compare resolved source paths.
+validate_manifest_containment
 
 mkdir -p "$LOCAL_DIR"
 
@@ -100,8 +214,6 @@ trap release_lock EXIT
 # Persist the selected destination only after this process owns the backup lock;
 # a rejected concurrent invocation must not redirect future backup/mount runs.
 printf '%s\n' "$DEST" > "$DEST_CACHE"
-
-VAULT="$DEST/DotfilesSecrets.sparseimage"
 
 # --- passphrase: create once in the local login Keychain ---
 # `security add-generic-password` does not create a synchronizable Keychain
@@ -192,32 +304,155 @@ if [[ ! -e "$VAULT" ]]; then
   ok "created $VAULT"
 fi
 
-# --- mount (idempotent) ---
+# --- mount selected vault and verify its exact returned device identity ---
 is_mounted() {
   mount | grep -F " on $MOUNT " >/dev/null 2>&1
 }
 
 MOUNTED_BY_US=0
+ATTACHED_DEVICE=""
+ATTACH_CLEANUP_DEVICE=""
+ATTACH_PLIST=""
 PARTIAL=""
-if [[ -d "$MOUNT" ]]; then
-  is_mounted || die "$MOUNT exists but is not a mounted volume; remove the stale directory and re-run"
-else
-  info "mounting vault"
-  get_pass | hdiutil attach "$VAULT" -stdinpass -mountpoint "$MOUNT" -nobrowse >/dev/null
-  MOUNTED_BY_US=1
-fi
-[[ -d "$MOUNT" && -w "$MOUNT" ]] || die "vault mount is not writable: $MOUNT"
-
 cleanup() {
   local status=$?
   if [[ -n "$PARTIAL" && -d "$PARTIAL" ]]; then
     rm -rf -- "$PARTIAL" || true
   fi
-  [[ $MOUNTED_BY_US -eq 1 ]] && hdiutil detach "$MOUNT" >/dev/null 2>&1 || true
+  [[ -n "$ATTACH_PLIST" ]] && rm -f -- "$ATTACH_PLIST"
+  if [[ $MOUNTED_BY_US -eq 1 ]]; then
+    if [[ -n "$ATTACHED_DEVICE" ]]; then
+      hdiutil detach "$ATTACHED_DEVICE" >/dev/null 2>&1 || true
+    elif [[ -n "$ATTACH_CLEANUP_DEVICE" ]]; then
+      hdiutil detach "$ATTACH_CLEANUP_DEVICE" >/dev/null 2>&1 || true
+    elif is_mounted; then
+      hdiutil detach "$MOUNT" >/dev/null 2>&1 || true
+    fi
+  fi
   release_lock
   return "$status"
 }
 trap cleanup EXIT
+
+# Resolve the selected image before calling attach. `hdiutil attach` reports an
+# already-attached image as though this process attached it, so mountpoint-only
+# detection can otherwise claim and detach an operator-owned device.
+resolve_selected_vault_attachment() {
+  local info_plist image_index entity_index image_path entity_mount entity_device
+  local vault_real image_real first_device first_mount
+  info_plist="$(mktemp "${TMPDIR:-/tmp}/dotfiles-vault-info.XXXXXX")"
+  if ! hdiutil info -plist > "$info_plist" 2>/dev/null; then
+    rm -f -- "$info_plist"
+    return 2
+  fi
+  vault_real="$(cd "$(dirname "$VAULT")" && pwd -P)/$(basename "$VAULT")"
+  image_index=0
+  while :; do
+    image_path="$(/usr/bin/plutil -extract "images.$image_index.image-path" raw -o - "$info_plist" 2>/dev/null || true)"
+    [[ -n "$image_path" ]] || break
+    if [[ -e "$image_path" ]]; then
+      image_real="$(cd "$(dirname "$image_path")" && pwd -P)/$(basename "$image_path")"
+    else
+      image_real="$image_path"
+    fi
+    if [[ "$image_real" == "$vault_real" ]]; then
+      first_device=""
+      first_mount=""
+      entity_index=0
+      while :; do
+        entity_device="$(/usr/bin/plutil -extract "images.$image_index.system-entities.$entity_index.dev-entry" raw -o - "$info_plist" 2>/dev/null || true)"
+        entity_mount="$(/usr/bin/plutil -extract "images.$image_index.system-entities.$entity_index.mount-point" raw -o - "$info_plist" 2>/dev/null || true)"
+        [[ -n "$entity_device" || -n "$entity_mount" ]] || break
+        if [[ "$entity_mount" == "$MOUNT" && "$entity_device" == /dev/disk* ]]; then
+          printf '%s\t%s' "$entity_device" "$entity_mount"
+          rm -f -- "$info_plist"
+          return 0
+        fi
+        if [[ -z "$first_device" && "$entity_device" == /dev/disk* ]]; then
+          first_device="$entity_device"
+          first_mount="$entity_mount"
+        fi
+        entity_index=$((entity_index + 1))
+      done
+      if [[ -n "$first_device" ]]; then
+        printf '%s\t%s' "$first_device" "$first_mount"
+        rm -f -- "$info_plist"
+        return 0
+      fi
+      rm -f -- "$info_plist"
+      return 2
+    fi
+    image_index=$((image_index + 1))
+  done
+  rm -f -- "$info_plist"
+  return 1
+}
+
+WAS_MOUNTED=0
+EXISTING_ATTACHMENT=""
+attachment_status=0
+EXISTING_ATTACHMENT="$(resolve_selected_vault_attachment)" || attachment_status=$?
+case "$attachment_status" in
+  0)
+    existing_device="${EXISTING_ATTACHMENT%%$'\t'*}"
+    existing_mount="${EXISTING_ATTACHMENT#*$'\t'}"
+    if [[ "$existing_mount" == "$MOUNT" ]]; then
+      if [[ ! -d "$MOUNT" ]] || ! is_mounted; then
+        die "selected vault reports $MOUNT but it is not a live mounted volume; detach it manually and re-run"
+      fi
+      ATTACHED_DEVICE="$existing_device"
+      WAS_MOUNTED=1
+    else
+      [[ -n "$existing_mount" ]] || existing_mount="an unmounted device"
+      die "selected vault is already attached at $existing_mount ($existing_device)
+  leave that operator-owned attachment in place, or detach it manually before re-running"
+    fi
+    ;;
+  1) ;;
+  *) die "could not determine whether the selected vault is already attached: $VAULT" ;;
+esac
+
+if [[ $WAS_MOUNTED -eq 0 && -d "$MOUNT" ]]; then
+  is_mounted || die "$MOUNT exists but is not a mounted volume; remove the stale directory and re-run"
+  die "$MOUNT is mounted but is not the selected vault: $VAULT
+  unmount it (eject in Finder or: hdiutil detach \"$MOUNT\") and re-run"
+fi
+
+if [[ $WAS_MOUNTED -eq 1 ]]; then
+  info "vault already mounted at $MOUNT — selected image identity verified"
+  ok "using already-mounted vault ($ATTACHED_DEVICE)"
+  MOUNTED_BY_US=0
+else
+  info "attaching selected vault"
+  ATTACH_PLIST="$(mktemp "${TMPDIR:-/tmp}/dotfiles-vault-attach.XXXXXX")"
+  if ! get_pass | hdiutil attach "$VAULT" -stdinpass -mountpoint "$MOUNT" -nobrowse -plist > "$ATTACH_PLIST"; then
+    die "could not attach selected vault: $VAULT"
+  fi
+  # Own the mount for EXIT cleanup immediately — plist parse can still fail.
+  MOUNTED_BY_US=1
+
+  # hdiutil's attach plist links the selected sparseimage to its /dev/disk node
+  # and mount point. A directory/mount name alone is not sufficient proof.
+  entity_index=0
+  while :; do
+    entity_device="$(/usr/bin/plutil -extract "system-entities.$entity_index.dev-entry" raw -o - "$ATTACH_PLIST" 2>/dev/null || true)"
+    entity_mount="$(/usr/bin/plutil -extract "system-entities.$entity_index.mount-point" raw -o - "$ATTACH_PLIST" 2>/dev/null || true)"
+    [[ -n "$entity_device" || -n "$entity_mount" ]] || break
+    if [[ -z "$ATTACH_CLEANUP_DEVICE" && "$entity_device" == /dev/disk* ]]; then
+      ATTACH_CLEANUP_DEVICE="$entity_device"
+    fi
+    if [[ "$entity_mount" == "$MOUNT" && "$entity_device" == /dev/disk* ]]; then
+      ATTACHED_DEVICE="$entity_device"
+      ATTACH_CLEANUP_DEVICE="$entity_device"
+      break
+    fi
+    entity_index=$((entity_index + 1))
+  done
+  [[ -n "$ATTACHED_DEVICE" ]] || die "selected vault did not attach as $MOUNT with a verified /dev/disk identity"
+  rm -f -- "$ATTACH_PLIST"
+  ATTACH_PLIST=""
+fi
+[[ -d "$MOUNT" && -w "$MOUNT" ]] || die "vault mount is not writable: $MOUNT"
 
 prune_snapshots() {
   local target_keep="$1"
@@ -233,15 +468,8 @@ prune_snapshots() {
 }
 
 estimate_manifest_kb() {
-  local total=0 line src kb
-  while IFS= read -r line || [[ -n "$line" ]]; do
-    line="${line%%#*}"
-    line="${line#"${line%%[![:space:]]*}"}"
-    line="${line%"${line##*[![:space:]]}"}"
-    [[ -z "$line" ]] && continue
-    if ! src="$(expand_manifest_path "$line")"; then
-      continue
-    fi
+  local total=0 src kb
+  for src in "${MANIFEST_PATHS[@]}"; do
     if [[ ! -e "$src" && ! -L "$src" ]]; then
       continue
     fi
@@ -255,7 +483,7 @@ estimate_manifest_kb() {
       return 1
     }
     total=$((total + kb))
-  done < "$MANIFEST"
+  done
   printf '%s' "$total"
 }
 
@@ -273,32 +501,6 @@ check_vault_space() {
   fi
 }
 
-expand_manifest_path() {
-  local s="$1"
-  local secrets_dir="${DOTFILES_SECRETS_DIR:-$HOME/.secrets}"
-
-  # Literal tilde/variable patterns are expanded manually below.
-  # shellcheck disable=SC2088,SC2016
-  case "$s" in
-    '~') printf '%s' "$HOME" ;;
-    '~/'*) printf '%s/%s' "$HOME" "${s#\~/}" ;;
-    '$HOME') printf '%s' "$HOME" ;;
-    '$HOME/'*) printf '%s/%s' "$HOME" "${s#\$HOME/}" ;;
-    '${HOME}') printf '%s' "$HOME" ;;
-    '${HOME}/'*) printf '%s/%s' "$HOME" "${s#\$\{HOME\}/}" ;;
-    '$DOTFILES_SECRETS_DIR') printf '%s' "$secrets_dir" ;;
-    '$DOTFILES_SECRETS_DIR/'*) printf '%s/%s' "$secrets_dir" "${s#\$DOTFILES_SECRETS_DIR/}" ;;
-    '${DOTFILES_SECRETS_DIR}') printf '%s' "$secrets_dir" ;;
-    '${DOTFILES_SECRETS_DIR}/'*) printf '%s/%s' "$secrets_dir" "${s#\$\{DOTFILES_SECRETS_DIR\}/}" ;;
-    '$DOTFILES_LOCAL_DIR') printf '%s' "$LOCAL_DIR" ;;
-    '$DOTFILES_LOCAL_DIR/'*) printf '%s/%s' "$LOCAL_DIR" "${s#\$DOTFILES_LOCAL_DIR/}" ;;
-    '${DOTFILES_LOCAL_DIR}') printf '%s' "$LOCAL_DIR" ;;
-    '${DOTFILES_LOCAL_DIR}/'*) printf '%s/%s' "$LOCAL_DIR" "${s#\$\{DOTFILES_LOCAL_DIR\}/}" ;;
-    *'$'* | *'`'*) return 1 ;;
-    *) printf '%s' "$s" ;;
-  esac
-}
-
 # Enforce any explicitly lowered/exceeded retention before checking capacity,
 # but never delete below KEEP merely to attempt a backup. A failed copy must
 # preserve every snapshot within policy. Normal pruning happens after publish.
@@ -312,15 +514,7 @@ PARTIAL="$MOUNT/.$STAMP.partial"
 mkdir -p "$PARTIAL"
 info "snapshotting manifest → .$STAMP.partial"
 COUNT=0
-while IFS= read -r line || [[ -n "$line" ]]; do
-  line="${line%%#*}"
-  line="${line#"${line%%[![:space:]]*}"}"
-  line="${line%"${line##*[![:space:]]}"}"
-  [[ -z "$line" ]] && continue
-  if ! src="$(expand_manifest_path "$line")"; then
-    warn "skip (unsupported expansion): $line"
-    continue
-  fi
+for src in "${MANIFEST_PATHS[@]}"; do
   if [[ ! -e "$src" && ! -L "$src" ]]; then
     warn "skip (missing): $src"
     continue
@@ -336,7 +530,7 @@ while IFS= read -r line || [[ -n "$line" ]]; do
   if the vault was full, prune or resize before retrying (see check_vault_space hints above)"
   fi
   COUNT=$((COUNT + 1))
-done < "$MANIFEST"
+done
 if (( COUNT == 0 )); then
   die "manifest produced 0 snapshot paths; partial snapshot will be removed"
 fi
@@ -348,8 +542,10 @@ prune_snapshots "$KEEP"
 # --- unmount + compact so destination uploads stay small ---
 if [[ $MOUNTED_BY_US -eq 1 ]]; then
   info "unmounting + compacting"
-  hdiutil detach "$MOUNT" >/dev/null
+  hdiutil detach "$ATTACHED_DEVICE" >/dev/null
   MOUNTED_BY_US=0
+  ATTACHED_DEVICE=""
+  ATTACH_CLEANUP_DEVICE=""
   if ! get_pass | hdiutil compact "$VAULT" -stdinpass >/dev/null 2>&1; then
     die "snapshot succeeded, but vault compaction failed: $VAULT"
   fi
