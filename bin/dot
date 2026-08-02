@@ -57,7 +57,7 @@ EOF
     done
     cat <<EOF
 Also available via Make (repo root):
-  make help | link | unlink | brew | brew-base | brew-mas | brew-check | shims
+  make help | link | unlink | brew | brew-base | node | brew-npm | brew-mas | brew-check | shims
   make macos | dock | terminal | services | hooks
   make default-apps | capture-default-apps | doctor | docs-audit
   make rules-audit | brewfile-audit | skills-audit

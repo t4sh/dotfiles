@@ -3,7 +3,10 @@
 # Copy to ~/.dotfiles-local/backup.manifest (NOT into the repo) and edit.
 # One path per line. `#` starts a comment. Supported prefixes: ~, $HOME,
 # $DOTFILES_SECRETS_DIR, and $DOTFILES_LOCAL_DIR (also ${…} forms).
-# Other variable/command expansion is rejected; missing paths are warned/skipped.
+# Every entry must resolve to an absolute path. Relative paths and other
+# variable/command expansion are rejected before vault mutation. Sources that
+# overlap the selected vault image or /Volumes/DotfilesSecrets are also
+# rejected; missing absolute paths are warned/skipped.
 #
 # Recommended (single canonical tree — see README § Secrets layout):
 #
@@ -19,18 +22,14 @@
 #   │   ├── moltbook/credentials.json   # → ~/.config/moltbook/credentials.json
 #   │   └── env/                        # → ~/.config/env/ (per-tool env files)
 #   └── apps/
+#       ├── canary-mail/                # realms + plist — make backup-canary / restore-canary
+#       ├── shottr/                     # cc.ffitch.shottr.plist — make backup-shottr / restore-shottr
 #       ├── raycast/                    # manual .rayconfig / export bundles
+#       ├── vscode/                     # token-bearing MCP/profile data — manual restore
+#       ├── sublime-text/               # Monokai Pro license settings (not in repo)
 #       └── transmit/                   # manual .transmitservers exports
 #
-# Shottr license prefs: make backup-shottr (or restore from a dated vault snapshot).
-#
-# Monokai Pro (Sublime): license file is NOT in the repo — keep under:
-#   ~/.secrets/apps/sublime-text/Theme - Monokai Pro.sublime-settings
-# Covered by the ~/.secrets line above when using the recommended manifest.
-#
-# Canary Mail: make backup-canary → ~/.secrets/apps/canary-mail/ (realms + plist).
-# Shottr: make backup-shottr → ~/.secrets/apps/shottr/cc.ffitch.shottr.plist
-# Also covered by ~/.secrets when using the recommended manifest.
+# All of the above are covered by the single ~/.secrets manifest line.
 #
 # Migrating from an old manifest that listed ~/.config/* or ~/.ssh/* paths?
 # Move files into the ~/.secrets/ tree above, then `make link`.

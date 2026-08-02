@@ -1,5 +1,5 @@
 tap "homebrew/core"
-tap "xykong/tap"
+tap "minghinmatthewlam/tap"
 # Static analysis and lint tool, for (ba)sh scripts
 brew "shellcheck"
 # Static checker for GitHub Actions workflow files
@@ -92,7 +92,7 @@ brew "ripgrep"
 brew "rtk"
 # Cross-shell prompt for astronauts
 brew "starship"
-# Official tldr client (Rust; replaces deprecated Homebrew tldr)
+# Official tldr client written in Rust
 brew "tlrc"
 # Upgrade all the things
 brew "topgrade"
@@ -132,12 +132,14 @@ cask "asset-catalog-tinkerer"
 cask "betterdisplay"
 # Utility to create and modify archives
 cask "betterzip"
-# Design and communication tool
+# AI-native design tool
 cask "brilliant"
 # Design tool
 cask "canva"
 # OpenAI's official ChatGPT desktop app
 cask "chatgpt"
+# Anthropic's official Claude AI desktop app
+cask "claude"
 # Image, video and clipboard optimiser
 cask "clop"
 # Free app that makes your Internet safer
@@ -170,8 +172,6 @@ cask "duckduckgo"
 cask "figma"
 # Web browser
 cask "firefox"
-# Markdown previews in Finder QuickLook with diagrams and math
-cask "xykong/tap/flux-markdown", trusted: true
 cask "font-anton"
 cask "font-architects-daughter"
 cask "font-bangers"
@@ -180,6 +180,7 @@ cask "font-bree-serif"
 cask "font-caveat"
 cask "font-caveat-brush"
 cask "font-computer-modern"
+cask "font-cooper-hewitt"
 cask "font-darker-grotesque"
 cask "font-domine"
 cask "font-fira-code-nerd-font"
@@ -241,6 +242,8 @@ cask "lobehub"
 cask "lunacy"
 # Clipboard manager
 cask "maccy"
+# Markdown previewer with bundled Quick Look extension
+cask "markdown-preview"
 # Select text in any app and translate it
 cask "mate-translate"
 # Provides updates to various Microsoft products
@@ -276,6 +279,7 @@ cask "paseo"
 # Utility to uninstall apps and remove leftover files from old/uninstalled apps
 cask "pearcleaner"
 # Codex-style desktop shell for pi
+cask "minghinmatthewlam/tap/pi-gui", trusted: true
 # All-in-one bookmark manager
 cask "raindropio"
 # Control your tools with a few keystrokes
@@ -331,12 +335,9 @@ mas "Hidden Bar", id: 1452453066
 mas "HP", id: 1474276998
 mas "HP Easy Scan", id: 967004861
 mas "Keynote", id: 361285480
-mas "Keynote", id: 409183694
 mas "Kindle", id: 302584613
 mas "Lungo", id: 1263070803
-mas "Numbers", id: 409203825
 mas "Numbers", id: 361304891
-mas "Pages", id: 409201541
 mas "Pages", id: 361309726
 mas "Perplexity", id: 6714467650
 mas "Prime Video", id: 545519333
@@ -455,3 +456,4 @@ vscode "yoavbls.pretty-ts-errors"
 vscode "yzhang.markdown-all-in-one"
 vscode "zignd.html-css-class-completion"
 npm "corepack"
+npm "design-book"

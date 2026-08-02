@@ -1,5 +1,8 @@
 root = true
 
+# LF only — Windows+Mac safe. CRLF breaks shell scripts on macOS.
+# Keep editor Prettier files.eol / prettier.endOfLine in sync (lf / \n).
+
 [*]
 charset = utf-8
 end_of_line = lf

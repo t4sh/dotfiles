@@ -2,8 +2,10 @@
 # Consumed by `make backup` (defaults export) and scripts/restore-apps.sh
 # (defaults import). Mirrors the symlinks.tsv pattern.
 #
-# Format:   <domain>\t<label>\t<repo-relative plist>
-# Placeholder: $DOTFILES expands in restore-apps.sh; paths are repo-root-relative.
+# Format:   <domain>\t<label>\t<repo-relative plist>\t[AppleScript app name]
+# The optional fourth field defaults to the label. Use `-` for macOS domains
+# that have no owning application process.
+# Plist paths are repo-root-relative; variable placeholders are not expanded.
 # Lines starting with `#` and blank lines are ignored.
 #
 # NOTE: apps needing container copies / exclusions / sanitize steps (Dato,
@@ -40,8 +42,8 @@ com.todesktop.230313mzl4w4u92	Cursor	apps/cursor/cursor.plist
 # macOS system UX domains — too deeply nested to hand-write in macos/defaults.sh,
 # so snapshotted whole. Plists live in macos/ (next to dock-backup.plist), not
 # apps/. Changes need a logout (or killall cfprefsd) to take effect on import.
-com.apple.symbolichotkeys	Keyboard Shortcuts	macos/symbolichotkeys.plist
-com.apple.HIToolbox	Input Sources	macos/hitoolbox.plist
+com.apple.symbolichotkeys	Keyboard Shortcuts	macos/symbolichotkeys.plist	-
+com.apple.HIToolbox	Input Sources	macos/hitoolbox.plist	-
 
 # Shottr license prefs (kc-license) — vault via make backup-shottr / restore-shottr.
 # Monokai Pro license settings are NOT kept in the repo — vault only

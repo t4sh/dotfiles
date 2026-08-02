@@ -18,6 +18,10 @@ Usage: link.sh [--dry-run | --check]
 
   --dry-run   Show what would be linked/backed up without changing files.
   --check     Exit non-zero when a source is missing or a destination has drifted.
+
+Environment:
+  DOTFILES_STRICT_LINK=1   Exit non-zero when any declared source is missing
+                           (normal apply mode; --check already fails on missing sources).
 EOF
 }
 
@@ -113,16 +117,40 @@ else
     echo "Linking dotfiles from $MANIFEST..."
 fi
 
+# Snapshot the manifest once. In strict apply mode, validate every source before
+# changing any destination so a nonzero result never means "partially applied."
+MANIFEST_SOURCES=()
+MANIFEST_DESTINATIONS=()
 while IFS=$'\t' read -r src dst; do
     [ -z "${src:-}" ] && continue
     [[ "$src" =~ ^[[:space:]]*# ]] && continue
-    link_one "$(expand "$src")" "$(expand "$dst")"
+    MANIFEST_SOURCES+=("$(expand "$src")")
+    MANIFEST_DESTINATIONS+=("$(expand "$dst")")
 done < "$MANIFEST"
+
+if [[ "${DOTFILES_STRICT_LINK:-0}" == "1" ]] && (( ! CHECK )); then
+    for src in "${MANIFEST_SOURCES[@]}"; do
+        if [[ ! -e "$src" ]]; then
+            echo "  ⚠ strict preflight source missing: $src"
+            MISSING_SOURCES=$((MISSING_SOURCES + 1))
+        fi
+    done
+    if (( MISSING_SOURCES > 0 )); then
+        echo "Strict link failed before applying changes: $MISSING_SOURCES missing source(s)."
+        exit 1
+    fi
+fi
+
+for i in "${!MANIFEST_SOURCES[@]}"; do
+    link_one "${MANIFEST_SOURCES[$i]}" "${MANIFEST_DESTINATIONS[$i]}"
+done
 
 echo ""
 if (( MISSING_SOURCES > 0 )); then
-    echo "Warning: $MISSING_SOURCES declared source(s) are missing; no destination was changed for them."
-    echo "Restore ~/.secrets from the vault and re-run this script if these are secret-backed paths."
+    printf '\033[1m⚠ %d declared source(s) missing — destinations left untouched.\033[0m\n' "$MISSING_SOURCES"
+    echo "  Most often these are vault-backed paths under ~/.secrets/."
+    echo "  Restore the vault, then re-run: make link"
+    echo "  Strict mode: DOTFILES_STRICT_LINK=1 make link  # nonzero exit when any source is missing"
     echo ""
 fi
 if (( CHECK )); then
@@ -131,6 +159,9 @@ if (( CHECK )); then
         exit 1
     fi
     echo "Check complete. All managed links are healthy."
+elif (( MISSING_SOURCES > 0 )) && [[ "${DOTFILES_STRICT_LINK:-0}" == "1" ]]; then
+    echo "Strict link failed: $MISSING_SOURCES missing source(s) (DOTFILES_STRICT_LINK=1)."
+    exit 1
 elif (( DRY_RUN )); then
     echo "Dry-run complete. No files changed."
 elif [ -d "$BACKUP_DIR" ]; then

@@ -41,7 +41,7 @@ fi
 
 if have brew; then
   ok "Homebrew installed"
-  if brew bundle check --file="$DOTFILES/Brewfile" >/dev/null 2>&1; then
+  if env DOTFILES="$DOTFILES" bash "$DOTFILES/scripts/brewfile.sh" check >/dev/null 2>&1; then
     ok "Brewfile entries installed"
   else
     warn "Brewfile has missing installs; run: make brew"
@@ -134,6 +134,22 @@ fi
 
 if [ -d "$HOME/.secrets" ]; then
   ok "$HOME/.secrets exists"
+  # Warn-level readiness checks — presence only; never print secret contents.
+  if [ -f "$HOME/.secrets/ssh/github_ed25519" ]; then
+    ok "GitHub SSH private key present"
+  else
+    warn "GitHub SSH private key missing (~/.secrets/ssh/github_ed25519); restore vault then make link && make ssh-setup"
+  fi
+  if [ -f "$HOME/.secrets/config/gh/hosts.yml" ]; then
+    ok "GitHub CLI hosts.yml present"
+  else
+    warn "GitHub CLI hosts.yml missing (~/.secrets/config/gh/hosts.yml); restore vault then make link"
+  fi
+  if [ -f "$HOME/.secrets/config/moltbook/credentials.json" ]; then
+    ok "Moltbook credentials present"
+  else
+    warn "Moltbook credentials missing (~/.secrets/config/moltbook/credentials.json); restore vault then make link"
+  fi
 else
   warn "$HOME/.secrets missing; restore vault before secret-backed symlinks work"
 fi
