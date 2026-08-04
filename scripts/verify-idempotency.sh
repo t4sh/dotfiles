@@ -19,12 +19,12 @@
 #    "converges to declared state" claim in the README.
 #
 # 2. FRESH-MAC VERIFICATION (the one path that can't be tested any other way)
-#    On a brand-new Mac after following README § Fresh Mac (`install.sh`):
-#      a. Clone the repo, BEFORE running `make all`:
+#    On a brand-new Mac after cloning the repo:
+#      a. BEFORE running `install.sh`:
 #            scripts/verify-idempotency.sh snapshot
 #         The baseline will be mostly MISSING links and empty `defaults`
 #         domains — that's fine, it's the point.
-#      b. Run `make all`. Note any target that errors — those are first-run
+#      b. Run `bash install.sh`. Note any target that errors — those are first-run
 #         idempotency bugs (the branches that only execute when a file/path
 #         is absent: Homebrew install, keygen, plist import, shell change).
 #      c. Run `scripts/verify-idempotency.sh diff`. On a fresh Mac the diff
@@ -33,7 +33,8 @@
 #            - secret-backed links remain MISSING safely until vault restore + make link
 #            - brew check should flip from "missing X, Y, Z" to clean
 #            - `defaults` domains should fill in with declared values
-#      d. Run `make all` a SECOND time and re-diff. This second run is the
+#      d. After vault recovery, capture a new baseline, run `make all`, and
+#         re-diff. This existing-Mac run is the
 #         real idempotency test — it should produce only the known-noise
 #         categories (below). Any other drift is a bug.
 #
@@ -44,7 +45,8 @@
 #   com.apple.dock:
 #     - GUID           (regenerated every `dock.sh` run — by design)
 #     - mod-count      (bumped by every `defaults write`)
-#     - parent-mod-date (filesystem mod-time on Downloads folder)
+#     - file-mod-date / parent-mod-date (filesystem mod-times on Dock items)
+#     - last-analytics-stamp / trash-full (runtime state, not Dock policy)
 #
 #   com.apple.finder:
 #     - file-bookmark / name pairs under FXRecentFolders (Finder remembers
@@ -104,7 +106,8 @@ set -euo pipefail
 SNAPDIR="${DOTFILES_IDEMPOTENCY_SNAPSHOT_DIR:-/tmp/dotfiles-idempotency-$USER}"
 mkdir -p "$SNAPDIR"
 
-DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+DOTFILES="${DOTFILES:-$(cd -- "$SCRIPT_DIR/.." && pwd -P)}"
 MANIFEST="$DOTFILES/symlinks.tsv"
 
 expand() { local s="$1"; s="${s//\$DOTFILES/$DOTFILES}"; s="${s//\$HOME/$HOME}"; printf '%s' "$s"; }
@@ -137,7 +140,15 @@ import sys
 DOMAIN = sys.argv[1]
 DROP = {"book", "file-bookmark"}
 if DOMAIN == "com.apple.dock":
-    DROP.update({"GUID", "mod-count", "parent-mod-date"})
+    DROP.update({
+        "GUID",
+        "file-mod-date",
+        "last-analytics-stamp",
+        "mod-count",
+        "parent-file-mod-date",
+        "parent-mod-date",
+        "trash-full",
+    })
 elif DOMAIN == "com.apple.finder":
     DROP.update({"FXRecentFolders", "GoToField", "GoToFieldHistory"})
 elif DOMAIN == "NSGlobalDomain":

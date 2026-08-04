@@ -12,9 +12,9 @@
 # Sublime Text, VS Code, Cursor settings.json) stay as explicit blocks in their consumers — they carry
 # irregular logic that does not fit a flat row. This manifest is for the
 # homogeneous `defaults import/export <domain> <plist>` case only.
+# This public projection lists only snapshots actually shipped in this repo.
 
 com.knollsoft.Rectangle	Rectangle	apps/rectangle/rectangle.plist
-pro.betterdisplay.BetterDisplay	BetterDisplay	apps/betterdisplay/betterdisplay.plist
 com.macitbetter.betterzip	BetterZip	apps/betterzip/betterzip.plist
 com.lowtechguys.Clop	Clop	apps/clop/clop.plist
 com.ethanbills.DockDoor	DockDoor	apps/dockdoor/dockdoor.plist
@@ -35,9 +35,6 @@ com.wolfrosch.Gapplin	Gapplin	apps/gapplin/gapplin.plist
 com.valerijs.boguckis.store.TextSniper	TextSniper	apps/textsniper/textsniper.plist
 com.devtoys	DevToys	apps/devtoys/devtoys.plist
 com.alienator88.Pearcleaner	Pearcleaner	apps/pearcleaner/pearcleaner.plist
-com.fournova.Tower3	Tower	apps/tower/tower.plist
-md.obsidian	Obsidian	apps/obsidian/obsidian.plist
-com.todesktop.230313mzl4w4u92	Cursor	apps/cursor/cursor.plist
 
 # macOS system UX domains — too deeply nested to hand-write in macos/defaults.sh,
 # so snapshotted whole. Plists live in macos/ (next to dock-backup.plist), not

@@ -15,7 +15,8 @@
 # Hand-curated entries elsewhere in .gitignore are never touched.
 set -euo pipefail
 
-DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+DOTFILES="${DOTFILES:-$(cd -- "$SCRIPT_DIR/.." && pwd -P)}"
 SKILLS_DIR="$DOTFILES/agents/skills"
 LOCK_FILE="$DOTFILES/agents/.skill-lock.json"
 SOURCE_LICENSES="$DOTFILES/agents/skills/source-licenses.tsv"

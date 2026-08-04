@@ -149,11 +149,11 @@
     },
     "peacock.favoriteColors": [
         {
-            "name": "Set Ash",
+            "name": "Dark A",
             "value": "#1f1919"
         },
         {
-            "name": "get Ash",
+            "name": "Dark B",
             "value": "#1a1a1a"
         }
     ],
@@ -268,50 +268,19 @@
     ],
     "eslint.enable": false,
     "docker.extension.enableComposeLanguageServer": false,
-    "terminal.integrated.sendKeybindingsToShell": true,    "docker.extension.dockerEngineAvailabilityPrompt": false,
+    "terminal.integrated.sendKeybindingsToShell": true,
+    "yaml.schemas": {},
+    "docker.extension.dockerEngineAvailabilityPrompt": false,
     "chat.mcp.gallery.enabled": true,
     "gitlens.ai.model": "gemini:gemini-3-flash-preview",
     "gitlens.ai.vscode.model": "copilot:gpt-4.1",
     "atlascode.bitbucket.enabled": false,
     "atlascode.jira.enabled": true,
     "workbench.activityBar.location": "bottom",
-    "chat.tools.terminal.autoApprove": {
-        "true": true,
-        "/^git --no-pager diff --name-only dev\\.\\.\\.origin/update/legal-in-strapi \\|\\| true$/": {
-            "approve": true,
-            "matchCommandLine": true
-        },
-        "/^git fetch --all --prune && git --no-pager diff --name-only dev\\.\\.\\.origin/update/legal-in-strapi \\|\\| true$/": {
-            "approve": true,
-            "matchCommandLine": true
-        },
-        "/^git fetch --all --prune$/": {
-            "approve": true,
-            "matchCommandLine": true
-        },
-        "/^git rev-parse --verify origin/update/legal-in-strapi && git --no-pager diff --name-only dev\\.\\.\\.origin/update/legal-in-strapi \\|\\| true$/": {
-            "approve": true,
-            "matchCommandLine": true
-        },
-        "/^git --no-pager diff dev\\.\\.\\.origin/update/legal-in-strapi$/": {
-            "approve": true,
-            "matchCommandLine": true
-        },
-        "/^git --no-pager diff --name-only dev\\.\\.\\.origin/update/legal-in-strapi$/": {
-            "approve": true,
-            "matchCommandLine": true
-        },
-        "/^git fetch origin update/legal-in-strapi 2>&1 && git diff HEAD origin/update/legal-in-strapi --stat$/": {
-            "approve": true,
-            "matchCommandLine": true
-        },
-        "git fetch": true
-    },
     "svg.preview.mode": "svg",
     "claudeCode.preferredLocation": "sidebar",
     "python.defaultInterpreterPath": "/opt/homebrew/bin/python3",
     "chat.useClaudeHooks": true,
-    "claudeCode.allowDangerouslySkipPermissions": true,
     "claudeCode.selectedModel": "opus[1m]",
     "gitlens.ai.ollama.url": "http://localhost:11434",
     "generate-local-commit.model": "llama3.2:latest",

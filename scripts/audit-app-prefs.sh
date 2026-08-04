@@ -3,7 +3,8 @@
 # IDs, and hardcoded home paths. Run after `make backup` (Makefile invokes this).
 set -euo pipefail
 
-DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+DOTFILES="${DOTFILES:-$(cd -- "$SCRIPT_DIR/.." && pwd -P)}"
 ROOTS=("$DOTFILES/apps" "$DOTFILES/macos" "$DOTFILES/services")
 TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$TMPDIR"' EXIT
@@ -64,7 +65,7 @@ scan_file() {
       ;;
   esac
 
-  pattern='license_key|"kc-license"|ghp_[A-Za-z0-9]+|glpat-[A-Za-z0-9_-]+|sk-ant-[A-Za-z0-9_-]+|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}|/Users/[^/[:space:]<"]+|OneDrive-[A-Za-z0-9._@-]+'
+  pattern='license_key|"kc-license"|ghp_[A-Za-z0-9]+|glpat-[A-Za-z0-9_-]+|sk-ant-[A-Za-z0-9_-]+|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}|/Users/[^/[:space:]<"]+|OneDrive-[A-Za-z0-9._@-]+|chat\.tools\.terminal\.autoApprove|claudeCode\.allowDangerouslySkipPermissions[[:space:]]*"?[[:space:]]*:[[:space:]]*true|"(Set|get) Ash"|legal-in-strapi'
 
   if rg -qi "$pattern" "$scan" 2>/dev/null; then
     report "private or machine-specific content: $rel"
