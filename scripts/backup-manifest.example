@@ -19,7 +19,6 @@
 #   ├── ssh/                            # → ~/.ssh/* via symlinks.tsv
 #   ├── config/
 #   │   ├── gh/hosts.yml                # → ~/.config/gh/hosts.yml
-#   │   ├── moltbook/credentials.json   # → ~/.config/moltbook/credentials.json
 #   │   └── env/                        # → ~/.config/env/ (per-tool env files)
 #   └── apps/
 #       ├── canary-mail/                # realms + plist — make backup-canary / restore-canary

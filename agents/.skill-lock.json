@@ -307,15 +307,6 @@
       "installedAt": "2026-04-13T02:37:01.266Z",
       "updatedAt": "2026-06-16T19:00:09.604Z"
     },
-    "moltbook": {
-      "source": "sorcerai/moltbook-skill",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/sorcerai/moltbook-skill.git",
-      "skillPath": "SKILL.md",
-      "skillFolderHash": "a7d975f1079ebf59bda276f5ccc64ee51d155187",
-      "installedAt": "2026-04-13T02:37:22.800Z",
-      "updatedAt": "2026-04-13T03:22:36.067Z"
-    },
     "agent-memory": {
       "source": "t4sh/skills4sh",
       "sourceType": "github",

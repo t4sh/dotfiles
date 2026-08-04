@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Skillsfile — declarative global skill manifest (Brewfile pattern).
 #
-# GENERATED 2026-07-16T07:54:00+05:30 from agents/.skill-lock.json by
+# GENERATED 2026-08-04T15:20:07+05:30 from agents/.skill-lock.json by
 # scripts/gen-skillsfile.py — DO NOT EDIT BY HAND. To change skills:
 #   ~/.local/bin/npx-stable skills add/remove ...   then   make skills-manifest
 #   (regenerates Skillsfile + agents/skills/README.md)
 #
 # Install everything:  make skills   (or: bash Skillsfile)
-# 248 skills — 35 github sources + 2 local.
+# 247 skills — 34 github sources + 2 local.
 #
 # Prereqs (fresh Mac): node + git + GitHub auth (SSH/gh) must be set
 # up first — GitHub-authenticated skill sources need repo access.
@@ -101,9 +101,6 @@ echo "→ referodesign/refero_skill"
 
 echo "→ shadcn/improve"
 "$NPX" skills add shadcn/improve --skill improve -g -y
-
-echo "→ sorcerai/moltbook-skill"
-"$NPX" skills add sorcerai/moltbook-skill --skill moltbook -g -y
 
 echo "→ t4sh/skills4sh"
 "$NPX" skills add t4sh/skills4sh --skill agent-memory,code-to-figma,discord-harvest,eleventy-nunjucks,figma-to-code,localhost-screenshots,skill-architect -g -y
