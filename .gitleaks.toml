@@ -4,26 +4,6 @@
 useDefault = true
 
 [[allowlists]]
-description = "Exact Moltbook documentation placeholder in curl examples"
-targetRules = ["curl-auth-header"]
-condition = "AND"
-regexTarget = "match"
-regexes = ['''Authorization: Bearer YOUR_API_KEY''']
-paths = [
-  '''agents/skills/moltbook/SKILL\.md$''',
-  '''agents/skills/moltbook/MESSAGING\.md$''',
-  '''agents/skills/moltbook/HEARTBEAT\.md$''',
-]
-
-[[allowlists]]
-description = "Exact Moltbook credential-manager dummy value"
-targetRules = ["generic-api-key"]
-condition = "AND"
-regexTarget = "line"
-regexes = ['''test_api_key_12345''']
-paths = ['''agents/skills/moltbook/tests/test_credential_manager\.py$''']
-
-[[allowlists]]
 description = "Exact Tower workflow icon bytes that resemble a Square access token"
 targetRules = ["square-access-token"]
 condition = "AND"

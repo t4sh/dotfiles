@@ -60,7 +60,6 @@ authored for this dotfiles repo.
 | `loop-me` | mattpocock/skills | https://github.com/mattpocock/skills |
 | `migrate-to-shoehorn` | mattpocock/skills | https://github.com/mattpocock/skills |
 | `minimalist-ui` | Leonxlnx/taste-skill | https://github.com/Leonxlnx/taste-skill |
-| `moltbook` | sorcerai/moltbook-skill | https://github.com/sorcerai/moltbook-skill |
 | `monorepo-management` | wshobson/agents | https://github.com/wshobson/agents |
 | `obsidian-vault` | mattpocock/skills | https://github.com/mattpocock/skills |
 | `pdf-harvester` | mindmorass/reflex | https://github.com/mindmorass/reflex |

@@ -10,7 +10,6 @@ extend-exclude = [
 IST = "IST"
 ue = "ue"
 Dato = "Dato"
-Moltbook = "Moltbook"
 Monokai = "Monokai"
 Shottr = "Shottr"
 OnyX = "OnyX"
