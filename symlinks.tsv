@@ -32,7 +32,6 @@ $HOME/.secrets/ssh/known_hosts	$HOME/.ssh/known_hosts
 # Tool auth — canonical files under ~/.secrets/config/; consumer paths symlinked
 # (vault rsync restores the tree; `make link` wires consumers after restore)
 $HOME/.secrets/config/gh/hosts.yml	$HOME/.config/gh/hosts.yml
-$HOME/.secrets/config/moltbook/credentials.json	$HOME/.config/moltbook/credentials.json
 
 # Starship
 $DOTFILES/starship/starship.toml	$HOME/.config/starship.toml
@@ -58,6 +57,8 @@ $DOTFILES/hammerspoon	$HOME/.hammerspoon
 
 # Agents — whole-directory symlink (must precede ~/.claude/* entries below)
 $DOTFILES/agents	$HOME/.agents
+$DOTFILES/config/codex/AGENTS.md	$HOME/.codex/AGENTS.md
+$HOME/.agents/skills	$HOME/.cursor/skills
 $HOME/.agents/skills	$HOME/.claude/skills
 
 # Claude Code / Craft Agent — wire ~/.claude/ into the agents tree
