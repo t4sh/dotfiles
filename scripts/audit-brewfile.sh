@@ -18,7 +18,8 @@
 #   dot audit-brewfile                    same, via the dispatcher (scripts/audit-brewfile.sh)
 set -euo pipefail
 
-DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+DOTFILES="${DOTFILES:-$(cd -- "$SCRIPT_DIR/.." && pwd -P)}"
 BREWFILE="${BREWFILE:-$DOTFILES/Brewfile}"
 
 CHECK=0

@@ -81,14 +81,7 @@ if [ -d "$DOTFILES/apps/sublime-text" ] && [ -n "$(ls -A "$DOTFILES/apps/sublime
     if restore_app_is_deferred "Sublime Text"; then
         echo "  - Sublime Text skipped because it hosts this restore"
     else
-        mkdir -p "$SUBLIME_USER"
-        for f in "$DOTFILES/apps/sublime-text/"*; do
-            [[ -e "$f" ]] || continue
-            base="${f##*/}"
-            [[ "$base" == "Theme - Monokai Pro.sublime-settings" ]] && continue
-            cp "$f" "$SUBLIME_USER/"
-        done
-        echo "  ✓ Sublime Text"
+        bash "$DOTFILES/scripts/sync-sublime-settings.sh" restore
     fi
 fi
 if [ -f "$MONOKAI_VAULT" ] && ! restore_app_is_deferred "Sublime Text"; then

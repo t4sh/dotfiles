@@ -15,7 +15,7 @@ Most [awesome-dotfiles](https://github.com/webpro/awesome-dotfiles) examples sto
 | Symlinks | Stow, dotbot, rcm, chezmoi | [`symlinks.tsv`](symlinks.tsv) + `make link` — add a row, no extra framework |
 | Fresh Mac | `setup.sh` or `script/bootstrap` | [`install.sh`](install.sh) (from zero) + [`make all`](Makefile) (re-apply) |
 | Packages | Brewfile | Brewfile as **single source of truth** (formulae, casks, MAS, VS Code extensions) |
-| App prefs | mackup or manual | [`apps.tsv`](apps.tsv) + `make backup` / `make restore-apps`; licensed prefs in vault |
+| App prefs | mackup or manual | [`apps.tsv`](apps.tsv) + `make backup` / `make restore-apps`; convergent Sublime managed files; licensed prefs in vault |
 | Default apps | Rare | [`config/duti`](config/duti) as **repo policy** → `make default-apps` |
 | Secrets | `*.local` files | `~/.secrets/` + encrypted sparseimage (`make secrets-backup`) |
 | Verification | Uncommon | `make doctor`, `brewfile-audit`, `verify-idempotency.sh`, gitleaks |
@@ -38,8 +38,8 @@ Most [awesome-dotfiles](https://github.com/webpro/awesome-dotfiles) examples sto
 - **macOS** — [`macos/defaults.sh`](macos/defaults.sh), Dock layout plist, Hammerspoon window management
 - **Apps** — non-secret preference snapshots (Dato, Sublime, VS Code, Cursor, Terminal, Velja, Rectangle fallback prefs, …)
 - **Services** — Automator Quick Actions (open in editor, PDF helpers, …)
-- **Agents** — public-safe rules, skills, commands, and agent definitions under [`agents/`](agents/)
-- **Safety** — gitleaks pre-commit, app-pref audit, skill license audit, Brewfile drift audit
+- **Agents** — public-safe rules, skills, commands, and agent definitions under [`agents/`](agents/), with client projection ownership in [`agents/CLIENTS.md`](agents/CLIENTS.md)
+- **Safety** — gitleaks pre-commit, app-pref privacy and live-drift audits, skill license audit, Brewfile drift audit
 - **Maintenance** — [topgrade](config/topgrade.toml) config with Brewfile audit hook
 
 ## Quick start
@@ -58,13 +58,13 @@ bash install.sh
 
 Shared automated steps match `make all`: services → restore-apps → dock → hooks → macos. Pre-vault `make link` warns and skips missing `~/.secrets` sources (exit 0 unless `DOTFILES_STRICT_LINK=1`); re-run `make link` after vault restore.
 
-It does **not** run: `rules-audit`, `skills-audit`, `make dock` / `make macos` (unless you answer yes), `make ssh-setup`, `make default-apps`, `make doctor`, `make docs-audit`, or `make skills`. Those are documented manual follow-ups.
+It does **not** run: `rules-audit`, `skills-audit`, `make dock` / `make macos` (unless you answer yes), `make post-vault`, `make default-apps`, `make doctor`, `make docs-audit`, or `make skills`. Those are documented manual follow-ups.
 
 After bootstrap:
 
 1. Sign into the App Store, then run `make brew-mas`.
 2. Sign into iCloud if needed, recover the vault password from an independent password manager, restore `~/.secrets/`, then run `make secrets-pass-import`.
-3. Run `make link && make ssh-setup` only after the existing secret-backed identity is restored.
+3. Run `make post-vault` only after the existing secret-backed identity is restored. It installs the default backup manifest if absent, strictly links every declared consumer, verifies/registers the GitHub key, and restores vault-backed app preferences when present.
 4. Complete the remaining manual steps printed by `install.sh` (Canary/Shottr restore quits/reopens those apps automatically).
 
 ### Existing Mac (already has Homebrew)
@@ -207,7 +207,7 @@ HTTPS default-browser mapping is omitted (`duti` returns error -54 for direct `h
 
 ## Agents & skills
 
-The [`agents/`](agents/) directory symlinks to `~/.agents` and wires into Claude Code (`~/.claude/`). It includes:
+The [`agents/`](agents/) directory symlinks to `~/.agents`, wires into Claude Code (`~/.claude/`), exposes canonical skills at `~/.cursor/skills`, and installs a Codex bootstrap bridge at `~/.codex/AGENTS.md`. It includes:
 
 - `AGENTS.md` and rule files
 - A large **vendored skills** tree with upstream attribution in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md)
@@ -228,7 +228,7 @@ Nothing secret lives in git. `~/.secrets/` is the single canonical tree; tools r
 ```text
 ~/.secrets/
 ├── ssh/              → ~/.ssh/* via symlinks.tsv
-├── config/           → gh, moltbook consumers
+├── config/           → gh consumers
 └── apps/
     ├── canary-mail/  # realms + plist — make backup-canary / restore-canary
     ├── shottr/       # license prefs — make backup-shottr / restore-shottr
@@ -267,6 +267,7 @@ Notable contracts:
 
 - **`make brew`** — phased `brew-base` → `node` → `brew-npm` → `brew-mas` (npm never lands under Homebrew's transient Node).
 - **`make restore-apps`** — running-app gate derives apps from `apps.tsv` plus irregular settings surfaces, fails closed when process state is unknown, quits managed apps, restores, and reopens what it quit. The hosting editor is never quit; ambiguous Code-family identity skips Cursor/VS Code prefs while continuing. Override with `DOTFILES_RESTORE_FORCE=1`. Same lifecycle for `restore-shottr` / `restore-canary`.
+- **`make apps-drift`** — compares live state only with faithful snapshots this public projection ships; intentionally excluded snapshots have no manifest rows, and curated VS Code/Cursor onboarding templates are outside the live-drift contract.
 - **`make link`** — missing `~/.secrets` sources warn and skip (strict mode: `DOTFILES_STRICT_LINK=1`).
 
 For a stronger check that a second `make all` converges:

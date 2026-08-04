@@ -2,7 +2,8 @@
 # Read-only preflight checks for a fresh or re-applied Mac bootstrap.
 set -euo pipefail
 
-DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+DOTFILES="${DOTFILES:-$(cd -- "$SCRIPT_DIR/.." && pwd -P)}"
 WARNINGS=0
 FAILURES=0
 
@@ -113,7 +114,7 @@ fi
 check_command typos "typos"
 
 if have gh; then
-  if gh auth status >/dev/null 2>&1; then
+  if GH_HOST=github.com gh auth status --hostname github.com >/dev/null 2>&1; then
     ok "GitHub CLI authenticated"
   else
     warn "GitHub CLI installed but not authenticated"
@@ -145,11 +146,6 @@ if [ -d "$HOME/.secrets" ]; then
   else
     warn "GitHub CLI hosts.yml missing (~/.secrets/config/gh/hosts.yml); restore vault then make link"
   fi
-  if [ -f "$HOME/.secrets/config/moltbook/credentials.json" ]; then
-    ok "Moltbook credentials present"
-  else
-    warn "Moltbook credentials missing (~/.secrets/config/moltbook/credentials.json); restore vault then make link"
-  fi
 else
   warn "$HOME/.secrets missing; restore vault before secret-backed symlinks work"
 fi
@@ -158,6 +154,18 @@ if bash "$DOTFILES/scripts/link.sh" --check >/dev/null 2>&1; then
   ok "all managed symlinks healthy"
 else
   warn "managed symlink drift detected; run: bash scripts/link.sh --check"
+fi
+
+if ! have python3; then
+  warn "app preference snapshot audit skipped (python3 missing)"
+elif [ ! -f "$DOTFILES/scripts/lib/plist_drift.py" ]; then
+  warn "app preference snapshot audit unavailable (scripts/lib/plist_drift.py missing)"
+elif [ ! -f "$DOTFILES/apps.tsv" ]; then
+  warn "app preference snapshot audit unavailable (apps.tsv missing)"
+elif bash "$DOTFILES/scripts/audit-apps-drift.sh" --check >/dev/null 2>&1; then
+  ok "app preference snapshots match system state"
+else
+  warn "app preference snapshot drift detected; run: make apps-drift"
 fi
 
 printf '\nSummary: %d warning(s), %d failure(s)\n' "$WARNINGS" "$FAILURES"

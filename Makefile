@@ -1,4 +1,4 @@
-.PHONY: all help link unlink brew brew-base node brew-npm brew-mas brew-check brewfile-audit shims macos dock terminal services restore-apps restore-canary restore-shottr backup backup-canary backup-shottr audit-apps hooks ssh-setup skills-audit skills skills-manifest secrets-backup secrets-mount secrets-pass secrets-pass-import rules-audit default-apps capture-default-apps doctor docs-audit
+.PHONY: all help link unlink brew brew-base node brew-npm brew-mas brew-check brewfile-audit shims macos dock terminal services restore-apps restore-canary restore-shottr post-vault backup backup-canary backup-shottr audit-apps apps-drift hooks ssh-setup skills-audit skills skills-manifest secrets-backup secrets-mount secrets-manifest secrets-pass secrets-pass-import rules-audit default-apps capture-default-apps doctor docs-audit
 
 export DOTFILES := $(CURDIR)
 
@@ -42,6 +42,20 @@ backup-shottr: ## Back up Shottr prefs into ~/.secrets
 ssh-setup: ## Verify/register the restored GitHub SSH key
 	@bash scripts/ssh-setup.sh
 
+secrets-manifest: ## Install the default vault backup manifest when absent
+	@umask 077; mkdir -p "$(HOME)/.dotfiles-local"; \
+	if [ -e "$(HOME)/.dotfiles-local/backup.manifest" ]; then \
+		echo "  ✓ backup manifest already exists (left unchanged)"; \
+	else \
+		cp scripts/backup-manifest.example "$(HOME)/.dotfiles-local/backup.manifest"; \
+		chmod 600 "$(HOME)/.dotfiles-local/backup.manifest"; \
+		echo "  ✓ installed default backup manifest → ~/.dotfiles-local/backup.manifest"; \
+	fi
+
+# After vault rsync + secrets-pass-import. Soft-skips Shottr/Canary when payload
+# absent. Not in `all` — requires ~/.secrets first.
+post-vault: ## After secrets land: strict links, SSH, vault app restores, restore-apps
+	@bash scripts/post-vault.sh
 
 skills-audit: ## Check tracked agent skills for redistribution/license safety
 	@bash scripts/audit-skill-licenses.sh --check
@@ -175,6 +189,9 @@ docs-audit: ## Check docs/scripts for typos when typos is installed
 audit-apps: ## Scan app preference snapshots for secrets/local paths
 	@bash scripts/audit-app-prefs.sh
 
+apps-drift: ## Check captured app preferences against current system state
+	@bash scripts/audit-apps-drift.sh
+
 backup: ## Refresh repo-tracked app prefs, Dock, services, and Brewfile
 	@echo "Backing up app configs..."
 	@# Bulk `defaults`-managed apps — driven by apps.tsv. Container-copy apps
@@ -190,13 +207,7 @@ backup: ## Refresh repo-tracked app prefs, Dock, services, and Brewfile
 	done < apps.tsv; \
 	echo "  defaults snapshots: $$captured captured, $$skipped skipped"
 	@cp ~/Library/Group\ Containers/group.com.sindresorhus.Dato/Library/Preferences/group.com.sindresorhus.Dato.plist apps/dato/dato.plist 2>/dev/null && echo "  ✓ Dato" || echo "  ⚠ Dato not captured"
-	@cp ~/Library/Application\ Support/Sublime\ Text/Packages/User/*.sublime-settings apps/sublime-text/ 2>/dev/null && echo "  ✓ Sublime Text settings" || echo "  - no Sublime Text settings to capture"
-	@rm -f "apps/sublime-text/Theme - Monokai Pro.sublime-settings"
-	@cp ~/Library/Application\ Support/Sublime\ Text/Packages/User/*.sublime-keymap apps/sublime-text/ 2>/dev/null && echo "  ✓ Sublime Text keybindings" || echo "  - no Sublime Text keybindings to capture"
-	@cp ~/Library/Application\ Support/Sublime\ Text/Packages/User/*.sublime-snippet apps/sublime-text/ 2>/dev/null && echo "  ✓ Sublime Text snippets" || echo "  - no Sublime Text snippets to capture"
-	@cp ~/Library/Application\ Support/Sublime\ Text/Packages/User/*.sublime-macro apps/sublime-text/ 2>/dev/null && echo "  ✓ Sublime Text macros" || echo "  - no Sublime Text macros to capture"
-	@cp ~/Library/Application\ Support/Sublime\ Text/Packages/User/*.palettes apps/sublime-text/ 2>/dev/null && echo "  ✓ Sublime Text palettes" || echo "  - no Sublime Text palettes to capture"
-	@cp ~/Library/Application\ Support/Sublime\ Text/Packages/User/*.py apps/sublime-text/ 2>/dev/null && echo "  ✓ Sublime Text user plugins" || echo "  - no Sublime Text user plugins to capture"
+	@bash scripts/sync-sublime-settings.sh capture
 	@cp ~/Library/Application\ Support/Code/User/settings.json apps/vscode/settings.json 2>/dev/null && echo "  ✓ VS Code" || echo "  ⚠ VS Code settings not captured"
 	@defaults export com.apple.dock macos/dock-backup.plist 2>/dev/null && echo "  ✓ Dock layout" || { echo "  ✗ Dock layout export failed" >&2; exit 1; }
 	@defaults export com.apple.Terminal apps/terminal/terminal.plist 2>/dev/null && echo "  ✓ Terminal.app profiles" || echo "  ⚠ Terminal.app profiles not captured"
