@@ -1,24 +1,18 @@
 # AGENTS.md
 
-Canonical agent configuration. This file is an index — edit rules in `./rules/` and they'll be composed at load time.
-
-Symlink this file (or its expanded form) into each tool's expected location:
-
-- Claude Code: `~/.claude/CLAUDE.md → ~/.agents/AGENTS.md`
-- Cursor: paste expanded contents into User Rules, or symlink per project as `.cursor/rules/global.mdc`
-- VS Code Copilot: list `rules/*.md` files in `github.copilot.chat.codeGeneration.instructions`
-- Antigravity: use its rules path, or a flattened export from the agents tree
+Canonical agent configuration. This file is an index — edit rules in `./rules/` and they'll be composed at load time. Client projection ownership, bootstrap steps, and verification boundaries are documented in [`CLIENTS.md`](./CLIENTS.md); that document is not a rule inventory or loader input.
 
 ## First Steps
 
 1. Read this file completely.
-2. Read the always-on rule files, then read only the activated rule files whose trigger condition matches the current task.
-   The always-on rule files are the files listed under the `## Always on` heading below.
-   Do not load inactive rule files just because they exist in `~/.agents/rules/`.
-3. Read `.agent-memory/index.yaml` to discover available project context. If `.agent-memory/` is absent, proceed without it — don't create it.
-4. Load relevant memory files based on the current task.
+2. Discover every top-level `~/.agents/rules/*.md` file, sort by basename, and read every file completely. Numeric prefixes establish the intended order.
+3. Loading is not applying: honor each rule only according to the applicability declared in the rule file and the section headings below.
+4. Read `.agent-memory/index.yaml` to discover available project context. If `.agent-memory/` is absent, proceed without it — don't create it.
+5. Load relevant memory files based on the current task.
 
 ---
+
+The headings below declare applicability and provide explicit includes for downstream consumers and exports. Rule membership comes from the top-level Markdown files on disk, not from this include surface.
 
 ## Always on
 
@@ -28,6 +22,7 @@ Symlink this file (or its expanded form) into each tool's expected location:
 @./rules/03-worktree-hygiene.md
 @./rules/04-codex-host-tooling.md
 @./rules/10-design-posture.md
+@./rules/11-skill-routing.md
 @./rules/99-anti-patterns.md
 
 ## Activate when code is involved
