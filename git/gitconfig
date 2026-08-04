@@ -2,9 +2,10 @@
 	keepBackup = true
 	prompt = false
 [user]
-	name = tAsh
-	email = t4sh@users.noreply.github.com
-	signingkey = ~/.ssh/github_ed25519.pub
+	# Configure your identity and SSH signing key locally before committing.
+	# name = tAsh
+	# email = t4sh@users.noreply.github.com
+	# signingkey = ~/.ssh/github_ed25519.pub
 [filter "lfs"]
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge --skip -- %f
