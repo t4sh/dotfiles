@@ -25,9 +25,27 @@ EOF
     shift
 done
 
+APPLICATION_FIREWALL_TOOL=/usr/libexec/ApplicationFirewall/socketfilterfw
+if [[ "$MODE" == check && -n "${DOTFILES_FIREWALL_TOOL:-}" ]]; then
+    APPLICATION_FIREWALL_TOOL="$DOTFILES_FIREWALL_TOOL"
+fi
+
 [[ "$(uname -s)" == "Darwin" ]] || { echo "macos/defaults.sh requires macOS" >&2; exit 1; }
 MACOS_VERSION="$(sw_vers -productVersion)"
 MACOS_MAJOR="${MACOS_VERSION%%.*}"
+DEFAULT_CAPTURE_PARENT="$HOME/odrive/ash.a.t@live/Workspace"
+if [[ -n "${DOTFILES_CAPTURE_DIR:-}" ]]; then
+    CAPTURE_DIR="$DOTFILES_CAPTURE_DIR"
+elif [[ -d "$DEFAULT_CAPTURE_PARENT" ]]; then
+    CAPTURE_DIR="$DEFAULT_CAPTURE_PARENT/Screengrabs"
+else
+    CAPTURE_DIR="$HOME/Desktop/Screengrabs"
+    echo "  ⚠ odrive workspace unavailable; screenshot policy uses $CAPTURE_DIR until make macos is rerun" >&2
+fi
+[[ "$CAPTURE_DIR" == /* && -n "${CAPTURE_DIR//\//}" ]] || {
+    echo "screenshot destination must be an absolute non-root path: $CAPTURE_DIR" >&2
+    exit 2
+}
 case "$MACOS_MAJOR" in
     15|26) ;;
     *)
@@ -42,7 +60,7 @@ esac
 echo "macOS defaults policy: mode=$MODE scope=$([[ $PRIVILEGED -eq 1 ]] && echo full || echo user-only) host=$MACOS_VERSION"
 
 verify_defaults() {
-    local failures=0 actual domain key expected firewall stealth
+    local failures=0 actual domain key expected firewall stealth capture
     while IFS=$'\t' read -r domain key expected; do
         actual="$(command defaults read "$domain" "$key" 2>/dev/null || true)"
         actual="${actual%\"}"; actual="${actual#\"}"
@@ -64,11 +82,26 @@ com.apple.Terminal	SecureKeyboardEntry	1
 com.apple.desktopservices	DSDontWriteNetworkStores	1
 com.apple.SoftwareUpdate	AutomaticCheckEnabled	1
 EOF
-    if (( PRIVILEGED )) && [[ -x /usr/libexec/ApplicationFirewall/socketfilterfw ]]; then
-        firewall="$(/usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate 2>/dev/null || true)"
-        stealth="$(/usr/libexec/ApplicationFirewall/socketfilterfw --getstealthmode 2>/dev/null || true)"
-        [[ "$firewall" == *enabled* ]] || { echo "  ✗ application firewall is not enabled" >&2; failures=$((failures + 1)); }
-        [[ "$stealth" == *enabled* ]] || { echo "  ✗ firewall stealth mode is not enabled" >&2; failures=$((failures + 1)); }
+    capture="$(command defaults read com.apple.screencapture location 2>/dev/null || true)"
+    capture="${capture%\"}"; capture="${capture#\"}"
+    if [[ "$capture" == "$CAPTURE_DIR" ]]; then
+        printf '  ✓ com.apple.screencapture location = %s\n' "$CAPTURE_DIR"
+    else
+        printf '  ✗ com.apple.screencapture location expected %s, got %s\n' \
+            "$CAPTURE_DIR" "${capture:-<unset>}" >&2
+        failures=$((failures + 1))
+    fi
+    if (( PRIVILEGED )) && [[ -x "$APPLICATION_FIREWALL_TOOL" ]]; then
+        firewall="$("$APPLICATION_FIREWALL_TOOL" --getglobalstate 2>/dev/null || true)"
+        stealth="$("$APPLICATION_FIREWALL_TOOL" --getstealthmode 2>/dev/null || true)"
+        [[ "$firewall" == *"is enabled"* || "$firewall" == *"State = 1"* ]] || {
+            echo "  ✗ application firewall is not enabled" >&2
+            failures=$((failures + 1))
+        }
+        [[ "$stealth" == *"stealth mode is on"* || "$stealth" == *"is enabled"* ]] || {
+            echo "  ✗ firewall stealth mode is not enabled" >&2
+            failures=$((failures + 1))
+        }
     fi
     (( failures == 0 ))
 }
@@ -102,6 +135,13 @@ warn_on_fail() {
         printf '  ⚠ %s\n' "$msg" >&2
         return 0
     }
+}
+
+write_safari_default() {
+    local key="$1"
+    shift
+    warn_on_fail "could not set Safari $key (Full Disk Access may be required)" \
+        defaults write com.apple.Safari "$key" "$@"
 }
 
 ###############################################################################
@@ -261,7 +301,6 @@ defaults write com.apple.screencapture "include-date" -bool "true"
 # Save screenshots and screen recordings to the same custom location.
 # `location-last` preserves Screenshot.app's Options → Save to → Other Location
 # choice, while `target=file` prevents an app/clipboard target from taking over.
-CAPTURE_DIR="$HOME/odrive/ash.a.t@live/Workspace/Screengrabs"
 [[ "$MODE" == dry-run ]] || mkdir -p "$CAPTURE_DIR"
 defaults write com.apple.screencapture "location" -string "$CAPTURE_DIR"
 defaults write com.apple.screencapture "location-last" -string "$CAPTURE_DIR"
@@ -508,23 +547,23 @@ defaults write NSGlobalDomain com.apple.springing.delay -float 0
 ###############################################################################
 
 # Privacy: don't send search queries to Apple
-defaults write com.apple.Safari UniversalSearchEnabled -bool false
-defaults write com.apple.Safari SuppressSearchSuggestions -bool true
+write_safari_default UniversalSearchEnabled -bool false
+write_safari_default SuppressSearchSuggestions -bool true
 
 # Enable the Develop menu and the Web Inspector in Safari
-defaults write com.apple.Safari IncludeDevelopMenu -bool "true"
-defaults write com.apple.Safari WebKitDeveloperExtrasEnabledPreferenceKey -bool "true"
-defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled -bool "true"
-defaults write com.apple.Safari "ShowFullURLInSmartSearchField" -bool "true"
+write_safari_default IncludeDevelopMenu -bool "true"
+write_safari_default WebKitDeveloperExtrasEnabledPreferenceKey -bool "true"
+write_safari_default com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled -bool "true"
+write_safari_default ShowFullURLInSmartSearchField -bool "true"
 
 # Safer downloads and form handling
-defaults write com.apple.Safari AutoOpenSafeDownloads -bool false
-defaults write com.apple.Safari AutoFillFromAddressBook -bool false
-defaults write com.apple.Safari AutoFillPasswords -bool false
-defaults write com.apple.Safari AutoFillCreditCardData -bool false
-defaults write com.apple.Safari AutoFillMiscellaneousForms -bool false
-defaults write com.apple.Safari WarnAboutFraudulentWebsites -bool true
-defaults write com.apple.Safari InstallExtensionUpdatesAutomatically -bool true
+write_safari_default AutoOpenSafeDownloads -bool false
+write_safari_default AutoFillFromAddressBook -bool false
+write_safari_default AutoFillPasswords -bool false
+write_safari_default AutoFillCreditCardData -bool false
+write_safari_default AutoFillMiscellaneousForms -bool false
+write_safari_default WarnAboutFraudulentWebsites -bool true
+write_safari_default InstallExtensionUpdatesAutomatically -bool true
 
 ###############################################################################
 # Chrome / Chrome Canary                                                       #
