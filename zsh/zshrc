@@ -1,5 +1,5 @@
 # ~/.dotfiles/zsh/zshrc — thin sourcer. Topic files live in zsh/lib/.
-# Load order is by filename: 00-path → 10-options → 20-plugins → 30-exports →
+# Load order is by filename: 00-path → 05-secrets → 10-options → 20-plugins → 30-exports →
 # 40/41/42-aliases-* → 50-functions → 60-tools → 80-prompt → 90-zoxide → 99-local.
 
 ZSH_LIB="$HOME/.dotfiles/zsh/lib"

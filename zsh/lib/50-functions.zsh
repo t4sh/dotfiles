@@ -23,22 +23,57 @@ jcd() {
   [[ -n "$project" ]] && cd -- "$project"
 }
 
-# Free a port by killing whatever is listening on it.
+# Free a port gracefully. Escalate to SIGKILL only with explicit --force.
 free-port() {
-  [[ -z "$1" ]] && echo "Usage: free-port <port>" && return 1
-  if lsof -i :$1 >/dev/null 2>&1; then
-    echo "Port $1 in use. Killing processes..."
-    lsof -t -i :$1 | xargs kill -9
-    echo "Port $1 freed."
-  else
-    echo "No process on port $1."
+  local force=0 port
+  if [[ "${1:-}" == "--force" ]]; then
+    force=1
+    shift
   fi
+  port="${1:-}"
+  [[ "$port" == <-> && "$port" -ge 1 && "$port" -le 65535 ]] || {
+    echo "Usage: free-port [--force] <1-65535>"
+    return 1
+  }
+  local raw
+  local current_pid
+  local -a pids remaining original_remaining
+  raw="$(lsof -t -iTCP:"$port" -sTCP:LISTEN 2>/dev/null)"
+  [[ -n "$raw" ]] || { echo "No process listening on port $port."; return 0; }
+  pids=("${(@f)raw}")
+  echo "Port $port in use by PID(s): ${pids[*]}. Sending TERM..."
+  kill -TERM "${pids[@]}" || return 1
+  sleep 1
+  raw="$(lsof -t -iTCP:"$port" -sTCP:LISTEN 2>/dev/null)"
+  if [[ -n "$raw" ]]; then
+    remaining=("${(@f)raw}")
+    if (( force )); then
+      for current_pid in "${remaining[@]}"; do
+        (( ${pids[(Ie)$current_pid]} )) && original_remaining+=("$current_pid")
+      done
+      if (( ${#original_remaining[@]} == 0 )); then
+        echo "Port $port was claimed by a new PID; refusing to kill the replacement listener."
+        return 1
+      fi
+      echo "Port $port still in use. Sending KILL to original PID(s): ${original_remaining[*]}..."
+      kill -KILL "${original_remaining[@]}" || return 1
+      raw="$(lsof -t -iTCP:"$port" -sTCP:LISTEN 2>/dev/null)"
+      [[ -z "$raw" ]] || {
+        echo "Port $port is still in use after the original listener exited."
+        return 1
+      }
+    else
+      echo "Port $port is still in use; retry with: free-port --force $port"
+      return 1
+    fi
+  fi
+  echo "Port $port freed."
 }
 
 # Free multiple ports.
 free-ports() {
   for port in "$@"; do
-    free-port $port
+    free-port "$port"
   done
 }
 

@@ -8,6 +8,7 @@ Usage:  python3 agents/compareskills.py
 """
 
 import json
+import argparse
 import re
 import sys
 from datetime import datetime, timezone, timedelta
@@ -197,6 +198,10 @@ This README.md is a conventional location for documenting skills collection, and
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Generate or verify the vendored skill inventory")
+    parser.add_argument("--check", action="store_true", help="fail on missing locked skills or inventory drift")
+    args = parser.parse_args()
+
     disk_skills = get_disk_skills()
     lock_version, lock_skills = get_lock_skills()
     remarks = parse_existing_remarks()
@@ -233,15 +238,31 @@ def main():
             flags=re.MULTILINE,
         )
 
-    if current is not None and stable(current) == stable(content):
+    inventory_matches = current is not None and stable(current) == stable(content)
+    if args.check:
+        failed = False
+        if in_lock_only:
+            print("  ERROR: locked skills are missing from disk", file=sys.stderr)
+            failed = True
+        if not inventory_matches:
+            print("  ERROR: agents/skills/README.md is out of sync", file=sys.stderr)
+            failed = True
+        if failed:
+            print("  Run: make skills-update", file=sys.stderr)
+            return 1
+        print(f"\n  Verified {matched} locked skills on disk and current inventory")
+        return 0
+
+    if inventory_matches:
         print(f"\n  Unchanged {README_FILE}")
         print(f"  {len(disk_skills)} skills total")
-        return
+        return 0
 
     README_FILE.write_text(content)
     print(f"\n  Wrote {README_FILE}")
     print(f"  {len(disk_skills)} skills total")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

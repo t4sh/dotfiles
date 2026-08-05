@@ -10,11 +10,24 @@ dotbackup() {
   # Resync Skillsfile only if .skill-lock.json drifted (--check avoids the
   # timestamp churn a blind regen would add to every backup commit).
   python3 scripts/gen-skillsfile.py --check >/dev/null 2>&1 || make skills-manifest
-  make backup && git add -A || return
+  make backup || return
+  local -a backup_paths=(
+    Brewfile Skillsfile THIRD_PARTY_NOTICES.md
+    apps services agents/skills/README.md
+    macos/dock-backup.plist macos/hitoolbox.plist macos/symbolichotkeys.plist
+  )
+  echo "Backup changes proposed:"
+  git status --short -- "${backup_paths[@]}"
+  git diff --stat -- "${backup_paths[@]}"
+  read -q "REPLY?Stage only these managed backup paths and commit? (y/n) " || { echo; return 1; }
+  echo
+  git add -A -- "${backup_paths[@]}" || return
   local default="chore: backup configs on $(date '+%Y-%m-%d %H:%M')"
   local msg
   vared -p "commit message [${default}]: " -c msg
-  git commit -m "${msg:-$default}"
+  # --only builds the commit from this pathspec while preserving any unrelated
+  # entries the operator already had staged before running dotbackup.
+  git commit --only -m "${msg:-$default}" -- "${backup_paths[@]}"
 }
 
 

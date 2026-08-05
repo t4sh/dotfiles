@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-# After ~/.secrets lands: restore backup ownership, wire consumers, prove SSH,
-# and restore vault-backed preferences.
+# After ~/.secrets lands: wire consumers, prove SSH, restore vault-backed prefs.
 #
-# Prerequisite (operator): vault mount → rsync → make secrets-pass-import
+# Prerequisite (operator): secrets-restore[-apply] → secrets-pass-import
+# Usage: make post-vault
+#        bash scripts/post-vault.sh
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
@@ -56,11 +57,11 @@ ok "post-vault complete"
 cat <<'EOF'
 
 GUI leftovers:
-  • App Store → make brew-mas
+  • If deferred earlier: App Store sign-in → make brew-mas
   • Import Raycast / Transmit (/ VS Code MCP) from ~/.secrets/apps/
   • Sign into apps; Hammerspoon Login + Accessibility
   • Dato once → make restore-apps   (if used)
-  • make default-apps && make doctor
+  • make default-apps && make verify-bootstrap
   • make skills
   • make terminal   (not from Terminal.app)
 

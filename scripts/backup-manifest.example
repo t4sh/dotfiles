@@ -15,7 +15,7 @@
 # ~/.secrets/ layout (all vault-backed, never in git):
 #
 #   ~/.secrets/
-#   ├── env.sh                          # sourced by zsh (API keys, exports)
+#   ├── env.sh                          # sourced only by interactive zsh
 #   ├── ssh/                            # → ~/.ssh/* via symlinks.tsv
 #   ├── config/
 #   │   ├── gh/hosts.yml                # → ~/.config/gh/hosts.yml

@@ -54,18 +54,18 @@ bash install.sh
 
 `install.sh` resolves the repo root from its own location (or `DOTFILES` if set), so a non-default clone path works: `DOTFILES=~/src/dotfiles bash ~/src/dotfiles/install.sh`.
 
-`install.sh` installs Xcode CLI tools (if needed), Homebrew, Brewfile **base** packages (excluding npm + App Store), pinned Node via `make node`, npm globals via `make brew-npm`, shims, convergent Automator services, app prefs, optional Dock, git hooks, optional macOS defaults last, and optionally Terminal profiles at the very end.
+`install.sh` installs Xcode CLI tools (if needed), Homebrew, **brew-core** then resumable **brew-apps**, pinned Node via `make node`, npm globals via `make brew-npm`, shims, convergent Automator services, app prefs, optional Dock, git hooks, optional macOS defaults (including Touch ID sudo) last, and optionally Terminal profiles at the very end.
 
-Shared automated steps match `make all`: services → restore-apps → dock → hooks → macos. Pre-vault `make link` warns and skips missing `~/.secrets` sources (exit 0 unless `DOTFILES_STRICT_LINK=1`); re-run `make link` after vault restore.
+Shared automated steps match `make all`: services → restore-apps → dock → hooks → macos. Pre-vault `make link` warns and skips missing `~/.secrets` sources (exit 0 unless `DOTFILES_STRICT_LINK=1`); after vault restore, `make post-vault` performs the strict relink and SSH/app recovery.
 
 It does **not** run: `rules-audit`, `skills-audit`, `make dock` / `make macos` (unless you answer yes), `make post-vault`, `make default-apps`, `make doctor`, `make docs-audit`, or `make skills`. Those are documented manual follow-ups.
 
 After bootstrap:
 
 1. Sign into the App Store, then run `make brew-mas`.
-2. Sign into iCloud if needed, recover the vault password from an independent password manager, restore `~/.secrets/`, then run `make secrets-pass-import`.
-3. Run `make post-vault` only after the existing secret-backed identity is restored. It installs the default backup manifest if absent, strictly links every declared consumer, verifies/registers the GitHub key, and restores vault-backed app preferences when present.
-4. Complete the remaining manual steps printed by `install.sh` (Canary/Shottr restore quits/reopens those apps automatically).
+2. Mount the vault, run `make secrets-restore` → `make secrets-restore-apply` → `make secrets-pass-import` (never rsync a snapshot onto `/`).
+3. Run `make post-vault` after secrets land. It installs the default backup manifest if absent, strictly links every declared consumer, verifies/registers the GitHub key, and restores vault-backed app preferences when present.
+4. Finish the GUI leftovers list from `post-vault`, then run `make verify-bootstrap`.
 
 ### Existing Mac (already has Homebrew)
 
@@ -75,13 +75,13 @@ cd ~/.dotfiles
 make all
 ```
 
-`make all` runs serially (including under `make -j all`): `link` → `rules-audit` → `skills-audit` → `brew` → `shims` → `services` → `restore-apps` → `dock` → `hooks` → `macos` (interactive, last).
+`make all` runs serially (including under `make -j all`): `link` → `rules-audit` → `skills-audit` → `brew-without-mas` → `shims` → `services` → `restore-apps` → `dock` → `hooks` → `macos` (interactive + Touch ID sudo, last). App Store apps stay explicit via `make brew-mas`.
 
-`make brew` itself is phased: `brew-base` → `node` → `brew-npm` → `brew-mas`.
+`make brew` runs `brew-base` → `node` → `brew-npm`, then optional/interactive MAS. Fresh re-apply prefers `brew-without-mas`.
 
 `ssh-setup` is deliberately manual and restore-first: it validates and registers an existing vault-backed key. Creating a new canonical identity requires the explicit `scripts/ssh-setup.sh --generate` option.
 
-Manual targets (not in `all`): `ssh-setup`, `terminal`, `default-apps`, `capture-default-apps`, `doctor`, `docs-audit`, `skills`.
+Manual targets (not in `all`): `post-vault`, `ssh-setup`, `terminal`, `default-apps`, `doctor`, `verify-bootstrap`, `docs-audit`, `skills` / `skills-update`.
 
 ```bash
 make help   # full target list with descriptions
@@ -108,8 +108,10 @@ Add a new symlink: one row in [`symlinks.tsv`](symlinks.tsv). No Stow/dotbot con
 |--------|---------|
 | `make all` | Main re-apply sequence (see above) |
 | `make link` | Apply symlinks from `symlinks.tsv` |
-| `make brew` | Phased install: `brew-base` → `node` → `brew-npm` → `brew-mas` |
-| `make brew-base` | Install Brewfile except npm and App Store entries |
+| `make brew` | Phased install with optional MAS confirmation |
+| `make brew-without-mas` | `brew-base` → `node` → `brew-npm` (used by `make all`) |
+| `make brew-core` / `make brew-apps` | Bootstrap formulae, then resumable casks/fonts/extensions |
+| `make brew-base` | Aggregate of `brew-core` → `brew-apps` |
 | `make node` | Install/activate the exact runtime from `.node-version` |
 | `make brew-npm` | Install Brewfile npm globals under that pinned Node |
 | `make brew-mas` | Install App Store apps after signing in |
@@ -117,7 +119,9 @@ Add a new symlink: one row in [`symlinks.tsv`](symlinks.tsv). No Stow/dotbot con
 | `make shims` | Create or repair the pinned `node-stable` / `npx-stable` shims |
 | `make restore-apps` | Restore tracked app prefs (running-app gate quits/reopens managed apps) |
 | `make services` | Install Automator workflows |
-| `make macos` | Apply macOS defaults (interactive) |
+| `make macos` | Apply macOS defaults + Touch ID sudo (`sudo_local`) |
+| `make touch-id-sudo` | Idempotently enable Touch ID for sudo |
+| `make verify-bootstrap` | Strict post-vault completion gate |
 | `make dock` | Restore Dock layout |
 | `make terminal` | Import Terminal profiles (quits Terminal — run outside Terminal.app) |
 | `make ssh-setup` | Validate/register a restored GitHub SSH key via `gh` |
@@ -128,8 +132,9 @@ Add a new symlink: one row in [`symlinks.tsv`](symlinks.tsv). No Stow/dotbot con
 | Target | Purpose |
 |--------|---------|
 | `make default-apps` | Apply repo default-app policy from `config/duti` (after `make brew`) |
+| `make default-apps-check` | Compare live Launch Services handlers with `config/duti` |
 | `make capture-default-apps` | Refresh `config/duti` when you change editor/URL handlers |
-| `make doctor` | Read-only bootstrap preflight |
+| `make doctor` | Read-only bootstrap preflight (Touch ID, duti receipt, SymbolicLinker, vault note) |
 | `make docs-audit` | Typo check docs/scripts (`typos` from Brewfile) |
 | `make brewfile-audit` | Strict Brewfile ↔ system drift check |
 | `make rules-audit` | Agent rule includes in sync |
@@ -145,6 +150,8 @@ Add a new symlink: one row in [`symlinks.tsv`](symlinks.tsv). No Stow/dotbot con
 | `make backup-shottr` / `make restore-shottr` | Shottr license prefs vault workflow (restore quits/reopens Shottr) |
 | `make secrets-backup` | Snapshot `~/.secrets/` into encrypted sparseimage |
 | `make secrets-mount` / `make secrets-pass` | Vault mount / local password-copy helper |
+| `make secrets-restore` / `secrets-restore-apply` | Validate / transactionally restore only `~/.secrets` |
+| `make secrets-health` | Mounted-vault snapshot freshness check |
 | `make secrets-pass-import` | Import a recovered vault password into the local Keychain |
 
 ### Agents
@@ -265,7 +272,7 @@ Every `make` target is safe to re-run. This is load-bearing — bootstrap is mea
 
 Notable contracts:
 
-- **`make brew`** — phased `brew-base` → `node` → `brew-npm` → `brew-mas` (npm never lands under Homebrew's transient Node).
+- **`make brew-without-mas` / `make brew`** — phased core/apps/node/npm with MAS deferred or optional (npm never lands under Homebrew's transient Node).
 - **`make restore-apps`** — running-app gate derives apps from `apps.tsv` plus irregular settings surfaces, fails closed when process state is unknown, quits managed apps, restores, and reopens what it quit. The hosting editor is never quit; ambiguous Code-family identity skips Cursor/VS Code prefs while continuing. Override with `DOTFILES_RESTORE_FORCE=1`. Same lifecycle for `restore-shottr` / `restore-canary`.
 - **`make apps-drift`** — compares live state only with faithful snapshots this public projection ships; intentionally excluded snapshots have no manifest rows, and curated VS Code/Cursor onboarding templates are outside the live-drift contract.
 - **`make link`** — missing `~/.secrets` sources warn and skip (strict mode: `DOTFILES_STRICT_LINK=1`).

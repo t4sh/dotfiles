@@ -30,7 +30,7 @@ $HOME/.secrets/ssh/github_ed25519.pub	$HOME/.ssh/github_ed25519.pub
 $HOME/.secrets/ssh/known_hosts	$HOME/.ssh/known_hosts
 
 # Tool auth — canonical files under ~/.secrets/config/; consumer paths symlinked
-# (vault rsync restores the tree; `make link` wires consumers after restore)
+# (`make secrets-restore-apply` restores the tree; `make post-vault` wires consumers)
 $HOME/.secrets/config/gh/hosts.yml	$HOME/.config/gh/hosts.yml
 
 # Starship

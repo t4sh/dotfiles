@@ -271,8 +271,14 @@ NODE
 sanitize_editor_settings "$APPS/vscode/settings.json"
 sanitize_editor_settings "$APPS/cursor/settings.json"
 
-# Tower stores license state and home-directory quick-open exclusions.
-for key in GTLicenseActivationLastUpdatedDate GTLicenseActivationState; do
+# Tower stores license state, repository-ID migration caches, and
+# home-directory quick-open exclusions. Repository UUIDs describe the current
+# machine's working-copy database; they are neither portable nor user policy.
+for key in \
+  GTLicenseActivationLastUpdatedDate \
+  GTLicenseActivationState \
+  GTUserDefaultsMigratedPinnedBranchesRepositories \
+  GTUserDefaultsMigratedStackedBranchesRepositories; do
   plist_delete "$APPS/tower/tower.plist" "$key"
 done
 if [[ -f "$APPS/tower/tower.plist" ]]; then

@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 # Skillsfile — declarative global skill manifest (Brewfile pattern).
 #
-# GENERATED 2026-08-04T15:20:07+05:30 from agents/.skill-lock.json by
+# GENERATED 2026-08-05T16:32:44+05:30 from agents/.skill-lock.json by
 # scripts/gen-skillsfile.py — DO NOT EDIT BY HAND. To change skills:
 #   ~/.local/bin/npx-stable skills add/remove ...   then   make skills-manifest
 #   (regenerates Skillsfile + agents/skills/README.md)
 #
-# Install everything:  make skills   (or: bash Skillsfile)
+# Explicit upstream refresh: make skills-update   (or: bash Skillsfile)
 # 247 skills — 34 github sources + 2 local.
 #
 # Prereqs (fresh Mac): node + git + GitHub auth (SSH/gh) must be set
-# up first — GitHub-authenticated skill sources need repo access.
+# up first — GitHub-hosted skill sources need auth when the registry requires it.
 # Agents and MCP tooling use the stable npx shim from ~/.local/bin.
 
 set -euo pipefail
@@ -18,106 +18,106 @@ set -euo pipefail
 NPX="${NPX:-$HOME/.local/bin/npx-stable}"
 [[ -x "$NPX" ]] || { echo "npx stable shim not found or not executable: $NPX" >&2; exit 1; }
 
-echo "→ ComposioHQ/awesome-claude-skills"
+echo "→ update ComposioHQ/awesome-claude-skills"
 "$NPX" skills add ComposioHQ/awesome-claude-skills --skill file-organizer -g -y
 
-echo "→ Jakubantalik/transitions.dev"
+echo "→ update Jakubantalik/transitions.dev"
 "$NPX" skills add Jakubantalik/transitions.dev --skill transitions-dev -g -y
 
-echo "→ Leonxlnx/taste-skill"
+echo "→ update Leonxlnx/taste-skill"
 "$NPX" skills add Leonxlnx/taste-skill --skill brandkit,design-taste-frontend,full-output-enforcement,gpt-taste,high-end-visual-design,industrial-brutalist-ui,minimalist-ui,redesign-existing-projects,stitch-design-taste -g -y
 
-echo "→ anthropics/knowledge-work-plugins"
+echo "→ update anthropics/knowledge-work-plugins"
 "$NPX" skills add anthropics/knowledge-work-plugins --skill accessibility-review,architecture,debug,deploy-checklist,design-critique,design-handoff,design-system,documentation,research-synthesis,system-design,tech-debt,user-research,ux-copy -g -y
 
-echo "→ anthropics/skills"
+echo "→ update anthropics/skills"
 "$NPX" skills add anthropics/skills --skill canvas-design,frontend-design,theme-factory -g -y
 
-echo "→ benjitaylor/agentation"
+echo "→ update benjitaylor/agentation"
 "$NPX" skills add benjitaylor/agentation --skill agentation,agentation-self-driving -g -y
 
-echo "→ cerico/macfair"
+echo "→ update cerico/macfair"
 "$NPX" skills add cerico/macfair --skill creative-design -g -y
 
-echo "→ coreyhaines31/marketingskills"
+echo "→ update coreyhaines31/marketingskills"
 "$NPX" skills add coreyhaines31/marketingskills --skill copywriting -g -y
 
-echo "→ dylantarre/animation-principles"
+echo "→ update dylantarre/animation-principles"
 "$NPX" skills add dylantarre/animation-principles --skill 3d-spatial,accessibility-advocate,accessibility-issues,accessible-motion,accordions-dropdowns,after-effects,animator-traditional,anime-js,anticipation-mastery,anticipation-payoff,appeal-mastery,arc-mastery,attention-direction,attention-grabbers,attention-management,brand-consistency,brand-marketing,brand-strategist,buttons-ctas,calm-relaxation,cards-containers,carousels-sliders,character-appeal,comfort-safety,continuous-infinite,continuous-loops,creative-director,css-native,data-visualization,deliberate-1200-2000ms,dramatic-2000ms-plus,e-commerce-retail,education-learning,educator-teacher,elegance-sophistication,emotional-disconnect,emotional-narrative,enterprise-b2b,entrance-animations,exaggerated-clarity,exaggeration-mastery,excitement-energy,exit-animations,feedback-indicators,figma-prototyping,filmmaker,fintech-banking,fitness-wellness,follow-through-overlapping,forms-inputs,framer-motion,friendliness-approachability,frontend-developer,game-designer,game-development,gaming-entertainment,gesture-responses,gsap-greensock,healthcare-medical,hover-interactions,icons-badges,implementation-debugging,instant-0-100ms,joy-delight,large-500-800ms,lists-grids,loaders-spinners,loading-states,lottie-bodymovin,media-publishing,medium-300-500ms,micro-100-200ms,micro-interactions,mobile-touch,modals-dialogs,motion-designer,motion-one,motion-sickness,naturalistic-motion,navigation-menus,notifications-toasts,orchestrated-sequences,page-transitions,performance-optimization,physics-intuition,playfulness-fun,popmotion,power-confidence,presentations,problem-diagnosis,product-manager,professionalism-credibility,react-spring,responsive-adaptive,rhythm-pacing,rive-animations,saas-productivity,scroll-animations,secondary-action-mastery,slow-800-1200ms,slow-in-out-mastery,small-200-300ms,social-media,solid-drawing-mastery,spatial-thinking,squash-stretch-mastery,staging-mastery,state-changes,straight-ahead-pose-mastery,technical-constraints,timing-calibration,timing-mastery,timing-principle-mastery,transition-sequences,travel-hospitality,trust-reliability,universal-elements,universal-emotion,universal-fallback,universal-industry,universal-mindset,universal-patterns,universal-practitioner,universal-solutions,universal-timing,universal-tool,urgency-action,user-feedback-clarity,ux-friction,ux-researcher,video-motion-graphics,web-motion-design -g -y
 
-echo "→ emilkowalski/skills"
+echo "→ update emilkowalski/skills"
 "$NPX" skills add emilkowalski/skills --skill animation-vocabulary,apple-design,emil-design-eng,improve-animations,review-animations -g -y
 
-echo "→ firebenders/sync-figma-token-skill"
+echo "→ update firebenders/sync-figma-token-skill"
 "$NPX" skills add firebenders/sync-figma-token-skill --skill sync-figma-token -g -y
 
-echo "→ github/awesome-copilot"
+echo "→ update github/awesome-copilot"
 "$NPX" skills add github/awesome-copilot --skill git-commit -g -y
 
-echo "→ index-how/vocabulary"
+echo "→ update index-how/vocabulary"
 "$NPX" skills add index-how/vocabulary --skill vocabulary -g -y
 
-echo "→ josiahsiegel/claude-plugin-marketplace"
+echo "→ update josiahsiegel/claude-plugin-marketplace"
 "$NPX" skills add josiahsiegel/claude-plugin-marketplace --skill tailwindcss-advanced-design-systems -g -y
 
-echo "→ julianoczkowski/designer-skills"
+echo "→ update julianoczkowski/designer-skills"
 "$NPX" skills add julianoczkowski/designer-skills --skill design-tokens -g -y
 
-echo "→ mattpocock/skills"
+echo "→ update mattpocock/skills"
 "$NPX" skills add mattpocock/skills --skill ask-matt,claude-handoff,code-review,codebase-design,design-an-interface,diagnosing-bugs,domain-modeling,edit-article,git-guardrails-claude-code,grill-me,grill-with-docs,grilling,handoff,implement,improve-codebase-architecture,loop-me,migrate-to-shoehorn,obsidian-vault,prototype,qa,request-refactor-plan,research,resolving-merge-conflicts,scaffold-exercises,setup-matt-pocock-skills,setup-pre-commit,tdd,teach,to-spec,to-tickets,triage,ubiquitous-language,wayfinder,wizard,writing-beats,writing-fragments,writing-great-skills,writing-shape -g -y
 
-echo "→ mblode/agent-skills"
+echo "→ update mblode/agent-skills"
 "$NPX" skills add mblode/agent-skills --skill ui-animation -g -y
 
-echo "→ mindmorass/reflex"
+echo "→ update mindmorass/reflex"
 "$NPX" skills add mindmorass/reflex --skill pdf-harvester -g -y
 
-echo "→ nextlevelbuilder/ui-ux-pro-max-skill"
+echo "→ update nextlevelbuilder/ui-ux-pro-max-skill"
 "$NPX" skills add nextlevelbuilder/ui-ux-pro-max-skill --skill ui-ux-pro-max -g -y
 
-echo "→ nodnarbnitram/claude-code-extensions"
+echo "→ update nodnarbnitram/claude-code-extensions"
 "$NPX" skills add nodnarbnitram/claude-code-extensions --skill tauri-v2 -g -y
 
-echo "→ notedit/happy-skills"
+echo "→ update notedit/happy-skills"
 "$NPX" skills add notedit/happy-skills --skill feature-dev -g -y
 
-echo "→ obra/superpowers"
+echo "→ update obra/superpowers"
 "$NPX" skills add obra/superpowers --skill brainstorming,executing-plans,finishing-a-development-branch,systematic-debugging,using-git-worktrees,writing-plans,writing-skills -g -y
 
-echo "→ openai/skills"
+echo "→ update openai/skills"
 "$NPX" skills add openai/skills --skill playwright,skill-creator -g -y
 
-echo "→ owl-listener/designer-skills"
+echo "→ update owl-listener/designer-skills"
 "$NPX" skills add owl-listener/designer-skills --skill design-token-audit -g -y
 
-echo "→ owl-listener/designpowers"
+echo "→ update owl-listener/designpowers"
 "$NPX" skills add owl-listener/designpowers --skill design-system-alignment -g -y
 
-echo "→ pbakaus/impeccable"
+echo "→ update pbakaus/impeccable"
 "$NPX" skills add pbakaus/impeccable --skill impeccable -g -y
 
-echo "→ referodesign/refero_skill"
+echo "→ update referodesign/refero_skill"
 "$NPX" skills add referodesign/refero_skill --skill refero-design -g -y
 
-echo "→ shadcn/improve"
+echo "→ update shadcn/improve"
 "$NPX" skills add shadcn/improve --skill improve -g -y
 
-echo "→ t4sh/skills4sh"
+echo "→ update t4sh/skills4sh"
 "$NPX" skills add t4sh/skills4sh --skill agent-memory,code-to-figma,discord-harvest,eleventy-nunjucks,figma-to-code,localhost-screenshots,skill-architect -g -y
 
-echo "→ vercel-labs/agent-browser"
+echo "→ update vercel-labs/agent-browser"
 "$NPX" skills add vercel-labs/agent-browser --skill agent-browser -g -y
 
-echo "→ vercel-labs/agent-skills"
+echo "→ update vercel-labs/agent-skills"
 "$NPX" skills add vercel-labs/agent-skills --skill web-design-guidelines -g -y
 
-echo "→ vercel-labs/skills"
+echo "→ update vercel-labs/skills"
 "$NPX" skills add vercel-labs/skills --skill find-skills -g -y
 
-echo "→ wondelai/skills"
+echo "→ update wondelai/skills"
 "$NPX" skills add wondelai/skills --skill refactoring-ui,top-design,web-typography -g -y
 
-echo "→ wshobson/agents"
+echo "→ update wshobson/agents"
 "$NPX" skills add wshobson/agents --skill monorepo-management,tailwind-design-system -g -y
 
 # Local / repo-native skills (vendored in agents/skills/,

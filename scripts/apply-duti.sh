@@ -7,6 +7,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 DOTFILES="${DOTFILES:-$(cd -- "$SCRIPT_DIR/.." && pwd -P)}"
 SETTINGS="${1:-$DOTFILES/config/duti}"
+STATE_DIR="${DOTFILES_STATE_DIR:-$HOME/.dotfiles-local}"
+STATE_FILE="$STATE_DIR/default-apps.sha256"
 
 warn() { printf '  ⚠ %s\n' "$*" >&2; }
 
@@ -81,23 +83,37 @@ while IFS= read -r line || [ -n "$line" ]; do
   fi
 done < "$SETTINGS"
 
-set +e
-output="$(duti "$filtered" 2>&1)"
-status=$?
-set -e
-if [ -n "$output" ]; then
-  printf '%s\n' "$output" >&2
-fi
-if [ "$status" -ne 0 ]; then
-  exit "$status"
-fi
-if printf '%s\n' "$output" | grep -qi '^failed to set '; then
-  echo "duti reported one or more mapping failures" >&2
+applied=0
+while read -r bundle_id target role; do
+  case "${bundle_id:-}" in ''|'#'*) continue ;; esac
+  set +e
+  if [[ -n "${role:-}" ]]; then
+    output="$(duti -s "$bundle_id" "$target" "$role" 2>&1)"
+  else
+    output="$(duti -s "$bundle_id" "$target" 2>&1)"
+  fi
+  status=$?
+  set -e
+  if [[ -n "$output" ]]; then printf '%s\n' "$output" >&2; fi
+  if (( status != 0 )) || printf '%s\n' "$output" | grep -qi '^failed to set '; then
+    echo "duti failed to apply: $bundle_id $target ${role:-}" >&2
+    exit 1
+  fi
+  applied=$((applied + 1))
+done < "$filtered"
+
+if ! bash "$DOTFILES/scripts/check-duti.sh" "$filtered"; then
+  echo "default-app policy did not converge; receipt not written" >&2
   exit 1
 fi
 
 if (( skipped > 0 )); then
-  echo "  ✓ default app mappings applied ($skipped missing bundle(s) skipped)"
+  echo "  ✓ $applied default app mappings applied ($skipped missing bundle(s) skipped)"
 else
-  echo "  ✓ default app mappings applied"
+  echo "  ✓ $applied default app mappings applied"
 fi
+
+mkdir -p "$STATE_DIR"
+shasum -a 256 "$SETTINGS" | awk '{print $1}' > "$STATE_FILE"
+chmod 600 "$STATE_FILE"
+echo "  ✓ default-app policy receipt recorded"

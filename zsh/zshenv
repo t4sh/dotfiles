@@ -1,8 +1,7 @@
 # In ~/.zshenv — ensures GUI apps see a minimal PATH.
 #
 # This file runs before ~/.zshrc, including for new Terminal login shells and
-# non-interactive zsh invocations. Keep it small, but make Homebrew available
-# before sourcing secrets because ~/.secrets/env.sh may call tools like gh.
+# non-interactive zsh invocations. Keep it deterministic and credential-free.
 typeset -U path
 path=(
   /opt/homebrew/bin
@@ -14,10 +13,6 @@ path=(
 export PATH
 
 [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
-
-# Secrets — never committed. Canonical tree: ~/.secrets/ (vault-backed).
-# Consumer paths (e.g. ~/.config/gh/hosts.yml, ~/.ssh/*) are symlinks — see symlinks.tsv.
-[[ -f ~/.secrets/env.sh ]] && source ~/.secrets/env.sh
 
 # RTK tracking DB for sandboxed Codex shells.
 export RTK_DB_PATH=/private/tmp/rtk-codex/history.db

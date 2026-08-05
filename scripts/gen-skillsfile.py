@@ -2,9 +2,9 @@
 """
 gen-skillsfile.py — regenerate ./Skillsfile from agents/.skill-lock.json.
 
-Brewfile pattern:  this script is the `brew bundle dump`; `make skills` is
-the `brew bundle`. Skillsfile is GENERATED — never hand-edit; change skills
-with `~/.local/bin/npx-stable skills add/remove` then re-run this.
+Brewfile pattern: this script generates the explicit upstream-update manifest.
+The checked-in agents/skills tree is the reproducible restore source; `make
+skills-update` is the network-mutating refresh. Skillsfile is GENERATED.
 
 GitHub-sourced skills are grouped by repo into one skills add line each (with
 --skill <comma-list>). `local` skills are repo-native (vendored in
@@ -51,6 +51,13 @@ def build_skillsfile(timestamp):
     for key, meta in data.get("skills", {}).items():
         name = installed_name(key, SKILLS_DIR)
         if meta.get("sourceType") == "github":
+            folder_hash = meta.get("skillFolderHash", "")
+            if not re.fullmatch(r"[0-9a-f]{40}", folder_hash):
+                raise ValueError(
+                    f"github skill {key!r} lacks an exact 40-character upstream tree hash"
+                )
+            if not meta.get("source") or not meta.get("skillPath"):
+                raise ValueError(f"github skill {key!r} lacks source or skillPath metadata")
             by_source[meta["source"]].append(name)
         else:
             local.append(name)
@@ -66,11 +73,11 @@ def build_skillsfile(timestamp):
         "#   ~/.local/bin/npx-stable skills add/remove ...   then   make skills-manifest",
         "#   (regenerates Skillsfile + agents/skills/README.md)",
         "#",
-        "# Install everything:  make skills   (or: bash Skillsfile)",
+        "# Explicit upstream refresh: make skills-update   (or: bash Skillsfile)",
         f"# {total} skills — {len(by_source)} github sources + {len(local)} local.",
         "#",
         "# Prereqs (fresh Mac): node + git + GitHub auth (SSH/gh) must be set",
-        "# up first — GitHub-authenticated skill sources need repo access.",
+        "# up first — GitHub-hosted skill sources need auth when the registry requires it.",
         "# Agents and MCP tooling use the stable npx shim from ~/.local/bin.",
         "",
         "set -euo pipefail",
@@ -82,7 +89,7 @@ def build_skillsfile(timestamp):
 
     for src in sorted(by_source):
         skills = ",".join(sorted(by_source[src]))
-        lines.append(f'echo "→ {src}"')
+        lines.append(f'echo "→ update {src}"')
         lines.append(f'"$NPX" skills add {src} --skill {skills} -g -y')
         lines.append("")
 

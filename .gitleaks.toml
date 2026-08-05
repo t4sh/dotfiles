@@ -4,6 +4,26 @@
 useDefault = true
 
 [[allowlists]]
+description = "Exact retired Moltbook documentation placeholder retained only for history scans"
+targetRules = ["curl-auth-header"]
+condition = "AND"
+regexTarget = "match"
+regexes = ['''Authorization: Bearer YOUR_API_KEY"''']
+paths = [
+  '''agents/skills/moltbook/SKILL\.md$''',
+  '''agents/skills/moltbook/MESSAGING\.md$''',
+  '''agents/skills/moltbook/HEARTBEAT\.md$''',
+]
+
+[[allowlists]]
+description = "Exact retired Moltbook credential-manager dummy retained only for history scans"
+targetRules = ["generic-api-key"]
+condition = "AND"
+regexTarget = "line"
+regexes = ['''test_api_key_12345''']
+paths = ['''agents/skills/moltbook/tests/test_credential_manager\.py$''']
+
+[[allowlists]]
 description = "Exact Tower workflow icon bytes that resemble a Square access token"
 targetRules = ["square-access-token"]
 condition = "AND"
