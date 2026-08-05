@@ -48,6 +48,7 @@ skip_or_die() {
 command -v python3 >/dev/null 2>&1 || skip_or_die "python3 not on PATH"
 [[ -f "$HELPER" ]] || skip_or_die "$HELPER not found"
 [[ -f "$MANIFEST" ]] || skip_or_die "$MANIFEST not found"
+APPS_MANIFEST="$MANIFEST" bash "$DOTFILES/scripts/validate-manifests.sh" apps
 
 workdir="$(mktemp -d -t apps-drift.XXXXXX)"
 stage="$workdir/stage"
@@ -67,6 +68,7 @@ unconfigured=0
 
 # Pass 1 — stage live exports at their manifest-relative paths.
 staged_rows=()
+staged_text_rows=()
 while IFS=$'\t' read -r domain label plist _rest || [[ -n "${domain:-}" ]]; do
   # Skip comments and blank rows, matching the symlinks.tsv/apps.tsv contract.
   case "$domain" in ''|'#'*) continue ;; esac
@@ -89,7 +91,8 @@ while IFS=$'\t' read -r domain label plist _rest || [[ -n "${domain:-}" ]]; do
 
   # An empty live domain means the app has no prefs yet (never launched, or
   # pre-restore on a fresh Mac). That is not drift.
-  if [[ ! -s "$live" ]] || ! plutil -p "$live" 2>/dev/null | rg -q '[^[:space:]{}]'; then
+  plist_view="$(plutil -p "$live" 2>/dev/null || true)"
+  if [[ ! -s "$live" ]] || ! rg -q '[^[:space:]{}]' <<< "$plist_view"; then
     printf '  ⚠ %s (%s) — no live preferences yet (app not launched?)\n' "$label" "$domain" >> "$report"
     unconfigured=$((unconfigured + 1))
     rm -f "$live"
@@ -135,15 +138,33 @@ stage_defaults() {
   fi
 }
 
+stage_text_file() {
+  local source="$1" label="$2" relative="$3" live
+  if [[ ! -f "$DOTFILES/$relative" ]]; then
+    printf '  ✗ %s — repo snapshot missing: %s\n' "$label" "$relative" >> "$report"
+    missing=$((missing + 1))
+    return
+  fi
+  if [[ ! -f "$source" ]]; then
+    printf '  ⚠ %s — live settings unavailable\n' "$label" >> "$report"
+    unconfigured=$((unconfigured + 1))
+    return
+  fi
+  live="$stage/$relative"
+  mkdir -p "$(dirname "$live")"
+  cp "$source" "$live"
+  staged_text_rows+=("$label"$'\t'"$relative")
+}
+
 stage_plist_file \
   "$HOME/Library/Group Containers/group.com.sindresorhus.Dato/Library/Preferences/group.com.sindresorhus.Dato.plist" \
   "Dato" "apps/dato/dato.plist" "dato-file"
 stage_defaults "com.apple.Terminal" "Terminal" "apps/terminal/terminal.plist"
 stage_defaults "com.apple.dock" "Dock" "macos/dock-backup.plist"
-# The public VS Code and Cursor settings files are deliberately curated
-# onboarding templates, not faithful projections of the private reference Mac.
-# Comparing them with live private profiles would either remain permanently red
-# or leak private-only labels and command approvals into the public snapshot.
+stage_text_file "$HOME/Library/Application Support/Code/User/settings.json" \
+  "VS Code" "apps/vscode/settings.json"
+stage_text_file "$HOME/Library/Application Support/Cursor/User/settings.json" \
+  "Cursor" "apps/cursor/settings.json"
 
 sublime_live="$HOME/Library/Application Support/Sublime Text/Packages/User"
 sublime_stage="$stage/apps/sublime-text"
@@ -170,11 +191,13 @@ fi
 # Pass 2 — apply the real sanitizer to the staged copies, never to the repo.
 if [[ -f "$SANITIZER" ]]; then
   if ! DOTFILES="$stage" bash "$SANITIZER" >"$workdir/sanitize.log" 2>&1; then
-    warn "sanitize-app-prefs.sh failed on staged exports; drift may be overstated"
+    warn "sanitize-app-prefs.sh failed on staged exports; audit is inconclusive"
     sed 's/^/    /' "$workdir/sanitize.log" >&2
+    missing=$((missing + 1))
   fi
 else
-  warn "$SANITIZER not found; sanitized-by-design keys will look like drift"
+  warn "$SANITIZER not found; audit is inconclusive"
+  missing=$((missing + 1))
 fi
 
 # Pass 3 — compare sanitized live exports against the committed snapshots.
@@ -197,6 +220,17 @@ for row in ${staged_rows+"${staged_rows[@]}"}; do
     missing=$((missing + 1))
     printf '  ✗ %s (%s) — comparison failed: %s\n' \
       "$label" "$domain" "$(tr '\n' ' ' < "$workdir/${domain}.err")" >> "$report"
+  fi
+done
+
+# Text/JSON settings are copied verbatim by `make backup`; after sanitization,
+# exact file drift is meaningful even though the formats permit comments.
+for row in ${staged_text_rows+"${staged_text_rows[@]}"}; do
+  IFS=$'\t' read -r label relative <<< "$row"
+  compared=$((compared + 1))
+  if ! cmp -s "$stage/$relative" "$DOTFILES/$relative"; then
+    drifted=$((drifted + 1))
+    printf '  ✗ %s → %s (content differs)\n' "$label" "$relative" >> "$report"
   fi
 done
 

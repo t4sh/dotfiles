@@ -7,6 +7,7 @@ DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
 MANIFEST="$DOTFILES/symlinks.tsv"
 
 [ -f "$MANIFEST" ] || { echo "manifest not found: $MANIFEST" >&2; exit 1; }
+bash "$DOTFILES/scripts/validate-manifests.sh" symlinks
 
 expand() {
     local s="$1"

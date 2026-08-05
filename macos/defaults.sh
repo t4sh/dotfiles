@@ -3,6 +3,98 @@ set -eo pipefail
 
 trap 'printf "  ✗ macos/defaults.sh failed at line %s: %s\n" "$LINENO" "$BASH_COMMAND" >&2' ERR
 
+MODE=apply
+PRIVILEGED=1
+while (($# > 0)); do
+    case "$1" in
+        --dry-run) MODE=dry-run ;;
+        --check) MODE=check ;;
+        --user-only) PRIVILEGED=0 ;;
+        -h|--help)
+            cat <<'EOF'
+usage: macos/defaults.sh [--dry-run|--check] [--user-only]
+
+  --dry-run    print mutations without applying them
+  --check      read back representative managed settings; do not mutate
+  --user-only  skip sudo-backed identity, security, login, and energy policy
+EOF
+            exit 0
+            ;;
+        *) echo "unknown option: $1" >&2; exit 2 ;;
+    esac
+    shift
+done
+
+[[ "$(uname -s)" == "Darwin" ]] || { echo "macos/defaults.sh requires macOS" >&2; exit 1; }
+MACOS_VERSION="$(sw_vers -productVersion)"
+MACOS_MAJOR="${MACOS_VERSION%%.*}"
+case "$MACOS_MAJOR" in
+    15|26) ;;
+    *)
+        if [[ "$MODE" == apply && "${DOTFILES_MACOS_ALLOW_UNTESTED:-0}" != "1" ]]; then
+            echo "macOS $MACOS_VERSION is outside the tested majors (15, 26)." >&2
+            echo "Review the dry-run, then set DOTFILES_MACOS_ALLOW_UNTESTED=1 to proceed." >&2
+            exit 1
+        fi
+        echo "  ⚠ macOS $MACOS_VERSION is outside the tested majors (15, 26); $MODE remains read-only" >&2
+        ;;
+esac
+echo "macOS defaults policy: mode=$MODE scope=$([[ $PRIVILEGED -eq 1 ]] && echo full || echo user-only) host=$MACOS_VERSION"
+
+verify_defaults() {
+    local failures=0 actual domain key expected firewall stealth
+    while IFS=$'\t' read -r domain key expected; do
+        actual="$(command defaults read "$domain" "$key" 2>/dev/null || true)"
+        actual="${actual%\"}"; actual="${actual#\"}"
+        if [[ "$actual" == "$expected" ]]; then
+            printf '  ✓ %s %s = %s\n' "$domain" "$key" "$expected"
+        else
+            printf '  ✗ %s %s expected %s, got %s\n' "$domain" "$key" "$expected" "${actual:-<unset>}" >&2
+            failures=$((failures + 1))
+        fi
+    done <<'EOF'
+NSGlobalDomain	AppleShowAllExtensions	0
+com.apple.finder	AppleShowAllFiles	1
+com.apple.finder	ShowPathbar	1
+com.apple.dock	autohide	0
+com.apple.dock	show-recents	0
+com.apple.screensaver	askForPassword	1
+com.apple.screensaver	askForPasswordDelay	0
+com.apple.Terminal	SecureKeyboardEntry	1
+com.apple.desktopservices	DSDontWriteNetworkStores	1
+com.apple.SoftwareUpdate	AutomaticCheckEnabled	1
+EOF
+    if (( PRIVILEGED )) && [[ -x /usr/libexec/ApplicationFirewall/socketfilterfw ]]; then
+        firewall="$(/usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate 2>/dev/null || true)"
+        stealth="$(/usr/libexec/ApplicationFirewall/socketfilterfw --getstealthmode 2>/dev/null || true)"
+        [[ "$firewall" == *enabled* ]] || { echo "  ✗ application firewall is not enabled" >&2; failures=$((failures + 1)); }
+        [[ "$stealth" == *enabled* ]] || { echo "  ✗ firewall stealth mode is not enabled" >&2; failures=$((failures + 1)); }
+    fi
+    (( failures == 0 ))
+}
+
+if [[ "$MODE" == check ]]; then
+    verify_defaults
+    exit $?
+fi
+
+if [[ "$MODE" == dry-run ]]; then
+    # sudo is wrapped too, so sudo-backed calls are printed as whole commands.
+    # shellcheck disable=SC2032
+    defaults() { printf '  would run: defaults'; printf ' %q' "$@"; echo; }
+    osascript() { printf '  would run: osascript'; printf ' %q' "$@"; echo; }
+    if (( PRIVILEGED )); then
+        sudo() { printf '  would run: sudo'; printf ' %q' "$@"; echo; }
+    else
+        sudo() { printf '  skipped privileged command:'; printf ' %q' "$@"; echo; }
+    fi
+    killall() { printf '  would run: killall'; printf ' %q' "$@"; echo; }
+    # shellcheck disable=SC2032
+    chflags() { printf '  would run: chflags'; printf ' %q' "$@"; echo; }
+elif (( ! PRIVILEGED )); then
+    sudo() { printf '  - skipped privileged command:' >&2; printf ' %q' "$@" >&2; echo >&2; }
+fi
+
 warn_on_fail() {
     local msg="$1"
     shift
@@ -20,11 +112,12 @@ warn_on_fail() {
 # settings we’re about to change
 osascript -e 'tell application "System Settings" to quit'
 
-# Ask for the administrator password upfront
-sudo -v
-
-# Keep-alive: update existing `sudo` time stamp until `.macos` has finished
-while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+# Ask for the administrator password upfront and keep it alive only for a full
+# real apply. Dry-run and user-only modes never prompt for sudo.
+if [[ "$MODE" == apply && $PRIVILEGED -eq 1 ]]; then
+    sudo -v
+    while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+fi
 
 # System identity + lock-screen recovery info.
 #
@@ -49,7 +142,11 @@ NewSysName="${DOTFILES_SYSNAME:-${NewSysName:-}}"
 RecoveryPhone="${DOTFILES_RECOVERY_PHONE:-${RecoveryPhone:-}}"
 RecoveryEmail="${DOTFILES_RECOVERY_EMAIL:-${RecoveryEmail:-}}"
 
-if [ -z "$NewSysName" ] || [ -z "$RecoveryPhone" ] || [ -z "$RecoveryEmail" ]; then
+if [[ "$MODE" == dry-run ]]; then
+    NewSysName="${NewSysName:-<prompted-on-apply>}"
+    RecoveryPhone="<configured-on-apply>"
+    RecoveryEmail="<configured-on-apply>"
+elif [ -z "$NewSysName" ] || [ -z "$RecoveryPhone" ] || [ -z "$RecoveryEmail" ]; then
     echo ":::::: System identity — one-time setup (values will be cached) ::::::"
     [ -z "$NewSysName" ]     && read -r -p '::::::::::::::::::: Discoverable as: ' NewSysName
     [ -z "$RecoveryPhone" ]  && read -r -p ':::::: Recovery Phone at LockScreen: ' RecoveryPhone
@@ -70,6 +167,8 @@ fi
 sudo scutil --set ComputerName "$NewSysName"
 sudo scutil --set HostName "$NewSysName"
 sudo scutil --set LocalHostName "$NewSysName"
+# The dry-run wrapper intentionally cannot intercept the command behind sudo.
+# shellcheck disable=SC2033
 sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName -string "$NewSysName"
 
 # Set Text for the Lock message
@@ -81,6 +180,10 @@ LoginMsg=$(printf '%s\n%s\n%s\n%s' \
 
 # Helper: PlistBuddy Set with Add fallback for fresh installs
 plist_set() {
+    if [[ "$MODE" == dry-run ]]; then
+        printf '  would set plist key %q (%s) to %q in %q\n' "$1" "$2" "$3" "$4"
+        return 0
+    fi
     /usr/libexec/PlistBuddy -c "Set ${1} ${3}" "${4}" 2>/dev/null ||
     /usr/libexec/PlistBuddy -c "Add ${1} ${2} ${3}" "${4}"
 }
@@ -159,7 +262,7 @@ defaults write com.apple.screencapture "include-date" -bool "true"
 # `location-last` preserves Screenshot.app's Options → Save to → Other Location
 # choice, while `target=file` prevents an app/clipboard target from taking over.
 CAPTURE_DIR="$HOME/odrive/ash.a.t@live/Workspace/Screengrabs"
-mkdir -p "$CAPTURE_DIR"
+[[ "$MODE" == dry-run ]] || mkdir -p "$CAPTURE_DIR"
 defaults write com.apple.screencapture "location" -string "$CAPTURE_DIR"
 defaults write com.apple.screencapture "location-last" -string "$CAPTURE_DIR"
 defaults write com.apple.screencapture "target" -string "file"
@@ -290,7 +393,11 @@ defaults write -g NSServicesMinimumItemCountForContextSubmenu -int 10
 # Discover keys: `defaults read pbs NSServicesStatus`.
 defaults write pbs NSServicesStatus -dict-add "com.apple.Terminal - New Terminal at Folder - newTerminalAtFolder" \
     '{ "enabled_context_menu" = 0; "enabled_services_menu" = 0; "presentation_modes" = { ContextMenu = 0; ServicesMenu = 0; }; }'
-/System/Library/CoreServices/pbs -flush 2>/dev/null || true
+if [[ "$MODE" == dry-run ]]; then
+    echo "  would run: /System/Library/CoreServices/pbs -flush"
+else
+    /System/Library/CoreServices/pbs -flush 2>/dev/null || true
+fi
 
 ###############################################################################
 # Mission Control             https://macos-defaults.com/#💻-list-of-commands #
@@ -463,6 +570,7 @@ sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on
 sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setstealthmode on
 
 # Disable guest account login
+# shellcheck disable=SC2033
 warn_on_fail "could not disable guest account login (sudo/defaults permission issue)" \
     sudo defaults write /Library/Preferences/com.apple.loginwindow GuestEnabled -bool false
 
@@ -490,12 +598,14 @@ unset remote_events_output
 defaults write com.apple.Terminal SecureKeyboardEntry -bool true
 
 # Reveal IP address, hostname, OS version on login window click
+# shellcheck disable=SC2033
 sudo defaults write /Library/Preferences/com.apple.loginwindow AdminHostInfo HostName
 
 ###############################################################################
 # Set custom lock message                                                     #
 ###############################################################################
 
+# shellcheck disable=SC2033
 sudo defaults write /Library/Preferences/com.apple.loginwindow LoginwindowText "$LoginMsg"
 
 ###############################################################################
@@ -506,6 +616,7 @@ sudo defaults write /Library/Preferences/com.apple.loginwindow LoginwindowText "
 chflags nohidden ~/Library
 
 # Show /Volumes folder
+# shellcheck disable=SC2033
 sudo chflags nohidden /Volumes
 
 # Faster window resize animations
@@ -624,7 +735,17 @@ for app in "Activity Monitor" \
 	killall "${app}" &> /dev/null || true
 done
 
-echo "macOS Configuration Applied."
+if [[ "$MODE" == dry-run ]]; then
+    echo "macOS dry-run complete. No settings were changed."
+    exit 0
+fi
+
+verify_defaults || {
+    echo "macOS configuration applied, but read-back verification failed." >&2
+    exit 1
+}
+
+echo "macOS Configuration Applied and verified."
 echo "Note that - "
 echo "           some of these changes require a logout/restart to take effect."
 echo "	         the Mouse and Trackpad Gestures still need to be set via System Settings"

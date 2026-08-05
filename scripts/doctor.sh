@@ -6,12 +6,58 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 DOTFILES="${DOTFILES:-$(cd -- "$SCRIPT_DIR/.." && pwd -P)}"
 WARNINGS=0
 FAILURES=0
+STRICT=0
+CHECK_TIMEOUT="${DOTFILES_DOCTOR_TIMEOUT:-30}"
+AUDIT_TIMEOUT="${DOTFILES_DOCTOR_AUDIT_TIMEOUT:-120}"
+
+while (($# > 0)); do
+  case "$1" in
+    --strict) STRICT=1 ;;
+    -h|--help)
+      echo "usage: doctor.sh [--strict]"
+      echo "  --strict  return nonzero when any warning remains"
+      exit 0
+      ;;
+    *) echo "unknown option: $1" >&2; exit 2 ;;
+  esac
+  shift
+done
+
+[[ "$CHECK_TIMEOUT" =~ ^[1-9][0-9]*$ ]] || { echo "DOTFILES_DOCTOR_TIMEOUT must be a positive integer" >&2; exit 2; }
+[[ "$AUDIT_TIMEOUT" =~ ^[1-9][0-9]*$ ]] || { echo "DOTFILES_DOCTOR_AUDIT_TIMEOUT must be a positive integer" >&2; exit 2; }
 
 ok() { printf '  ✓ %s\n' "$1"; }
+note() { printf '  - %s\n' "$1"; }
 warn() { printf '  ⚠ %s\n' "$1"; WARNINGS=$((WARNINGS + 1)); }
 fail() { printf '  ✗ %s\n' "$1"; FAILURES=$((FAILURES + 1)); }
 
 have() { command -v "$1" >/dev/null 2>&1; }
+
+run_with_timeout() {
+  local seconds="$1" pid watchdog status
+  shift
+  "$@" &
+  pid=$!
+  (
+    sleep "$seconds"
+    pkill -TERM -P "$pid" 2>/dev/null || true
+    kill -TERM "$pid" 2>/dev/null || exit 0
+    sleep 2
+    pkill -KILL -P "$pid" 2>/dev/null || true
+    kill -KILL "$pid" 2>/dev/null || true
+  ) &
+  watchdog=$!
+  set +e
+  wait "$pid"
+  status=$?
+  set -e
+  kill "$watchdog" 2>/dev/null || true
+  wait "$watchdog" 2>/dev/null || true
+  if (( status == 137 || status == 143 )); then
+    return 124
+  fi
+  return "$status"
+}
 
 check_command() {
   local command_name="$1" label="$2"
@@ -42,22 +88,65 @@ fi
 
 if have brew; then
   ok "Homebrew installed"
-  if env DOTFILES="$DOTFILES" bash "$DOTFILES/scripts/brewfile.sh" check >/dev/null 2>&1; then
+  echo "  … checking installed Brewfile entries"
+  if run_with_timeout "$AUDIT_TIMEOUT" env DOTFILES="$DOTFILES" bash "$DOTFILES/scripts/brewfile.sh" check >/dev/null 2>&1; then
     ok "Brewfile entries installed"
   else
-    warn "Brewfile has missing installs; run: make brew"
+    status=$?
+    if (( status == 124 )); then
+      warn "Brewfile install check timed out after ${AUDIT_TIMEOUT}s"
+    else
+      warn "Brewfile has missing installs; run: make brew"
+    fi
   fi
-  if bash "$DOTFILES/scripts/audit-brewfile.sh" --check >/dev/null 2>&1; then
+  echo "  … comparing Brewfile declarations with system state"
+  if run_with_timeout "$AUDIT_TIMEOUT" bash "$DOTFILES/scripts/audit-brewfile.sh" --check >/dev/null 2>&1; then
     ok "Brewfile declarations match system state"
   else
-    warn "Brewfile drift detected; run: make brewfile-audit"
+    status=$?
+    if (( status == 124 )); then
+      warn "Brewfile declaration audit timed out after ${AUDIT_TIMEOUT}s"
+    else
+      warn "Brewfile drift detected; run: make brewfile-audit"
+    fi
   fi
 else
   fail "Homebrew missing"
 fi
 
 check_command duti "duti"
+if have duti && [ -f "$DOTFILES/config/duti" ]; then
+  expected_duti_digest="$(shasum -a 256 "$DOTFILES/config/duti" | awk '{print $1}')"
+  duti_receipt="$HOME/.dotfiles-local/default-apps.sha256"
+  if [ -f "$duti_receipt" ] && [ "$(tr -d '[:space:]' < "$duti_receipt")" = "$expected_duti_digest" ]; then
+    ok "default-app policy applied (receipt matches config/duti)"
+    note "live handler drift check: make default-apps-check"
+  else
+    warn "default-app policy not applied for this config; run: make default-apps"
+  fi
+fi
 check_command gitleaks "gitleaks"
+
+touch_id_hardware_status=0
+bash "$DOTFILES/scripts/touch-id-sudo.sh" --hardware-check >/dev/null 2>&1 \
+  || touch_id_hardware_status=$?
+case "$touch_id_hardware_status" in
+  0)
+    if bash "$DOTFILES/scripts/touch-id-sudo.sh" --check >/dev/null 2>&1; then
+      ok "Touch ID sudo enabled"
+    else
+      warn "Touch ID sudo not enabled; run: make touch-id-sudo"
+    fi
+    ;;
+  1) note "Touch ID hardware not detected; password-only sudo policy accepted" ;;
+  *) warn "Touch ID hardware detection failed; run: make touch-id-sudo-check" ;;
+esac
+
+if [ -d "$HOME/Library/Services/SymbolicLinker.service" ] || [ -d "/Library/Services/SymbolicLinker.service" ]; then
+  ok "SymbolicLinker service installed (Brewfile cask)"
+else
+  warn "SymbolicLinker service missing; run: make brew-apps"
+fi
 
 if [ -f "$DOTFILES/.node-version" ]; then
   ok ".node-version present ($(tr -d '[:space:]' < "$DOTFILES/.node-version"))"
@@ -114,7 +203,7 @@ fi
 check_command typos "typos"
 
 if have gh; then
-  if GH_HOST=github.com gh auth status --hostname github.com >/dev/null 2>&1; then
+  if run_with_timeout "$CHECK_TIMEOUT" env GH_HOST=github.com gh auth status --hostname github.com >/dev/null 2>&1; then
     ok "GitHub CLI authenticated"
   else
     warn "GitHub CLI installed but not authenticated"
@@ -124,10 +213,17 @@ else
 fi
 
 if have mas; then
-  if mas config >/dev/null 2>&1 && mas list >/dev/null 2>&1; then
+  echo "  … checking Mac App Store state"
+  if run_with_timeout "$CHECK_TIMEOUT" mas config >/dev/null 2>&1 && \
+     run_with_timeout "$CHECK_TIMEOUT" mas list >/dev/null 2>&1; then
     ok "Mac App Store CLI operational"
   else
-    warn "mas cannot query App Store state; open the App Store and verify sign-in"
+    status=$?
+    if (( status == 124 )); then
+      warn "Mac App Store check timed out after ${CHECK_TIMEOUT}s"
+    else
+      warn "mas cannot query App Store state; open the App Store and verify sign-in"
+    fi
   fi
 else
   warn "mas missing"
@@ -139,15 +235,25 @@ if [ -d "$HOME/.secrets" ]; then
   if [ -f "$HOME/.secrets/ssh/github_ed25519" ]; then
     ok "GitHub SSH private key present"
   else
-    warn "GitHub SSH private key missing (~/.secrets/ssh/github_ed25519); restore vault then make link && make ssh-setup"
+    warn "GitHub SSH private key missing (~/.secrets/ssh/github_ed25519); restore/import secrets, then run: make post-vault"
   fi
   if [ -f "$HOME/.secrets/config/gh/hosts.yml" ]; then
     ok "GitHub CLI hosts.yml present"
   else
-    warn "GitHub CLI hosts.yml missing (~/.secrets/config/gh/hosts.yml); restore vault then make link"
+    warn "GitHub CLI hosts.yml missing (~/.secrets/config/gh/hosts.yml); restore/import secrets, then run: make post-vault"
   fi
 else
   warn "$HOME/.secrets missing; restore vault before secret-backed symlinks work"
+fi
+
+if [ -d "${DOTFILES_RESTORE_SOURCE:-/Volumes/DotfilesSecrets}" ]; then
+  if bash "$DOTFILES/scripts/secrets-health.sh" >/dev/null 2>&1; then
+    ok "mounted vault snapshot is valid and fresh"
+  else
+    warn "mounted vault snapshot is invalid or stale; run: make secrets-health"
+  fi
+else
+  note "vault unmounted (normal after restore); mount it for day-2 freshness check: make secrets-health"
 fi
 
 if bash "$DOTFILES/scripts/link.sh" --check >/dev/null 2>&1; then
@@ -162,13 +268,18 @@ elif [ ! -f "$DOTFILES/scripts/lib/plist_drift.py" ]; then
   warn "app preference snapshot audit unavailable (scripts/lib/plist_drift.py missing)"
 elif [ ! -f "$DOTFILES/apps.tsv" ]; then
   warn "app preference snapshot audit unavailable (apps.tsv missing)"
-elif bash "$DOTFILES/scripts/audit-apps-drift.sh" --check >/dev/null 2>&1; then
+elif run_with_timeout "$AUDIT_TIMEOUT" bash "$DOTFILES/scripts/audit-apps-drift.sh" --check >/dev/null 2>&1; then
   ok "app preference snapshots match system state"
 else
-  warn "app preference snapshot drift detected; run: make apps-drift"
+  status=$?
+  if (( status == 124 )); then
+    warn "app preference audit timed out after ${AUDIT_TIMEOUT}s"
+  else
+    warn "app preference snapshot drift detected; run: make apps-drift"
+  fi
 fi
 
 printf '\nSummary: %d warning(s), %d failure(s)\n' "$WARNINGS" "$FAILURES"
-if (( FAILURES > 0 )); then
+if (( FAILURES > 0 || (STRICT && WARNINGS > 0) )); then
   exit 1
 fi

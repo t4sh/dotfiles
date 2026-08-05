@@ -13,6 +13,7 @@
 set -euo pipefail
 
 DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
+bash "$DOTFILES/scripts/validate-manifests.sh" apps
 
 # shellcheck source=scripts/lib/running-app-gate.sh
 source "$DOTFILES/scripts/lib/running-app-gate.sh"

@@ -1,5 +1,5 @@
 # Default application mappings (repo policy for the Brewfile app set).
-# Format: bundle-id extension-or-url-scheme [role]
+# Format: bundle-id extension-or-UTI-or-url-scheme [role]
 
 # File extensions
 com.apple.ScriptEditor2 .applescript all
@@ -16,7 +16,6 @@ com.sublimetext.4 .json all
 com.todesktop.230313mzl4w4u92 .jsx all
 com.todesktop.230313mzl4w4u92 .lua all
 com.sublimetext.4 .mjs all
-com.sublimetext.4 .md all
 com.sublimetext.4 .py all
 com.sublimetext.4 .rb all
 com.todesktop.230313mzl4w4u92 .rs all
@@ -35,6 +34,9 @@ com.apple.Preview .jpg all
 com.apple.Preview .jpeg all
 com.apple.Preview .gif all
 com.apple.Preview .webp all
+
+# Uniform Type Identifiers
+com.sublimetext.4 net.daringfireball.markdown all
 
 # URL schemes
 com.sindresorhus.Velja http

@@ -1,4 +1,4 @@
-.PHONY: all help link unlink brew brew-base node brew-npm brew-mas brew-check brewfile-audit shims macos dock terminal services restore-apps restore-canary restore-shottr post-vault backup backup-canary backup-shottr audit-apps apps-drift hooks ssh-setup skills-audit skills skills-manifest secrets-backup secrets-mount secrets-manifest secrets-pass secrets-pass-import rules-audit default-apps capture-default-apps doctor docs-audit
+.PHONY: all help link unlink brew brew-without-mas brew-base brew-core brew-apps node brew-npm brew-mas brew-check brewfile-audit shims macos macos-user macos-dry-run macos-check touch-id-sudo touch-id-sudo-check dock terminal services restore-apps restore-canary restore-shottr post-vault backup backup-canary backup-shottr audit-apps apps-drift hooks ssh-setup skills-audit skills skills-update skills-manifest secrets-backup secrets-mount secrets-health secrets-manifest secrets-restore secrets-restore-apply secrets-pass secrets-pass-import rules-audit default-apps default-apps-check capture-default-apps doctor verify-bootstrap docs-audit
 
 export DOTFILES := $(CURDIR)
 
@@ -6,7 +6,7 @@ all: ## Re-apply the full existing-Mac setup, including node shims, in a fixed o
 	@$(MAKE) --no-print-directory link
 	@$(MAKE) --no-print-directory rules-audit
 	@$(MAKE) --no-print-directory skills-audit
-	@$(MAKE) --no-print-directory brew
+	@$(MAKE) --no-print-directory brew-without-mas
 	@$(MAKE) --no-print-directory shims
 	@$(MAKE) --no-print-directory services
 	@$(MAKE) --no-print-directory restore-apps
@@ -16,7 +16,7 @@ all: ## Re-apply the full existing-Mac setup, including node shims, in a fixed o
 	@echo "Full setup complete."
 # macos last: defaults.sh has interactive prompts; a Ctrl-C there previously
 # aborted the sequence before dock/hooks could run.
-# ssh-setup is manual and post-vault: never generate canonical key material
+# post-vault / ssh-setup stay manual: never touch canonical key material
 # before the existing secret tree has had a chance to be restored.
 # terminal is NOT in `all` (would kill parent Terminal.app shell).
 # default-apps, doctor, docs-audit, skills, and terminal stay manual.
@@ -39,7 +39,7 @@ backup-canary: ## Back up Canary Mail prefs into ~/.secrets
 backup-shottr: ## Back up Shottr prefs into ~/.secrets
 	@bash scripts/backup-shottr-vault.sh
 
-ssh-setup: ## Verify/register the restored GitHub SSH key
+ssh-setup: ## Verify/register restored GitHub auth + signing key
 	@bash scripts/ssh-setup.sh
 
 secrets-manifest: ## Install the default vault backup manifest when absent
@@ -52,9 +52,9 @@ secrets-manifest: ## Install the default vault backup manifest when absent
 		echo "  ✓ installed default backup manifest → ~/.dotfiles-local/backup.manifest"; \
 	fi
 
-# After vault rsync + secrets-pass-import. Soft-skips Shottr/Canary when payload
+# After transactional secrets restore + secrets-pass-import. Soft-skips Shottr/Canary when payload
 # absent. Not in `all` — requires ~/.secrets first.
-post-vault: ## After secrets land: strict links, SSH, vault app restores, restore-apps
+post-vault: ## After secrets land: link, ssh-setup, vault app restores, restore-apps
 	@bash scripts/post-vault.sh
 
 skills-audit: ## Check tracked agent skills for redistribution/license safety
@@ -72,10 +72,19 @@ skills-manifest: ## Regenerate Skillsfile and skills README from the skill lockf
 	@python3 scripts/gen-skillsfile.py
 	@python3 agents/compareskills.py
 
-# Install all global skills from the manifest (the `brew bundle`). Not in
-# `make all`: needs node + GitHub auth set up first.
-skills: skills-manifest ## Install global agent skills from Skillsfile
+# The checked-in agents/ tree is the reproducible restore source. `make link`
+# exposes it at ~/.agents; network installs are an explicit update workflow.
+skills: skills-audit ## Verify the vendored global skills restored by make link
+	@python3 scripts/gen-skillsfile.py --check
+	@python3 agents/compareskills.py --check
+	@echo "  ✓ vendored skills are repo-managed at $(CURDIR)/agents/skills"
+	@echo "  → upstream refresh is explicit: make skills-update"
+
+skills-update: ## Explicitly refresh vendored skills from current upstream sources
 	@bash Skillsfile
+	@$(MAKE) --no-print-directory skills-manifest
+	@$(MAKE) --no-print-directory skills-audit
+	@git status --short -- Skillsfile agents/.skill-lock.json agents/skills agents/skills/README.md THIRD_PARTY_NOTICES.md
 
 hooks: ## Install local git hooks and diff drivers
 	@git config --local core.hooksPath .githooks
@@ -91,14 +100,26 @@ link: ## Apply symlinks from symlinks.tsv
 unlink: ## Remove only symlinks managed by symlinks.tsv
 	@bash scripts/unlink.sh
 
-brew: ## Install all packages from Brewfile (requires App Store sign-in)
+brew: ## Install packages; confirm MAS interactively or defer it safely
 	@$(MAKE) brew-base
 	@$(MAKE) node
 	@$(MAKE) brew-npm
-	@$(MAKE) brew-mas
+	@DOTFILES="$(CURDIR)" bash scripts/brewfile.sh mas-optional
+
+brew-without-mas: ## Install all non-App-Store Brewfile phases
+	@$(MAKE) brew-base
+	@$(MAKE) node
+	@$(MAKE) brew-npm
+	@echo "  - App Store phase deferred; after sign-in run: make brew-mas"
 
 brew-base: ## Install Brewfile except npm and App Store entries
 	@DOTFILES="$(CURDIR)" bash scripts/brewfile.sh base
+
+brew-core: ## Install taps and formulae needed by the bootstrap itself
+	@DOTFILES="$(CURDIR)" bash scripts/brewfile.sh core
+
+brew-apps: ## Install casks, fonts, and editor extensions (resumable phase)
+	@DOTFILES="$(CURDIR)" bash scripts/brewfile.sh apps
 
 node: ## Install and activate the exact Node version from .node-version
 	@DOTFILES="$(CURDIR)" bash scripts/setup-node.sh
@@ -118,6 +139,24 @@ brew-check: ## Check whether Brewfile entries are installed
 
 macos: ## Apply interactive macOS defaults
 	@bash macos/defaults.sh
+	@bash scripts/touch-id-sudo.sh --apply
+
+macos-user: ## Apply only non-privileged per-user macOS defaults
+	@bash macos/defaults.sh --user-only
+
+macos-dry-run: ## Preview macOS defaults without changing the machine
+	@bash macos/defaults.sh --dry-run
+	@bash scripts/touch-id-sudo.sh --dry-run
+
+macos-check: ## Read back representative managed macOS defaults
+	@bash macos/defaults.sh --check
+	@bash scripts/touch-id-sudo.sh --check
+
+touch-id-sudo: ## Idempotently enable Touch ID authentication for sudo
+	@bash scripts/touch-id-sudo.sh --apply
+
+touch-id-sudo-check: ## Check whether Touch ID authentication for sudo is enabled
+	@bash scripts/touch-id-sudo.sh --check
 
 dock: ## Restore Dock layout from macos/dock-backup.plist
 	@bash macos/dock.sh
@@ -170,7 +209,10 @@ services: ## Install Automator Quick Actions into ~/Library/Services
 	echo "Automator services installed ($$count)."
 
 default-apps: ## Apply repo default-app policy from config/duti
-	@bash scripts/apply-duti.sh "$(DOTFILES)/config/duti"
+	@bash scripts/apply-duti.sh
+
+default-apps-check: ## Compare live default-app handlers with config/duti
+	@bash scripts/check-duti.sh
 
 capture-default-apps: ## Refresh config/duti from current handlers on this Mac
 	@bash scripts/capture-duti.sh
@@ -178,90 +220,43 @@ capture-default-apps: ## Refresh config/duti from current handlers on this Mac
 doctor: ## Run read-only bootstrap preflight checks
 	@bash scripts/doctor.sh
 
+verify-bootstrap: ## Fail unless the post-vault Mac bootstrap is complete
+	@$(MAKE) --no-print-directory rules-audit
+	@$(MAKE) --no-print-directory skills
+	@$(MAKE) --no-print-directory audit-apps
+	@bash scripts/link.sh --check
+	@bash scripts/doctor.sh --strict
+
 docs-audit: ## Check docs/scripts for typos when typos is installed
 	@if command -v typos >/dev/null 2>&1; then \
-		typos README.md AGENTS.md Makefile install.sh scripts macos zsh config hammerspoon bin; \
+		typos README.md AGENTS.md Makefile install.sh scripts macos zsh config hammerspoon bin git starship; \
 	else \
 		echo "  - typos not installed; run 'make brew' first"; \
 	fi
 
-
 audit-apps: ## Scan app preference snapshots for secrets/local paths
 	@bash scripts/audit-app-prefs.sh
 
-apps-drift: ## Check captured app preferences against current system state
+apps-drift: ## Check app preference snapshots against current system state
 	@bash scripts/audit-apps-drift.sh
 
-backup: ## Refresh repo-tracked app prefs, Dock, services, and Brewfile
-	@echo "Backing up app configs..."
-	@# Bulk `defaults`-managed apps — driven by apps.tsv. Container-copy apps
-	@# (Dato, Sublime, VS Code) stay as explicit lines below.
-	@captured=0; skipped=0; \
-	while IFS=$$'\t' read -r domain label plist app_name; do \
-		case "$$domain" in ''|\#*) continue ;; esac; \
-		if defaults export "$$domain" "$$plist" 2>/dev/null; then \
-			echo "  ✓ $$label"; captured=$$((captured + 1)); \
-		else \
-			echo "  ⚠ $$label not captured (app/domain unavailable)"; skipped=$$((skipped + 1)); \
-		fi; \
-	done < apps.tsv; \
-	echo "  defaults snapshots: $$captured captured, $$skipped skipped"
-	@cp ~/Library/Group\ Containers/group.com.sindresorhus.Dato/Library/Preferences/group.com.sindresorhus.Dato.plist apps/dato/dato.plist 2>/dev/null && echo "  ✓ Dato" || echo "  ⚠ Dato not captured"
-	@bash scripts/sync-sublime-settings.sh capture
-	@cp ~/Library/Application\ Support/Code/User/settings.json apps/vscode/settings.json 2>/dev/null && echo "  ✓ VS Code" || echo "  ⚠ VS Code settings not captured"
-	@defaults export com.apple.dock macos/dock-backup.plist 2>/dev/null && echo "  ✓ Dock layout" || { echo "  ✗ Dock layout export failed" >&2; exit 1; }
-	@defaults export com.apple.Terminal apps/terminal/terminal.plist 2>/dev/null && echo "  ✓ Terminal.app profiles" || echo "  ⚠ Terminal.app profiles not captured"
-	@# Shottr + Monokai Pro license settings are NOT kept in the repo — vault only
-	@# (~/.secrets/apps/…). Monokai is stripped above; copy license file to vault
-	@# after purchase/renewal, then make secrets-backup.
-	@set -e; \
-	restore_backup() { \
-		rc=$$?; \
-		trap - EXIT HUP INT TERM; \
-		if [ ! -e "$$dest" ] && [ -e "$$old" ]; then \
-			mv "$$old" "$$dest" || true; \
-		fi; \
-		rm -rf "$$tmp"; \
-		exit "$$rc"; \
-	}; \
-	for workflow in services/*.workflow; do \
-		[ -e "$$workflow" ] || continue; \
-		name=$$(basename "$$workflow"); \
-		source="$$HOME/Library/Services/$$name"; \
-		[ -d "$$source" ] || continue; \
-		dest="services/$$name"; \
-		tmp="services/.$$name.dotfiles-backup-tmp"; \
-		old="services/.$$name.dotfiles-backup-old"; \
-		rm -rf "$$tmp"; \
-		if [ ! -e "$$dest" ] && [ -e "$$old" ]; then mv "$$old" "$$dest"; fi; \
-		rm -rf "$$old"; \
-		trap restore_backup EXIT HUP INT TERM; \
-		cp -R "$$source" "$$tmp"; \
-		if [ -e "$$dest" ]; then mv "$$dest" "$$old"; fi; \
-		mv "$$tmp" "$$dest"; \
-		rm -rf "$$old"; \
-		trap - EXIT HUP INT TERM; \
-		echo "  ✓ Automator workflow $$name"; \
-	done
-	@bash scripts/sanitize-app-prefs.sh && echo "  ✓ Sanitized portable app prefs"
-	@DOTFILES="$(CURDIR)" bash scripts/brewfile.sh dump Brewfile && echo "  ✓ Brewfile"
-	@echo ""
-	@echo "Done. Manual exports still needed (sensitive — into the secret"
-	@echo "store, NOT the repo; ~/.secrets is vault-backed via 'make secrets-backup'):"
-	@echo "  - Canary Mail: make backup-canary"
-	@echo "  - Shottr: make backup-shottr"
-	@echo "  - Transmit: Servers > Export → ~/.secrets/apps/transmit/"
-	@echo "  - Raycast: Settings > Advanced > Export → ~/.secrets/apps/raycast/"
-	@echo ""
-	@bash scripts/audit-app-prefs.sh
-	@echo ""
-	@echo "Now commit: git add -A && git commit -m 'chore: backup configs'"
+backup: ## Transactionally refresh repo-tracked prefs, services, and Brewfile
+	@bash scripts/backup-apps.sh
 
 secrets-backup: ## Snapshot ~/.secrets into the encrypted sparseimage vault
 	@bash scripts/secrets-backup.sh
 
 secrets-mount: ## Mount the encrypted secrets sparseimage
 	@bash scripts/secrets-mount.sh
+
+secrets-health: ## Validate mounted vault snapshot freshness (day-2 check)
+	@bash scripts/secrets-health.sh
+
+secrets-restore: ## Read-only validation of the newest mounted vault snapshot
+	@bash scripts/secrets-restore.sh --check
+
+secrets-restore-apply: ## Restore ~/.secrets from the newest validated snapshot
+	@bash scripts/secrets-restore.sh --apply
 
 secrets-pass: ## Copy the local vault password from Keychain
 	@bash scripts/secrets-pass.sh

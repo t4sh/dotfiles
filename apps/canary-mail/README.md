@@ -24,8 +24,8 @@ make secrets-backup   # encrypt ~/.secrets/ into the sparseimage vault
 ## Restore (new Mac or wipe)
 
 1. Install Canary (`make brew` or MAS).
-2. Restore `~/.secrets/` from the vault (`rsync` from mounted snapshot).
-3. `make restore-canary` — before quitting Canary, requires both the preference plist and realms directory and validates the basename-only managed inventory. It then publishes transactionally (including removal of managed live realms absent from that complete snapshot) and reopens Canary.
+2. Mount the vault, then run `make secrets-restore` and `make secrets-restore-apply`.
+3. Run `make secrets-pass-import`, then `make post-vault`; it restores Canary automatically when the complete payload is present.
 4. Re-authenticate any account that prompts.
 
 Alternative: [Canary Cross-Device Sync](https://canarymail.io/help/how-to-use-cross-device-sync-macos) (QR) — vendor cloud, not dotfiles.

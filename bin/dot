@@ -57,14 +57,15 @@ EOF
     done
     cat <<EOF
 Also available via Make (repo root):
-  make help | link | unlink | brew | brew-base | node | brew-npm | brew-mas | brew-check | shims
-  make macos | dock | terminal | services | hooks
-  make default-apps | capture-default-apps | doctor | docs-audit | apps-drift
-  make rules-audit | brewfile-audit | skills-audit
+  make help | link | unlink | brew | brew-without-mas | brew-core | brew-apps | brew-base | node | brew-npm | brew-mas
+  make brew-check | shims | macos | macos-user | macos-dry-run | macos-check | touch-id-sudo
+  make dock | terminal | services | hooks
+  make default-apps | default-apps-check | capture-default-apps | doctor | verify-bootstrap | docs-audit
+  make rules-audit | brewfile-audit | skills-audit | audit-apps | apps-drift
   make restore-apps | restore-shottr | restore-canary | ssh-setup | post-vault
   make backup | backup-shottr | backup-canary
-  make secrets-backup | secrets-mount | secrets-manifest | secrets-pass | secrets-pass-import
-  make skills | all
+  make secrets-backup | secrets-mount | secrets-health | secrets-restore | secrets-restore-apply
+  make secrets-pass | secrets-pass-import | skills | skills-update | all
 EOF
 }
 

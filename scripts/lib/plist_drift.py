@@ -21,6 +21,7 @@ here is treated as a real setting and reported.
 
 from __future__ import annotations
 
+import json
 import plistlib
 import re
 import sys
@@ -51,6 +52,12 @@ VOLATILE_KEY_PATTERNS = (
     r"^last-analytics-stamp$",
     r"^trash-full$",
     r"^persistedWindowOrder$",
+    # Thaw discovers menu-bar instances dynamically. Identifiers, section
+    # ordering, per-display appearance caches, and display IDs are runtime
+    # inventory rather than portable preference policy.
+    r"^MenuBarItemManager\.",
+    r"^MenuBarAppearanceConfigurationV2$",
+    r"^KnownDisplays$",
     # Sindresorhus app bookkeeping (review prompt cadence, last launched build).
     r"^SS(App)?_(requestReview|previousLaunchedVersion|firstLaunchDate)",
     # Hardware-derived identity and live display state (BetterDisplay). These are
@@ -59,7 +66,7 @@ VOLATILE_KEY_PATTERNS = (
     r"^(displayConfigurationId|storedIdentifiers|resolutionFavorites|settingsPaneId)",
     r"^value@.*(brightness|contrast|volume)",
     # macOS input-source runtime state.
-    r"^Apple(SavedCurrentInputSource|InputSourceUpdateTime)$",
+    r"^Apple(InputSourceHistory|SelectedInputSources|SavedCurrentInputSource|InputSourceUpdateTime)$",
 )
 
 VOLATILE_KEY_RE = re.compile("|".join(VOLATILE_KEY_PATTERNS), re.IGNORECASE)
@@ -75,6 +82,14 @@ def strip_volatile(value):
         }
     if isinstance(value, list):
         return [strip_volatile(item) for item in value]
+    if isinstance(value, bytes):
+        try:
+            decoded = json.loads(value.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            return value
+        # Several Swift apps store Codable settings as plist Data. Compare
+        # their JSON meaning, not serialization key order.
+        return strip_volatile(decoded)
     return value
 
 

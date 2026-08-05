@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
-DOTFILES="${DOTFILES:-$(cd -- "$SCRIPT_DIR" && pwd -P)}"
+DOTFILES="$HOME/.dotfiles"
 
 echo "╔══════════════════════════════════════╗"
 echo "║      Mac Bootstrap — dotfiles        ║"
@@ -44,11 +43,18 @@ echo ""
 echo "→ Creating symlinks..."
 bash "$DOTFILES/scripts/link.sh"
 
-# 4. Brew bundle base (npm waits for pinned Node; App Store waits for sign-in)
+# 4. Brew core first; optional GUI/editor inventory is a resumable phase.
 echo ""
-echo "→ Installing Brewfile base packages (excluding npm and App Store apps)..."
-echo "  (This will take a while — formulae, casks, fonts, VS Code extensions)"
-make -C "$DOTFILES" brew-base
+echo "→ Installing bootstrap formulae..."
+make -C "$DOTFILES" brew-core
+
+BREW_APPS_FAILED=0
+echo "→ Installing GUI apps, fonts, and editor extensions..."
+if ! make -C "$DOTFILES" brew-apps; then
+    BREW_APPS_FAILED=1
+    echo "  ⚠ optional app phase incomplete; bootstrap will continue"
+    echo "    retry later with: make brew-apps"
+fi
 
 # 5. Default shell
 if [ "$SHELL" != "/bin/zsh" ]; then
@@ -101,7 +107,7 @@ echo ""
 read -p "→ Run macOS system preferences setup? (y/n) " -n 1 -r
 echo ""
 if [[ $REPLY =~ ^[Yy]$ ]]; then
-    bash "$DOTFILES/macos/defaults.sh"
+    make -C "$DOTFILES" macos
 fi
 
 echo ""
@@ -110,26 +116,15 @@ echo "║          Bootstrap Complete          ║"
 echo "╚══════════════════════════════════════╝"
 echo ""
 echo "Manual steps remaining:"
-echo "  1. Sign into the App Store, then install App Store apps:"
-echo "     → cd ~/.dotfiles && make brew-mas"
-echo "  2. Sign into iCloud and restore ~/.secrets from your DotfilesSecrets.sparseimage"
-echo "     → fetch the sparseimage from your backup destination"
-echo "     → retrieve the passphrase from your independently synchronized password manager"
-echo "     → double-click the image, paste the passphrase, and tick Remember"
-echo "     → sudo rsync -aL /Volumes/DotfilesSecrets/<latest-stamp>/ /"
+echo "  1. Sign into the App Store → make brew-mas"
+echo "  2. Restore ~/.secrets from DotfilesSecrets.sparseimage"
+echo "     → passphrase from independent password manager; double-click image; Remember"
+echo "     → make secrets-restore       # read-only validation"
+echo "     → make secrets-restore-apply # explicit transactional ~/.secrets restore"
 echo "     → make secrets-pass-import"
-echo "     → echo \"<destination>\" > ~/.dotfiles-local/backup.destination"
-echo "  3. Restore ownership and consumers:"
-echo "     → cd ~/.dotfiles && make post-vault"
-echo "  4. Launch Dato once (if used), then run make restore-apps again"
-echo "  5. Raycast: import config from ~/.secrets/apps/raycast/ (Settings → Advanced → Import)"
-echo "     then import extensions if needed; Transmit: import from ~/.secrets/apps/transmit/"
-echo "  6. Sign into apps: VS Code sync, Figma, etc."
-echo "  7. Set default browser and run: make default-apps"
-echo "  8. Open Hammerspoon, enable Launch at Login, and allow Accessibility permissions"
-echo "  9. Run bootstrap preflight checks: cd ~/.dotfiles && make doctor"
-echo " 12. Install global agent skills: cd ~/.dotfiles && make skills"
-echo "     (needs vault restore + gh auth for skill sources that need GitHub auth)"
+echo "     → echo \"<destination>\" > ~/.dotfiles-local/backup.destination   # optional"
+echo "  3. make post-vault          # link, ssh-setup, Shottr/Canary if present, restore-apps"
+echo "  4. Finish the short GUI list printed by make post-vault"
 echo ""
 
 # Terminal.app profile import quits Terminal.app, so keep it after all bootstrap
@@ -144,4 +139,11 @@ if [ -f "$DOTFILES/apps/terminal/terminal.plist" ]; then
     else
         echo "  - skipped Terminal.app profiles; run 'make terminal' later from iTerm / Ghostty / VS Code"
     fi
+fi
+
+if (( BREW_APPS_FAILED )); then
+    echo ""
+    echo "Bootstrap completed with an incomplete optional app phase."
+    echo "Retry: make brew-apps"
+    exit 1
 fi

@@ -90,11 +90,12 @@
 #       Prune older manual duplicates that are not this host's key.
 #   [ ] `ls ~/.secrets/` is populated (vault restored from sparseimage)
 #   [ ] `gh auth status` reports logged in
-#   [ ] Touch ID for sudo works in a NEW terminal tab (/etc/pam.d/sudo_local)
+#   [ ] `make touch-id-sudo-check` passes. On Touch ID Macs, authentication works
+#       in a NEW terminal tab; without a sensor, the password-only policy is accepted.
 #   [ ] Dock shows the apps declared in macos/dock.sh in the right order
 #   [ ] Raycast config imported from ~/.secrets/apps/raycast/ + extensions if needed (manual)
 #   [ ] Default browser / mail client set (manual)
-#   [ ] SymbolicLinker installed (manual .dmg)
+#   [ ] SymbolicLinker service is installed by the Brewfile cask (`make brew-apps`)
 #
 # For agents doing this verification: report findings as a structured list
 # of (surface, status, evidence). Do NOT silently treat known-noise drift as
