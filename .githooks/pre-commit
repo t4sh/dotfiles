@@ -44,7 +44,7 @@ if command -v shellcheck >/dev/null 2>&1; then
         ;;
       *)
         # extensionless: sniff the shebang
-        if [ -f "$f" ] && head -n1 "$f" 2>/dev/null | grep -Eq '^#!.*(bash|sh)\b'; then
+        if [ -f "$f" ] && head -n1 "$f" 2>/dev/null | grep -Eq '^#![[:space:]]*((/usr/bin/env[[:space:]]+(-S[[:space:]]+)?(bash|sh))|(/(usr/)?bin/(bash|sh)))([[:space:]]|$)'; then
           staged_sh+=("$f")
         fi
         ;;

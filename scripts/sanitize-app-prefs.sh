@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Normalize portable app pref snapshots after `make backup` copies live files.
+# - Editors: standard Homebrew roots → __HOMEBREW_PREFIX__ restore token
 # - Sublime: /Users/<user>/.nvm/... → ~/.nvm/versions/node/<dotfiles-default>/bin
 # - VS Code: drop yaml.schemas entries with machine-specific file:// paths
 # - Binary plists: remove keys that store local home paths, file bookmarks, or
@@ -14,6 +15,7 @@ NODE_DEFAULT="$(tr -d '[:space:]' < "$DOTFILES/.node-version" 2>/dev/null || pri
 NVM_NODE_BIN="~/.nvm/versions/node/$NODE_DEFAULT/bin"
 PLISTBUDDY=/usr/libexec/PlistBuddy
 NODE_STABLE="$HOME/.local/bin/node-stable"
+HOMEBREW_TOKEN="__HOMEBREW_PREFIX__"
 
 plist_delete() {
   local plist="$1" key="$2"
@@ -35,6 +37,18 @@ for f in \
   perl -i -pe '
     s#/Users/[^/]+/\.nvm/versions/node/[^"/]+/bin#'"$NVM_NODE_BIN"'#g;
     s#~/\.nvm/versions/node/[^"/]+/bin#'"$NVM_NODE_BIN"'#g;
+  ' "$f"
+done
+
+for f in \
+  "$APPS/sublime-text/GutterColor.sublime-settings" \
+  "$APPS/sublime-text/Formatter.sublime-settings" \
+  "$APPS/sublime-text/SublimeLinter.sublime-settings" \
+  "$APPS/vscode/settings.json" \
+  "$APPS/cursor/settings.json"; do
+  [[ -f "$f" ]] || continue
+  HOMEBREW_TOKEN="$HOMEBREW_TOKEN" perl -i -pe '
+    s#/(?:opt/homebrew|usr/local)(?=/(?:bin|sbin)(?:/|"))#$ENV{HOMEBREW_TOKEN}#g;
   ' "$f"
 done
 
@@ -270,6 +284,10 @@ NODE
 
 sanitize_editor_settings "$APPS/vscode/settings.json"
 sanitize_editor_settings "$APPS/cursor/settings.json"
+
+# BetterZip records recent archive log names and absolute source paths. This is
+# runtime history, not portable preference policy, and must never enter backups.
+plist_delete "$APPS/betterzip/betterzip.plist" "MIBLogs"
 
 # Tower stores license state, repository-ID migration caches, and
 # home-directory quick-open exclusions. Repository UUIDs describe the current

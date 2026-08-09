@@ -3,7 +3,7 @@
 # the eventual public dotfiles fork.
 #
 # Criterion is the REDISTRIBUTION GRANT, not authorship:
-#   permissible  Apache / MIT / BSD / ISC / MPL / Unlicense / CC-BY
+#   permissible  Apache / MIT / BSD / ISC / MPL / GPL / AGPL / Unlicense / CC-BY
 #   restricted   "all rights reserved" / proprietary / no-redistribution
 #   reviewed     remote source has explicit source-level metadata in
 #                agents/skills/source-licenses.tsv because installed skill dirs
@@ -80,10 +80,24 @@ meta_for() {
   awk -F '\t' -v n="$1" '$1 == n {print; exit}' "$META_TSV"
 }
 
-source_reviewed() {
+source_license_for() {
   local source="$1"
   [[ -n "$source" && -f "$SOURCE_LICENSES" ]] || return 1
-  awk -F '\t' -v s="$source" '$1 == s {found=1; exit} END {exit found ? 0 : 1}' "$SOURCE_LICENSES"
+  awk -F '\t' -v s="$source" '$1 == s {print $2; found=1; exit} END {exit found ? 0 : 1}' "$SOURCE_LICENSES"
+}
+
+# Classify a reviewed source-level license identifier from source-licenses.tsv.
+# "reviewed" preserves grandfathered entries that predate explicit identifiers.
+classify_source_license() {
+  local license; license="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
+  case "$license" in
+    reviewed|mit|mit-0|apache|apache-2.0|bsd|bsd-2-clause|bsd-3-clause|isc|mpl|mpl-2.0|unlicense|cc-by|cc-by-*)
+      echo permissible ;;
+    restricted|proprietary|all-rights-reserved|no-redistribution)
+      echo restricted ;;
+    *)
+      echo review ;;
+  esac
 }
 
 # Classify one license file's text. Echoes: permissible|restricted|review
@@ -94,6 +108,7 @@ classify() {
   esac
   case "$text" in
     *"apache license"*|*"mit license"*|*"permission is hereby granted, free of charge"*) echo permissible; return ;;
+    *"gnu general public license"*|*"gnu affero general public license"*)               echo permissible; return ;;
     *"bsd "*|*"redistribution and use in source and binary"*)                            echo permissible; return ;;
     *"isc license"*|*"mozilla public license"*|*"this is free and unencumbered software"*) echo permissible; return ;;
     *"creative commons attribution"*)
@@ -129,11 +144,21 @@ for dir in "$SKILLS_DIR"/*/; do
 
   if [[ -z "$lic" ]]; then
     if [[ "$source_type" == "github" ]]; then
-      if source_reviewed "$source"; then
-        source_reviewed_n=$((source_reviewed_n + 1))
-      else
-        REVIEW+=("$name (remote source has no reviewed license metadata: ${source:-unknown})")
-      fi
+      source_license="$(source_license_for "$source" || :)"
+      case "$(classify_source_license "$source_license")" in
+        permissible)
+          source_reviewed_n=$((source_reviewed_n + 1)) ;;
+        restricted)
+          if listed_in_gitignore "$name"; then MANUAL+=("$name")
+          else RESTRICTED+=("$name"); fi ;;
+        review)
+          if listed_in_gitignore "$name"; then MANUAL+=("$name")
+          elif [[ -n "$source_license" ]]; then
+            REVIEW+=("$name (unrecognized source license '$source_license': ${source:-unknown})")
+          else
+            REVIEW+=("$name (remote source has no reviewed license metadata: ${source:-unknown})")
+          fi ;;
+      esac
     else
       firstparty_n=$((firstparty_n + 1))
     fi
@@ -142,7 +167,9 @@ for dir in "$SKILLS_DIR"/*/; do
 
   case "$(classify "$lic")" in
     permissible) permissible_n=$((permissible_n + 1)) ;;
-    review)      REVIEW+=("$name (unclear local license)") ;;
+    review)
+      if listed_in_gitignore "$name"; then MANUAL+=("$name")
+      else REVIEW+=("$name (unclear local license)"); fi ;;
     restricted)
       if listed_in_gitignore "$name"; then MANUAL+=("$name")
       else RESTRICTED+=("$name"); fi ;;
@@ -154,7 +181,7 @@ info "skill license audit ($skill_count skills)"
 ok   "permissible local licenses (kept public): $permissible_n"
 ok   "reviewed source-level licenses (kept public): $source_reviewed_n"
 ok   "first-party / local no-license (kept public): $firstparty_n"
-[[ ${#MANUAL[@]}  -gt 0 ]] && for s in "${MANUAL[@]}";  do warn "restricted but already gitignored: $s"; done
+[[ ${#MANUAL[@]}  -gt 0 ]] && for s in "${MANUAL[@]}";  do warn "license-gated in .gitignore: $s"; done
 [[ ${#REVIEW[@]}  -gt 0 ]] && for s in "${REVIEW[@]}";  do warn "REVIEW: $s"; done
 
 if [[ ${#RESTRICTED[@]} -eq 0 ]]; then

@@ -1,0 +1,30 @@
+name: macOS verification
+
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: macOS static and fixture gates
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # actions/checkout@v5
+      - name: Check shell syntax
+        shell: bash
+        run: |
+          bash -n install.sh scripts/*.sh macos/*.sh
+      - name: Verify rule and skill inventories
+        run: make rules-audit skills
+      - name: Run executable fixtures
+        shell: bash
+        run: |
+          if [[ -f tests/test_audit_remediations.py ]]; then python3 tests/test_audit_remediations.py; fi
+          if [[ -f tests/test_public_projection.py ]]; then python3 tests/test_public_projection.py; fi
+          node --test agents/skills/impeccable/tests/*.test.mjs

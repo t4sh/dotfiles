@@ -88,26 +88,20 @@ fi
 
 if have brew; then
   ok "Homebrew installed"
-  echo "  … checking installed Brewfile entries"
-  if run_with_timeout "$AUDIT_TIMEOUT" env DOTFILES="$DOTFILES" bash "$DOTFILES/scripts/brewfile.sh" check >/dev/null 2>&1; then
-    ok "Brewfile entries installed"
-  else
-    status=$?
-    if (( status == 124 )); then
-      warn "Brewfile install check timed out after ${AUDIT_TIMEOUT}s"
-    else
-      warn "Brewfile has missing installs; run: make brew"
-    fi
-  fi
-  echo "  … comparing Brewfile declarations with system state"
+  # audit-brewfile performs one Homebrew inventory dump and compares both
+  # directions: declared-but-missing and installed-but-undeclared. Running a
+  # separate `brew bundle check` first doubled Doctor's slowest scan without
+  # adding a distinct completion signal; `make brew-check` remains available
+  # for an explicit installed-only diagnosis.
+  echo "  … comparing installed and declared Brewfile state"
   if run_with_timeout "$AUDIT_TIMEOUT" bash "$DOTFILES/scripts/audit-brewfile.sh" --check >/dev/null 2>&1; then
-    ok "Brewfile declarations match system state"
+    ok "Brewfile installed and declared state match"
   else
     status=$?
     if (( status == 124 )); then
-      warn "Brewfile declaration audit timed out after ${AUDIT_TIMEOUT}s"
+      warn "Brewfile state audit timed out after ${AUDIT_TIMEOUT}s"
     else
-      warn "Brewfile drift detected; run: make brewfile-audit"
+      warn "Brewfile install/declaration drift detected; run: make brewfile-audit"
     fi
   fi
 else
@@ -117,12 +111,13 @@ fi
 check_command duti "duti"
 if have duti && [ -f "$DOTFILES/config/duti" ]; then
   expected_duti_digest="$(shasum -a 256 "$DOTFILES/config/duti" | awk '{print $1}')"
+  expected_duti_receipt="v2:$expected_duti_digest"
   duti_receipt="$HOME/.dotfiles-local/default-apps.sha256"
-  if [ -f "$duti_receipt" ] && [ "$(tr -d '[:space:]' < "$duti_receipt")" = "$expected_duti_digest" ]; then
-    ok "default-app policy applied (receipt matches config/duti)"
+  if [ -f "$duti_receipt" ] && [ "$(tr -d '[:space:]' < "$duti_receipt")" = "$expected_duti_receipt" ]; then
+    ok "complete default-app policy applied (receipt matches config/duti)"
     note "live handler drift check: make default-apps-check"
   else
-    warn "default-app policy not applied for this config; run: make default-apps"
+    warn "complete default-app policy not applied for this config; run: make default-apps"
   fi
 fi
 check_command gitleaks "gitleaks"
@@ -246,6 +241,12 @@ else
   warn "$HOME/.secrets missing; restore vault before secret-backed symlinks work"
 fi
 
+post_vault_pending="$HOME/.dotfiles-local/post-vault.pending"
+if [ -s "$post_vault_pending" ]; then
+  pending_labels="$(awk 'BEGIN { sep = "" } { printf "%s%s", sep, $0; sep = ", " } END { print "" }' "$post_vault_pending" 2>/dev/null || true)"
+  warn "post-vault restores still pending (${pending_labels:-unknown}); run: make post-vault"
+fi
+
 if [ -d "${DOTFILES_RESTORE_SOURCE:-/Volumes/DotfilesSecrets}" ]; then
   if bash "$DOTFILES/scripts/secrets-health.sh" >/dev/null 2>&1; then
     ok "mounted vault snapshot is valid and fresh"
@@ -268,7 +269,7 @@ elif [ ! -f "$DOTFILES/scripts/lib/plist_drift.py" ]; then
   warn "app preference snapshot audit unavailable (scripts/lib/plist_drift.py missing)"
 elif [ ! -f "$DOTFILES/apps.tsv" ]; then
   warn "app preference snapshot audit unavailable (apps.tsv missing)"
-elif run_with_timeout "$AUDIT_TIMEOUT" bash "$DOTFILES/scripts/audit-apps-drift.sh" --check >/dev/null 2>&1; then
+elif run_with_timeout "$AUDIT_TIMEOUT" bash "$DOTFILES/scripts/audit-apps-drift.sh" --check --strict >/dev/null 2>&1; then
   ok "app preference snapshots match system state"
 else
   status=$?

@@ -14,6 +14,8 @@ brew "bun"
 brew "caddy"
 # Object-file caching compiler wrapper
 brew "ccache"
+# Cross-platform make
+brew "cmake"
 # Container runtimes on MacOS (and Linux) with minimal setup
 brew "colima"
 # GNU File, Shell, and Text utilities
@@ -234,6 +236,8 @@ cask "kaleidoscope"
 cask "keycastr"
 # Utility that shows the latest app updates
 cask "latest"
+# Free cross-platform office suite, fresh version
+cask "libreoffice"
 # App to manage software development and track bugs
 cask "linear"
 # AI chat framework

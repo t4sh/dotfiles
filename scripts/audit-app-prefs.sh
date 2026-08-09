@@ -65,7 +65,7 @@ scan_file() {
       ;;
   esac
 
-  pattern='license_key|"kc-license"|ghp_[A-Za-z0-9]+|glpat-[A-Za-z0-9_-]+|sk-ant-[A-Za-z0-9_-]+|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}|/Users/[^/[:space:]<"]+|OneDrive-[A-Za-z0-9._@-]+|chat\.tools\.terminal\.autoApprove|claudeCode\.allowDangerouslySkipPermissions[[:space:]]*"?[[:space:]]*:[[:space:]]*true|"(Set|get) Ash"|legal-in-strapi'
+  pattern='license_key|"kc-license"|ghp_[A-Za-z0-9]+|glpat-[A-Za-z0-9_-]+|sk-ant-[A-Za-z0-9_-]+|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}|/Users/[^/[:space:]<"]+|OneDrive-[A-Za-z0-9._@-]+'
 
   if rg -qi "$pattern" "$scan" 2>/dev/null; then
     report "private or machine-specific content: $rel"

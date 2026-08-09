@@ -9,6 +9,8 @@
 # rejected; missing absolute paths are warned/skipped.
 #
 # Recommended (single canonical tree — see README § Secrets layout):
+# This row publishes as <snapshot>/payload/secrets/ so a replacement Mac may
+# use a different short username without changing the restore command.
 #
 ~/.secrets
 #

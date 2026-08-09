@@ -1,14 +1,14 @@
 {
   "version": 4,
   "skills": {
-    "accessibility-review": {
-      "source": "anthropics/knowledge-work-plugins",
+    "Skill Development": {
+      "source": "anthropics/claude-code",
       "sourceType": "github",
-      "sourceUrl": "https://github.com/anthropics/knowledge-work-plugins.git",
-      "skillPath": "design/skills/accessibility-review/SKILL.md",
-      "skillFolderHash": "f85ccda1cc84ca38ffb477d442d57b96c6447869",
-      "installedAt": "2026-04-13T02:34:09.038Z",
-      "updatedAt": "2026-04-13T03:19:34.996Z"
+      "sourceUrl": "https://github.com/anthropics/claude-code.git",
+      "skillPath": "plugins/plugin-dev/skills/skill-development/SKILL.md",
+      "skillFolderHash": "3dd57083301fd1ba1a4e04967c6fc055c6d740eb",
+      "installedAt": "2026-04-13T02:34:04.636Z",
+      "updatedAt": "2026-04-13T03:19:30.762Z"
     },
     "architecture": {
       "source": "anthropics/knowledge-work-plugins",
@@ -24,9 +24,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/mattpocock/skills.git",
       "skillPath": "skills/engineering/code-review/SKILL.md",
-      "skillFolderHash": "474a27d46efb1eff9724a29ae1edc9cd8a75d911",
+      "skillFolderHash": "7a2057dcc514dc024d4e6bf8ad78021b97f229ae",
       "installedAt": "2026-04-13T02:34:18.080Z",
-      "updatedAt": "2026-07-14T05:35:19.378Z"
+      "updatedAt": "2026-08-06T15:05:26.633Z"
     },
     "debug": {
       "source": "anthropics/knowledge-work-plugins",
@@ -46,14 +46,13 @@
       "installedAt": "2026-04-13T02:34:35.256Z",
       "updatedAt": "2026-04-13T03:19:51.459Z"
     },
-    "design-critique": {
-      "source": "anthropics/knowledge-work-plugins",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/anthropics/knowledge-work-plugins.git",
-      "skillPath": "design/skills/design-critique/SKILL.md",
-      "skillFolderHash": "7c246346e4e343637cc9a805df5ed87d34f74913",
-      "installedAt": "2026-04-13T02:34:39.540Z",
-      "updatedAt": "2026-04-13T03:19:56.854Z"
+    "design-book": {
+      "source": "npm:design-book",
+      "sourceType": "local",
+      "skillPath": "design-book/SKILL.md",
+      "sourceVersion": "0.5.0",
+      "installedAt": "2026-07-31T12:58:01.000Z",
+      "updatedAt": "2026-07-31T12:58:01.000Z"
     },
     "design-handoff": {
       "source": "anthropics/knowledge-work-plugins",
@@ -118,15 +117,6 @@
       "installedAt": "2026-04-13T02:35:12.002Z",
       "updatedAt": "2026-04-13T03:20:26.880Z"
     },
-    "ux-copy": {
-      "source": "anthropics/knowledge-work-plugins",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/anthropics/knowledge-work-plugins.git",
-      "skillPath": "design/skills/ux-copy/SKILL.md",
-      "skillFolderHash": "667711b17d9021f4a45d4cad7d23b7f2c4969680",
-      "installedAt": "2026-04-13T02:35:16.433Z",
-      "updatedAt": "2026-04-13T03:20:31.886Z"
-    },
     "canvas-design": {
       "source": "anthropics/skills",
       "sourceType": "github",
@@ -190,15 +180,6 @@
       "installedAt": "2026-04-13T02:36:07.129Z",
       "updatedAt": "2026-04-13T03:21:19.509Z"
     },
-    "tailwindcss-advanced-design-systems": {
-      "source": "josiahsiegel/claude-plugin-marketplace",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/josiahsiegel/claude-plugin-marketplace.git",
-      "skillPath": "plugins/tailwindcss-master/skills/tailwindcss-advanced-design-systems/SKILL.md",
-      "skillFolderHash": "849e0dc2478c8434c022effa71f3cc31b400d45d",
-      "installedAt": "2026-04-13T02:36:12.428Z",
-      "updatedAt": "2026-05-21T02:21:14.198Z"
-    },
     "design-taste-frontend": {
       "source": "Leonxlnx/taste-skill",
       "sourceType": "github",
@@ -216,15 +197,6 @@
       "skillFolderHash": "3dd6ad49b667d15182acddc9d3e4f7763ae33c9c",
       "installedAt": "2026-04-13T02:36:19.135Z",
       "updatedAt": "2026-04-13T03:21:51.676Z"
-    },
-    "high-end-visual-design": {
-      "source": "Leonxlnx/taste-skill",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/Leonxlnx/taste-skill.git",
-      "skillPath": "skills/soft-skill/SKILL.md",
-      "skillFolderHash": "1b5943432ddd1b980206968c529a323cc992dbec",
-      "installedAt": "2026-04-13T02:36:22.161Z",
-      "updatedAt": "2026-06-06T02:59:05.845Z"
     },
     "industrial-brutalist-ui": {
       "source": "Leonxlnx/taste-skill",
@@ -276,72 +248,45 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill.git",
       "skillPath": ".claude/skills/ui-ux-pro-max/SKILL.md",
-      "skillFolderHash": "e36b015761c3bd5e2b6977323db9b105b4cd8d5f",
+      "skillFolderHash": "3d66a0486c1000e6da51da67b0cb917be22ea8dd",
       "installedAt": "2026-04-13T02:36:50.857Z",
-      "updatedAt": "2026-07-14T20:29:37.779Z"
-    },
-    "feature-dev": {
-      "source": "notedit/happy-skills",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/notedit/happy-skills.git",
-      "skillPath": "skills/dev/feature-dev/SKILL.md",
-      "skillFolderHash": "c76d6445f932cf75005871da7c2d2e537ec9e3dd",
-      "installedAt": "2026-04-13T02:36:54.310Z",
-      "updatedAt": "2026-04-13T03:22:09.133Z"
-    },
-    "brainstorming": {
-      "source": "obra/superpowers",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/obra/superpowers.git",
-      "skillPath": "skills/brainstorming/SKILL.md",
-      "skillFolderHash": "b14f49a55a8387cfa12ac89794ab79698d7fddbb",
-      "installedAt": "2026-04-13T02:36:58.165Z",
-      "updatedAt": "2026-07-01T07:24:28.812Z"
-    },
-    "using-git-worktrees": {
-      "source": "obra/superpowers",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/obra/superpowers.git",
-      "skillPath": "skills/using-git-worktrees/SKILL.md",
-      "skillFolderHash": "069a24665c6ce34ca78da57727c84e3c05e65c76",
-      "installedAt": "2026-04-13T02:37:01.266Z",
-      "updatedAt": "2026-06-16T19:00:09.604Z"
+      "updatedAt": "2026-07-31T11:19:08.231Z"
     },
     "agent-memory": {
       "source": "t4sh/skills4sh",
       "sourceType": "github",
       "sourceUrl": "https://github.com/t4sh/skills4sh.git",
       "skillPath": "skills/agent-memory/SKILL.md",
-      "skillFolderHash": "680a2142a7835ea292ac30e42b190b01a1b298a9",
+      "skillFolderHash": "09c8f7642e25491d79228556651c6461a3be77e7",
       "installedAt": "2026-04-13T02:37:25.957Z",
-      "updatedAt": "2026-07-10T05:32:43.636Z"
+      "updatedAt": "2026-08-07T05:46:26.237Z"
     },
     "discord-harvest": {
       "source": "t4sh/skills4sh",
       "sourceType": "github",
       "sourceUrl": "https://github.com/t4sh/skills4sh.git",
       "skillPath": "skills/discord-harvest/SKILL.md",
-      "skillFolderHash": "10eb57f818057817b52c5cc3d49aaf87d5682f41",
+      "skillFolderHash": "87f0a1905d9cee4ce663fec6cf5af7de5474605e",
       "installedAt": "2026-04-13T02:37:26.389Z",
-      "updatedAt": "2026-07-10T05:32:43.645Z"
+      "updatedAt": "2026-08-07T05:46:26.244Z"
     },
     "localhost-screenshots": {
       "source": "t4sh/skills4sh",
       "sourceType": "github",
       "sourceUrl": "https://github.com/t4sh/skills4sh.git",
       "skillPath": "skills/localhost-screenshots/SKILL.md",
-      "skillFolderHash": "e1689ec30478956aacf22b36e6fd119b8c55aa32",
+      "skillFolderHash": "e558219f33c110da7822646f44a67b8426e31a12",
       "installedAt": "2026-04-13T02:37:26.860Z",
-      "updatedAt": "2026-07-10T05:32:43.653Z"
+      "updatedAt": "2026-08-07T05:46:26.250Z"
     },
     "agent-browser": {
       "source": "vercel-labs/agent-browser",
       "sourceType": "github",
       "sourceUrl": "https://github.com/vercel-labs/agent-browser.git",
       "skillPath": "skills/agent-browser/SKILL.md",
-      "skillFolderHash": "9b31e495b887e4ca123960415eca69fc7e1bba28",
+      "skillFolderHash": "037e8078db4b20b4aa25c04f21c6de7d335ec449",
       "installedAt": "2026-04-13T02:37:29.244Z",
-      "updatedAt": "2026-06-25T10:10:33.729Z"
+      "updatedAt": "2026-07-19T23:22:21.093Z"
     },
     "web-design-guidelines": {
       "source": "vercel-labs/agent-skills",
@@ -351,15 +296,6 @@
       "skillFolderHash": "3116f3e62dbd02b44a598b1aa690d2a8938e8f89",
       "installedAt": "2026-04-13T02:37:33.573Z",
       "updatedAt": "2026-04-13T03:22:48.725Z"
-    },
-    "refactoring-ui": {
-      "source": "wondelai/skills",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/wondelai/skills.git",
-      "skillPath": "refactoring-ui/SKILL.md",
-      "skillFolderHash": "66956f55738f0d82f57425484ee6a25b9aec38b6",
-      "installedAt": "2026-04-13T02:37:45.550Z",
-      "updatedAt": "2026-07-01T07:24:37.190Z"
     },
     "top-design": {
       "source": "wondelai/skills",
@@ -400,9 +336,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/t4sh/skills4sh.git",
       "skillPath": "skills/figma-to-code/SKILL.md",
-      "skillFolderHash": "6ff02f5dc59abf57ce7c2bd06adad6ffef28e853",
+      "skillFolderHash": "b6c19b2be124ff5a096ed2a9a62b49fbfce4d155",
       "installedAt": "2026-04-13T03:15:00.000Z",
-      "updatedAt": "2026-07-10T05:32:43.651Z"
+      "updatedAt": "2026-08-07T05:46:26.248Z"
     },
     "init-rulebook": {
       "source": "local",
@@ -416,63 +352,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/owl-listener/designer-skills.git",
       "skillPath": "designer-toolkit/skills/design-token-audit/SKILL.md",
-      "skillFolderHash": "7f64eb88408a4560a2c70ecc912a57376d708c68",
+      "skillFolderHash": "2d868c38e7b7f86bf8684dbf6d4d5ebb257bfff9",
       "installedAt": "2026-04-13T03:24:08.928Z",
-      "updatedAt": "2026-04-13T03:24:08.928Z"
-    },
-    "design-system-alignment": {
-      "source": "owl-listener/designpowers",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/owl-listener/designpowers.git",
-      "skillPath": "skills/design-system-alignment/SKILL.md",
-      "skillFolderHash": "cde31fbcd9bc6366bfcb1f1ca484d0c6704a83aa",
-      "installedAt": "2026-04-13T03:24:12.472Z",
-      "updatedAt": "2026-04-13T03:24:12.472Z"
-    },
-    "executing-plans": {
-      "source": "obra/superpowers",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/obra/superpowers.git",
-      "skillPath": "skills/executing-plans/SKILL.md",
-      "skillFolderHash": "d10ac40a0b6c12e46fd642eb88a6f2bda6deb1e5",
-      "installedAt": "2026-04-13T03:56:19.708Z",
-      "updatedAt": "2026-07-01T07:24:31.468Z"
-    },
-    "finishing-a-development-branch": {
-      "source": "obra/superpowers",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/obra/superpowers.git",
-      "skillPath": "skills/finishing-a-development-branch/SKILL.md",
-      "skillFolderHash": "97f521c5001a8b979aa297a69c4257ce8b6a0939",
-      "installedAt": "2026-04-13T03:56:23.394Z",
-      "updatedAt": "2026-06-16T19:00:13.807Z"
-    },
-    "systematic-debugging": {
-      "source": "obra/superpowers",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/obra/superpowers.git",
-      "skillPath": "skills/systematic-debugging/SKILL.md",
-      "skillFolderHash": "5702624a1f0e5ad478234442ce5cde038a525465",
-      "installedAt": "2026-04-13T03:56:26.847Z",
-      "updatedAt": "2026-06-16T19:00:15.988Z"
-    },
-    "writing-plans": {
-      "source": "obra/superpowers",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/obra/superpowers.git",
-      "skillPath": "skills/writing-plans/SKILL.md",
-      "skillFolderHash": "ab2adb78b24572c2a80c18158ad699ab065c73df",
-      "installedAt": "2026-04-13T03:56:30.081Z",
-      "updatedAt": "2026-06-16T19:00:18.306Z"
-    },
-    "writing-skills": {
-      "source": "obra/superpowers",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/obra/superpowers.git",
-      "skillPath": "skills/writing-skills/SKILL.md",
-      "skillFolderHash": "69e051f84da949c75eaa1f94a1f5acc4c3e402b6",
-      "installedAt": "2026-04-13T03:56:33.164Z",
-      "updatedAt": "2026-07-01T07:24:34.307Z"
+      "updatedAt": "2026-08-08T20:29:37.738Z"
     },
     "monorepo-management": {
       "source": "wshobson/agents",
@@ -482,15 +364,6 @@
       "skillFolderHash": "479cb611c4ef614bbe83d11f30f81bb123f0ffd4",
       "installedAt": "2026-04-13T07:58:49.906Z",
       "updatedAt": "2026-05-22T13:08:29.363Z"
-    },
-    "refero-design": {
-      "source": "referodesign/refero_skill",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/referodesign/refero_skill.git",
-      "skillPath": "SKILL.md",
-      "skillFolderHash": "f78b4eccf112d7a179b92afeafdd7e8684560ac2",
-      "installedAt": "2026-04-20T12:29:08.832Z",
-      "updatedAt": "2026-06-11T07:04:09.147Z"
     },
     "agentation": {
       "source": "benjitaylor/agentation",
@@ -515,27 +388,27 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/emilkowalski/skills.git",
       "skillPath": "skills/emil-design-eng/SKILL.md",
-      "skillFolderHash": "0e6f8d7223a0abe73f81e890b3ec76257029a834",
+      "skillFolderHash": "175725745e70946d891b93a1694d7c9ebb71b69d",
       "installedAt": "2026-04-21T17:58:26.527Z",
-      "updatedAt": "2026-07-14T09:21:17.970Z"
+      "updatedAt": "2026-07-21T17:41:14.451Z"
     },
     "impeccable": {
       "source": "pbakaus/impeccable",
       "sourceType": "github",
       "sourceUrl": "https://github.com/pbakaus/impeccable.git",
       "skillPath": ".agents/skills/impeccable/SKILL.md",
-      "skillFolderHash": "6ea3e5f6614e1f9df9c5bde834170bf51f3c09d6",
+      "skillFolderHash": "1bc6cb2ddb5d8f6ab314946f413907fff4c63979",
       "installedAt": "2026-05-03T11:49:23.273Z",
-      "updatedAt": "2026-07-10T03:59:48.509Z"
+      "updatedAt": "2026-08-09T14:13:47.578Z"
     },
     "eleventy-nunjucks": {
       "source": "t4sh/skills4sh",
       "sourceType": "github",
       "sourceUrl": "https://github.com/t4sh/skills4sh.git",
       "skillPath": "skills/eleventy-nunjucks/SKILL.md",
-      "skillFolderHash": "9ba94fc5eda192b91e91316559cb3190b4ece8b6",
+      "skillFolderHash": "055d6f24a6f311f438623e22505fb101ccc0773f",
       "installedAt": "2026-05-11T10:22:19.683Z",
-      "updatedAt": "2026-07-10T05:32:43.648Z"
+      "updatedAt": "2026-08-07T05:46:26.247Z"
     },
     "skill-creator": {
       "source": "openai/skills",
@@ -578,18 +451,18 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/t4sh/skills4sh.git",
       "skillPath": "skills/code-to-figma/SKILL.md",
-      "skillFolderHash": "59a91dcd524381a9f99d4c1c31e2d442bf16a661",
+      "skillFolderHash": "554dc99f0679fcb2b199a0784b0d97dc1ba00c9d",
       "installedAt": "2026-05-21T10:20:08.065Z",
-      "updatedAt": "2026-07-10T05:32:43.641Z"
+      "updatedAt": "2026-08-07T05:46:26.242Z"
     },
     "transitions-dev": {
       "source": "Jakubantalik/transitions.dev",
       "sourceType": "github",
       "sourceUrl": "https://github.com/Jakubantalik/transitions.dev.git",
       "skillPath": "skills/transitions-dev/SKILL.md",
-      "skillFolderHash": "f4d63cde04dd70f34aa6c8921de712a660d70960",
+      "skillFolderHash": "b5843d085c881a788329d6fdf41da9fed68b8e5b",
       "installedAt": "2026-05-22T20:49:00.916Z",
-      "updatedAt": "2026-07-14T05:36:56.083Z"
+      "updatedAt": "2026-07-16T20:14:44.187Z"
     },
     "tauri-v2": {
       "source": "nodnarbnitram/claude-code-extensions",
@@ -605,9 +478,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/mblode/agent-skills.git",
       "skillPath": "skills/ui-animation/SKILL.md",
-      "skillFolderHash": "e630fd741fa79287bb51bd6a06d392827f6e855f",
+      "skillFolderHash": "6f1e61baeb6d5708ff06b81f7c1de22305f4d2b2",
       "installedAt": "2026-05-29T10:31:36.298Z",
-      "updatedAt": "2026-07-14T05:36:58.779Z"
+      "updatedAt": "2026-08-07T04:33:55.970Z"
     },
     "brandkit": {
       "source": "Leonxlnx/taste-skill",
@@ -659,72 +532,37 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/t4sh/skills4sh.git",
       "skillPath": "skills/skill-architect/SKILL.md",
-      "skillFolderHash": "f2f00a2f875b16666d82798e5cbcb51ddaddcccb",
+      "skillFolderHash": "f5ad0057bbc07cc5439129389230af4913c05167",
       "installedAt": "2026-06-15T20:39:22.428Z",
-      "updatedAt": "2026-07-10T14:48:18.379Z"
-    },
-    "design-an-interface": {
-      "source": "mattpocock/skills",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/mattpocock/skills.git",
-      "skillPath": "skills/deprecated/design-an-interface/SKILL.md",
-      "skillFolderHash": "080dd14b88424aea0c6aca72357c617d6ab42625",
-      "installedAt": "2026-06-28T11:15:39.765Z",
-      "updatedAt": "2026-07-14T05:35:21.492Z"
-    },
-    "qa": {
-      "source": "mattpocock/skills",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/mattpocock/skills.git",
-      "skillPath": "skills/deprecated/qa/SKILL.md",
-      "skillFolderHash": "f63fde811a0215ab15f5b83bcaae9627ecacbe8e",
-      "installedAt": "2026-06-28T11:15:39.777Z",
-      "updatedAt": "2026-07-14T05:35:23.895Z"
-    },
-    "request-refactor-plan": {
-      "source": "mattpocock/skills",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/mattpocock/skills.git",
-      "skillPath": "skills/deprecated/request-refactor-plan/SKILL.md",
-      "skillFolderHash": "603d197e4306ad8f1d8c4595d5aab4296b2d1f82",
-      "installedAt": "2026-06-28T11:15:39.786Z",
-      "updatedAt": "2026-07-14T05:35:26.251Z"
-    },
-    "ubiquitous-language": {
-      "source": "mattpocock/skills",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/mattpocock/skills.git",
-      "skillPath": "skills/deprecated/ubiquitous-language/SKILL.md",
-      "skillFolderHash": "8e138d6b06a52aeaf5f329be7a0c8298e06f62e5",
-      "installedAt": "2026-06-28T11:15:39.799Z",
-      "updatedAt": "2026-07-14T05:35:28.590Z"
+      "updatedAt": "2026-08-07T05:46:26.251Z"
     },
     "ask-matt": {
       "source": "mattpocock/skills",
       "sourceType": "github",
       "sourceUrl": "https://github.com/mattpocock/skills.git",
       "skillPath": "skills/engineering/ask-matt/SKILL.md",
-      "skillFolderHash": "c7d57789b230d6f88d26ca81ab9d03bad160171f",
+      "skillFolderHash": "c9c83b11b1a0c91c555ed6ade5ba67f6d6b103d4",
+      "pluginName": "mattpocock-skills",
       "installedAt": "2026-06-28T11:15:39.802Z",
-      "updatedAt": "2026-07-14T05:35:31.037Z"
+      "updatedAt": "2026-08-05T21:13:45.738Z"
     },
     "codebase-design": {
       "source": "mattpocock/skills",
       "sourceType": "github",
       "sourceUrl": "https://github.com/mattpocock/skills.git",
       "skillPath": "skills/engineering/codebase-design/SKILL.md",
-      "skillFolderHash": "7347168e8de2de105e2e55f07ecb33d25fd56f44",
+      "skillFolderHash": "20b7cd1dd1fe5b0bd37ba72649f3a29375574b5b",
       "installedAt": "2026-06-28T11:15:39.810Z",
-      "updatedAt": "2026-07-14T05:35:33.101Z"
+      "updatedAt": "2026-08-06T15:05:28.352Z"
     },
     "diagnosing-bugs": {
       "source": "mattpocock/skills",
       "sourceType": "github",
       "sourceUrl": "https://github.com/mattpocock/skills.git",
       "skillPath": "skills/engineering/diagnosing-bugs/SKILL.md",
-      "skillFolderHash": "27bf00e3ccc53491e938e8b5602be39238ce68f3",
+      "skillFolderHash": "463c81def888fefa77b894837d301d9ed70e0994",
       "installedAt": "2026-06-28T11:15:39.816Z",
-      "updatedAt": "2026-07-14T05:35:35.133Z"
+      "updatedAt": "2026-08-06T15:05:30.056Z"
     },
     "domain-modeling": {
       "source": "mattpocock/skills",
@@ -732,8 +570,9 @@
       "sourceUrl": "https://github.com/mattpocock/skills.git",
       "skillPath": "skills/engineering/domain-modeling/SKILL.md",
       "skillFolderHash": "959e63161ff78b4b1cd553b2c0e09e0c68418e5f",
+      "pluginName": "mattpocock-skills",
       "installedAt": "2026-06-28T11:15:39.819Z",
-      "updatedAt": "2026-07-14T05:35:37.688Z"
+      "updatedAt": "2026-08-05T21:13:45.748Z"
     },
     "grill-with-docs": {
       "source": "mattpocock/skills",
@@ -741,8 +580,9 @@
       "sourceUrl": "https://github.com/mattpocock/skills.git",
       "skillPath": "skills/engineering/grill-with-docs/SKILL.md",
       "skillFolderHash": "5fdcdeedf2d0c73b3ecb1da0a464dd885590f8d6",
+      "pluginName": "mattpocock-skills",
       "installedAt": "2026-06-28T11:15:39.827Z",
-      "updatedAt": "2026-07-14T05:35:39.848Z"
+      "updatedAt": "2026-08-05T21:13:45.749Z"
     },
     "implement": {
       "source": "mattpocock/skills",
@@ -750,26 +590,28 @@
       "sourceUrl": "https://github.com/mattpocock/skills.git",
       "skillPath": "skills/engineering/implement/SKILL.md",
       "skillFolderHash": "f07d230f645fc9ac390cf13a450bbff12ad791a3",
+      "pluginName": "mattpocock-skills",
       "installedAt": "2026-06-28T11:15:39.837Z",
-      "updatedAt": "2026-07-14T05:35:41.866Z"
+      "updatedAt": "2026-08-05T21:13:45.750Z"
     },
     "improve-codebase-architecture": {
       "source": "mattpocock/skills",
       "sourceType": "github",
       "sourceUrl": "https://github.com/mattpocock/skills.git",
       "skillPath": "skills/engineering/improve-codebase-architecture/SKILL.md",
-      "skillFolderHash": "bce229692e60dff3462e49bc5e774e83bef348e6",
+      "skillFolderHash": "6a971d1f5b109ac817e18c0f0419c2a32d60f26a",
       "installedAt": "2026-06-28T11:15:39.844Z",
-      "updatedAt": "2026-07-14T05:35:44.407Z"
+      "updatedAt": "2026-08-06T15:05:31.792Z"
     },
     "prototype": {
       "source": "mattpocock/skills",
       "sourceType": "github",
       "sourceUrl": "https://github.com/mattpocock/skills.git",
       "skillPath": "skills/engineering/prototype/SKILL.md",
-      "skillFolderHash": "dd3d782b69ccb67493fbe76b84149399da3c9fee",
+      "skillFolderHash": "57569dda16077a016b8fb82494dbf9f6430d7cc4",
+      "pluginName": "mattpocock-skills",
       "installedAt": "2026-06-28T11:15:39.851Z",
-      "updatedAt": "2026-07-14T05:35:46.992Z"
+      "updatedAt": "2026-08-05T21:13:45.752Z"
     },
     "resolving-merge-conflicts": {
       "source": "mattpocock/skills",
@@ -777,44 +619,48 @@
       "sourceUrl": "https://github.com/mattpocock/skills.git",
       "skillPath": "skills/engineering/resolving-merge-conflicts/SKILL.md",
       "skillFolderHash": "6aa1ed0b40fac0ebea5c0cf6f2addf82c99b6323",
+      "pluginName": "mattpocock-skills",
       "installedAt": "2026-06-28T11:15:39.854Z",
-      "updatedAt": "2026-07-14T05:35:49.658Z"
+      "updatedAt": "2026-08-05T21:13:45.755Z"
     },
     "setup-matt-pocock-skills": {
       "source": "mattpocock/skills",
       "sourceType": "github",
       "sourceUrl": "https://github.com/mattpocock/skills.git",
       "skillPath": "skills/engineering/setup-matt-pocock-skills/SKILL.md",
-      "skillFolderHash": "634cf9b010bca5701642aca736dce899822f08f7",
+      "skillFolderHash": "abf20c04a4aa8a37ff20aa7286f28857150f8b8d",
+      "pluginName": "mattpocock-skills",
       "installedAt": "2026-06-28T11:15:39.868Z",
-      "updatedAt": "2026-07-14T05:35:51.731Z"
+      "updatedAt": "2026-08-05T21:13:45.756Z"
     },
     "tdd": {
       "source": "mattpocock/skills",
       "sourceType": "github",
       "sourceUrl": "https://github.com/mattpocock/skills.git",
       "skillPath": "skills/engineering/tdd/SKILL.md",
-      "skillFolderHash": "0a727bd358b855cbcc1c35cfff21ef31f9ffb8de",
+      "skillFolderHash": "423f3cc2bccf3b0ed426fb35eeb4b38d9188a343",
+      "pluginName": "mattpocock-skills",
       "installedAt": "2026-06-28T11:15:39.870Z",
-      "updatedAt": "2026-07-14T05:35:53.707Z"
+      "updatedAt": "2026-08-05T21:13:45.757Z"
     },
     "triage": {
       "source": "mattpocock/skills",
       "sourceType": "github",
       "sourceUrl": "https://github.com/mattpocock/skills.git",
       "skillPath": "skills/engineering/triage/SKILL.md",
-      "skillFolderHash": "258364be8354f726bf4080077cd92d86d08c69eb",
+      "skillFolderHash": "b20940845332f540e3f17b0cb32d45fd8c2298bf",
+      "pluginName": "mattpocock-skills",
       "installedAt": "2026-06-28T11:15:39.895Z",
-      "updatedAt": "2026-07-14T05:35:56.152Z"
+      "updatedAt": "2026-08-05T21:13:45.760Z"
     },
     "loop-me": {
       "source": "mattpocock/skills",
       "sourceType": "github",
       "sourceUrl": "https://github.com/mattpocock/skills.git",
       "skillPath": "skills/in-progress/loop-me/SKILL.md",
-      "skillFolderHash": "e487ef6954cbf6f2d96991cf79332c98354df9ef",
+      "skillFolderHash": "6364da007c562d9f6ad3f54524dbc42465d9893a",
       "installedAt": "2026-06-28T11:15:39.936Z",
-      "updatedAt": "2026-07-14T05:35:58.603Z"
+      "updatedAt": "2026-08-05T21:13:45.763Z"
     },
     "writing-beats": {
       "source": "mattpocock/skills",
@@ -823,7 +669,7 @@
       "skillPath": "skills/in-progress/writing-beats/SKILL.md",
       "skillFolderHash": "545d05c3fdbfdd094dd88900b0ef8c9a823eac90",
       "installedAt": "2026-06-28T11:15:39.994Z",
-      "updatedAt": "2026-07-14T05:36:00.958Z"
+      "updatedAt": "2026-08-05T21:13:45.765Z"
     },
     "writing-fragments": {
       "source": "mattpocock/skills",
@@ -832,7 +678,7 @@
       "skillPath": "skills/in-progress/writing-fragments/SKILL.md",
       "skillFolderHash": "ce7d2741a30df8a488f6248c84cf954cff98393f",
       "installedAt": "2026-06-28T11:15:40.019Z",
-      "updatedAt": "2026-07-14T05:36:03.308Z"
+      "updatedAt": "2026-08-05T21:13:45.766Z"
     },
     "writing-shape": {
       "source": "mattpocock/skills",
@@ -841,7 +687,7 @@
       "skillPath": "skills/in-progress/writing-shape/SKILL.md",
       "skillFolderHash": "31af0156520819c15d19358a8e0bd36f82e67ad3",
       "installedAt": "2026-06-28T11:15:40.033Z",
-      "updatedAt": "2026-07-14T05:36:06.026Z"
+      "updatedAt": "2026-08-05T21:13:45.767Z"
     },
     "git-guardrails-claude-code": {
       "source": "mattpocock/skills",
@@ -850,7 +696,7 @@
       "skillPath": "skills/misc/git-guardrails-claude-code/SKILL.md",
       "skillFolderHash": "e90e289cce7a31bdf1afdf591f0790d7ac6c3cbc",
       "installedAt": "2026-06-28T11:15:40.036Z",
-      "updatedAt": "2026-07-14T05:36:08.853Z"
+      "updatedAt": "2026-08-05T21:13:45.767Z"
     },
     "migrate-to-shoehorn": {
       "source": "mattpocock/skills",
@@ -859,7 +705,7 @@
       "skillPath": "skills/misc/migrate-to-shoehorn/SKILL.md",
       "skillFolderHash": "0aea91a3599a4bf7aeec17e3262d4cbcfcbeec23",
       "installedAt": "2026-06-28T11:15:40.041Z",
-      "updatedAt": "2026-07-14T05:36:11.278Z"
+      "updatedAt": "2026-08-05T21:13:45.768Z"
     },
     "scaffold-exercises": {
       "source": "mattpocock/skills",
@@ -868,7 +714,7 @@
       "skillPath": "skills/misc/scaffold-exercises/SKILL.md",
       "skillFolderHash": "44a0ee332b9d67ebbd59389c7eb4e5aff1ce845c",
       "installedAt": "2026-06-28T11:15:40.044Z",
-      "updatedAt": "2026-07-14T05:36:13.636Z"
+      "updatedAt": "2026-08-05T21:13:45.769Z"
     },
     "setup-pre-commit": {
       "source": "mattpocock/skills",
@@ -877,25 +723,7 @@
       "skillPath": "skills/misc/setup-pre-commit/SKILL.md",
       "skillFolderHash": "dcc584ff84c4f040ea12742fcb46b7c3ad7070bd",
       "installedAt": "2026-06-28T11:15:40.053Z",
-      "updatedAt": "2026-07-14T05:36:16.018Z"
-    },
-    "edit-article": {
-      "source": "mattpocock/skills",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/mattpocock/skills.git",
-      "skillPath": "skills/personal/edit-article/SKILL.md",
-      "skillFolderHash": "19ce34c6f4afcb58788e8e525dbb80c79a45a4a0",
-      "installedAt": "2026-06-28T11:15:40.059Z",
-      "updatedAt": "2026-07-14T05:36:18.335Z"
-    },
-    "obsidian-vault": {
-      "source": "mattpocock/skills",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/mattpocock/skills.git",
-      "skillPath": "skills/personal/obsidian-vault/SKILL.md",
-      "skillFolderHash": "5fdd257588fefa400e8a0d505aac555a0b52311a",
-      "installedAt": "2026-06-28T11:15:40.061Z",
-      "updatedAt": "2026-07-14T05:36:21.028Z"
+      "updatedAt": "2026-08-05T21:13:45.770Z"
     },
     "grill-me": {
       "source": "mattpocock/skills",
@@ -903,17 +731,19 @@
       "sourceUrl": "https://github.com/mattpocock/skills.git",
       "skillPath": "skills/productivity/grill-me/SKILL.md",
       "skillFolderHash": "c817f6f36acd483294144694a935a76d3e3eb101",
+      "pluginName": "mattpocock-skills",
       "installedAt": "2026-06-28T11:15:40.066Z",
-      "updatedAt": "2026-07-14T05:36:23.173Z"
+      "updatedAt": "2026-08-05T21:13:45.770Z"
     },
     "grilling": {
       "source": "mattpocock/skills",
       "sourceType": "github",
       "sourceUrl": "https://github.com/mattpocock/skills.git",
       "skillPath": "skills/productivity/grilling/SKILL.md",
-      "skillFolderHash": "10b0db61f9b3869243db8a1a0ee84f862139b94e",
+      "skillFolderHash": "fd99bcbb818f7ef766b83656fb5fac0b58e223ad",
+      "pluginName": "mattpocock-skills",
       "installedAt": "2026-06-28T11:15:40.069Z",
-      "updatedAt": "2026-07-14T05:36:25.608Z"
+      "updatedAt": "2026-08-05T21:13:45.771Z"
     },
     "handoff": {
       "source": "mattpocock/skills",
@@ -921,8 +751,9 @@
       "sourceUrl": "https://github.com/mattpocock/skills.git",
       "skillPath": "skills/productivity/handoff/SKILL.md",
       "skillFolderHash": "184d485ae68a2132893a94239b2b85d253e6152b",
+      "pluginName": "mattpocock-skills",
       "installedAt": "2026-06-28T11:15:40.073Z",
-      "updatedAt": "2026-07-14T05:36:27.657Z"
+      "updatedAt": "2026-08-05T21:13:45.772Z"
     },
     "teach": {
       "source": "mattpocock/skills",
@@ -930,17 +761,9 @@
       "sourceUrl": "https://github.com/mattpocock/skills.git",
       "skillPath": "skills/productivity/teach/SKILL.md",
       "skillFolderHash": "15f8c86d39ef834e643d092733ca899b59049067",
+      "pluginName": "mattpocock-skills",
       "installedAt": "2026-06-28T11:15:40.076Z",
-      "updatedAt": "2026-07-14T05:36:30.171Z"
-    },
-    "writing-great-skills": {
-      "source": "mattpocock/skills",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/mattpocock/skills.git",
-      "skillPath": "skills/productivity/writing-great-skills/SKILL.md",
-      "skillFolderHash": "81d36946d48842f90358d8af54e3cdcc141f8e01",
-      "installedAt": "2026-06-28T11:15:40.078Z",
-      "updatedAt": "2026-07-14T05:36:32.517Z"
+      "updatedAt": "2026-08-05T21:13:45.773Z"
     },
     "animation-vocabulary": {
       "source": "emilkowalski/skills",
@@ -956,1197 +779,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/emilkowalski/skills.git",
       "skillPath": "skills/review-animations/SKILL.md",
-      "skillFolderHash": "0012fc43a25cce5df019102ab28bb6a68ad9db3d",
+      "skillFolderHash": "82571acae75a97764fa7899f10bd21d93a4f1414",
       "installedAt": "2026-07-02T17:51:20.865Z",
-      "updatedAt": "2026-07-14T09:21:17.973Z"
-    },
-    "3d-spatial": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/01-by-domain/3d-spatial/SKILL.md",
-      "skillFolderHash": "86da4a8f961f762c526ae27a9e76fe78b10cbc10",
-      "installedAt": "2026-07-02T17:58:34.867Z",
-      "updatedAt": "2026-07-02T17:58:34.867Z"
-    },
-    "accessible-motion": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/01-by-domain/accessible-motion/SKILL.md",
-      "skillFolderHash": "cb46582aaae70e47f4335699cc7eecbd7ffed6a4",
-      "installedAt": "2026-07-02T17:58:34.873Z",
-      "updatedAt": "2026-07-02T17:58:34.873Z"
-    },
-    "brand-marketing": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/01-by-domain/brand-marketing/SKILL.md",
-      "skillFolderHash": "2659abd13581dbe4b6d921047cf4cedcb366db76",
-      "installedAt": "2026-07-02T17:58:34.876Z",
-      "updatedAt": "2026-07-02T17:58:34.876Z"
-    },
-    "data-visualization": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/01-by-domain/data-visualization/SKILL.md",
-      "skillFolderHash": "064eab5f190cfefa9d8e61bcfdcfeef569e86667",
-      "installedAt": "2026-07-02T17:58:34.877Z",
-      "updatedAt": "2026-07-02T17:58:34.877Z"
-    },
-    "game-development": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/01-by-domain/game-development/SKILL.md",
-      "skillFolderHash": "31eadf6323ebd0f3406cbfda3f75f219704b366b",
-      "installedAt": "2026-07-02T17:58:34.881Z",
-      "updatedAt": "2026-07-02T17:58:34.881Z"
-    },
-    "micro-interactions": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/01-by-domain/micro-interactions/SKILL.md",
-      "skillFolderHash": "9081d63b5e75a5713b35813acc7e418ce87c762f",
-      "installedAt": "2026-07-02T17:58:34.883Z",
-      "updatedAt": "2026-07-02T17:58:34.883Z"
-    },
-    "mobile-touch": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/01-by-domain/mobile-touch/SKILL.md",
-      "skillFolderHash": "9203ae12266a3e314804dcfd26dae33abb495b51",
-      "installedAt": "2026-07-02T17:58:34.885Z",
-      "updatedAt": "2026-07-02T17:58:34.885Z"
-    },
-    "page-transitions": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/01-by-domain/page-transitions/SKILL.md",
-      "skillFolderHash": "714f0b8da986fe83eb3e793c6e33edcc30c28e7f",
-      "installedAt": "2026-07-02T17:58:34.886Z",
-      "updatedAt": "2026-07-02T17:58:34.886Z"
-    },
-    "presentations": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/01-by-domain/presentations/SKILL.md",
-      "skillFolderHash": "daa51bb7c76f6dfdf355a491290ecf23cab70c86",
-      "installedAt": "2026-07-02T17:58:34.892Z",
-      "updatedAt": "2026-07-02T17:58:34.892Z"
-    },
-    "universal-fallback": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/01-by-domain/universal-fallback/SKILL.md",
-      "skillFolderHash": "ad8d05811a1dca77ed714f33682c452da518fd68",
-      "installedAt": "2026-07-02T17:58:34.894Z",
-      "updatedAt": "2026-07-02T17:58:34.894Z"
-    },
-    "video-motion-graphics": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/01-by-domain/video-motion-graphics/SKILL.md",
-      "skillFolderHash": "bf437c1881f75b13fdd14dafcf5b816c8af752cb",
-      "installedAt": "2026-07-02T17:58:34.895Z",
-      "updatedAt": "2026-07-02T17:58:34.895Z"
-    },
-    "web-motion-design": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/01-by-domain/web-motion-design/SKILL.md",
-      "skillFolderHash": "fa0f884ae5ac6b0b0e291ca6b8d4559f1a0c6e7c",
-      "installedAt": "2026-07-02T17:58:34.898Z",
-      "updatedAt": "2026-07-02T17:58:34.898Z"
-    },
-    "anticipation-payoff": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/02-by-thinking-style/anticipation-payoff/SKILL.md",
-      "skillFolderHash": "474f08ac5590f98b681d2dc3cb3c371e6d773985",
-      "installedAt": "2026-07-02T17:58:34.899Z",
-      "updatedAt": "2026-07-02T17:58:34.899Z"
-    },
-    "attention-direction": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/02-by-thinking-style/attention-direction/SKILL.md",
-      "skillFolderHash": "d901d9b101902326068f6d4abfabc0c4b0437340",
-      "installedAt": "2026-07-02T17:58:34.901Z",
-      "updatedAt": "2026-07-02T17:58:34.901Z"
-    },
-    "character-appeal": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/02-by-thinking-style/character-appeal/SKILL.md",
-      "skillFolderHash": "dcacb9d1f198ea2bfdf763998ede88cc56b1d8a3",
-      "installedAt": "2026-07-02T17:58:34.902Z",
-      "updatedAt": "2026-07-02T17:58:34.902Z"
-    },
-    "emotional-narrative": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/02-by-thinking-style/emotional-narrative/SKILL.md",
-      "skillFolderHash": "9e15c2d945ac631ca3b7178cde7a135edb9f25e4",
-      "installedAt": "2026-07-02T17:58:34.903Z",
-      "updatedAt": "2026-07-02T17:58:34.903Z"
-    },
-    "exaggerated-clarity": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/02-by-thinking-style/exaggerated-clarity/SKILL.md",
-      "skillFolderHash": "f7a56ae39c44499455fa1a1a0c25cd3ac2f496f0",
-      "installedAt": "2026-07-02T17:58:34.907Z",
-      "updatedAt": "2026-07-02T17:58:34.907Z"
-    },
-    "naturalistic-motion": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/02-by-thinking-style/naturalistic-motion/SKILL.md",
-      "skillFolderHash": "46a1b5ff5178b7cbaaf49965d5aa5405aa8fa6f0",
-      "installedAt": "2026-07-02T17:58:34.909Z",
-      "updatedAt": "2026-07-02T17:58:34.909Z"
-    },
-    "physics-intuition": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/02-by-thinking-style/physics-intuition/SKILL.md",
-      "skillFolderHash": "5f9426af6f88158bf289d9413f0287b5f35fa353",
-      "installedAt": "2026-07-02T17:58:34.910Z",
-      "updatedAt": "2026-07-02T17:58:34.910Z"
-    },
-    "problem-diagnosis": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/02-by-thinking-style/problem-diagnosis/SKILL.md",
-      "skillFolderHash": "66eb6f01a894806409bb529edb57de3c949bd9c6",
-      "installedAt": "2026-07-02T17:58:34.911Z",
-      "updatedAt": "2026-07-02T17:58:34.911Z"
-    },
-    "rhythm-pacing": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/02-by-thinking-style/rhythm-pacing/SKILL.md",
-      "skillFolderHash": "207e00fd15b7d75530d19ff2508cdcfb2e90b404",
-      "installedAt": "2026-07-02T17:58:34.913Z",
-      "updatedAt": "2026-07-02T17:58:34.913Z"
-    },
-    "spatial-thinking": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/02-by-thinking-style/spatial-thinking/SKILL.md",
-      "skillFolderHash": "922710a47ffebc65050e0f27c29f19bb42b5ec40",
-      "installedAt": "2026-07-02T17:58:34.914Z",
-      "updatedAt": "2026-07-02T17:58:34.914Z"
-    },
-    "timing-mastery": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/02-by-thinking-style/timing-mastery/SKILL.md",
-      "skillFolderHash": "746bca7be7397f9c87da2c1492de988084e7046a",
-      "installedAt": "2026-07-02T17:58:34.915Z",
-      "updatedAt": "2026-07-02T17:58:34.915Z"
-    },
-    "universal-mindset": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/02-by-thinking-style/universal-mindset/SKILL.md",
-      "skillFolderHash": "47b1cc7b75a19ef954c0b7c7bc7c11ec9972a8f4",
-      "installedAt": "2026-07-02T17:58:34.917Z",
-      "updatedAt": "2026-07-02T17:58:34.917Z"
-    },
-    "accessibility-advocate": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/03-by-role-persona/accessibility-advocate/SKILL.md",
-      "skillFolderHash": "376cb22372c8078c3c864f1ccd1d32f058cde3ec",
-      "installedAt": "2026-07-02T17:58:34.918Z",
-      "updatedAt": "2026-07-02T17:58:34.918Z"
-    },
-    "animator-traditional": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/03-by-role-persona/animator-traditional/SKILL.md",
-      "skillFolderHash": "95d399ce8b9113cc8ff5cc20242892a0706c8dd8",
-      "installedAt": "2026-07-02T17:58:34.919Z",
-      "updatedAt": "2026-07-02T17:58:34.919Z"
-    },
-    "brand-strategist": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/03-by-role-persona/brand-strategist/SKILL.md",
-      "skillFolderHash": "a909bd399fe2772c5281638471bb6ed59cac55f9",
-      "installedAt": "2026-07-02T17:58:34.920Z",
-      "updatedAt": "2026-07-02T17:58:34.920Z"
-    },
-    "creative-director": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/03-by-role-persona/creative-director/SKILL.md",
-      "skillFolderHash": "b4202bea163993e20809b3e6ec69bd3710a2c1ab",
-      "installedAt": "2026-07-02T17:58:34.922Z",
-      "updatedAt": "2026-07-02T17:58:34.922Z"
-    },
-    "educator-teacher": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/03-by-role-persona/educator-teacher/SKILL.md",
-      "skillFolderHash": "46c52515446e2f9305a3e755e8a3e6d87436b130",
-      "installedAt": "2026-07-02T17:58:34.923Z",
-      "updatedAt": "2026-07-02T17:58:34.923Z"
-    },
-    "filmmaker": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/03-by-role-persona/filmmaker/SKILL.md",
-      "skillFolderHash": "de187d9f403e3e3ed27694116c143f3ee46399c8",
-      "installedAt": "2026-07-02T17:58:34.924Z",
-      "updatedAt": "2026-07-02T17:58:34.924Z"
-    },
-    "frontend-developer": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/03-by-role-persona/frontend-developer/SKILL.md",
-      "skillFolderHash": "21577140b2f9a6ca9f4ff373368c4aadec9f745a",
-      "installedAt": "2026-07-02T17:58:34.926Z",
-      "updatedAt": "2026-07-02T17:58:34.926Z"
-    },
-    "game-designer": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/03-by-role-persona/game-designer/SKILL.md",
-      "skillFolderHash": "0908b245742c251aceab946781c8ab5b2af01aad",
-      "installedAt": "2026-07-02T17:58:34.927Z",
-      "updatedAt": "2026-07-02T17:58:34.927Z"
-    },
-    "motion-designer": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/03-by-role-persona/motion-designer/SKILL.md",
-      "skillFolderHash": "53e00be0e7024b626e365eb4f654d006309a590c",
-      "installedAt": "2026-07-02T17:58:34.928Z",
-      "updatedAt": "2026-07-02T17:58:34.928Z"
-    },
-    "product-manager": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/03-by-role-persona/product-manager/SKILL.md",
-      "skillFolderHash": "328b8c8968e52c4b89f1decf9caff4114731aad8",
-      "installedAt": "2026-07-02T17:58:34.929Z",
-      "updatedAt": "2026-07-02T17:58:34.929Z"
-    },
-    "universal-practitioner": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/03-by-role-persona/universal-practitioner/SKILL.md",
-      "skillFolderHash": "f6e362cad16b7da43d5f0fae8c6fb3f723f896cb",
-      "installedAt": "2026-07-02T17:58:34.931Z",
-      "updatedAt": "2026-07-02T17:58:34.931Z"
-    },
-    "ux-researcher": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/03-by-role-persona/ux-researcher/SKILL.md",
-      "skillFolderHash": "9645a084b900cf48efd2eb855d885845fbdb6b62",
-      "installedAt": "2026-07-02T17:58:34.931Z",
-      "updatedAt": "2026-07-02T17:58:34.931Z"
-    },
-    "attention-grabbers": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/05-by-animation-type/attention-grabbers/SKILL.md",
-      "skillFolderHash": "6266eae5c88c956ea593a942bdb02e2f156716a3",
-      "installedAt": "2026-07-02T17:58:34.946Z",
-      "updatedAt": "2026-07-02T17:58:34.946Z"
-    },
-    "continuous-loops": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/05-by-animation-type/continuous-loops/SKILL.md",
-      "skillFolderHash": "47d7d1c2d91dd5595b46652628293f66d70f4e21",
-      "installedAt": "2026-07-02T17:58:34.947Z",
-      "updatedAt": "2026-07-02T17:58:34.947Z"
-    },
-    "entrance-animations": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/05-by-animation-type/entrance-animations/SKILL.md",
-      "skillFolderHash": "353feac791a4499294503925a08f4e932d064eb4",
-      "installedAt": "2026-07-02T17:58:34.948Z",
-      "updatedAt": "2026-07-02T17:58:34.948Z"
-    },
-    "exit-animations": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/05-by-animation-type/exit-animations/SKILL.md",
-      "skillFolderHash": "f40907918718482f97ff77e0250dd27118ae403f",
-      "installedAt": "2026-07-02T17:58:34.949Z",
-      "updatedAt": "2026-07-02T17:58:34.949Z"
-    },
-    "feedback-indicators": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/05-by-animation-type/feedback-indicators/SKILL.md",
-      "skillFolderHash": "569dad8100e39fb17dd5b4aa29702699f4f6a15d",
-      "installedAt": "2026-07-02T17:58:34.950Z",
-      "updatedAt": "2026-07-02T17:58:34.950Z"
-    },
-    "gesture-responses": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/05-by-animation-type/gesture-responses/SKILL.md",
-      "skillFolderHash": "1cb2fe455f008c78d81e4aab689ed00d1971bf54",
-      "installedAt": "2026-07-02T17:58:34.951Z",
-      "updatedAt": "2026-07-02T17:58:34.951Z"
-    },
-    "hover-interactions": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/05-by-animation-type/hover-interactions/SKILL.md",
-      "skillFolderHash": "d4f93f8bbfc8d2cda0ac1e8b0cf4318165cacae3",
-      "installedAt": "2026-07-02T17:58:34.952Z",
-      "updatedAt": "2026-07-02T17:58:34.952Z"
-    },
-    "loading-states": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/05-by-animation-type/loading-states/SKILL.md",
-      "skillFolderHash": "85a6e0ea21797e6a618d9170d891d2f835921c63",
-      "installedAt": "2026-07-02T17:58:34.953Z",
-      "updatedAt": "2026-07-02T17:58:34.953Z"
-    },
-    "scroll-animations": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/05-by-animation-type/scroll-animations/SKILL.md",
-      "skillFolderHash": "9db5d6aac81cc0dbe016f028a00975d96da0813b",
-      "installedAt": "2026-07-02T17:58:34.954Z",
-      "updatedAt": "2026-07-02T17:58:34.954Z"
-    },
-    "state-changes": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/05-by-animation-type/state-changes/SKILL.md",
-      "skillFolderHash": "ca644c53ef188a12fb9bf4488deee785a09df8d5",
-      "installedAt": "2026-07-02T17:58:34.956Z",
-      "updatedAt": "2026-07-02T17:58:34.956Z"
-    },
-    "transition-sequences": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/05-by-animation-type/transition-sequences/SKILL.md",
-      "skillFolderHash": "b8d7fbb7c8e2ee5c4a1af94479ba99379f524865",
-      "installedAt": "2026-07-02T17:58:34.957Z",
-      "updatedAt": "2026-07-02T17:58:34.957Z"
-    },
-    "universal-patterns": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/05-by-animation-type/universal-patterns/SKILL.md",
-      "skillFolderHash": "5df9f3d2d9163a99ede40f246bb2448df4c17450",
-      "installedAt": "2026-07-02T17:58:34.958Z",
-      "updatedAt": "2026-07-02T17:58:34.958Z"
-    },
-    "calm-relaxation": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/06-by-emotional-outcome/calm-relaxation/SKILL.md",
-      "skillFolderHash": "36621e4539f27b539f41edae3b1231738cfe201d",
-      "installedAt": "2026-07-02T17:58:34.960Z",
-      "updatedAt": "2026-07-02T17:58:34.960Z"
-    },
-    "comfort-safety": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/06-by-emotional-outcome/comfort-safety/SKILL.md",
-      "skillFolderHash": "42d9644e86cafc3ed27d0dda953b02a0d020a6d3",
-      "installedAt": "2026-07-02T17:58:34.961Z",
-      "updatedAt": "2026-07-02T17:58:34.961Z"
-    },
-    "elegance-sophistication": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/06-by-emotional-outcome/elegance-sophistication/SKILL.md",
-      "skillFolderHash": "965bf0f536abab13d1db09d734513d6514792a00",
-      "installedAt": "2026-07-02T17:58:34.962Z",
-      "updatedAt": "2026-07-02T17:58:34.962Z"
-    },
-    "excitement-energy": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/06-by-emotional-outcome/excitement-energy/SKILL.md",
-      "skillFolderHash": "16087d0169ed4e053188ca3637477515791e3212",
-      "installedAt": "2026-07-02T17:58:34.964Z",
-      "updatedAt": "2026-07-02T17:58:34.964Z"
-    },
-    "friendliness-approachability": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/06-by-emotional-outcome/friendliness-approachability/SKILL.md",
-      "skillFolderHash": "716a371b3a57bc2ba16f3ec756d888a54eb5e84d",
-      "installedAt": "2026-07-02T17:58:34.964Z",
-      "updatedAt": "2026-07-02T17:58:34.964Z"
-    },
-    "joy-delight": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/06-by-emotional-outcome/joy-delight/SKILL.md",
-      "skillFolderHash": "6862177ab5a2a52eca4ea6c4c2793b6f5d0076cf",
-      "installedAt": "2026-07-02T17:58:34.965Z",
-      "updatedAt": "2026-07-02T17:58:34.965Z"
-    },
-    "playfulness-fun": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/06-by-emotional-outcome/playfulness-fun/SKILL.md",
-      "skillFolderHash": "b477a5d1d226839bf63c58b066a056a204444023",
-      "installedAt": "2026-07-02T17:58:34.967Z",
-      "updatedAt": "2026-07-02T17:58:34.967Z"
-    },
-    "power-confidence": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/06-by-emotional-outcome/power-confidence/SKILL.md",
-      "skillFolderHash": "10a0cffe9627e7543bc91cd28593b8d0d3615450",
-      "installedAt": "2026-07-02T17:58:34.968Z",
-      "updatedAt": "2026-07-02T17:58:34.968Z"
-    },
-    "professionalism-credibility": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/06-by-emotional-outcome/professionalism-credibility/SKILL.md",
-      "skillFolderHash": "4ba413d43c120db200193d65ac94a47fab92f40a",
-      "installedAt": "2026-07-02T17:58:34.969Z",
-      "updatedAt": "2026-07-02T17:58:34.969Z"
-    },
-    "trust-reliability": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/06-by-emotional-outcome/trust-reliability/SKILL.md",
-      "skillFolderHash": "cf1ff5da80a05b3204c39ad7bc1b0224dc06e14d",
-      "installedAt": "2026-07-02T17:58:34.970Z",
-      "updatedAt": "2026-07-02T17:58:34.970Z"
-    },
-    "universal-emotion": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/06-by-emotional-outcome/universal-emotion/SKILL.md",
-      "skillFolderHash": "9ccbf80d86c0e6daded8ae1bef529fb24fa18e6d",
-      "installedAt": "2026-07-02T17:58:34.972Z",
-      "updatedAt": "2026-07-02T17:58:34.972Z"
-    },
-    "urgency-action": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/06-by-emotional-outcome/urgency-action/SKILL.md",
-      "skillFolderHash": "3b14f46816afc6a2f6d34229fb13c7f0a724bc03",
-      "installedAt": "2026-07-02T17:58:34.973Z",
-      "updatedAt": "2026-07-02T17:58:34.973Z"
-    },
-    "accordions-dropdowns": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/07-by-ui-element/accordions-dropdowns/SKILL.md",
-      "skillFolderHash": "078f6954a2d55b1c584b149f97e409b86f3f40d6",
-      "installedAt": "2026-07-02T17:58:34.974Z",
-      "updatedAt": "2026-07-02T17:58:34.974Z"
-    },
-    "buttons-ctas": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/07-by-ui-element/buttons-ctas/SKILL.md",
-      "skillFolderHash": "3c94038d966e1ce1e775f405f7aa62b0aac5020b",
-      "installedAt": "2026-07-02T17:58:34.976Z",
-      "updatedAt": "2026-07-02T17:58:34.976Z"
-    },
-    "cards-containers": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/07-by-ui-element/cards-containers/SKILL.md",
-      "skillFolderHash": "24e3c5cd368b7361a24815059d0995ba68c02399",
-      "installedAt": "2026-07-02T17:58:34.977Z",
-      "updatedAt": "2026-07-02T17:58:34.977Z"
-    },
-    "carousels-sliders": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/07-by-ui-element/carousels-sliders/SKILL.md",
-      "skillFolderHash": "ecdf5a84c1178349f69bb9822bf43fa8925cc4f2",
-      "installedAt": "2026-07-02T17:58:34.978Z",
-      "updatedAt": "2026-07-02T17:58:34.978Z"
-    },
-    "forms-inputs": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/07-by-ui-element/forms-inputs/SKILL.md",
-      "skillFolderHash": "76d64bc8f3d4f4ce4831c3896161188624224732",
-      "installedAt": "2026-07-02T17:58:34.980Z",
-      "updatedAt": "2026-07-02T17:58:34.980Z"
-    },
-    "icons-badges": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/07-by-ui-element/icons-badges/SKILL.md",
-      "skillFolderHash": "1c6df928731cbb0e83ce04ff7568b75a08b0c057",
-      "installedAt": "2026-07-02T17:58:34.981Z",
-      "updatedAt": "2026-07-02T17:58:34.981Z"
-    },
-    "lists-grids": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/07-by-ui-element/lists-grids/SKILL.md",
-      "skillFolderHash": "2f1767043f971100c312592b4d86650de329e6ba",
-      "installedAt": "2026-07-02T17:58:34.983Z",
-      "updatedAt": "2026-07-02T17:58:34.983Z"
-    },
-    "loaders-spinners": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/07-by-ui-element/loaders-spinners/SKILL.md",
-      "skillFolderHash": "44f940f0909f51d80b3d4b5cdaff57e5f4a02d03",
-      "installedAt": "2026-07-02T17:58:34.984Z",
-      "updatedAt": "2026-07-02T17:58:34.984Z"
-    },
-    "modals-dialogs": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/07-by-ui-element/modals-dialogs/SKILL.md",
-      "skillFolderHash": "4fd5e12686604642a5b161fc8afb6f7f0255916b",
-      "installedAt": "2026-07-02T17:58:34.985Z",
-      "updatedAt": "2026-07-02T17:58:34.985Z"
-    },
-    "navigation-menus": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/07-by-ui-element/navigation-menus/SKILL.md",
-      "skillFolderHash": "a964a384eea89acd963dae989ba3724e5a58a3b6",
-      "installedAt": "2026-07-02T17:58:34.986Z",
-      "updatedAt": "2026-07-02T17:58:34.986Z"
-    },
-    "notifications-toasts": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/07-by-ui-element/notifications-toasts/SKILL.md",
-      "skillFolderHash": "53265b4ea856547ad0d3b98165a456a9f1e7ec91",
-      "installedAt": "2026-07-02T17:58:34.988Z",
-      "updatedAt": "2026-07-02T17:58:34.988Z"
-    },
-    "universal-elements": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/07-by-ui-element/universal-elements/SKILL.md",
-      "skillFolderHash": "e16670ead9f142584ac5eb11643448542a4379ec",
-      "installedAt": "2026-07-02T17:58:34.990Z",
-      "updatedAt": "2026-07-02T17:58:34.990Z"
-    },
-    "e-commerce-retail": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/08-by-industry/e-commerce-retail/SKILL.md",
-      "skillFolderHash": "88492873c5c88f0e5f773faf819ea98d57e0f148",
-      "installedAt": "2026-07-02T17:58:34.990Z",
-      "updatedAt": "2026-07-02T17:58:34.990Z"
-    },
-    "education-learning": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/08-by-industry/education-learning/SKILL.md",
-      "skillFolderHash": "64c987c6abbc18325944d3134bdeb260c52fa210",
-      "installedAt": "2026-07-02T17:58:34.992Z",
-      "updatedAt": "2026-07-02T17:58:34.992Z"
-    },
-    "enterprise-b2b": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/08-by-industry/enterprise-b2b/SKILL.md",
-      "skillFolderHash": "6fb51308d58bc5dd64b5602916e0ee7de2b8989c",
-      "installedAt": "2026-07-02T17:58:34.993Z",
-      "updatedAt": "2026-07-02T17:58:34.993Z"
-    },
-    "fintech-banking": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/08-by-industry/fintech-banking/SKILL.md",
-      "skillFolderHash": "b793416d4ce9c9c83f9bb7db0be737b63117f12f",
-      "installedAt": "2026-07-02T17:58:34.994Z",
-      "updatedAt": "2026-07-02T17:58:34.994Z"
-    },
-    "fitness-wellness": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/08-by-industry/fitness-wellness/SKILL.md",
-      "skillFolderHash": "7fca2faacc477f429ff820b350243b1cd73fe5b8",
-      "installedAt": "2026-07-02T17:58:34.994Z",
-      "updatedAt": "2026-07-02T17:58:34.994Z"
-    },
-    "gaming-entertainment": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/08-by-industry/gaming-entertainment/SKILL.md",
-      "skillFolderHash": "651b23b9248010e02783b5a76b29cd68e148f2ee",
-      "installedAt": "2026-07-02T17:58:34.996Z",
-      "updatedAt": "2026-07-02T17:58:34.996Z"
-    },
-    "healthcare-medical": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/08-by-industry/healthcare-medical/SKILL.md",
-      "skillFolderHash": "304d395dfe173b26a387773a732963b0b3dbc6b5",
-      "installedAt": "2026-07-02T17:58:34.998Z",
-      "updatedAt": "2026-07-02T17:58:34.998Z"
-    },
-    "media-publishing": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/08-by-industry/media-publishing/SKILL.md",
-      "skillFolderHash": "2e3bddf1037eac995da0a02ecf79a036243cc2c0",
-      "installedAt": "2026-07-02T17:58:34.999Z",
-      "updatedAt": "2026-07-02T17:58:34.999Z"
-    },
-    "saas-productivity": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/08-by-industry/saas-productivity/SKILL.md",
-      "skillFolderHash": "55e6844143827a42271cc5b8b0e8861e5bbc8ae4",
-      "installedAt": "2026-07-02T17:58:35.000Z",
-      "updatedAt": "2026-07-02T17:58:35.000Z"
-    },
-    "social-media": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/08-by-industry/social-media/SKILL.md",
-      "skillFolderHash": "8c71227a6ca455dadfaa5bfbb487355c92db64d2",
-      "installedAt": "2026-07-02T17:58:35.001Z",
-      "updatedAt": "2026-07-02T17:58:35.001Z"
-    },
-    "travel-hospitality": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/08-by-industry/travel-hospitality/SKILL.md",
-      "skillFolderHash": "1c44709d934e2d5d00c4e304b92aff23f7612cfb",
-      "installedAt": "2026-07-02T17:58:35.002Z",
-      "updatedAt": "2026-07-02T17:58:35.002Z"
-    },
-    "universal-industry": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/08-by-industry/universal-industry/SKILL.md",
-      "skillFolderHash": "95c8e4223e2b3088f56165ba54cc8c43ff14f339",
-      "installedAt": "2026-07-02T17:58:35.005Z",
-      "updatedAt": "2026-07-02T17:58:35.005Z"
-    },
-    "after-effects": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/09-by-tool-framework/after-effects/SKILL.md",
-      "skillFolderHash": "4041d7b4f08935af84b0c2a2ec87711336ad4d00",
-      "installedAt": "2026-07-02T17:58:35.006Z",
-      "updatedAt": "2026-07-02T17:58:35.006Z"
-    },
-    "anime-js": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/09-by-tool-framework/anime-js/SKILL.md",
-      "skillFolderHash": "bc7d1b175fb1dd5b948b38f06d0b3788cc544385",
-      "installedAt": "2026-07-02T17:58:35.008Z",
-      "updatedAt": "2026-07-02T17:58:35.008Z"
-    },
-    "css-native": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/09-by-tool-framework/css-native/SKILL.md",
-      "skillFolderHash": "eebb6fa388c4afcfa7a788d8b86e64f3238ddeb8",
-      "installedAt": "2026-07-02T17:58:35.009Z",
-      "updatedAt": "2026-07-02T17:58:35.009Z"
-    },
-    "figma-prototyping": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/09-by-tool-framework/figma-prototyping/SKILL.md",
-      "skillFolderHash": "b8fdcd0c767a4773aef4dbc186e32fb1d52327e2",
-      "installedAt": "2026-07-02T17:58:35.010Z",
-      "updatedAt": "2026-07-02T17:58:35.010Z"
-    },
-    "framer-motion": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/09-by-tool-framework/framer-motion/SKILL.md",
-      "skillFolderHash": "0b9be8f582a3efea3ac5a26978394761ad279382",
-      "installedAt": "2026-07-02T17:58:35.011Z",
-      "updatedAt": "2026-07-02T17:58:35.011Z"
-    },
-    "gsap-greensock": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/09-by-tool-framework/gsap-greensock/SKILL.md",
-      "skillFolderHash": "cb11459e6d2f8546b3298960ceb2030c77dc47a5",
-      "installedAt": "2026-07-02T17:58:35.013Z",
-      "updatedAt": "2026-07-02T17:58:35.013Z"
-    },
-    "lottie-bodymovin": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/09-by-tool-framework/lottie-bodymovin/SKILL.md",
-      "skillFolderHash": "dafc307c8829de71e1e2fc2c9b65248ad5742380",
-      "installedAt": "2026-07-02T17:58:35.014Z",
-      "updatedAt": "2026-07-02T17:58:35.014Z"
-    },
-    "motion-one": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/09-by-tool-framework/motion-one/SKILL.md",
-      "skillFolderHash": "55df30c9d805b189b045617b45a2d886511bf9e5",
-      "installedAt": "2026-07-02T17:58:35.015Z",
-      "updatedAt": "2026-07-02T17:58:35.015Z"
-    },
-    "popmotion": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/09-by-tool-framework/popmotion/SKILL.md",
-      "skillFolderHash": "232af6fd5bdea8526a86a3754ba0a0181f18affe",
-      "installedAt": "2026-07-02T17:58:35.016Z",
-      "updatedAt": "2026-07-02T17:58:35.016Z"
-    },
-    "react-spring": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/09-by-tool-framework/react-spring/SKILL.md",
-      "skillFolderHash": "980dc4ef6a27498c7484540e68ed1f812eccb4fa",
-      "installedAt": "2026-07-02T17:58:35.018Z",
-      "updatedAt": "2026-07-02T17:58:35.018Z"
-    },
-    "rive-animations": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/09-by-tool-framework/rive-animations/SKILL.md",
-      "skillFolderHash": "fb7180e37b5d256ad17644ff022ef928d2c84da6",
-      "installedAt": "2026-07-02T17:58:35.019Z",
-      "updatedAt": "2026-07-02T17:58:35.019Z"
-    },
-    "universal-tool": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/09-by-tool-framework/universal-tool/SKILL.md",
-      "skillFolderHash": "d7c5beb634e0758c4d858747459382c0f38a9ce6",
-      "installedAt": "2026-07-02T17:58:35.020Z",
-      "updatedAt": "2026-07-02T17:58:35.020Z"
-    },
-    "continuous-infinite": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/10-by-time-scale/continuous-infinite/SKILL.md",
-      "skillFolderHash": "09a6165274899bbad83be36fa28355d4edb044f8",
-      "installedAt": "2026-07-02T17:58:35.023Z",
-      "updatedAt": "2026-07-02T17:58:35.023Z"
-    },
-    "deliberate-1200-2000ms": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/10-by-time-scale/deliberate-1200-2000ms/SKILL.md",
-      "skillFolderHash": "d32594c797f995c820087c41e3082ecf259ff67b",
-      "installedAt": "2026-07-02T17:58:35.024Z",
-      "updatedAt": "2026-07-02T17:58:35.024Z"
-    },
-    "dramatic-2000ms-plus": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/10-by-time-scale/dramatic-2000ms-plus/SKILL.md",
-      "skillFolderHash": "84447488ed5977477cfefdaa1adeb5a635ee62f8",
-      "installedAt": "2026-07-02T17:58:35.026Z",
-      "updatedAt": "2026-07-02T17:58:35.026Z"
-    },
-    "instant-0-100ms": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/10-by-time-scale/instant-0-100ms/SKILL.md",
-      "skillFolderHash": "fbf967036e6f6395094131ccba5f99718d7cf2af",
-      "installedAt": "2026-07-02T17:58:35.027Z",
-      "updatedAt": "2026-07-02T17:58:35.027Z"
-    },
-    "large-500-800ms": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/10-by-time-scale/large-500-800ms/SKILL.md",
-      "skillFolderHash": "a7d56a3973f70d72cc7c58e0098714cc817078ea",
-      "installedAt": "2026-07-02T17:58:35.028Z",
-      "updatedAt": "2026-07-02T17:58:35.028Z"
-    },
-    "medium-300-500ms": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/10-by-time-scale/medium-300-500ms/SKILL.md",
-      "skillFolderHash": "9690b4d184b68d8ecb247592b8f96070cb7cdcbd",
-      "installedAt": "2026-07-02T17:58:35.030Z",
-      "updatedAt": "2026-07-02T17:58:35.030Z"
-    },
-    "micro-100-200ms": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/10-by-time-scale/micro-100-200ms/SKILL.md",
-      "skillFolderHash": "51e5dd167c4c1cde195b1ff6df57a598762bed97",
-      "installedAt": "2026-07-02T17:58:35.032Z",
-      "updatedAt": "2026-07-02T17:58:35.032Z"
-    },
-    "orchestrated-sequences": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/10-by-time-scale/orchestrated-sequences/SKILL.md",
-      "skillFolderHash": "1c16fcdce45540cb766fc658c1125178dd79680f",
-      "installedAt": "2026-07-02T17:58:35.033Z",
-      "updatedAt": "2026-07-02T17:58:35.033Z"
-    },
-    "responsive-adaptive": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/10-by-time-scale/responsive-adaptive/SKILL.md",
-      "skillFolderHash": "641f9cc38cbaa17cf2140540eb0b7f1757fc0c84",
-      "installedAt": "2026-07-02T17:58:35.035Z",
-      "updatedAt": "2026-07-02T17:58:35.035Z"
-    },
-    "slow-800-1200ms": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/10-by-time-scale/slow-800-1200ms/SKILL.md",
-      "skillFolderHash": "2dd485b7bc3a5cf2b81babf98b6cd9d793eeb7d6",
-      "installedAt": "2026-07-02T17:58:35.036Z",
-      "updatedAt": "2026-07-02T17:58:35.036Z"
-    },
-    "small-200-300ms": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/10-by-time-scale/small-200-300ms/SKILL.md",
-      "skillFolderHash": "908734d5afabc606a23504a42b5dacdbeb0b1859",
-      "installedAt": "2026-07-02T17:58:35.039Z",
-      "updatedAt": "2026-07-02T17:58:35.039Z"
-    },
-    "universal-timing": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/10-by-time-scale/universal-timing/SKILL.md",
-      "skillFolderHash": "dc665a16612d2fce37dda16ec01e53d97fb5521a",
-      "installedAt": "2026-07-02T17:58:35.040Z",
-      "updatedAt": "2026-07-02T17:58:35.040Z"
-    },
-    "anticipation-mastery": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/11-by-principle-focus/anticipation-mastery/SKILL.md",
-      "skillFolderHash": "71b69e25bbf0f6abe270e008d526fc2ee0772d49",
-      "installedAt": "2026-07-02T17:58:35.042Z",
-      "updatedAt": "2026-07-02T17:58:35.042Z"
-    },
-    "appeal-mastery": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/11-by-principle-focus/appeal-mastery/SKILL.md",
-      "skillFolderHash": "ed1553b523d849fe0358ee66c5788cdad43c353f",
-      "installedAt": "2026-07-02T17:58:35.043Z",
-      "updatedAt": "2026-07-02T17:58:35.043Z"
-    },
-    "arc-mastery": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/11-by-principle-focus/arc-mastery/SKILL.md",
-      "skillFolderHash": "7477681706486a55f15098b180d0cd77fff191d7",
-      "installedAt": "2026-07-02T17:58:35.044Z",
-      "updatedAt": "2026-07-02T17:58:35.044Z"
-    },
-    "exaggeration-mastery": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/11-by-principle-focus/exaggeration-mastery/SKILL.md",
-      "skillFolderHash": "3d968c49ded951b293fcf15d5208cfa5233b441e",
-      "installedAt": "2026-07-02T17:58:35.046Z",
-      "updatedAt": "2026-07-02T17:58:35.046Z"
-    },
-    "follow-through-overlapping": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/11-by-principle-focus/follow-through-overlapping/SKILL.md",
-      "skillFolderHash": "8e6af8338926e4b7fce8424cc762ce624ec496ba",
-      "installedAt": "2026-07-02T17:58:35.048Z",
-      "updatedAt": "2026-07-02T17:58:35.048Z"
-    },
-    "secondary-action-mastery": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/11-by-principle-focus/secondary-action-mastery/SKILL.md",
-      "skillFolderHash": "171d27a52c16c6a92da2703d20e95f080f7e9c37",
-      "installedAt": "2026-07-02T17:58:35.049Z",
-      "updatedAt": "2026-07-02T17:58:35.049Z"
-    },
-    "slow-in-out-mastery": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/11-by-principle-focus/slow-in-out-mastery/SKILL.md",
-      "skillFolderHash": "f525820d153bcff8b5cab943a1457869968e3b5d",
-      "installedAt": "2026-07-02T17:58:35.050Z",
-      "updatedAt": "2026-07-02T17:58:35.050Z"
-    },
-    "solid-drawing-mastery": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/11-by-principle-focus/solid-drawing-mastery/SKILL.md",
-      "skillFolderHash": "1d9567092b5831ddb7393be1ee3a6feffc5cf051",
-      "installedAt": "2026-07-02T17:58:35.052Z",
-      "updatedAt": "2026-07-02T17:58:35.052Z"
-    },
-    "squash-stretch-mastery": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/11-by-principle-focus/squash-stretch-mastery/SKILL.md",
-      "skillFolderHash": "ac194b96eda64c29b98c8cfa7ca3f311bda86d1f",
-      "installedAt": "2026-07-02T17:58:35.053Z",
-      "updatedAt": "2026-07-02T17:58:35.053Z"
-    },
-    "staging-mastery": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/11-by-principle-focus/staging-mastery/SKILL.md",
-      "skillFolderHash": "7eff5f2ad150f89fcfe8b04abad3a290487e3143",
-      "installedAt": "2026-07-02T17:58:35.055Z",
-      "updatedAt": "2026-07-02T17:58:35.055Z"
-    },
-    "straight-ahead-pose-mastery": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/11-by-principle-focus/straight-ahead-pose-mastery/SKILL.md",
-      "skillFolderHash": "3a5a33b504ca8ae183c3ef527d8ec09e02e2b1af",
-      "installedAt": "2026-07-02T17:58:35.057Z",
-      "updatedAt": "2026-07-02T17:58:35.057Z"
-    },
-    "timing-principle-mastery": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/11-by-principle-focus/timing-principle-mastery/SKILL.md",
-      "skillFolderHash": "f7803cbd8bf6d704bcd43e8280e986c94843d1cd",
-      "installedAt": "2026-07-02T17:58:35.060Z",
-      "updatedAt": "2026-07-02T17:58:35.060Z"
-    },
-    "accessibility-issues": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/12-by-problem-type/accessibility-issues/SKILL.md",
-      "skillFolderHash": "a2e8a34aeffea1c1b75902f79706fb3d980b7a1a",
-      "installedAt": "2026-07-02T17:58:35.061Z",
-      "updatedAt": "2026-07-02T17:58:35.061Z"
-    },
-    "attention-management": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/12-by-problem-type/attention-management/SKILL.md",
-      "skillFolderHash": "f3f4a423a609ba075151e7a8e4c5d005be442831",
-      "installedAt": "2026-07-02T17:58:35.062Z",
-      "updatedAt": "2026-07-02T17:58:35.062Z"
-    },
-    "brand-consistency": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/12-by-problem-type/brand-consistency/SKILL.md",
-      "skillFolderHash": "d0d232fb2f5c7bf11e06853381cffa9de3a19536",
-      "installedAt": "2026-07-02T17:58:35.064Z",
-      "updatedAt": "2026-07-02T17:58:35.064Z"
-    },
-    "emotional-disconnect": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/12-by-problem-type/emotional-disconnect/SKILL.md",
-      "skillFolderHash": "2520f3c56b2241b2245aff6c3cddff0eb6d66870",
-      "installedAt": "2026-07-02T17:58:35.065Z",
-      "updatedAt": "2026-07-02T17:58:35.065Z"
-    },
-    "implementation-debugging": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/12-by-problem-type/implementation-debugging/SKILL.md",
-      "skillFolderHash": "f9bd54cc59cb532574c04bcee68ca7c8bfe0515c",
-      "installedAt": "2026-07-02T17:58:35.068Z",
-      "updatedAt": "2026-07-02T17:58:35.068Z"
-    },
-    "motion-sickness": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/12-by-problem-type/motion-sickness/SKILL.md",
-      "skillFolderHash": "79d5ab9a42b6a2f35f5f7f28dd820c53c0e95a18",
-      "installedAt": "2026-07-02T17:58:35.069Z",
-      "updatedAt": "2026-07-02T17:58:35.069Z"
-    },
-    "performance-optimization": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/12-by-problem-type/performance-optimization/SKILL.md",
-      "skillFolderHash": "e1133dddcef0a034a72256b11940f60111f17896",
-      "installedAt": "2026-07-02T17:58:35.070Z",
-      "updatedAt": "2026-07-02T17:58:35.070Z"
-    },
-    "technical-constraints": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/12-by-problem-type/technical-constraints/SKILL.md",
-      "skillFolderHash": "85196bb99c93c893b0e39608beb1ca47d1d26c07",
-      "installedAt": "2026-07-02T17:58:35.072Z",
-      "updatedAt": "2026-07-02T17:58:35.072Z"
-    },
-    "timing-calibration": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/12-by-problem-type/timing-calibration/SKILL.md",
-      "skillFolderHash": "b2426a329d7d1241fb7934296b7b9f9f3f1944dd",
-      "installedAt": "2026-07-02T17:58:35.074Z",
-      "updatedAt": "2026-07-02T17:58:35.074Z"
-    },
-    "universal-solutions": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/12-by-problem-type/universal-solutions/SKILL.md",
-      "skillFolderHash": "0cddd0e83f20440aa66f1d92b8f59e050a12cda9",
-      "installedAt": "2026-07-02T17:58:35.075Z",
-      "updatedAt": "2026-07-02T17:58:35.075Z"
-    },
-    "user-feedback-clarity": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/12-by-problem-type/user-feedback-clarity/SKILL.md",
-      "skillFolderHash": "ae65f9ff077660f54ec6dfaf3411b39b029ed122",
-      "installedAt": "2026-07-02T17:58:35.076Z",
-      "updatedAt": "2026-07-02T17:58:35.076Z"
-    },
-    "ux-friction": {
-      "source": "dylantarre/animation-principles",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/dylantarre/animation-principles.git",
-      "skillPath": "skills/12-by-problem-type/ux-friction/SKILL.md",
-      "skillFolderHash": "cba058d3cb2209d58e55c152bee8f1567a4db6e1",
-      "installedAt": "2026-07-02T17:58:35.077Z",
-      "updatedAt": "2026-07-02T17:58:35.077Z"
+      "updatedAt": "2026-07-21T17:41:16.829Z"
     },
     "research": {
       "source": "mattpocock/skills",
@@ -2154,53 +789,48 @@
       "sourceUrl": "https://github.com/mattpocock/skills.git",
       "skillPath": "skills/engineering/research/SKILL.md",
       "skillFolderHash": "972a34cd8128b7952b7eb279b06715862db906a7",
+      "pluginName": "mattpocock-skills",
       "installedAt": "2026-07-09T15:22:45.610Z",
-      "updatedAt": "2026-07-14T05:36:34.855Z"
+      "updatedAt": "2026-08-05T21:13:45.753Z"
     },
     "to-spec": {
       "source": "mattpocock/skills",
       "sourceType": "github",
       "sourceUrl": "https://github.com/mattpocock/skills.git",
       "skillPath": "skills/engineering/to-spec/SKILL.md",
-      "skillFolderHash": "bf698b96b5d8798d110d9872e32b9310728555b0",
+      "skillFolderHash": "dc32a36159f99c854cb470f371106cd38513a15f",
+      "pluginName": "mattpocock-skills",
       "installedAt": "2026-07-09T15:22:45.617Z",
-      "updatedAt": "2026-07-14T05:36:36.863Z"
+      "updatedAt": "2026-08-05T21:13:45.758Z"
     },
     "to-tickets": {
       "source": "mattpocock/skills",
       "sourceType": "github",
       "sourceUrl": "https://github.com/mattpocock/skills.git",
       "skillPath": "skills/engineering/to-tickets/SKILL.md",
-      "skillFolderHash": "5467d7a37ef365ed43ebe6eb466d6e952be881b8",
+      "skillFolderHash": "80c1bedbdaa72a4abd524055013accb4fe0ea8c4",
+      "pluginName": "mattpocock-skills",
       "installedAt": "2026-07-09T15:22:45.619Z",
-      "updatedAt": "2026-07-14T05:36:39.459Z"
+      "updatedAt": "2026-08-05T21:13:45.759Z"
     },
     "wayfinder": {
       "source": "mattpocock/skills",
       "sourceType": "github",
       "sourceUrl": "https://github.com/mattpocock/skills.git",
       "skillPath": "skills/engineering/wayfinder/SKILL.md",
-      "skillFolderHash": "33ed747fb30668c0e7b61698af5268c25c0d75cb",
+      "skillFolderHash": "48c3a8b0a9705d6310d37f7f9b53bcb2c55955c7",
+      "pluginName": "mattpocock-skills",
       "installedAt": "2026-07-09T15:22:45.623Z",
-      "updatedAt": "2026-07-14T05:36:41.998Z"
+      "updatedAt": "2026-08-05T21:13:45.761Z"
     },
     "claude-handoff": {
       "source": "mattpocock/skills",
       "sourceType": "github",
       "sourceUrl": "https://github.com/mattpocock/skills.git",
       "skillPath": "skills/in-progress/claude-handoff/SKILL.md",
-      "skillFolderHash": "5a245865fed8cc05df59f8a15a31acf6871ba729",
+      "skillFolderHash": "b312afac556f7229717dbd9b786d77bc160c8649",
       "installedAt": "2026-07-09T15:22:45.626Z",
-      "updatedAt": "2026-07-14T05:36:44.455Z"
-    },
-    "wizard": {
-      "source": "mattpocock/skills",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/mattpocock/skills.git",
-      "skillPath": "skills/in-progress/wizard/SKILL.md",
-      "skillFolderHash": "e4dc85309aebecd9759f6c4cb3fdcb7c4f69544c",
-      "installedAt": "2026-07-09T15:22:45.630Z",
-      "updatedAt": "2026-07-14T05:36:46.943Z"
+      "updatedAt": "2026-08-05T21:13:45.762Z"
     },
     "apple-design": {
       "source": "emilkowalski/skills",
@@ -2216,9 +846,174 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/emilkowalski/skills.git",
       "skillPath": "skills/improve-animations/SKILL.md",
-      "skillFolderHash": "ec57cb65ea60a23af278d305d1425ce4f998f510",
+      "skillFolderHash": "2ff93ddb9833df45f5e83080de838bb668530820",
       "installedAt": "2026-07-14T09:21:17.972Z",
-      "updatedAt": "2026-07-14T09:21:17.972Z"
+      "updatedAt": "2026-07-21T17:41:19.404Z"
+    },
+    "git-flow-branch-creator": {
+      "source": "github/awesome-copilot",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/github/awesome-copilot.git",
+      "skillPath": "skills/git-flow-branch-creator/SKILL.md",
+      "skillFolderHash": "f303999031498939d1c25cc37ad36cb96a0639c5",
+      "installedAt": "2026-07-16T18:56:52.843Z",
+      "updatedAt": "2026-07-16T18:56:52.843Z"
+    },
+    "seo-audit": {
+      "source": "coreyhaines31/marketingskills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/coreyhaines31/marketingskills.git",
+      "skillPath": "skills/seo-audit/SKILL.md",
+      "skillFolderHash": "0f1f5e31ce921513828ac8f440f358df6fa0751a",
+      "installedAt": "2026-07-16T19:18:05.226Z",
+      "updatedAt": "2026-07-16T19:18:05.226Z"
+    },
+    "marketing-psychology": {
+      "source": "coreyhaines31/marketingskills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/coreyhaines31/marketingskills.git",
+      "skillPath": "skills/marketing-psychology/SKILL.md",
+      "skillFolderHash": "0a527bd6cff5ab2fe2b5a60b97d86013a385326a",
+      "installedAt": "2026-07-16T19:18:42.456Z",
+      "updatedAt": "2026-07-16T19:18:42.456Z"
+    },
+    "hallmark": {
+      "source": "nutlope/hallmark",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/nutlope/hallmark.git",
+      "skillPath": "skills/hallmark/SKILL.md",
+      "skillFolderHash": "747c924c4767b4d5fa6f1c59985c87a21c918334",
+      "installedAt": "2026-07-18T17:00:17.510Z",
+      "updatedAt": "2026-08-06T21:41:39.195Z"
+    },
+    "better-accessibility": {
+      "source": "jakubkrehel/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/jakubkrehel/skills.git",
+      "skillPath": "skills/better-accessibility/SKILL.md",
+      "skillFolderHash": "de3c03dd915359ff07bbf20bf532339c39d660b1",
+      "installedAt": "2026-08-01T19:07:45.239Z",
+      "updatedAt": "2026-08-01T19:07:45.239Z"
+    },
+    "better-colors": {
+      "source": "jakubkrehel/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/jakubkrehel/skills.git",
+      "skillPath": "skills/better-colors/SKILL.md",
+      "skillFolderHash": "efb5db3cbc324ea836305baac585d07e4c725696",
+      "installedAt": "2026-08-01T19:07:45.243Z",
+      "updatedAt": "2026-08-01T19:07:45.243Z"
+    },
+    "better-interface": {
+      "source": "jakubkrehel/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/jakubkrehel/skills.git",
+      "skillPath": "skills/better-interface/SKILL.md",
+      "skillFolderHash": "f992ecb85a1304fe3967835bd37ddbb8a7cb7177",
+      "installedAt": "2026-08-01T19:07:45.245Z",
+      "updatedAt": "2026-08-06T15:06:02.579Z"
+    },
+    "better-layout": {
+      "source": "jakubkrehel/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/jakubkrehel/skills.git",
+      "skillPath": "skills/better-layout/SKILL.md",
+      "skillFolderHash": "7b95fd9f974618314df4f073079e0dd95587cdd8",
+      "installedAt": "2026-08-01T19:07:45.246Z",
+      "updatedAt": "2026-08-01T19:07:45.246Z"
+    },
+    "better-typography": {
+      "source": "jakubkrehel/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/jakubkrehel/skills.git",
+      "skillPath": "skills/better-typography/SKILL.md",
+      "skillFolderHash": "a175046f0135de4056196a8d69e856f1583a9b6e",
+      "installedAt": "2026-08-01T19:07:45.247Z",
+      "updatedAt": "2026-08-01T19:07:45.247Z"
+    },
+    "better-ui": {
+      "source": "jakubkrehel/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/jakubkrehel/skills.git",
+      "skillPath": "skills/better-ui/SKILL.md",
+      "skillFolderHash": "3965b5bc70657d64f0163a65389990c6044d0290",
+      "installedAt": "2026-08-01T19:07:45.248Z",
+      "updatedAt": "2026-08-01T19:07:45.248Z"
+    },
+    "better-writing": {
+      "source": "jakubkrehel/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/jakubkrehel/skills.git",
+      "skillPath": "skills/better-writing/SKILL.md",
+      "skillFolderHash": "901c085a23945001618b2aee838accedae2d1a27",
+      "installedAt": "2026-08-01T19:07:45.249Z",
+      "updatedAt": "2026-08-01T19:07:45.249Z"
+    },
+    "find-animation-opportunities": {
+      "source": "emilkowalski/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/emilkowalski/skills.git",
+      "skillPath": "skills/find-animation-opportunities/SKILL.md",
+      "skillFolderHash": "502f891c05c9cade7e7bd815e3f228fdd20b61b6",
+      "installedAt": "2026-08-02T14:28:56.618Z",
+      "updatedAt": "2026-08-02T14:28:56.618Z"
+    },
+    "pick-ui-library": {
+      "source": "emilkowalski/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/emilkowalski/skills.git",
+      "skillPath": "skills/pick-ui-library/SKILL.md",
+      "skillFolderHash": "cfc9a519a1b554eef39bba7bd74bd6845524ccd1",
+      "installedAt": "2026-08-02T14:29:00.128Z",
+      "updatedAt": "2026-08-02T14:29:00.128Z"
+    },
+    "wizard": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "skills/engineering/wizard/SKILL.md",
+      "skillFolderHash": "359db2fb13dc168346632556185252cab9dbec77",
+      "installedAt": "2026-08-05T21:13:45.761Z",
+      "updatedAt": "2026-08-06T15:05:33.492Z"
+    },
+    "setup-ts-deep-modules": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "skills/in-progress/setup-ts-deep-modules/SKILL.md",
+      "skillFolderHash": "706cd1617d53587b0c4e6df5a8c56974f54cacd2",
+      "installedAt": "2026-08-05T21:13:45.764Z",
+      "updatedAt": "2026-08-05T21:13:45.764Z"
+    },
+    "to-questionnaire": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "skills/productivity/to-questionnaire/SKILL.md",
+      "skillFolderHash": "7c4d04fb4d77824d7d98433ee7a8b17dde5efa13",
+      "pluginName": "mattpocock-skills",
+      "installedAt": "2026-08-05T21:13:45.775Z",
+      "updatedAt": "2026-08-05T21:13:45.775Z"
+    },
+    "wait-what": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "skills/productivity/wait-what/SKILL.md",
+      "skillFolderHash": "6abe708f1bf253158a037ac49faea2944e2809dc",
+      "pluginName": "mattpocock-skills",
+      "installedAt": "2026-08-05T21:13:45.778Z",
+      "updatedAt": "2026-08-05T21:13:45.778Z"
+    },
+    "writing-for-agents": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "skills/productivity/writing-for-agents/SKILL.md",
+      "skillFolderHash": "bd9c9c4762db0a9a094fd419316ebd4b0444d06e",
+      "pluginName": "mattpocock-skills",
+      "installedAt": "2026-08-05T21:13:45.780Z",
+      "updatedAt": "2026-08-05T21:13:45.780Z"
     }
   },
   "dismissed": {

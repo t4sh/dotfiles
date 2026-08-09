@@ -11,6 +11,51 @@ Always on. Apply this before loading or invoking installed skills whose descript
 5. **Orchestration must be intentional.** `better-interface` may coordinate its six owning `better-*` domains for a holistic review. Otherwise add a secondary skill only when it supplies a distinct requested artifact or verification pass.
 6. **Project authority still wins.** Follow project instructions, existing tokens, components, conventions, and user scope over any skill default.
 
+## Written-plan execution
+
+The **Executing written plans** section in `00-core.md` is the sole authority for implementing an existing written plan; `23-verification.md` and `03-worktree-hygiene.md` still govern verification and workspace/integration safety. Do not invoke the retired `executing-plans` skill, including when another third-party skill names it as a required handoff.
+
+## Discovery, specifications, implementation, and planning
+
+Do not invoke the retired `brainstorming`, `writing-plans`, or `feature-dev` skills. Route by the action or artifact the user needs:
+
+| Request | Primary owner |
+| --- | --- |
+| Implement a sufficiently specified feature or change | Core workflow in `00-core.md`, `20-code-posture.md`, and `23-verification.md`; no workflow skill |
+| Interview or stress-test an unclear plan, decision, or idea | `grilling` |
+| Build throwaway UI or logic to answer one concrete design question | `prototype` |
+| Design a system, API, data model, or service boundary | `system-design` |
+| Record or evaluate one architecture decision and its trade-offs | `architecture` |
+| Synthesize an already-settled conversation into a tracker specification | `to-spec` |
+| Produce an executor-ready implementation plan for known work | `improve` in `plan <description>` mode |
+| Break a plan or specification into tracker-native vertical slices | `to-tickets` |
+| Map work too large or uncertain for one agent session | `wayfinder` |
+| Implement explicitly test-first with a red-green loop and agreed seams | `tdd` |
+| Review changes since a fixed commit, branch, tag, or merge-base | `code-review` |
+
+Boundaries:
+
+- A sufficiently specified action request proceeds through the core workflow after reading the relevant context. Do not manufacture a discovery, architecture, planning, TDD, multi-agent, or review approval gate.
+- `prototype` resolves an uncertain design question with disposable evidence; it does not replace requirements discovery or a durable specification.
+- `to-spec` synthesizes settled context and does not conduct the interview itself.
+- `improve plan` authors the plan but does not own execution; use the written-plan execution authority above afterward.
+- `to-tickets` owns tracker decomposition and dependency edges, not file-level implementation instructions.
+- `tdd` owns an explicitly requested test-first workflow. It is not a prerequisite for ordinary implementation; `23-verification.md` still requires proportionate verification.
+- `code-review` owns a requested fixed-point diff review. It is not an automatic completion phase; the proactive in-scope review in `00-core.md` still applies while implementing.
+- Do not auto-route to the user-invoked `implement` skill. When the user invokes it explicitly, project rules still override its bundled defaults, including commit authorization.
+
+## Development completion and integration
+
+`03-worktree-hygiene.md` is the sole authority for finishing development work, integration, pull requests, and branch/worktree cleanup. Do not invoke the retired `finishing-a-development-branch` skill, including when a third-party skill names it as a required follow-up.
+
+## Skill authoring and review
+
+Use `skill-architect` for creating, editing, auditing, comparing, or evaluating agent skills. Do not route to the retired `writing-skills` skill; its reusable behavior-evidence principles are preserved in `skill-architect` references.
+
+## Debugging
+
+Use `diagnosing-bugs` for hypothesis-driven bug and performance diagnosis. Do not route to the retired `systematic-debugging` skill; its durable root-cause, layered-defense, condition-waiting, and three-failed-fixes guidance is preserved in `20-code-posture.md` and `23-verification.md`.
+
 ## Software interface architecture
 
 Use `design-an-interface` when the requested interface is a module or API boundary and the deliverable is multiple radically different signatures/shapes with trade-off comparison. It is read-only design exploration, not visual UI design or implementation.

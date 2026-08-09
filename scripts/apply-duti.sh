@@ -9,6 +9,7 @@ DOTFILES="${DOTFILES:-$(cd -- "$SCRIPT_DIR/.." && pwd -P)}"
 SETTINGS="${1:-$DOTFILES/config/duti}"
 STATE_DIR="${DOTFILES_STATE_DIR:-$HOME/.dotfiles-local}"
 STATE_FILE="$STATE_DIR/default-apps.sha256"
+RECEIPT_VERSION=2
 
 warn() { printf '  ⚠ %s\n' "$*" >&2; }
 
@@ -20,6 +21,10 @@ if [ ! -f "$SETTINGS" ]; then
   echo "$SETTINGS missing" >&2
   exit 1
 fi
+
+# Starting an apply invalidates any prior proof. A partial or failed run must
+# never leave an older receipt that doctor can mistake for current convergence.
+rm -f "$STATE_FILE"
 
 _bundle_exists_find() {
   local bundle_id="$1"
@@ -62,7 +67,8 @@ bundle_exists() {
 
 filtered="$(mktemp -t duti.apply.XXXXXX)"
 bundle_cache="$(mktemp -t duti.bundle-cache.XXXXXX)"
-trap 'rm -f "$filtered" "$bundle_cache"' EXIT
+receipt_tmp=""
+trap 'rm -f "$filtered" "$bundle_cache" "${receipt_tmp:-}"' EXIT
 
 skipped=0
 while IFS= read -r line || [ -n "$line" ]; do
@@ -109,11 +115,17 @@ fi
 
 if (( skipped > 0 )); then
   echo "  ✓ $applied default app mappings applied ($skipped missing bundle(s) skipped)"
+  warn "complete default-app receipt not recorded; install the missing apps and re-run: make default-apps"
+  exit 0
 else
   echo "  ✓ $applied default app mappings applied"
 fi
 
 mkdir -p "$STATE_DIR"
-shasum -a 256 "$SETTINGS" | awk '{print $1}' > "$STATE_FILE"
-chmod 600 "$STATE_FILE"
-echo "  ✓ default-app policy receipt recorded"
+settings_digest="$(shasum -a 256 "$SETTINGS" | awk '{print $1}')"
+receipt_tmp="$(mktemp "$STATE_DIR/.default-apps.sha256.XXXXXX")"
+printf 'v%s:%s\n' "$RECEIPT_VERSION" "$settings_digest" > "$receipt_tmp"
+chmod 600 "$receipt_tmp"
+mv "$receipt_tmp" "$STATE_FILE"
+receipt_tmp=""
+echo "  ✓ complete default-app policy receipt recorded"
