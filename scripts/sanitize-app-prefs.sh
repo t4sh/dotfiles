@@ -3,8 +3,8 @@
 # - Editors: standard Homebrew roots → __HOMEBREW_PREFIX__ restore token
 # - Sublime: /Users/<user>/.nvm/... → ~/.nvm/versions/node/<dotfiles-default>/bin
 # - VS Code: drop yaml.schemas entries with machine-specific file:// paths
-# - Binary plists: remove keys that store local home paths, file bookmarks, or
-#   account-revealing cloud folder names.
+# - Binary plists: remove keys that store local home paths, file bookmarks,
+#   account-revealing cloud folder names, or intentionally per-machine policy.
 set -euo pipefail
 
 DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
@@ -29,6 +29,12 @@ plist_set_bool() {
   "$PLISTBUDDY" -c "Set :$key $value" "$plist" 2>/dev/null ||
     "$PLISTBUDDY" -c "Add :$key bool $value" "$plist"
 }
+
+# Secure Keyboard Entry blocks other processes from observing Terminal input,
+# but it also prevents the system Touch ID authorization panel from taking
+# focus. Keep that security/UX choice local to each Mac instead of restoring it
+# from a portable Terminal profile snapshot.
+plist_delete "$APPS/terminal/terminal.plist" SecureKeyboardEntry
 
 for f in \
   "$APPS/sublime-text/Formatter.sublime-settings" \
