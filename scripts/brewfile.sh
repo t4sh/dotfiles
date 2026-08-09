@@ -72,6 +72,34 @@ filter_retired_mas() {
   ' "$RETIRED_MAS_IDS" "$input" > "$output"
 }
 
+merge_curated_declarations() {
+  local curated="$1" dumped="$2" output="$3"
+  awk '
+    function declaration_key(line, normalized, kind, rest, name) {
+      normalized = line
+      sub(/^[[:space:]]*/, "", normalized)
+      if (normalized !~ /^(tap|brew|cask|mas|vscode|npm)[[:space:]]+"/) return ""
+      kind = normalized
+      sub(/[[:space:]].*$/, "", kind)
+      rest = normalized
+      sub(/^[^"]*"/, "", rest)
+      name = rest
+      sub(/".*$/, "", name)
+      return kind SUBSEP name
+    }
+    NR == FNR {
+      key = declaration_key($0)
+      if (key != "") curated[key] = $0
+      next
+    }
+    {
+      key = declaration_key($0)
+      if (key != "" && key in curated) print curated[key]
+      else print
+    }
+  ' "$curated" "$dumped" > "$output"
+}
+
 check_installed_entries() {
   DOTFILES_CHECK_FILTERED="$(mktemp "${TMPDIR:-/tmp}/dotfiles-brew-check.XXXXXX")"
   DOTFILES_CHECK_EXPECTED="$(mktemp "${TMPDIR:-/tmp}/dotfiles-brew-expected.XXXXXX")"
@@ -177,15 +205,18 @@ case "${1:-}" in
     mkdir -p "$destination_dir"
     tmp="$(mktemp "${TMPDIR:-/tmp}/dotfiles-brewfile.XXXXXX")"
     filtered="$(mktemp "$destination_dir/.dotfiles-brewfile-filtered.XXXXXX")"
+    merged="$(mktemp "$destination_dir/.dotfiles-brewfile-merged.XXXXXX")"
     cleanup_dump() {
       rm -f -- "$tmp"
       [[ -z "$filtered" ]] || rm -f -- "$filtered"
+      [[ -z "$merged" ]] || rm -f -- "$merged"
     }
     trap cleanup_dump EXIT HUP INT TERM
     brew bundle dump --file="$tmp" --force
     filter_retired_mas "$tmp" "$filtered"
-    mv "$filtered" "$2"
-    filtered=""
+    merge_curated_declarations "$BREWFILE" "$filtered" "$merged"
+    mv "$merged" "$2"
+    merged=""
     ;;
   -h|--help|help) usage ;;
   *) usage >&2; exit 1 ;;

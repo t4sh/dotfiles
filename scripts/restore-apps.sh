@@ -15,6 +15,30 @@ set -euo pipefail
 DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
 bash "$DOTFILES/scripts/validate-manifests.sh" apps
 
+materialize_editor_file() {
+    local source="$1" destination="$2" prefix tmp
+    mkdir -p "$(dirname "$destination")"
+    if ! grep -q '__HOMEBREW_PREFIX__' "$source"; then
+        cp "$source" "$destination"
+        return
+    fi
+    command -v brew >/dev/null 2>&1 || {
+        echo "Homebrew is required to materialize editor paths in $source" >&2
+        return 1
+    }
+    prefix="$(brew --prefix)"
+    tmp="$(mktemp "$(dirname "$destination")/.dotfiles-editor.XXXXXX")"
+    if ! HOMEBREW_PREFIX="$prefix" perl -pe \
+        's/__HOMEBREW_PREFIX__/$ENV{HOMEBREW_PREFIX}/g' "$source" > "$tmp"; then
+        rm -f "$tmp"
+        return 1
+    fi
+    if ! chmod 600 "$tmp" || ! mv "$tmp" "$destination"; then
+        rm -f "$tmp"
+        return 1
+    fi
+}
+
 # shellcheck source=scripts/lib/running-app-gate.sh
 source "$DOTFILES/scripts/lib/running-app-gate.sh"
 trap restore_reopen_apps EXIT
@@ -97,8 +121,7 @@ if [ -f "$DOTFILES/apps/vscode/settings.json" ]; then
     if restore_app_is_deferred "Visual Studio Code"; then
         echo "  - VS Code skipped because it hosts this restore"
     else
-        mkdir -p "$VSCODE_USER"
-        cp "$DOTFILES/apps/vscode/settings.json" "$VSCODE_USER/settings.json"
+        materialize_editor_file "$DOTFILES/apps/vscode/settings.json" "$VSCODE_USER/settings.json"
         echo "  ✓ VS Code"
     fi
 fi
@@ -109,8 +132,7 @@ if [ -f "$DOTFILES/apps/cursor/settings.json" ]; then
     if restore_app_is_deferred "Cursor"; then
         echo "  - Cursor settings skipped because it hosts this restore"
     else
-        mkdir -p "$CURSOR_USER"
-        cp "$DOTFILES/apps/cursor/settings.json" "$CURSOR_USER/settings.json"
+        materialize_editor_file "$DOTFILES/apps/cursor/settings.json" "$CURSOR_USER/settings.json"
         echo "  ✓ Cursor"
     fi
 fi

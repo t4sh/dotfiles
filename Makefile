@@ -1,4 +1,6 @@
-.PHONY: all help link unlink brew brew-without-mas brew-base brew-core brew-apps node brew-npm brew-mas brew-check brewfile-audit shims macos macos-user macos-dry-run macos-check touch-id-sudo touch-id-sudo-check dock terminal services restore-apps restore-canary restore-shottr post-vault backup backup-canary backup-shottr audit-apps apps-drift hooks ssh-setup skills-audit skills skills-update skills-manifest secrets-backup secrets-mount secrets-health secrets-manifest secrets-restore secrets-restore-apply secrets-pass secrets-pass-import rules-audit default-apps default-apps-check capture-default-apps doctor verify-bootstrap docs-audit
+.DEFAULT_GOAL := help
+
+.PHONY: all help link unlink brew brew-without-mas brew-base brew-core brew-apps node brew-npm brew-mas brew-check brewfile-audit shims macos macos-user macos-dry-run macos-check touch-id-sudo touch-id-sudo-check dock terminal services services-check restore-apps restore-canary restore-shottr post-vault backup backup-canary backup-shottr audit-apps apps-drift hooks hooks-check ssh-setup skills-audit skills skills-update skills-manifest secrets-backup secrets-mount secrets-health secrets-manifest secrets-restore secrets-restore-apply secrets-pass secrets-pass-import rules-audit default-apps default-apps-check capture-default-apps doctor verify-bootstrap docs-audit
 
 export DOTFILES := $(CURDIR)
 
@@ -93,6 +95,9 @@ hooks: ## Install local git hooks and diff drivers
 	@git config --local diff.plist.textconv "plutil -p"
 	@git config --local diff.plist.binary true
 	@echo "  ✓ plist diff driver (.gitattributes wires *.plist → plist)"
+
+hooks-check: ## Verify this checkout uses the tracked executable git hooks
+	@bash scripts/check-hooks.sh
 
 link: ## Apply symlinks from symlinks.tsv
 	@bash scripts/link.sh
@@ -208,6 +213,9 @@ services: ## Install Automator Quick Actions into ~/Library/Services
 	[ "$$count" -gt 0 ] || { echo "  ✗ no Automator workflows found" >&2; exit 1; }; \
 	echo "Automator services installed ($$count)."
 
+services-check: ## Compare installed Automator workflows with the repo copies
+	@bash scripts/check-services.sh
+
 default-apps: ## Apply repo default-app policy from config/duti
 	@bash scripts/apply-duti.sh
 
@@ -225,6 +233,10 @@ verify-bootstrap: ## Fail unless the post-vault Mac bootstrap is complete
 	@$(MAKE) --no-print-directory skills
 	@$(MAKE) --no-print-directory audit-apps
 	@bash scripts/link.sh --check
+	@$(MAKE) --no-print-directory services-check
+	@$(MAKE) --no-print-directory hooks-check
+	@$(MAKE) --no-print-directory macos-check
+	@$(MAKE) --no-print-directory default-apps-check
 	@bash scripts/doctor.sh --strict
 
 docs-audit: ## Check docs/scripts for typos when typos is installed

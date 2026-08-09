@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DOTFILES="$HOME/.dotfiles"
+DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
+BOOTSTRAP_SMOKE="${DOTFILES_BOOTSTRAP_SMOKE:-0}"
+
+if [[ "$BOOTSTRAP_SMOKE" == "1" && "${CI:-}" != "true" ]]; then
+    echo "DOTFILES_BOOTSTRAP_SMOKE=1 is reserved for disposable CI runners." >&2
+    exit 1
+fi
 
 echo "╔══════════════════════════════════════╗"
 echo "║      Mac Bootstrap — dotfiles        ║"
@@ -14,6 +20,13 @@ if ! xcode-select -p &>/dev/null; then
     xcode-select --install
     echo "  Press any key after Xcode CLI tools finish installing."
     read -r -n 1 -s
+    echo ""
+    if ! xcode-select -p &>/dev/null; then
+        echo "Xcode Command Line Tools installation incomplete." >&2
+        echo "Finish or retry 'xcode-select --install', then rerun ./install.sh." >&2
+        exit 1
+    fi
+    echo "✓ Xcode CLI tools installed"
 else
     echo "✓ Xcode CLI tools already installed"
 fi
@@ -49,15 +62,21 @@ echo "→ Installing bootstrap formulae..."
 make -C "$DOTFILES" brew-core
 
 BREW_APPS_FAILED=0
-echo "→ Installing GUI apps, fonts, and editor extensions..."
-if ! make -C "$DOTFILES" brew-apps; then
-    BREW_APPS_FAILED=1
-    echo "  ⚠ optional app phase incomplete; bootstrap will continue"
-    echo "    retry later with: make brew-apps"
+if [[ "$BOOTSTRAP_SMOKE" == "1" ]]; then
+    echo "  - disposable core smoke: GUI apps, fonts, and editor extensions deferred"
+else
+    echo "→ Installing GUI apps, fonts, and editor extensions..."
+    if ! make -C "$DOTFILES" brew-apps; then
+        BREW_APPS_FAILED=1
+        echo "  ⚠ optional app phase incomplete; bootstrap will continue"
+        echo "    retry later with: make brew-apps"
+    fi
 fi
 
 # 5. Default shell
-if [ "$SHELL" != "/bin/zsh" ]; then
+if [[ "$BOOTSTRAP_SMOKE" == "1" ]]; then
+    echo "  - disposable core smoke: default-shell mutation deferred"
+elif [ "$SHELL" != "/bin/zsh" ]; then
     echo "→ Setting zsh as default shell..."
     chsh -s /bin/zsh
 else
@@ -76,6 +95,19 @@ make -C "$DOTFILES" brew-npm
 # (agents invoke node through these, independent of nvm's per-dir switching).
 # Single source of truth: scripts/link-node-shims.sh (also `make shims`).
 make -C "$DOTFILES" shims
+
+if [[ "$BOOTSTRAP_SMOKE" == "1" ]]; then
+    echo ""
+    echo "→ Exercising disposable service and hook installation..."
+    make -C "$DOTFILES" services
+    make -C "$DOTFILES" hooks
+    make -C "$DOTFILES" rules-audit
+    make -C "$DOTFILES" skills
+    echo ""
+    echo "Disposable macOS core bootstrap smoke complete."
+    echo "GUI casks, app preference restore, Dock, system defaults, MAS, and vault recovery remain outside hosted-runner coverage."
+    exit 0
+fi
 
 # 7. Automator Services — before restore-apps (same order as `make all`:
 #    services → restore-apps → dock → hooks → macos).
@@ -108,6 +140,8 @@ read -p "→ Run macOS system preferences setup? (y/n) " -n 1 -r
 echo ""
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     make -C "$DOTFILES" macos
+else
+    echo "  - macOS policy deferred; run: make macos"
 fi
 
 echo ""

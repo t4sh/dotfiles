@@ -75,6 +75,22 @@ copy_managed "$source_dir" "$incoming"
 copy_managed "$destination_dir" "$previous"
 mkdir -p "$destination_dir"
 
+if [[ "$mode" == restore ]]; then
+  homebrew_prefix=""
+  while IFS= read -r -d '' file; do
+    grep -q '__HOMEBREW_PREFIX__' "$file" || continue
+    if [[ -z "$homebrew_prefix" ]]; then
+      command -v brew >/dev/null 2>&1 || {
+        echo "Homebrew is required to materialize Sublime Text paths" >&2
+        exit 1
+      }
+      homebrew_prefix="$(brew --prefix)"
+    fi
+    HOMEBREW_PREFIX="$homebrew_prefix" perl -i -pe \
+      's/__HOMEBREW_PREFIX__/$ENV{HOMEBREW_PREFIX}/g' "$file"
+  done < <(managed_files "$incoming")
+fi
+
 publish() {
   remove_managed "$destination_dir"
   copy_managed "$incoming" "$destination_dir"

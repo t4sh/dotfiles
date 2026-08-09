@@ -1,0 +1,27 @@
+name: disposable macOS bootstrap smoke
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bootstrap-core:
+    name: Fresh hosted macOS core bootstrap
+    runs-on: macos-15
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # actions/checkout@v5
+      - name: Run the real core bootstrap path
+        shell: bash
+        env:
+          DOTFILES: ${{ github.workspace }}
+          DOTFILES_BOOTSTRAP_SMOKE: "1"
+        run: bash install.sh
+      - name: Verify installed core state
+        run: |
+          make hooks-check services-check rules-audit skills
+          test -x "$HOME/.local/bin/node-stable"
+          test -x "$HOME/.local/bin/npx-stable"

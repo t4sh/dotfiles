@@ -14,7 +14,8 @@
 #   Manifest     $DOTFILES_BACKUP_MANIFEST or ~/.dotfiles-local/backup.manifest
 #   Destination  $DOTFILES_BACKUP_DEST or prompt (cached in ~/.dotfiles-local/backup.destination)
 # Vault:       <destination>/DotfilesSecrets.sparseimage
-# Snapshots:   /Volumes/DotfilesSecrets/YYYYMMDD-HHMMSS/<absolute-path-mirror>/
+# Snapshots:   /Volumes/DotfilesSecrets/YYYYMMDD-HHMMSS/payload/secrets/ for
+#              canonical ~/.secrets; other manifest rows retain absolute mirrors.
 # Retention:   $DOTFILES_BACKUP_KEEP (default 10) newest dated folders.
 
 set -euo pipefail
@@ -29,6 +30,7 @@ RECOVERY_ACK="$LOCAL_DIR/vault-recovery.confirmed"
 KEEP="${DOTFILES_BACKUP_KEEP:-10}"
 SIZE_CAP="${DOTFILES_VAULT_SIZE:-4g}"
 STAMP="$(date +%Y%m%d-%H%M%S)"
+SECRETS_DIR="${DOTFILES_SECRETS_DIR:-$HOME/.secrets}"
 
 [[ "$KEEP" =~ ^[1-9][0-9]*$ ]] || {
   printf '\033[31merror:\033[0m DOTFILES_BACKUP_KEEP must be a positive integer (got: %s)\n' "$KEEP" >&2
@@ -46,7 +48,6 @@ die()  { printf '\033[31merror:\033[0m %s\n' "$*" >&2; exit 1; }
 
 expand_manifest_path() {
   local s="$1"
-  local secrets_dir="${DOTFILES_SECRETS_DIR:-$HOME/.secrets}"
 
   # Literal tilde/variable patterns are expanded manually below.
   # shellcheck disable=SC2088,SC2016
@@ -57,10 +58,10 @@ expand_manifest_path() {
     '$HOME/'*) printf '%s/%s' "$HOME" "${s#\$HOME/}" ;;
     '${HOME}') printf '%s' "$HOME" ;;
     '${HOME}/'*) printf '%s/%s' "$HOME" "${s#\$\{HOME\}/}" ;;
-    '$DOTFILES_SECRETS_DIR') printf '%s' "$secrets_dir" ;;
-    '$DOTFILES_SECRETS_DIR/'*) printf '%s/%s' "$secrets_dir" "${s#\$DOTFILES_SECRETS_DIR/}" ;;
-    '${DOTFILES_SECRETS_DIR}') printf '%s' "$secrets_dir" ;;
-    '${DOTFILES_SECRETS_DIR}/'*) printf '%s/%s' "$secrets_dir" "${s#\$\{DOTFILES_SECRETS_DIR\}/}" ;;
+    '$DOTFILES_SECRETS_DIR') printf '%s' "$SECRETS_DIR" ;;
+    '$DOTFILES_SECRETS_DIR/'*) printf '%s/%s' "$SECRETS_DIR" "${s#\$DOTFILES_SECRETS_DIR/}" ;;
+    '${DOTFILES_SECRETS_DIR}') printf '%s' "$SECRETS_DIR" ;;
+    '${DOTFILES_SECRETS_DIR}/'*) printf '%s/%s' "$SECRETS_DIR" "${s#\$\{DOTFILES_SECRETS_DIR\}/}" ;;
     '$DOTFILES_LOCAL_DIR') printf '%s' "$LOCAL_DIR" ;;
     '$DOTFILES_LOCAL_DIR/'*) printf '%s/%s' "$LOCAL_DIR" "${s#\$DOTFILES_LOCAL_DIR/}" ;;
     '${DOTFILES_LOCAL_DIR}') printf '%s' "$LOCAL_DIR" ;;
@@ -520,13 +521,20 @@ for src in "${MANIFEST_PATHS[@]}"; do
     warn "skip (missing): $src"
     continue
   fi
-  dst_parent="$PARTIAL${src%/*}"
-  mkdir -p "$dst_parent"
+  if [[ "${src%/}" == "${SECRETS_DIR%/}" ]]; then
+    destination="$PARTIAL/payload/secrets"
+    mkdir -p "$destination"
+    source_path="${src%/}/"
+  else
+    destination="$PARTIAL${src%/*}"
+    mkdir -p "$destination"
+    source_path="$src"
+  fi
   if ! rsync -aL --quiet \
         --exclude='.DS_Store' --exclude='*.sock' --exclude='sockets' \
         --exclude='node_modules' --exclude='__pycache__' --exclude='*.pyc' \
         --exclude='com.microsoft.appcenter' \
-        "$src" "$dst_parent/"; then
+        "$source_path" "$destination/"; then
     die "rsync failed copying $src — partial snapshot will be removed
   if the vault was full, prune or resize before retrying (see check_vault_space hints above)"
   fi

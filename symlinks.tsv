@@ -41,7 +41,6 @@ $DOTFILES/starship/jetpack.toml	$HOME/.config/jetpack.toml
 # Config
 $DOTFILES/config/gh-config.yml	$HOME/.config/gh/config.yml
 $DOTFILES/config/topgrade.toml	$HOME/.config/topgrade.toml
-$DOTFILES/config/mcp.json	$HOME/.mcp.json
 $DOTFILES/config/bat/config	$HOME/.config/bat/config
 $DOTFILES/config/lazygit/config.yml	$HOME/.config/lazygit/config.yml
 $DOTFILES/config/duti	$HOME/.duti

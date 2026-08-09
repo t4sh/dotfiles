@@ -31,7 +31,27 @@ fi
 
 SNAPSHOT="$SOURCE_ROOT/$STAMP"
 [[ -d "$SNAPSHOT" ]] || die "snapshot not found: $SNAPSHOT"
-SNAPSHOT_SECRETS="${DOTFILES_RESTORE_SECRETS_SOURCE:-$SNAPSHOT$HOME/.secrets}"
+
+if [[ -n "${DOTFILES_RESTORE_SECRETS_SOURCE:-}" ]]; then
+  SNAPSHOT_SECRETS="$DOTFILES_RESTORE_SECRETS_SOURCE"
+elif [[ -d "$SNAPSHOT/payload/secrets" ]]; then
+  SNAPSHOT_SECRETS="$SNAPSHOT/payload/secrets"
+elif [[ -d "$SNAPSHOT$HOME/.secrets" ]]; then
+  # Backward compatibility for absolute-path snapshots created by older runs.
+  SNAPSHOT_SECRETS="$SNAPSHOT$HOME/.secrets"
+else
+  legacy_candidates=()
+  if [[ -d "$SNAPSHOT/Users" ]]; then
+    while IFS= read -r -d '' candidate; do
+      legacy_candidates+=("$candidate")
+    done < <(find "$SNAPSHOT/Users" -mindepth 2 -maxdepth 2 -type d -name .secrets -print0)
+  fi
+  case "${#legacy_candidates[@]}" in
+    1) SNAPSHOT_SECRETS="${legacy_candidates[0]}" ;;
+    0) die "canonical secrets payload missing: $SNAPSHOT/payload/secrets" ;;
+    *) die "ambiguous legacy secrets payloads under $SNAPSHOT/Users; set DOTFILES_RESTORE_SECRETS_SOURCE explicitly" ;;
+  esac
+fi
 [[ -d "$SNAPSHOT_SECRETS" ]] || die "canonical secrets payload missing: $SNAPSHOT_SECRETS"
 
 file_count="$(find "$SNAPSHOT_SECRETS" -type f | wc -l | tr -d '[:space:]')"

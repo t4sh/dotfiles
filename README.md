@@ -118,14 +118,14 @@ Add a new symlink: one row in [`symlinks.tsv`](symlinks.tsv). No Stow/dotbot con
 | `make brew-check` | Quick install-state check (`scripts/brewfile.sh check`) |
 | `make shims` | Create or repair the pinned `node-stable` / `npx-stable` shims |
 | `make restore-apps` | Restore tracked app prefs (running-app gate quits/reopens managed apps) |
-| `make services` | Install Automator workflows |
+| `make services` / `make services-check` | Install Automator workflows / compare installed copies with the repo |
 | `make macos` | Apply macOS defaults + Touch ID sudo (`sudo_local`) |
 | `make touch-id-sudo` | Idempotently enable Touch ID for sudo |
-| `make verify-bootstrap` | Strict post-vault completion gate |
+| `make verify-bootstrap` | Strict post-vault gate for rules, skills, app snapshots, links, services, hooks, macOS policy, and default apps |
 | `make dock` | Restore Dock layout |
 | `make terminal` | Import Terminal profiles (quits Terminal — run outside Terminal.app) |
 | `make ssh-setup` | Validate/register a restored GitHub SSH key via `gh` |
-| `make hooks` | Install git hooks (gitleaks) |
+| `make hooks` / `make hooks-check` | Install tracked git hooks / verify hook routing and executable bits |
 
 ### Policy & audits
 
@@ -266,6 +266,8 @@ The CLI-created Keychain item is local and is not assumed to synchronize through
 | **audit-brewfile** | `make brewfile-audit`, topgrade hook |
 | **verify-idempotency** | Optional drift harness (see below) |
 
+Hosted CI runs gitleaks plus macOS-native shell syntax, rule/skill inventory, and executable Impeccable fixtures. A separate manual workflow exercises the real core `install.sh` path on a disposable `macos-15` runner while deliberately excluding GUI casks, app preference restore, Dock, system defaults, MAS, and vault recovery.
+
 ## Idempotency
 
 Every `make` target is safe to re-run. This is load-bearing — bootstrap is meant as "apply current state," not "run once."
@@ -307,7 +309,7 @@ Create `~/.dotfiles/zsh/lib/99-local.zsh` for anything that must not be committe
 | [`zsh/`](zsh/) | Shell configuration |
 | [`git/`](git/) | Git config and global ignore |
 | [`starship/`](starship/) | Prompt themes |
-| [`config/`](config/) | Tool configs, duti, EditorConfig, inputrc, topgrade, MCP |
+| [`config/`](config/) | Tool configs, duti, EditorConfig, inputrc, topgrade |
 | [`hammerspoon/`](hammerspoon/) | Primary window manager (Rectangle-style shortcuts + top-edge Almost Maximize) |
 | [`agents/`](agents/) | Agent rules, skills, commands |
 | [`apps/`](apps/) | App preference snapshots |

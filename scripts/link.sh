@@ -75,8 +75,25 @@ backup_path_for() {
     printf '%s' "$backup.$n"
 }
 
+candidate_path_for() {
+    local dst="$1" dir base candidate n
+    dir="$(dirname "$dst")"
+    base="$(basename "$dst")"
+    candidate="$dir/.$base.dotfiles-link.$$"
+    if [[ ! -e "$candidate" && ! -L "$candidate" ]]; then
+        printf '%s' "$candidate"
+        return
+    fi
+
+    n=1
+    while [[ -e "$candidate.$n" || -L "$candidate.$n" ]]; do
+        n=$((n + 1))
+    done
+    printf '%s' "$candidate.$n"
+}
+
 link_one() {
-    local src="$1" dst="$2" backup
+    local src="$1" dst="$2" backup="" candidate status
     if [[ ! -e "$src" ]]; then
         echo "  ⚠ source missing for $dst: $src"
         MISSING_SOURCES=$((MISSING_SOURCES + 1))
@@ -93,20 +110,56 @@ link_one() {
         echo "  ✗ $dst (expected link to $src)"
         return
     fi
-    if [ -e "$dst" ] || [ -L "$dst" ]; then
-        backup="$(backup_path_for "$dst")"
-        echo "  → backing up $dst → $backup"
-        if (( ! DRY_RUN )); then
-            mkdir -p "$(dirname "$backup")"
-            mv "$dst" "$backup"
-        fi
-    fi
     if (( DRY_RUN )); then
+        if [ -e "$dst" ] || [ -L "$dst" ]; then
+            backup="$(backup_path_for "$dst")"
+            echo "  → backing up $dst → $backup"
+        fi
         echo "  + would link $dst → $src"
         return
     fi
+
     mkdir -p "$(dirname "$dst")"
-    ln -s "$src" "$dst"
+    candidate="$(candidate_path_for "$dst")"
+    if ln -s "$src" "$candidate"; then
+        :
+    else
+        status=$?
+        rm -f -- "$candidate"
+        echo "  ✗ could not stage link for $dst" >&2
+        return "$status"
+    fi
+
+    if [ -e "$dst" ] || [ -L "$dst" ]; then
+        backup="$(backup_path_for "$dst")"
+        echo "  → backing up $dst → $backup"
+        mkdir -p "$(dirname "$backup")"
+        if mv "$dst" "$backup"; then
+            :
+        else
+            status=$?
+            rm -f -- "$candidate"
+            echo "  ✗ could not back up $dst" >&2
+            return "$status"
+        fi
+    fi
+
+    if mv "$candidate" "$dst"; then
+        :
+    else
+        status=$?
+        rm -f -- "$candidate"
+        if [[ -n "$backup" && ( -e "$backup" || -L "$backup" ) ]]; then
+            if mv "$backup" "$dst"; then
+                :
+            else
+                echo "  ✗ publish failed and rollback could not restore $dst; original remains at $backup" >&2
+                return "$status"
+            fi
+        fi
+        echo "  ✗ could not publish link for $dst; previous destination restored" >&2
+        return "$status"
+    fi
     echo "  ✓ $dst → $src"
 }
 

@@ -21,3 +21,11 @@ Always on. These apply in every mode, every project, every tool.
 9. **Scope commits deliberately.** Group changes logically — don't commit per-fix. If a session exceeds 5 commits, pause and ask whether to re-scope and squash.
 
 10. **Fetch+rebase before shared-branch commits.** Default sequence: fetch → rebase → resolve → verify → stage → commit. If the repo is offline, local-only, detached, has no upstream, or rebasing would disturb unrelated user work, skip the rebase and say why before committing. Exception: if local `<default>` diverged after a squash PR merge, follow **Default-branch realignment after squash PR merge** in `03-worktree-hygiene.md` instead of rebasing.
+
+## Executing written plans
+
+When implementing an existing written plan:
+
+- **Validate the plan against current state before editing.** Read the complete plan, then verify its paths, assumptions, dependencies, constraints, and completion criteria against the current repository and environment. Surface material drift, contradictions, or gaps before starting; do not execute a stale plan literally.
+- **Track every plan item explicitly.** Put each actionable item in the available task or plan tracker, keep at most one item in progress, run its specified verification before marking it complete, and do not silently skip or reorder work. Report any deliberate deviation and its reason.
+- **Return to plan review when reality changes.** Revalidate and update the remaining plan when the user changes it, repository state invalidates an assumption, the fundamental approach changes, or verification exposes a critical gap. Get the user's decision when the correction materially changes scope or direction; do not force the original plan through blockers.

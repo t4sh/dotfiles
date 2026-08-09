@@ -36,7 +36,7 @@ expand_supported_absolute() {
 }
 
 validate_symlinks() {
-  local manifest="${SYMLINKS_MANIFEST:-$DOTFILES/symlinks.tsv}" line number=0 src dst expanded_dst
+  local manifest="${SYMLINKS_MANIFEST:-$DOTFILES/symlinks.tsv}" line number=0 src dst expanded_src expanded_dst
   [[ -f "$manifest" ]] || die "manifest not found: $manifest"
   DESTINATIONS_TMP="$(mktemp -t dotfiles-link-destinations.XXXXXX)"
 
@@ -46,8 +46,13 @@ validate_symlinks() {
     [[ "$(tab_count "$line")" == "1" ]] || die "$manifest:$number must contain exactly 2 tab-separated fields"
     IFS=$'\t' read -r src dst <<< "$line"
     [[ -n "$src" && -n "$dst" ]] || die "$manifest:$number has an empty source or destination"
-    expand_supported_absolute "$src" "$manifest:$number source" >/dev/null
+    expanded_src="$(expand_supported_absolute "$src" "$manifest:$number source")"
     expanded_dst="$(expand_supported_absolute "$dst" "$manifest:$number destination")"
+    [[ "$expanded_src" == "$DOTFILES/"* || "$expanded_src" == "$HOME/.secrets/"* || \
+       "$expanded_src" == "$HOME/.agents/"* ]] || \
+      die "$manifest:$number source must be beneath an owned root (\$DOTFILES, \$HOME/.secrets, or \$HOME/.agents): $src"
+    [[ "$expanded_dst" == "$HOME/"* ]] || \
+      die "$manifest:$number destination must be beneath the owned root \$HOME: $dst"
     if grep -Fqx -- "$expanded_dst" "$DESTINATIONS_TMP"; then
       die "$manifest:$number duplicates destination: $dst"
     fi

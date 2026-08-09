@@ -40,7 +40,7 @@ VOLATILE_KEY_PATTERNS = (
     # Generic per-launch counters, timestamps, and recents.
     r"last(launch|run|used|open|check|seen|update|sync|active|version|connected|unseen|played)",
     r"^LastTerminalStartTime$",
-    r"(launch|run|usage|open|session|activation)count",
+    r"(launch|run|usage|open|session|activation|startup)count",
     r"^recent",
     r"recent(documents|searches|items|files)",
     r"(firstlaunch|hasrun|haslaunched|installdate|installtime)",
@@ -60,13 +60,15 @@ VOLATILE_KEY_PATTERNS = (
     r"^KnownDisplays$",
     # Sindresorhus app bookkeeping (review prompt cadence, last launched build).
     r"^SS(App)?_(requestReview|previousLaunchedVersion|firstLaunchDate)",
+    r"^SS_StatusItem-\d+_PreviousPosition$",
     # Hardware-derived identity and live display state (BetterDisplay). These are
     # keyed by per-machine display IDs and IOService paths, so restoring them
     # onto different hardware is wrong, not merely stale.
     r"^(displayConfigurationId|storedIdentifiers|resolutionFavorites|settingsPaneId)",
+    r"^(persistedDisplayID|connected)@Display:",
     r"^value@.*(brightness|contrast|volume)",
     # macOS input-source runtime state.
-    r"^Apple(InputSourceHistory|SelectedInputSources|SavedCurrentInputSource|InputSourceUpdateTime)$",
+    r"^Apple(CurrentKeyboardLayoutInputSourceID|InputSourceHistory|SelectedInputSources|SavedCurrentInputSource|InputSourceUpdateTime)$",
 )
 
 VOLATILE_KEY_RE = re.compile("|".join(VOLATILE_KEY_PATTERNS), re.IGNORECASE)

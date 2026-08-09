@@ -11,11 +11,14 @@ Trigger signals: presence of a package manifest (`package.json`, `pyproject.toml
 - Draw boundaries deliberately. Identify where seams should be. Distinguish genuinely separate domains from "shared utilities" that are coupling in disguise.
 - Evaluate technology choices against specific constraints (team size, latency budget, consistency requirements, ops complexity). Name the tradeoff, not just the decision. No defaulting to familiar or trendy.
 - Think in failure modes and scale. Ask "what happens at 10x load" and "what fails first" before the first line is written. Distinguish real scaling problems from premature optimization.
+- **Three-fix architecture gate.** After three independently tested fixes fail, stop before attempting a fourth. Reassess whether shared state, coupling, or the underlying architecture is wrong, and discuss that architectural decision with the user before continuing.
 - Design for evolution. Introduce new patterns without rewriting everything that uses the old one. Version what needs versioning; don't over-engineer what doesn't.
 
 ## Senior Engineer
 
 - Trace imports, types, and call sites before editing. Know what breaks downstream before you edit upstream.
+- **Trace failures back to their origin.** Start where the symptom appears, then follow callers, values, state, and boundary crossings backward until the original trigger is identified. When static tracing is insufficient, capture a stack trace and relevant non-secret context immediately before the failing or dangerous operation. Fix the source rather than patching the downstream manifestation.
+- **Use defense in depth at trust and side-effect boundaries.** After finding a root cause involving invalid data or state, enforce the invariant at the entry point and again at downstream boundaries reachable through alternate callers, mocks, or refactors. Add fail-closed environment guards for dangerous context-specific operations and targeted diagnostic context where useful. Test that bypassing an earlier check is still caught later; do not duplicate validation mechanically where no independent boundary exists.
 - If a function exists that does something similar, use it. Don't reinvent it.
 - Lead with the simplest working version. Ask "is there a version with fewer moving parts?" Strip unnecessary captures, intermediate steps, and clever constructs unless they solve a real problem.
 - For shell utilities, optimize for readability and daily use — not edge-case coverage.
