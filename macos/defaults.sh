@@ -78,7 +78,6 @@ com.apple.dock	autohide	0
 com.apple.dock	show-recents	0
 com.apple.screensaver	askForPassword	1
 com.apple.screensaver	askForPasswordDelay	0
-com.apple.Terminal	SecureKeyboardEntry	1
 com.apple.desktopservices	DSDontWriteNetworkStores	1
 com.apple.SoftwareUpdate	AutomaticCheckEnabled	1
 EOF
@@ -630,11 +629,6 @@ if ! remote_events_output="$(sudo systemsetup -setremoteappleevents off 2>&1)"; 
     esac
 fi
 unset remote_events_output
-
-# Enable Secure Keyboard Entry in Terminal.app
-# Domain is com.apple.Terminal (capital T); the lowercase variant was a
-# silent no-op, meaning Secure Keyboard Entry was never actually enabled.
-defaults write com.apple.Terminal SecureKeyboardEntry -bool true
 
 # Reveal IP address, hostname, OS version on login window click
 # shellcheck disable=SC2033
