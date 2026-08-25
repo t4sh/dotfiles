@@ -70,6 +70,16 @@ def get_lock_skills():
     return version, skills
 
 
+def inventory_skills_for_manifest(disk_skills, lock_skills, gated):
+    """Return the reproducible full inventory, including gated lock entries."""
+    return sorted(set(disk_skills) | (set(lock_skills) & set(gated)))
+
+
+def required_lock_misses(in_lock_only, gated):
+    """Return missing locked skills that are not intentionally gated."""
+    return sorted(set(in_lock_only) - set(gated))
+
+
 def parse_existing_remarks():
     """Extract remarks from the current README table (preserves manual annotations)."""
     remarks = {}
@@ -86,26 +96,30 @@ def parse_existing_remarks():
     return remarks
 
 
-def build_readme(disk_skills, lock_version, lock_skills, remarks, gated):
+def build_readme(inventory_skills, lock_version, lock_skills, remarks, gated):
     """Generate the full README.md content."""
 
-    total = len(disk_skills)
-    remote = sum(1 for s in disk_skills if s in lock_skills and lock_skills[s]["sourceType"] != "local")
+    total = len(inventory_skills)
+    remote = sum(
+        1
+        for skill in inventory_skills
+        if skill in lock_skills and lock_skills[skill]["sourceType"] != "local"
+    )
     local = total - remote
 
-    gated_on_disk = sorted(s for s in disk_skills if s in gated)
+    gated_inventory = sorted(s for s in inventory_skills if s in gated)
 
-    on_disk_only = sorted(s for s in disk_skills if s not in lock_skills)
-    in_lock_only = sorted(s for s in lock_skills if s not in set(disk_skills))
+    on_disk_only = sorted(s for s in inventory_skills if s not in lock_skills)
+    in_lock_only = sorted(s for s in lock_skills if s not in set(inventory_skills))
 
     rows = []
-    for i, name in enumerate(disk_skills, 1):
+    for i, name in enumerate(inventory_skills, 1):
         source = lock_skills[name]["source"] if name in lock_skills else "local"
         remark = remarks.get(name, "\u2014")
         rows.append(f"| {i} | {name} | {source} | `~/.agents/skills/{name}/` | {remark} |")
 
     groups = {}
-    for name in disk_skills:
+    for name in inventory_skills:
         src = lock_skills[name]["source"] if name in lock_skills else "local"
         groups.setdefault(src, []).append(name)
     by_source = "\n".join(
@@ -116,9 +130,9 @@ def build_readme(disk_skills, lock_version, lock_skills, remarks, gated):
     lock_miss = ", ".join(in_lock_only) if in_lock_only else "none"
     disk_miss = ", ".join(on_disk_only) if on_disk_only else f"none (all {total} skills tracked)"
 
-    if gated_on_disk:
+    if gated_inventory:
         gated_summary = (
-            f" — {len(gated_on_disk)} **gated** "
+            f" — {len(gated_inventory)} **gated** "
             f"(on disk, excluded from git — see below)"
         )
         gated_section = (
@@ -128,7 +142,7 @@ def build_readme(disk_skills, lock_version, lock_skills, remarks, gated):
             "license-restricted and kept out of the public split. Managed via "
             "`.gitignore` + `scripts/audit-skill-licenses.sh` — this list is "
             "derived from `.gitignore`, not hardcoded.\n\n"
-            f"- **{len(gated_on_disk)}:** {', '.join(gated_on_disk)}\n\n---\n\n"
+            f"- **{len(gated_inventory)}:** {', '.join(gated_inventory)}\n\n---\n\n"
         )
     else:
         gated_summary = ""
@@ -139,7 +153,7 @@ def build_readme(disk_skills, lock_version, lock_skills, remarks, gated):
     return f"""---
 generated: {now}
 skills_count: {total}
-gated_count: {len(gated_on_disk)}
+gated_count: {len(gated_inventory)}
 lock_file: ../.skill-lock.json
 lock_version: {lock_version}
 ---
@@ -209,6 +223,11 @@ def main():
 
     on_disk_only = sorted(s for s in disk_skills if s not in lock_skills)
     in_lock_only = sorted(s for s in lock_skills if s not in set(disk_skills))
+    expected_gated_absent = sorted(set(in_lock_only) & gated)
+    missing_required = required_lock_misses(in_lock_only, gated)
+    inventory_skills = inventory_skills_for_manifest(
+        disk_skills, lock_skills, gated
+    )
     matched = len([s for s in disk_skills if s in lock_skills])
 
     print(f"Skills inventory  (lock version {lock_version})")
@@ -220,6 +239,11 @@ def main():
         print(f"  On disk but NOT in lock: {', '.join(on_disk_only)}")
     if in_lock_only:
         print(f"  In lock but NOT on disk: {', '.join(in_lock_only)}")
+    if expected_gated_absent:
+        print(
+            "  Expected gated skills absent from tracked checkout: "
+            f"{', '.join(expected_gated_absent)}"
+        )
     if not on_disk_only and not in_lock_only:
         print("  Lock file and disk are in perfect sync")
 
@@ -227,7 +251,9 @@ def main():
     if gated_on_disk:
         print(f"  Gated (on disk, excluded from git): {', '.join(gated_on_disk)}")
 
-    content = build_readme(disk_skills, lock_version, lock_skills, remarks, gated)
+    content = build_readme(
+        inventory_skills, lock_version, lock_skills, remarks, gated
+    )
     current = README_FILE.read_text() if README_FILE.exists() else None
     def stable(text: str) -> str:
         return re.sub(
@@ -241,7 +267,7 @@ def main():
     inventory_matches = current is not None and stable(current) == stable(content)
     if args.check:
         failed = False
-        if in_lock_only:
+        if missing_required:
             print("  ERROR: locked skills are missing from disk", file=sys.stderr)
             failed = True
         if not inventory_matches:
@@ -250,7 +276,12 @@ def main():
         if failed:
             print("  Run: make skills-update", file=sys.stderr)
             return 1
-        print(f"\n  Verified {matched} locked skills on disk and current inventory")
+        verified = matched + len(expected_gated_absent)
+        print(
+            f"\n  Verified {verified} locked skills "
+            f"({matched} on disk, {len(expected_gated_absent)} expected gated) "
+            "and current inventory"
+        )
         return 0
 
     if inventory_matches:

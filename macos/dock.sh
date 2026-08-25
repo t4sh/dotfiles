@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Restore the Dock layout from macos/dock-backup.plist (captured by `make
-# backup`). The backup plist is the source of truth for dock state; the
-# hardcoded rebuild script lives at macos/dock-dev.sh for fallback / edit
+# backup`). The snapshot owns layout and carries a full-domain copy of Dock
+# policy because `defaults import` replaces the domain; defaults.sh remains the
+# policy authority, and regression tests require overlapping values to agree.
+# The hardcoded rebuild script lives at macos/dock-dev.sh for fallback / edit
 # mode (see header there).
 set -euo pipefail
 

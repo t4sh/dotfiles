@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Skillsfile — declarative global skill manifest (Brewfile pattern).
 #
-# GENERATED 2026-08-09T20:59:05+05:30 from agents/.skill-lock.json by
+# GENERATED 2026-08-25T20:41:36+05:30 from agents/.skill-lock.json by
 # scripts/gen-skillsfile.py — DO NOT EDIT BY HAND. To change skills:
 #   ~/.local/bin/npx-stable skills add/remove ...   then   make skills-manifest
 #   (regenerates Skillsfile + agents/skills/README.md)
 #
 # Explicit upstream refresh: make skills-update   (or: bash Skillsfile)
-# 111 skills — 31 github sources + 3 local.
+# 115 skills — 32 github sources + 3 local.
 #
 # Prereqs (fresh Mac): node + git + GitHub auth (SSH/gh) must be set
 # up first — GitHub-hosted skill sources need auth when the registry requires it.
@@ -21,50 +21,53 @@ NPX="${NPX:-$HOME/.local/bin/npx-stable}"
 echo "→ update ComposioHQ/awesome-claude-skills"
 "$NPX" skills add ComposioHQ/awesome-claude-skills --skill file-organizer -g -y
 
+echo "→ update DietrichGebert/ponytail"
+"$NPX" skills add DietrichGebert/ponytail --skill ponytail ponytail-audit ponytail-help ponytail-review -g -y
+
 echo "→ update Jakubantalik/transitions.dev"
 "$NPX" skills add Jakubantalik/transitions.dev --skill transitions-dev -g -y
 
 echo "→ update Leonxlnx/taste-skill"
-"$NPX" skills add Leonxlnx/taste-skill --skill brandkit,design-taste-frontend,full-output-enforcement,gpt-taste,industrial-brutalist-ui,minimalist-ui,redesign-existing-projects,stitch-design-taste -g -y
+"$NPX" skills add Leonxlnx/taste-skill --skill brandkit design-taste-frontend full-output-enforcement gpt-taste industrial-brutalist-ui minimalist-ui redesign-existing-projects stitch-design-taste -g -y
 
 echo "→ update anthropics/claude-code"
 "$NPX" skills add anthropics/claude-code --skill skill-development -g -y
 
 echo "→ update anthropics/knowledge-work-plugins"
-"$NPX" skills add anthropics/knowledge-work-plugins --skill architecture,debug,deploy-checklist,design-handoff,design-system,documentation,research-synthesis,system-design,tech-debt,user-research -g -y
+"$NPX" skills add anthropics/knowledge-work-plugins --skill architecture debug deploy-checklist design-handoff design-system documentation research-synthesis system-design tech-debt user-research -g -y
 
 echo "→ update anthropics/skills"
-"$NPX" skills add anthropics/skills --skill canvas-design,frontend-design,theme-factory -g -y
+"$NPX" skills add anthropics/skills --skill canvas-design frontend-design theme-factory -g -y
 
 echo "→ update benjitaylor/agentation"
-"$NPX" skills add benjitaylor/agentation --skill agentation,agentation-self-driving -g -y
+"$NPX" skills add benjitaylor/agentation --skill agentation agentation-self-driving -g -y
 
 echo "→ update cerico/macfair"
 "$NPX" skills add cerico/macfair --skill creative-design -g -y
 
 echo "→ update coreyhaines31/marketingskills"
-"$NPX" skills add coreyhaines31/marketingskills --skill copywriting,marketing-psychology,seo-audit -g -y
+"$NPX" skills add coreyhaines31/marketingskills --skill copywriting marketing-psychology seo-audit -g -y
 
 echo "→ update emilkowalski/skills"
-"$NPX" skills add emilkowalski/skills --skill animation-vocabulary,apple-design,emil-design-eng,find-animation-opportunities,improve-animations,pick-ui-library,review-animations -g -y
+"$NPX" skills add emilkowalski/skills --skill animation-vocabulary apple-design emil-design-eng find-animation-opportunities improve-animations pick-ui-library review-animations -g -y
 
 echo "→ update firebenders/sync-figma-token-skill"
 "$NPX" skills add firebenders/sync-figma-token-skill --skill sync-figma-token -g -y
 
 echo "→ update github/awesome-copilot"
-"$NPX" skills add github/awesome-copilot --skill git-commit,git-flow-branch-creator -g -y
+"$NPX" skills add github/awesome-copilot --skill git-commit git-flow-branch-creator -g -y
 
 echo "→ update index-how/vocabulary"
 "$NPX" skills add index-how/vocabulary --skill vocabulary -g -y
 
 echo "→ update jakubkrehel/skills"
-"$NPX" skills add jakubkrehel/skills --skill better-accessibility,better-colors,better-interface,better-layout,better-typography,better-ui,better-writing -g -y
+"$NPX" skills add jakubkrehel/skills --skill better-accessibility better-colors better-interface better-layout better-typography better-ui better-writing -g -y
 
 echo "→ update julianoczkowski/designer-skills"
 "$NPX" skills add julianoczkowski/designer-skills --skill design-tokens -g -y
 
 echo "→ update mattpocock/skills"
-"$NPX" skills add mattpocock/skills --skill ask-matt,claude-handoff,code-review,codebase-design,diagnosing-bugs,domain-modeling,git-guardrails-claude-code,grill-me,grill-with-docs,grilling,handoff,implement,improve-codebase-architecture,loop-me,migrate-to-shoehorn,prototype,research,resolving-merge-conflicts,scaffold-exercises,setup-matt-pocock-skills,setup-pre-commit,setup-ts-deep-modules,tdd,teach,to-questionnaire,to-spec,to-tickets,triage,wait-what,wayfinder,wizard,writing-beats,writing-for-agents,writing-fragments,writing-shape -g -y
+"$NPX" skills add mattpocock/skills --skill ask-matt claude-handoff code-review codebase-design diagnosing-bugs domain-modeling git-guardrails-claude-code grill-me grill-with-docs grilling handoff implement improve-codebase-architecture loop-me migrate-to-shoehorn prototype research resolving-merge-conflicts scaffold-exercises setup-matt-pocock-skills setup-pre-commit setup-ts-deep-modules tdd teach to-questionnaire to-spec to-tickets triage wait-what wayfinder wizard writing-beats writing-for-agents writing-fragments writing-shape -g -y
 
 echo "→ update mblode/agent-skills"
 "$NPX" skills add mblode/agent-skills --skill ui-animation -g -y
@@ -82,7 +85,7 @@ echo "→ update nutlope/hallmark"
 "$NPX" skills add nutlope/hallmark --skill hallmark -g -y
 
 echo "→ update openai/skills"
-"$NPX" skills add openai/skills --skill playwright,skill-creator -g -y
+"$NPX" skills add openai/skills --skill playwright skill-creator -g -y
 
 echo "→ update owl-listener/designer-skills"
 "$NPX" skills add owl-listener/designer-skills --skill design-token-audit -g -y
@@ -94,7 +97,7 @@ echo "→ update shadcn/improve"
 "$NPX" skills add shadcn/improve --skill improve -g -y
 
 echo "→ update t4sh/skills4sh"
-"$NPX" skills add t4sh/skills4sh --skill agent-memory,code-to-figma,discord-harvest,eleventy-nunjucks,figma-to-code,localhost-screenshots,skill-architect -g -y
+"$NPX" skills add t4sh/skills4sh --skill agent-memory code-to-figma discord-harvest eleventy-nunjucks figma-to-code localhost-screenshots skill-architect -g -y
 
 echo "→ update vercel-labs/agent-browser"
 "$NPX" skills add vercel-labs/agent-browser --skill agent-browser -g -y
@@ -106,10 +109,10 @@ echo "→ update vercel-labs/skills"
 "$NPX" skills add vercel-labs/skills --skill find-skills -g -y
 
 echo "→ update wondelai/skills"
-"$NPX" skills add wondelai/skills --skill top-design,web-typography -g -y
+"$NPX" skills add wondelai/skills --skill top-design web-typography -g -y
 
 echo "→ update wshobson/agents"
-"$NPX" skills add wshobson/agents --skill monorepo-management,tailwind-design-system -g -y
+"$NPX" skills add wshobson/agents --skill monorepo-management tailwind-design-system -g -y
 
 # Local / repo-native skills (vendored in agents/skills/,
 # no upstream — they ship with the dotfiles repo itself):

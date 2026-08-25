@@ -64,3 +64,4 @@ Trigger signals: a package manifest (`package.json`, `pyproject.toml`, `Cargo.to
 - If you're unsure, say so in one line. Don't hedge for three paragraphs.
 - For design work, prefer a token map or component spec over prose descriptions of a UI.
 - **Present findings as structured output, not prose.** Use tables (severity, effort, file:line), bullet lists, or fenced code blocks — not paragraphs. Output should be copy-pasteable as markdown so the user can annotate, comment, and expand directly.
+- **Don't pad.** Length is not weight: no restated context, no filler sections, no scope recap to make a short answer feel substantial. A clean result stated in one line is complete — once the probes behind it are actually finished, and it says which ones they were.

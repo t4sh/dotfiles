@@ -57,10 +57,18 @@ case "$MACOS_MAJOR" in
         echo "  ⚠ macOS $MACOS_VERSION is outside the tested majors (15, 26); $MODE remains read-only" >&2
         ;;
 esac
+if (( MACOS_MAJOR >= 26 )); then
+    CONTROL_CENTER_VISIBILITY_KEY="NSStatusItem VisibleCC"
+else
+    # Fixture-verified for macOS 15; live-host confirmation remains pending.
+    CONTROL_CENTER_VISIBILITY_KEY="NSStatusItem Visible"
+fi
+CONTROL_CENTER_MODULES=(Bluetooth Clock FocusModes Sound WiFi)
 echo "macOS defaults policy: mode=$MODE scope=$([[ $PRIVILEGED -eq 1 ]] && echo full || echo user-only) host=$MACOS_VERSION"
 
 verify_defaults() {
     local failures=0 actual domain key expected firewall stealth capture
+    local cc_key cc_actual module
     while IFS=$'\t' read -r domain key expected; do
         actual="$(command defaults read "$domain" "$key" 2>/dev/null || true)"
         actual="${actual%\"}"; actual="${actual#\"}"
@@ -80,6 +88,16 @@ com.apple.screensaver	askForPassword	1
 com.apple.screensaver	askForPasswordDelay	0
 com.apple.desktopservices	DSDontWriteNetworkStores	1
 com.apple.SoftwareUpdate	AutomaticCheckEnabled	1
+NSGlobalDomain	AppleInterfaceStyleSwitchesAutomatically	1
+com.apple.controlcenter	BatteryShowPercentage	0
+com.apple.dock	wvous-tl-corner	2
+com.apple.dock	wvous-tl-modifier	0
+com.apple.dock	wvous-tr-corner	2
+com.apple.dock	wvous-tr-modifier	0
+com.apple.dock	wvous-bl-corner	4
+com.apple.dock	wvous-bl-modifier	0
+com.apple.dock	wvous-br-corner	2
+com.apple.dock	wvous-br-modifier	0
 EOF
     capture="$(command defaults read com.apple.screencapture location 2>/dev/null || true)"
     capture="${capture%\"}"; capture="${capture#\"}"
@@ -102,6 +120,19 @@ EOF
             failures=$((failures + 1))
         }
     fi
+    # Control Center module visibility — macOS 26 introduced the VisibleCC key.
+    for module in "${CONTROL_CENTER_MODULES[@]}"; do
+        cc_key="$CONTROL_CENTER_VISIBILITY_KEY $module"
+        cc_actual="$(command defaults read com.apple.controlcenter "$cc_key" 2>/dev/null || true)"
+        cc_actual="${cc_actual%\"}"; cc_actual="${cc_actual#\"}"
+        if [[ "$cc_actual" == "1" ]]; then
+            printf '  ✓ com.apple.controlcenter %s = 1\n' "$cc_key"
+        else
+            printf '  ✗ com.apple.controlcenter %s expected 1, got %s\n' \
+                "$cc_key" "${cc_actual:-<unset>}" >&2
+            failures=$((failures + 1))
+        fi
+    done
     (( failures == 0 ))
 }
 
@@ -236,6 +267,11 @@ FINDER_PLIST=~/Library/Preferences/com.apple.finder.plist
 # System Settings → Appearance → Show scroll bars
 # Automatic | WhenScrolling | Always
 defaults write NSGlobalDomain AppleShowScrollBars -string "Automatic"
+
+# Appearance — follow the automatic light/dark schedule. AppleInterfaceStyle
+# is the current effective mode (Dark or absent for Light), so it is deliberately
+# neither written nor verified. Accent color remains a manual choice.
+defaults write NSGlobalDomain AppleInterfaceStyleSwitchesAutomatically -bool true
 
 ###############################################################################
 # Dock                        https://macos-defaults.com/#💻-list-of-commands #
@@ -523,9 +559,18 @@ defaults write com.apple.TextEdit PlainTextEncodingForWrite -int 4
 #         5=Screen Saver, 6=Disable Screen Saver, 10=Put Display to Sleep,
 #         11=Launchpad, 12=Notification Center, 13=Lock Screen, 14=Quick Note
 
+# Top-left → Mission Control
+defaults write com.apple.dock wvous-tl-corner -int 2
+defaults write com.apple.dock wvous-tl-modifier -int 0
+# Top-right → Mission Control
+defaults write com.apple.dock wvous-tr-corner -int 2
+defaults write com.apple.dock wvous-tr-modifier -int 0
 # Bottom-left → Desktop
 defaults write com.apple.dock wvous-bl-corner -int 4
 defaults write com.apple.dock wvous-bl-modifier -int 0
+# Bottom-right → Mission Control
+defaults write com.apple.dock wvous-br-corner -int 2
+defaults write com.apple.dock wvous-br-modifier -int 0
 
 ###############################################################################
 # DS_Store                                                                     #
@@ -739,6 +784,22 @@ defaults write com.apple.menuextra.clock IsAnalog -bool "true"
 defaults write com.apple.menuextra.clock ShowDate -int 1
 defaults write com.apple.menuextra.clock ShowDayOfWeek -bool "true"
 defaults write com.apple.menuextra.clock ShowAMPM -bool "true"
+
+###############################################################################
+# Control Center / Menu Bar modules                                           #
+###############################################################################
+
+# Keep Bluetooth, Clock, Focus, Sound, and Wi-Fi in the menu bar. macOS 26+
+# (Tahoe) renamed the per-module toggles to "NSStatusItem VisibleCC <Module>";
+# the legacy "NSStatusItem Visible <Module>" keys apply on macOS 15 (Sequoia).
+# Menu-bar positions are runtime state (volatile) and stay unmanaged.
+for module in "${CONTROL_CENTER_MODULES[@]}"; do
+    defaults write com.apple.controlcenter "$CONTROL_CENTER_VISIBILITY_KEY $module" -bool true
+done
+
+# Battery percentage stays hidden (it lives inside the Control Center capsule).
+# Written explicitly so the state is declared, not accidental.
+defaults write com.apple.controlcenter BatteryShowPercentage -bool false
 
 ###############################################################################
 # Accessibility — Zoom                                                        #

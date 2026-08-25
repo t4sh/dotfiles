@@ -30,6 +30,37 @@ plist_set_bool() {
     "$PLISTBUDDY" -c "Add :$key bool $value" "$plist"
 }
 
+plist_top_level_keys_matching() {
+  local plist="$1" pattern="$2"
+  [[ -f "$plist" ]] || return 0
+  LC_ALL=C "$PLISTBUDDY" -c Print "$plist" 2>/dev/null |
+    LC_ALL=C awk -v pattern="$pattern" '
+      /^    [^ ].* =/ {
+        key = $0
+        sub(/^    /, "", key)
+        sub(/ =.*$/, "", key)
+        if (key ~ pattern) print key
+      }
+    '
+}
+
+normalize_tower_toolbar() {
+  local plist="$1" idx=0 item
+  [[ -f "$plist" ]] || return 0
+  while item="$("$PLISTBUDDY" -c \
+    "Print :\"NSToolbar Configuration MainWindowToolbar.BigSur\":\"TB Item Identifiers\":$idx" \
+    "$plist" 2>/dev/null)"; do
+    case "$item" in
+      GTToolbarItemIdentifierDetailTrackingSeparator.0x*)
+        "$PLISTBUDDY" -c \
+          "Set :\"NSToolbar Configuration MainWindowToolbar.BigSur\":\"TB Item Identifiers\":$idx GTToolbarItemIdentifierDetailTrackingSeparator" \
+          "$plist"
+        ;;
+    esac
+    idx=$((idx + 1))
+  done
+}
+
 # Secure Keyboard Entry blocks other processes from observing Terminal input,
 # but it also prevents the system Touch ID authorization panel from taking
 # focus. Keep that security/UX choice local to each Mac instead of restoring it
@@ -295,20 +326,31 @@ sanitize_editor_settings "$APPS/cursor/settings.json"
 # runtime history, not portable preference policy, and must never enter backups.
 plist_delete "$APPS/betterzip/betterzip.plist" "MIBLogs"
 
-# Tower stores license state, repository-ID migration caches, and
-# home-directory quick-open exclusions. Repository UUIDs describe the current
-# machine's working-copy database; they are neither portable nor user policy.
+# Tower stores license state, App Center device/session identity, repository-ID
+# migration caches, and home-directory quick-open state. Remove those values,
+# but preserve the main-window toolbar layout while normalizing its
+# process-derived tracking-separator identifier.
 for key in \
   GTLicenseActivationLastUpdatedDate \
   GTLicenseActivationState \
   GTUserDefaultsMigratedPinnedBranchesRepositories \
-  GTUserDefaultsMigratedStackedBranchesRepositories; do
+  GTUserDefaultsMigratedStackedBranchesRepositories \
+  MSAppCenterInstallId \
+  MSAppCenterPastDevices \
+  MSAppCenterSessionIdHistory \
+  MSAppCenterUserIdHistory \
+  NSOSPLastRootDirectory; do
   plist_delete "$APPS/tower/tower.plist" "$key"
 done
 if [[ -f "$APPS/tower/tower.plist" ]]; then
   "$PLISTBUDDY" -c "Set :GTUserDefaultsDefaultCloningDirectory ~/Projects" \
     "$APPS/tower/tower.plist" 2>/dev/null || true
   plist_delete "$APPS/tower/tower.plist" "GTUserDefaultsQuickOpenIgnoredFilePaths"
+  normalize_tower_toolbar "$APPS/tower/tower.plist"
+  while IFS= read -r key; do
+    plist_delete "$APPS/tower/tower.plist" "\"$key\""
+  done < <(plist_top_level_keys_matching \
+    "$APPS/tower/tower.plist" '^(NSWindow Frame|NSSplitView Subview Frames)')
 fi
 
 # Clop stores output folders, recent directories, and security-scoped bookmarks.
@@ -344,11 +386,20 @@ if [[ -f "$DOTFILES/macos/dock-backup.plist" ]]; then
   plist_set_bool "$DOTFILES/macos/dock-backup.plist" "contents-immutable" true
   plist_set_bool "$DOTFILES/macos/dock-backup.plist" "autohide" false
   plist_set_bool "$DOTFILES/macos/dock-backup.plist" "autohide-immutable" true
+  for key in \
+    mod-count \
+    last-analytics-stamp \
+    trash-full \
+    lastShowIndicatorTime; do
+    plist_delete "$DOTFILES/macos/dock-backup.plist" "$key"
+  done
 
   idx=0
   while "$PLISTBUDDY" -c "Print :persistent-apps:$idx" "$DOTFILES/macos/dock-backup.plist" \
     >/dev/null 2>&1; do
     plist_delete "$DOTFILES/macos/dock-backup.plist" "persistent-apps:$idx:tile-data:book"
+    plist_delete "$DOTFILES/macos/dock-backup.plist" "persistent-apps:$idx:tile-data:file-mod-date"
+    plist_delete "$DOTFILES/macos/dock-backup.plist" "persistent-apps:$idx:tile-data:parent-mod-date"
     idx=$((idx + 1))
   done
 fi

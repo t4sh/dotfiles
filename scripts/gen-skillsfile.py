@@ -7,7 +7,7 @@ The checked-in agents/skills tree is the reproducible restore source; `make
 skills-update` is the network-mutating refresh. Skillsfile is GENERATED.
 
 GitHub-sourced skills are grouped by repo into one skills add line each (with
---skill <comma-list>). `local` skills are repo-native (vendored in
+space-separated names after `--skill`). `local` skills are repo-native (vendored in
 agents/skills/, no upstream) and listed as comments only.
 """
 
@@ -88,7 +88,7 @@ def build_skillsfile(timestamp):
     ]
 
     for src in sorted(by_source):
-        skills = ",".join(sorted(by_source[src]))
+        skills = " ".join(sorted(by_source[src]))
         lines.append(f'echo "→ update {src}"')
         lines.append(f'"$NPX" skills add {src} --skill {skills} -g -y')
         lines.append("")

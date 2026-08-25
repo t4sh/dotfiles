@@ -1,5 +1,4 @@
 tap "homebrew/core"
-tap "minghinmatthewlam/tap"
 # Static analysis and lint tool, for (ba)sh scripts
 brew "shellcheck"
 # Static checker for GitHub Actions workflow files
@@ -142,6 +141,8 @@ cask "canva"
 cask "chatgpt"
 # Anthropic's official Claude AI desktop app
 cask "claude"
+# Terminal-based AI coding assistant
+cask "claude-code"
 # Image, video and clipboard optimiser
 cask "clop"
 # Free app that makes your Internet safer
@@ -282,8 +283,8 @@ cask "paper-design"
 cask "paseo"
 # Utility to uninstall apps and remove leftover files from old/uninstalled apps
 cask "pearcleaner"
-# Codex-style desktop shell for pi
-cask "minghinmatthewlam/tap/pi-gui", trusted: true
+# AI-powered answer engine with Personal Computer agent
+cask "perplexity"
 # All-in-one bookmark manager
 cask "raindropio"
 # Control your tools with a few keystrokes
@@ -338,12 +339,14 @@ mas "Gifski", id: 1351639930
 mas "Hidden Bar", id: 1452453066
 mas "HP", id: 1474276998
 mas "HP Easy Scan", id: 967004861
+mas "Keynote", id: 409183694
 mas "Keynote", id: 361285480
 mas "Kindle", id: 302584613
 mas "Lungo", id: 1263070803
+mas "Numbers", id: 409203825
 mas "Numbers", id: 361304891
 mas "Pages", id: 361309726
-mas "Perplexity", id: 6714467650
+mas "Pages", id: 409201541
 mas "Prime Video", id: 545519333
 mas "uBlock Origin Lite", id: 6745342698
 mas "Urban VPN Desktop", id: 1517772049

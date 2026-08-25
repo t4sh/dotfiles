@@ -17,7 +17,7 @@ Generic host-tooling rules still apply to sandbox false-negatives, browser acces
 
 ## Worktrees and branches
 
-- The allowed project-local placement rules in `03-worktree-hygiene.md` apply to user-requested Paseo worktrees too: `.worktrees/<full-git-flow-branch-name>` or `worktrees/<full-git-flow-branch-name>`. Use Paseo `create_worktree` or `create_agent.workspace.source.kind = "worktree"` only when it can honor the selected placement; otherwise report the limitation instead of creating an externally placed worktree or silently working in place.
+- The canonical placement rule in `03-worktree-hygiene.md` applies to user-requested Paseo worktrees too: `<repo-root>/.worktrees/<full-branch-name>`. Use Paseo `create_worktree` or `create_agent.workspace.source.kind = "worktree"` only when it can honor that exact parent; otherwise report the limitation instead of creating an externally placed worktree or silently working in place.
 - Branch names passed to Paseo must follow the repo's branch policy. Prefer workflow namespaces such as `feature/<slug>`, `bugfix/<slug>`, `hotfix/<slug>`, or `release/<version>` when the repo expects git-flow naming.
 - Do not use agent/operator namespaces such as `codex/*`, `claude/*`, `cursor/*`, `gemini/*`, `ash/*`, or `tash/*`.
 - Avoid generic `fix/<slug>` unless the repo explicitly uses that namespace.

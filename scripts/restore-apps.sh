@@ -70,6 +70,14 @@ done < "$DOTFILES/apps.tsv"
 
 restore_running_app_gate "${RESTORE_GATE_ENTRIES[@]}"
 
+# Whole-domain macOS system snapshots (Keyboard Shortcuts and Input Sources)
+# are imported via `defaults import`, but cfprefsd caches these domains. Track
+# exactly which snapshots were imported so the cache refresh and read-back
+# summary cannot claim that an absent domain was restored.
+RESTORE_DEFERRED_DOMAINS=()
+RESTORE_DEFERRED_LABELS=()
+RESTORE_DEFERRED_PLISTS=()
+
 # Bulk `defaults`-managed apps — driven by apps.tsv (domain ⇥ label ⇥ plist).
 # Apps needing container copies / exclusions stay as explicit blocks below.
 while IFS=$'\t' read -r domain label plist app_name; do
@@ -83,6 +91,14 @@ while IFS=$'\t' read -r domain label plist app_name; do
     if [ -f "$DOTFILES/$plist" ]; then
         defaults import "$domain" "$DOTFILES/$plist"
         echo "  ✓ $label"
+        # Keep in sync with the two macos/ rows in apps.tsv (no owning app; cfprefsd caches them).
+        case "$domain" in
+            com.apple.symbolichotkeys|com.apple.HIToolbox)
+                RESTORE_DEFERRED_DOMAINS+=("$domain")
+                RESTORE_DEFERRED_LABELS+=("$label")
+                RESTORE_DEFERRED_PLISTS+=("$DOTFILES/$plist")
+                ;;
+        esac
     fi
 done < "$DOTFILES/apps.tsv"
 
@@ -140,6 +156,63 @@ fi
 # Shottr — license prefs live in the vault (make restore-shottr after secrets restore).
 # Canary Mail — sandbox realms + plist; vault via make restore-canary
 # (see apps/canary-mail/README.md). Not part of restore-apps.
+
+verify_deferred_imports() {
+    local index domain label source live_plist failures=0
+    if ! command -v python3 >/dev/null 2>&1 || \
+       [[ ! -f "$DOTFILES/scripts/lib/plist_drift.py" ]]; then
+        echo "  ⚠ semantic read-back unavailable; log out and back in, then run make apps-drift." >&2
+        return 1
+    fi
+    for ((index = 0; index < ${#RESTORE_DEFERRED_DOMAINS[@]}; index++)); do
+        domain="${RESTORE_DEFERRED_DOMAINS[index]}"
+        label="${RESTORE_DEFERRED_LABELS[index]}"
+        source="${RESTORE_DEFERRED_PLISTS[index]}"
+        live_plist="$(mktemp "${TMPDIR:-/tmp}/dotfiles-deferred-pref.XXXXXX")"
+        # The shared comparator deliberately ignores current/selected input
+        # source runtime state; this verifies the portable managed values.
+        if defaults export "$domain" "$live_plist" >/dev/null 2>&1 && \
+           python3 "$DOTFILES/scripts/lib/plist_drift.py" "$live_plist" "$source" >/dev/null; then
+            echo "  ✓ $label managed preference read-back matches"
+        else
+            echo "  ⚠ $label managed preference read-back did not match; log out and back in, then run make apps-drift." >&2
+            failures=$((failures + 1))
+        fi
+        rm -f "$live_plist"
+    done
+    (( failures == 0 ))
+}
+
+if (( ${#RESTORE_DEFERRED_DOMAINS[@]} > 0 )); then
+    deferred_summary="${RESTORE_DEFERRED_LABELS[0]}"
+    cfprefsd_running=-1
+    for ((index = 1; index < ${#RESTORE_DEFERRED_LABELS[@]}; index++)); do
+        deferred_summary+=", ${RESTORE_DEFERRED_LABELS[index]}"
+    done
+    echo
+    if command -v killall >/dev/null 2>&1; then
+        if command -v pgrep >/dev/null 2>&1; then
+            pgrep_status=0
+            pgrep -u "$(id -u)" -x cfprefsd >/dev/null 2>&1 || pgrep_status=$?
+            case "$pgrep_status" in
+                0) cfprefsd_running=1 ;;
+                1) cfprefsd_running=0 ;;
+            esac
+        fi
+        if (( cfprefsd_running == 0 )); then
+            echo "  → current user's cfprefsd was not running; no restart needed for: $deferred_summary"
+            verify_deferred_imports || true
+        elif killall -u "$(id -un)" cfprefsd 2>/dev/null; then
+            echo "  → restarted the current user's cfprefsd for: $deferred_summary"
+            verify_deferred_imports || true
+        else
+            echo "  ⚠ could not restart cfprefsd for: $deferred_summary" >&2
+            echo "    log out and back in to apply those preferences." >&2
+        fi
+    else
+        echo "  → log out and back in to apply: $deferred_summary"
+    fi
+fi
 
 echo "Done. Terminal.app is handled separately: run 'make terminal' from a"
 echo "non-Terminal shell (iTerm / Ghostty / VS Code integrated terminal)."
