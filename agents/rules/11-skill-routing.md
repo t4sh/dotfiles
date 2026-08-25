@@ -44,6 +44,23 @@ Boundaries:
 - `code-review` owns a requested fixed-point diff review. It is not an automatic completion phase; the proactive in-scope review in `00-core.md` still applies while implementing.
 - Do not auto-route to the user-invoked `implement` skill. When the user invokes it explicitly, project rules still override its bundled defaults, including commit authorization.
 
+## Minimalism and over-engineering
+
+| Request | Primary owner |
+| --- | --- |
+| Explicitly request Ponytail, lazy mode, or the smallest possible implementation | Core implementation workflow with `ponytail` as an explicit behavior modifier |
+| Review a diff only for unnecessary complexity or deletion opportunities | `ponytail-review` |
+| Audit a whole repository only for over-engineering or removable bloat | `ponytail-audit` |
+| Show the installed Ponytail command reference | `ponytail-help` |
+
+Boundaries:
+
+- Do not auto-route `ponytail` for ordinary coding work despite its broad upstream description. The core workflow already owns implementation; use Ponytail only when the user explicitly requests that discipline.
+- Ponytail may minimize the implementation, never the requested acceptance boundary, project workflow, safety requirements, accessibility, or verification required by `23-verification.md`.
+- A complete fixed-point review remains owned by `code-review`. When the user explicitly asks for both complete review and over-engineering review, run `ponytail-review` as a separate complexity-only pass rather than replacing or merging the Standards and Spec axes.
+- A broad whole-codebase audit remains owned by `improve`; use `ponytail-audit` only for the narrower delete/simplify report.
+- `ponytail-help` is user-invoked reference material only. Do not use it to activate a mode or route work.
+
 ## Development completion and integration
 
 `03-worktree-hygiene.md` is the sole authority for finishing development work, integration, pull requests, and branch/worktree cleanup. Do not invoke the retired `finishing-a-development-branch` skill, including when a third-party skill names it as a required follow-up.

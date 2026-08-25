@@ -38,7 +38,7 @@ If the user's reply to a clarifying question is still ambiguous, default to prop
 
 Git commands that write only git metadata may need proactive permission setup regardless of tool — they don't touch the working tree but still require elevated access.
 
-Known metadata writers: `git fetch`, `git worktree remove`, `git worktree prune`, `git cherry-pick`.
+Known metadata writers: `git fetch`, `git worktree add`, `git worktree remove`, `git worktree prune`, `git cherry-pick`. `git worktree add` belongs here because the detached integration worktree in `03-worktree-hygiene.md` writes into the Git common directory, which a sandbox may expose read-only.
 
 - **Codex** — run with the narrow persisted approval prefix when available.
 - **Claude Code** — if repeated prompts block routine work, add narrow `allowedTools` entries via the relevant config/update workflow.

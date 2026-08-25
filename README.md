@@ -120,6 +120,7 @@ Add a new symlink: one row in [`symlinks.tsv`](symlinks.tsv). No Stow/dotbot con
 | `make restore-apps` | Restore tracked app prefs (running-app gate quits/reopens managed apps) |
 | `make services` / `make services-check` | Install Automator workflows / compare installed copies with the repo |
 | `make macos` | Apply macOS defaults + Touch ID sudo (`sudo_local`) |
+| `make macos-check` | Verify managed appearance, Control Center, battery, Dock, and input policy |
 | `make touch-id-sudo` | Idempotently enable Touch ID for sudo |
 | `make verify-bootstrap` | Strict post-vault gate for rules, skills, app snapshots, links, services, hooks, macOS policy, and default apps |
 | `make dock` | Restore Dock layout |
@@ -211,6 +212,16 @@ Hammerspoon is the primary window manager. [Rectangle](https://rectangleapp.com/
 2. Changed preferences on your reference Mac: `make capture-default-apps` → review diff → commit
 
 HTTPS default-browser mapping is omitted (`duti` returns error -54 for direct `https` binding on tested macOS versions).
+
+## Preference coverage
+
+Preference coverage is selective: capture portable, non-secret settings; keep credentials and licensed exports in the encrypted vault; leave account-bound or machine-specific state to vendor sync or manual setup.
+
+- **App snapshots:** `make restore-apps` restores `apps.tsv` and documented irregular settings; `make apps-drift` checks only faithful snapshots this public projection ships.
+- **macOS policy:** `make macos` applies automatic appearance, hot corners, battery percentage, and visibility for Bluetooth, Clock, Focus, Sound, and Wi-Fi; `make macos-check` verifies the managed values.
+- **Dock:** `make dock` imports a full-domain, public-safe snapshot; where the snapshot overlaps `macos/defaults.sh`, scripted policy is authoritative.
+- **Keyboard and input sources:** restore restarts the current user's `cfprefsd`, verifies portable managed values, and reports an explicit logout fallback if either step cannot be confirmed.
+- **Manual or vendor-managed:** wallpaper and custom images, display layout, network profiles, volume, Screen Time, notification schedules, and unlisted Control Center modules remain outside the tracked policy.
 
 ## Agents & skills
 

@@ -18,6 +18,8 @@ Never do these, regardless of mode. Some rules here intentionally restate princi
 - Rewriting a file to "clean it up" when the task was a one-line fix. See `00-core.md`.
 - `TODO: implement later` as part of a solution. See `00-core.md`.
 - Committing after every small change instead of accumulating and scoping. See `00-core.md`.
+- Inventing or padding findings so thin work reads as thorough. See `00-core.md`.
+- Declaring "no findings" early — before the probes are exhausted — because it is cheaper than reviewing. A clean verdict is earned by completed checks and names them. See `00-core.md`.
 
 ### Code
 

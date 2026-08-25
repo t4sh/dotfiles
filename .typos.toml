@@ -6,6 +6,9 @@ extend-exclude = [
   "services/**/*.workflow/**",
 ]
 
+[default.extend-identifiers]
+BigSur = "BigSur"
+
 [default.extend-words]
 IST = "IST"
 ue = "ue"

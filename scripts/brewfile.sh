@@ -72,15 +72,48 @@ filter_retired_mas() {
   ' "$RETIRED_MAS_IDS" "$input" > "$output"
 }
 
+preserve_curated_mas_on_empty_dump() {
+  local input="$1" output="$2" curated_count dumped_count
+  curated_count="$(awk '/^[[:space:]]*mas[[:space:]]+/ { count++ } END { print count + 0 }' "$BREWFILE")"
+  dumped_count="$(awk '/^[[:space:]]*mas[[:space:]]+/ { count++ } END { print count + 0 }' "$input")"
+
+  if [[ "$curated_count" -eq 0 || "$dumped_count" -gt 0 ]]; then
+    cp "$input" "$output"
+    return
+  fi
+
+  warn "brew bundle dump returned zero MAS entries; preserving $curated_count curated App Store declarations"
+  awk '
+    NR == FNR {
+      if ($0 ~ /^[[:space:]]*mas[[:space:]]+/) mas[++mas_count] = $0
+      next
+    }
+    !inserted && $0 ~ /^[[:space:]]*(vscode|npm)[[:space:]]+/ {
+      for (i = 1; i <= mas_count; i++) print mas[i]
+      inserted = 1
+    }
+    { print }
+    END {
+      if (!inserted) for (i = 1; i <= mas_count; i++) print mas[i]
+    }
+  ' "$BREWFILE" "$input" > "$output"
+}
+
 merge_curated_declarations() {
   local curated="$1" dumped="$2" output="$3"
   awk '
-    function declaration_key(line, normalized, kind, rest, name) {
+    function declaration_key(line, normalized, kind, rest, name, id) {
       normalized = line
       sub(/^[[:space:]]*/, "", normalized)
       if (normalized !~ /^(tap|brew|cask|mas|vscode|npm)[[:space:]]+"/) return ""
       kind = normalized
       sub(/[[:space:]].*$/, "", kind)
+      if (kind == "mas") {
+        id = normalized
+        sub(/^.*id:[[:space:]]*/, "", id)
+        sub(/[^0-9].*$/, "", id)
+        if (id ~ /^[0-9]+$/) return kind SUBSEP id
+      }
       rest = normalized
       sub(/^[^"]*"/, "", rest)
       name = rest
@@ -214,7 +247,8 @@ case "${1:-}" in
     trap cleanup_dump EXIT HUP INT TERM
     brew bundle dump --file="$tmp" --force
     filter_retired_mas "$tmp" "$filtered"
-    merge_curated_declarations "$BREWFILE" "$filtered" "$merged"
+    preserve_curated_mas_on_empty_dump "$filtered" "$tmp"
+    merge_curated_declarations "$BREWFILE" "$tmp" "$merged"
     mv "$merged" "$2"
     merged=""
     ;;

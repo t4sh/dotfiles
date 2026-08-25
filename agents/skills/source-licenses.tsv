@@ -8,6 +8,7 @@
 # Existing sources are kept explicit so future no-license remote additions do
 # not silently become public-split-safe without review.
 ComposioHQ/awesome-claude-skills	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+DietrichGebert/ponytail	MIT	GitHub repo root LICENSE; fetched 2026-08-24
 Jakubantalik/transitions.dev	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
 Leonxlnx/taste-skill	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
 anthropics/claude-code	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
