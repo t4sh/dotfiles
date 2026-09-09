@@ -6,7 +6,8 @@
 # dangles. Single source of truth for the shims (install.sh + `make shims`).
 set -euo pipefail
 
-DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+DOTFILES="${DOTFILES:-$(cd -- "$SCRIPT_DIR/.." && pwd -P)}"
 NODE_PINNED="$(tr -d '[:space:]' < "$DOTFILES/.node-version")"
 export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
 

@@ -2,7 +2,8 @@
 # Install and activate the exact Node runtime declared by .node-version.
 set -euo pipefail
 
-DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+DOTFILES="${DOTFILES:-$(cd -- "$SCRIPT_DIR/.." && pwd -P)}"
 NODE_VERSION_FILE="${DOTFILES_NODE_VERSION_FILE:-$DOTFILES/.node-version}"
 
 die() { printf '\033[31merror:\033[0m %s\n' "$*" >&2; exit 1; }

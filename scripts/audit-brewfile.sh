@@ -52,13 +52,12 @@ trap 'rm -f "$tmp" "$actual_norm" "$expected_norm" "$missing_from_system" "$miss
 normalize_brewfile() {
   # Compare declarations as a sorted multiset, not as generated text.
   # Plain `sort` preserves duplicate/distinct declarations; do not use `sort -u`.
-  grep -v '^[[:space:]]*#' "$1" \
-    | sed '/^[[:space:]]*$/d' \
+  awk '!/^[[:space:]]*(#|$)/' "$1" \
     | LC_ALL=C sort
 }
 
 if ! env DOTFILES="$DOTFILES" BREWFILE="$BREWFILE" \
-  bash "$DOTFILES/scripts/brewfile.sh" dump "$tmp" >"$dump_log" 2>&1; then
+  bash "$DOTFILES/scripts/brewfile.sh" inventory "$tmp" >"$dump_log" 2>&1; then
   warn "brew bundle dump failed:"
   sed 's/^/    /' "$dump_log" >&2
   die "brewfile audit could not compare current system state"

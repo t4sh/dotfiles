@@ -9,10 +9,9 @@
 # Lines starting with `#` and blank lines are ignored.
 #
 # NOTE: apps needing container copies / exclusions / sanitize steps (Dato,
-# Sublime Text, VS Code, Cursor settings.json) stay as explicit blocks in their consumers — they carry
+# Sublime Text, VS Code, Cursor, Zed settings/keymaps) stay as explicit blocks in their consumers — they carry
 # irregular logic that does not fit a flat row. This manifest is for the
 # homogeneous `defaults import/export <domain> <plist>` case only.
-# This public projection lists only snapshots actually shipped in this repo.
 
 com.knollsoft.Rectangle	Rectangle	apps/rectangle/rectangle.plist
 com.macitbetter.betterzip	BetterZip	apps/betterzip/betterzip.plist

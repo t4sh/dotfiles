@@ -19,19 +19,16 @@ $DOTFILES/Brewfile	$HOME/.Brewfile
 # Git
 $DOTFILES/git/gitconfig	$HOME/.gitconfig
 $DOTFILES/git/gitignore-global	$HOME/.config/git/ignore
+$DOTFILES/git/gitconfig-macos	$HOME/.gitconfig-platform
 
 # SSH — config + keys live under ~/.secrets/ssh/ (vault-backed, never in repo);
 # config exposes prod infra so it stays out of git. Only allowed_signers
 # (public key, non-secret) is repo-tracked. Symlink everything to ~/.ssh/<name>.
-$HOME/.secrets/ssh/config	$HOME/.ssh/config
-$DOTFILES/ssh/allowed_signers	$HOME/.ssh/allowed_signers
-$HOME/.secrets/ssh/github_ed25519	$HOME/.ssh/github_ed25519
-$HOME/.secrets/ssh/github_ed25519.pub	$HOME/.ssh/github_ed25519.pub
-$HOME/.secrets/ssh/known_hosts	$HOME/.ssh/known_hosts
 
 # Tool auth — canonical files under ~/.secrets/config/; consumer paths symlinked
 # (`make secrets-restore-apply` restores the tree; `make post-vault` wires consumers)
 $HOME/.secrets/config/gh/hosts.yml	$HOME/.config/gh/hosts.yml
+$HOME/.secrets/config/env	$HOME/.config/env
 
 # Starship
 $DOTFILES/starship/starship.toml	$HOME/.config/starship.toml
@@ -57,6 +54,7 @@ $DOTFILES/hammerspoon	$HOME/.hammerspoon
 # Agents — whole-directory symlink (must precede ~/.claude/* entries below)
 $DOTFILES/agents	$HOME/.agents
 $DOTFILES/config/codex/AGENTS.md	$HOME/.codex/AGENTS.md
+$DOTFILES/config/zed/AGENTS.md	$HOME/.config/zed/AGENTS.md
 $HOME/.agents/skills	$HOME/.cursor/skills
 $HOME/.agents/skills	$HOME/.claude/skills
 
@@ -64,3 +62,8 @@ $HOME/.agents/skills	$HOME/.claude/skills
 $HOME/.agents/AGENTS.md	$HOME/.claude/CLAUDE.md
 $HOME/.agents/agents	$HOME/.claude/agents
 $HOME/.agents/commands	$HOME/.claude/commands
+$HOME/.secrets/ssh/config	$HOME/.ssh/config
+$DOTFILES/ssh/allowed_signers	$HOME/.ssh/allowed_signers
+$HOME/.secrets/ssh/github_ed25519	$HOME/.ssh/github_ed25519
+$HOME/.secrets/ssh/github_ed25519.pub	$HOME/.ssh/github_ed25519.pub
+$HOME/.secrets/ssh/known_hosts	$HOME/.ssh/known_hosts

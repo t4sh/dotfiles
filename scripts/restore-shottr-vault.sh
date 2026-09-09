@@ -5,7 +5,8 @@
 # Running-app policy: warn, quit, refuse unless DOTFILES_RESTORE_FORCE=1.
 set -euo pipefail
 
-DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+DOTFILES="${DOTFILES:-$(cd -- "$SCRIPT_DIR/.." && pwd -P)}"
 DOMAIN="cc.ffitch.shottr"
 SRC="$HOME/.secrets/apps/shottr/${DOMAIN}.plist"
 

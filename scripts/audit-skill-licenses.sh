@@ -54,8 +54,13 @@ META_TSV="$TMPDIR/skill-meta.tsv"
 # Lock key/frontmatter display names may contain spaces and punctuation while
 # installed skill directories use slugs. Keep this slug logic aligned with
 # scripts/gen-skillsfile.py.
-if [[ -f "$LOCK_FILE" ]] && command -v python3 >/dev/null 2>&1; then
-  python3 - "$LOCK_FILE" > "$META_TSV" <<'PY'
+PYTHON_BIN="${PYTHON_BIN:-}"
+if [[ -z "$PYTHON_BIN" ]] && command -v python3 >/dev/null 2>&1; then
+  PYTHON_BIN="$(command -v python3)"
+fi
+
+if [[ -f "$LOCK_FILE" && -n "$PYTHON_BIN" ]]; then
+  "$PYTHON_BIN" - "$LOCK_FILE" > "$META_TSV" <<'PY'
 import json, re, sys
 
 def slugify(value):

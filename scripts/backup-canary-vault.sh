@@ -7,7 +7,8 @@
 set -euo pipefail
 umask 077
 
-DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+DOTFILES="${DOTFILES:-$(cd -- "$SCRIPT_DIR/.." && pwd -P)}"
 CONTAINER="$HOME/Library/Containers/io.canarymail.mac/Data/Library"
 PREFS_SRC="$CONTAINER/Preferences/io.canarymail.mac.plist"
 DB_SRC="$CONTAINER/Application Support/CanaryDB"
@@ -141,4 +142,4 @@ trap - EXIT
 
 echo ""
 ok "Canary config replaced under ~/.secrets/apps/canary-mail/"
-echo "  next: run make secrets-backup to write the encrypted sparseimage snapshot"
+echo "  next: run make secrets-backup to publish an encrypted recovery DMG"

@@ -279,7 +279,7 @@
     "workbench.activityBar.location": "bottom",
     "svg.preview.mode": "svg",
     "claudeCode.preferredLocation": "sidebar",
-    "python.defaultInterpreterPath": "/opt/homebrew/bin/python3",
+    "python.defaultInterpreterPath": "__HOMEBREW_PREFIX__/bin/python3",
     "chat.useClaudeHooks": true,
     "claudeCode.selectedModel": "opus[1m]",
     "gitlens.ai.ollama.url": "http://localhost:11434",

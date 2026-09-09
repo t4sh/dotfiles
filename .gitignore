@@ -44,3 +44,11 @@ zsh/lib/42-aliases-git.local.zsh
 
 # Git LFS auto-installed hooks (per-clone, not dotfiles-managed)
 git/hooks/
+
+# Local recovery and temporary artifacts
+*.tar.age
+*.agekey
+.backup-stage.*/
+.backup-rollback.*/
+.proto/
+.proto-logs/

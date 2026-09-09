@@ -20,6 +20,7 @@
 # Usage:
 #   scripts/audit-apps-drift.sh           check + exit non-zero on drift
 #   scripts/audit-apps-drift.sh --check   same; skips cleanly when tooling absent
+#   scripts/audit-apps-drift.sh --strict  also fails when managed apps are unconfigured
 #   make apps-drift                       same, via Make
 #   dot audit-apps-drift                  same, via the dispatcher
 set -euo pipefail
@@ -31,9 +32,19 @@ HELPER="$DOTFILES/scripts/lib/plist_drift.py"
 SANITIZER="$DOTFILES/scripts/sanitize-app-prefs.sh"
 
 CHECK=0
-case "${1:-}" in
-  -c|--check) CHECK=1 ;;
-esac
+STRICT=0
+while (($# > 0)); do
+  case "$1" in
+    -c|--check) CHECK=1 ;;
+    --strict) STRICT=1 ;;
+    -h|--help)
+      echo "usage: audit-apps-drift.sh [--check] [--strict]"
+      exit 0
+      ;;
+    *) echo "unknown option: $1" >&2; exit 2 ;;
+  esac
+  shift
+done
 
 info() { printf '\033[36m==>\033[0m %s\n' "$*"; }
 ok()   { printf '\033[32m  ✓\033[0m %s\n' "$*"; }
@@ -68,7 +79,6 @@ unconfigured=0
 
 # Pass 1 — stage live exports at their manifest-relative paths.
 staged_rows=()
-staged_text_rows=()
 while IFS=$'\t' read -r domain label plist _rest || [[ -n "${domain:-}" ]]; do
   # Skip comments and blank rows, matching the symlinks.tsv/apps.tsv contract.
   case "$domain" in ''|'#'*) continue ;; esac
@@ -103,24 +113,6 @@ while IFS=$'\t' read -r domain label plist _rest || [[ -n "${domain:-}" ]]; do
 done < "$MANIFEST"
 
 # Irregular repo-captured surfaces that do not fit apps.tsv.
-stage_plist_file() {
-  local source="$1" label="$2" plist="$3" identity="$4" live
-  if [[ ! -f "$DOTFILES/$plist" ]]; then
-    printf '  ✗ %s — repo snapshot missing: %s\n' "$label" "$plist" >> "$report"
-    missing=$((missing + 1))
-    return
-  fi
-  if [[ ! -f "$source" ]]; then
-    printf '  ⚠ %s — live preferences unavailable\n' "$label" >> "$report"
-    unconfigured=$((unconfigured + 1))
-    return
-  fi
-  live="$stage/$plist"
-  mkdir -p "$(dirname "$live")"
-  cp "$source" "$live"
-  staged_rows+=("$identity"$'\t'"$label"$'\t'"$plist")
-}
-
 stage_defaults() {
   local domain="$1" label="$2" plist="$3" live
   if [[ ! -f "$DOTFILES/$plist" ]]; then
@@ -138,55 +130,22 @@ stage_defaults() {
   fi
 }
 
-stage_text_file() {
-  local source="$1" label="$2" relative="$3" live
-  if [[ ! -f "$DOTFILES/$relative" ]]; then
-    printf '  ✗ %s — repo snapshot missing: %s\n' "$label" "$relative" >> "$report"
-    missing=$((missing + 1))
-    return
-  fi
-  if [[ ! -f "$source" ]]; then
-    printf '  ⚠ %s — live settings unavailable\n' "$label" >> "$report"
-    unconfigured=$((unconfigured + 1))
-    return
-  fi
-  live="$stage/$relative"
-  mkdir -p "$(dirname "$live")"
-  cp "$source" "$live"
-  staged_text_rows+=("$label"$'\t'"$relative")
-}
-
-stage_plist_file \
-  "$HOME/Library/Group Containers/group.com.sindresorhus.Dato/Library/Preferences/group.com.sindresorhus.Dato.plist" \
-  "Dato" "apps/dato/dato.plist" "dato-file"
-stage_defaults "com.apple.Terminal" "Terminal" "apps/terminal/terminal.plist"
-stage_defaults "com.apple.dock" "Dock" "macos/dock-backup.plist"
-stage_text_file "$HOME/Library/Application Support/Code/User/settings.json" \
-  "VS Code" "apps/vscode/settings.json"
-stage_text_file "$HOME/Library/Application Support/Cursor/User/settings.json" \
-  "Cursor" "apps/cursor/settings.json"
-
-sublime_live="$HOME/Library/Application Support/Sublime Text/Packages/User"
-sublime_stage="$stage/apps/sublime-text"
-sublime_enabled=0
-if [[ -d "$DOTFILES/apps/sublime-text" && -d "$sublime_live" ]]; then
-  mkdir -p "$sublime_stage"
-  while IFS= read -r -d '' source; do
-    cp "$source" "$sublime_stage/$(basename "$source")"
-    sublime_enabled=1
-  done < <(find "$sublime_live" -maxdepth 1 -type f \
-    \( -name '*.sublime-settings' -o -name '*.sublime-keymap' \
-       -o -name '*.sublime-snippet' -o -name '*.sublime-macro' \
-       -o -name '*.palettes' -o -name '*.py' \) \
-    ! -name 'Theme - Monokai Pro.sublime-settings' -print0)
-  if (( ! sublime_enabled )); then
-    printf '  ⚠ Sublime Text — no managed live settings found\n' >> "$report"
-    unconfigured=$((unconfigured + 1))
-  fi
+# Compare the managed display key, without treating uncaptured primary keys as drift.
+dato_primary="$HOME/Library/Containers/com.sindresorhus.Dato/Data/Library/Preferences/com.sindresorhus.Dato.plist"
+if [[ ! -f "$DOTFILES/apps/dato/display.plist" ]]; then
+  printf '  ✗ Dato display — repo snapshot missing\n' >> "$report"
+  missing=$((missing + 1))
+elif dato_format="$(plutil -extract dateTimeFormat raw -o - "$dato_primary" 2>/dev/null)"; then
+  mkdir -p "$stage/apps/dato"
+  plutil -create xml1 "$stage/apps/dato/display.plist"
+  plutil -insert dateTimeFormat -string "$dato_format" "$stage/apps/dato/display.plist"
+  staged_rows+=("dato-display"$'\t'"Dato custom date/time format"$'\t'"apps/dato/display.plist")
 else
-  printf '  ⚠ Sublime Text — live settings unavailable\n' >> "$report"
+  printf '  ⚠ Dato display — live custom date/time format unavailable\n' >> "$report"
   unconfigured=$((unconfigured + 1))
 fi
+stage_defaults "com.apple.Terminal" "Terminal" "apps/terminal/terminal.plist"
+# Editor and Dock snapshots are curated public templates.
 
 # Pass 2 — apply the real sanitizer to the staged copies, never to the repo.
 if [[ -f "$SANITIZER" ]]; then
@@ -223,49 +182,12 @@ for row in ${staged_rows+"${staged_rows[@]}"}; do
   fi
 done
 
-# Text/JSON settings are copied verbatim by `make backup`; after sanitization,
-# exact file drift is meaningful even though the formats permit comments.
-for row in ${staged_text_rows+"${staged_text_rows[@]}"}; do
-  IFS=$'\t' read -r label relative <<< "$row"
-  compared=$((compared + 1))
-  if ! cmp -s "$stage/$relative" "$DOTFILES/$relative"; then
-    drifted=$((drifted + 1))
-    printf '  ✗ %s → %s (content differs)\n' "$label" "$relative" >> "$report"
-  fi
-done
-
-if (( sublime_enabled )); then
-  while IFS= read -r -d '' repo_file; do
-    basename="$(basename "$repo_file")"
-    compared=$((compared + 1))
-    if [[ ! -f "$sublime_stage/$basename" ]]; then
-      drifted=$((drifted + 1))
-      printf '  ✗ Sublime Text → apps/sublime-text/%s (repo only)\n' "$basename" >> "$report"
-    elif ! cmp -s "$sublime_stage/$basename" "$repo_file"; then
-      drifted=$((drifted + 1))
-      printf '  ✗ Sublime Text → apps/sublime-text/%s (content differs)\n' "$basename" >> "$report"
-    fi
-  done < <(find "$DOTFILES/apps/sublime-text" -maxdepth 1 -type f \
-    \( -name '*.sublime-settings' -o -name '*.sublime-keymap' \
-       -o -name '*.sublime-snippet' -o -name '*.sublime-macro' \
-       -o -name '*.palettes' -o -name '*.py' \) \
-    ! -name 'Theme - Monokai Pro.sublime-settings' -print0)
-
-  while IFS= read -r -d '' live_file; do
-    basename="$(basename "$live_file")"
-    if [[ ! -f "$DOTFILES/apps/sublime-text/$basename" ]]; then
-      compared=$((compared + 1))
-      drifted=$((drifted + 1))
-      printf '  ✗ Sublime Text → apps/sublime-text/%s (live only)\n' "$basename" >> "$report"
-    fi
-  done < <(find "$sublime_stage" -maxdepth 1 -type f -print0)
-fi
-
 if (( drifted == 0 && missing == 0 )); then
   ok "app preference snapshots in sync with system state ($compared surface(s) compared)"
   if (( unconfigured > 0 )); then
     info "$unconfigured domain(s) have no live preferences yet"
     rg '^  ⚠' "$report" || true
+    (( STRICT == 0 )) || exit 1
   fi
   exit 0
 fi

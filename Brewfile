@@ -1,8 +1,10 @@
-tap "homebrew/core"
+tap "deskflow/tap"
 # Static analysis and lint tool, for (ba)sh scripts
 brew "shellcheck"
 # Static checker for GitHub Actions workflow files
 brew "actionlint"
+# Simple, modern, secure file encryption
+brew "age"
 # Browser automation CLI for AI agents
 brew "agent-browser"
 # Clone of cat(1) with syntax highlighting and Git integration
@@ -58,7 +60,7 @@ brew "git-lfs"
 # Audit git repos for secrets
 brew "gitleaks"
 # Apache HTTP server
-brew "httpd", restart_service: :changed
+brew "httpd"
 # Tools and libraries to manipulate images in select formats
 brew "imagemagick"
 # Lightweight and flexible command-line JSON processor
@@ -161,6 +163,8 @@ cask "craft-agents"
 cask "cursor"
 # Disk space visualiser
 cask "daisydisk"
+# Mouse and keyboard sharing utility
+cask "deskflow/tap/deskflow"
 # Utilities designed to make common development tasks easier
 cask "devtoys"
 # Voice and text chat software
@@ -227,6 +231,8 @@ cask "google-gemini"
 cask "hammerspoon"
 # Open-source video transcoder
 cask "handbrake-app"
+# Open-source desktop AI agent
+cask "hermes-desktop"
 # Free and open-source media player
 cask "iina"
 # Tool to optimise images to a smaller size
@@ -261,6 +267,10 @@ cask "microsoft-excel"
 cask "microsoft-powerpoint"
 # Meet, chat, call, and collaborate in just one place
 cask "microsoft-teams"
+# Word processor
+cask "microsoft-word"
+# Mounts servers and cloud storages as a disk on the desktop
+cask "mountain-duck"
 # Visual workspace for building with Codex and Claude Code
 cask "nimbalyst"
 # App to write, plan, collaborate, and get organised
@@ -269,8 +279,6 @@ cask "notion"
 cask "notion-calendar"
 # Knowledge base that works on top of a local folder of plain text Markdown files
 cask "obsidian"
-# Tool to make any cloud storage unified, synchronised, shareable, and encrypted
-cask "odrive"
 # Verify system files structure, run miscellaneous maintenance and more
 cask "onyx"
 # Cross-platform GUI for youtube-dl made in Electron and node.js
@@ -303,8 +311,6 @@ cask "suspicious-package"
 cask "symboliclinker"
 # Messaging app with a focus on speed and security
 cask "telegram"
-# Disposable email client
-cask "tempbox"
 # Extract text from images and other digital documents
 cask "textsniper"
 # Menu bar manager
@@ -323,6 +329,8 @@ cask "upscayl"
 cask "visual-studio-code"
 # Native desktop client for WhatsApp
 cask "whatsapp"
+# Multiplayer code editor
+cask "zed"
 # Gecko based web browser
 cask "zen"
 # Video communication and virtual meeting platform
@@ -334,7 +342,7 @@ mas "CDRViewer", id: 600067300
 mas "Color Picker", id: 1545870783
 mas "Dato", id: 1470584107
 mas "Gapplin", id: 768053424
-mas "Ghostery Privacy Ad Blocker", id: 6504861501
+mas "Ghostery AdBlocker for Privacy", id: 6504861501
 mas "Gifski", id: 1351639930
 mas "Hidden Bar", id: 1452453066
 mas "HP", id: 1474276998
@@ -343,11 +351,12 @@ mas "Keynote", id: 409183694
 mas "Keynote", id: 361285480
 mas "Kindle", id: 302584613
 mas "Lungo", id: 1263070803
-mas "Numbers", id: 409203825
 mas "Numbers", id: 361304891
+mas "Numbers", id: 409203825
 mas "Pages", id: 361309726
 mas "Pages", id: 409201541
 mas "Prime Video", id: 545519333
+mas "Save to Raindrop.io", id: 1549370672
 mas "uBlock Origin Lite", id: 6745342698
 mas "Urban VPN Desktop", id: 1517772049
 mas "Velja", id: 1607635845
@@ -386,6 +395,7 @@ vscode "formulahendry.auto-close-tag"
 vscode "formulahendry.auto-rename-tag"
 vscode "foxundermoon.shell-format"
 vscode "github.codespaces"
+vscode "github.remotehub"
 vscode "github.vscode-github-actions"
 vscode "github.vscode-pull-request-github"
 vscode "google.geminicodeassist"
@@ -424,6 +434,7 @@ vscode "ms-toolsai.jupyter-renderers"
 vscode "ms-toolsai.vscode-jupyter-cell-tags"
 vscode "ms-toolsai.vscode-jupyter-slideshow"
 vscode "ms-vscode-remote.remote-containers"
+vscode "ms-vscode.azure-repos"
 vscode "ms-vscode.live-server"
 vscode "ms-vscode.makefile-tools"
 vscode "ms-vscode.remote-repositories"
@@ -462,5 +473,5 @@ vscode "yatki.vscode-surround"
 vscode "yoavbls.pretty-ts-errors"
 vscode "yzhang.markdown-all-in-one"
 vscode "zignd.html-css-class-completion"
+uv "browser-use"
 npm "corepack"
-npm "design-book"

@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# Windows uses native entry points; reject before any Unix-path mutation.
+case "${OS:-}:$(uname -s)" in
+  Windows_NT:*|*:MINGW*|*:MSYS*) echo 'This is a macOS workflow. On Windows run bin/dot.cmd help.' >&2; exit 2 ;;
+esac
 set -eo pipefail
 
 trap 'printf "  ✗ macos/defaults.sh failed at line %s: %s\n" "$LINENO" "$BASH_COMMAND" >&2' ERR
@@ -82,21 +86,26 @@ verify_defaults() {
 NSGlobalDomain	AppleShowAllExtensions	0
 com.apple.finder	AppleShowAllFiles	1
 com.apple.finder	ShowPathbar	1
+com.apple.finder	ShowPreviewPane	1
+com.apple.finder	FXPreferredViewStyle	clmv
+com.apple.finder	FXPreferredGroupBy	Date Modified
 com.apple.dock	autohide	0
 com.apple.dock	show-recents	0
 com.apple.screensaver	askForPassword	1
 com.apple.screensaver	askForPasswordDelay	0
 com.apple.desktopservices	DSDontWriteNetworkStores	1
 com.apple.SoftwareUpdate	AutomaticCheckEnabled	1
+com.apple.AppleMultitouchMouse	MouseTwoFingerHorizSwipeGesture	1
+com.apple.universalaccess	closeViewHotkeysEnabled	1
 NSGlobalDomain	AppleInterfaceStyleSwitchesAutomatically	1
 com.apple.controlcenter	BatteryShowPercentage	0
-com.apple.dock	wvous-tl-corner	2
+com.apple.dock	wvous-tl-corner	4
 com.apple.dock	wvous-tl-modifier	0
-com.apple.dock	wvous-tr-corner	2
+com.apple.dock	wvous-tr-corner	1
 com.apple.dock	wvous-tr-modifier	0
-com.apple.dock	wvous-bl-corner	4
+com.apple.dock	wvous-bl-corner	2
 com.apple.dock	wvous-bl-modifier	0
-com.apple.dock	wvous-br-corner	2
+com.apple.dock	wvous-br-corner	1
 com.apple.dock	wvous-br-modifier	0
 EOF
     capture="$(command defaults read com.apple.screencapture location 2>/dev/null || true)"
@@ -366,6 +375,9 @@ defaults write com.apple.finder "AppleShowAllFiles" -bool "true"
 # Show path bar in the bottom of the Finder windows (default value is "false")
 defaults write com.apple.finder "ShowPathbar" -bool "true"
 
+# Keep Finder's Preview pane visible when switching folder views.
+defaults write com.apple.finder "ShowPreviewPane" -bool "true"
+
 # Display full POSIX path as Finder window title
 defaults write com.apple.finder "_FXShowPosixPathInTitle" -bool "true"
 
@@ -378,6 +390,9 @@ defaults write com.apple.finder "ShowStatusBar" -bool "true"
 # Column View : `clmv`
 # Gallery View : `Flwv`   (was "Cover Flow" before Mojave)
 defaults write com.apple.finder "FXPreferredViewStyle" -string "clmv"
+
+# Match Finder's Group By → Date Modified menu (separate from sorting within groups).
+defaults write com.apple.finder "FXPreferredGroupBy" -string "Date Modified"
 
 # Set the default path for new Window's location
 # Computer : `PfCm`
@@ -519,10 +534,9 @@ defaults -currentHost write NSGlobalDomain com.apple.trackpad.enableSecondaryCli
 defaults write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerDrag -bool "true"
 defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerDrag -bool "true"
 
-# Magic Mouse: enable right-click (default is single-button "OneButton") and
-# the two-finger swipe/double-tap gestures.
+# Magic Mouse: enable right-click and retain the selected horizontal swipe mode.
 defaults write com.apple.AppleMultitouchMouse MouseButtonMode -string "TwoButton"
-defaults write com.apple.AppleMultitouchMouse MouseTwoFingerHorizSwipeGesture -int 2
+defaults write com.apple.AppleMultitouchMouse MouseTwoFingerHorizSwipeGesture -int 1
 defaults write com.apple.AppleMultitouchMouse MouseTwoFingerDoubleTapGesture -int 3
 
 ###############################################################################
@@ -555,21 +569,21 @@ defaults write com.apple.TextEdit PlainTextEncodingForWrite -int 4
 ###############################################################################
 # Hot Corners                                                                  #
 ###############################################################################
-# Values: 0=no-op, 2=Mission Control, 3=App Windows, 4=Desktop,
+# Values: 1=no action, 2=Mission Control, 3=App Windows, 4=Desktop,
 #         5=Screen Saver, 6=Disable Screen Saver, 10=Put Display to Sleep,
 #         11=Launchpad, 12=Notification Center, 13=Lock Screen, 14=Quick Note
 
-# Top-left → Mission Control
-defaults write com.apple.dock wvous-tl-corner -int 2
+# Top-left → Desktop
+defaults write com.apple.dock wvous-tl-corner -int 4
 defaults write com.apple.dock wvous-tl-modifier -int 0
-# Top-right → Mission Control
-defaults write com.apple.dock wvous-tr-corner -int 2
+# Top-right → No action
+defaults write com.apple.dock wvous-tr-corner -int 1
 defaults write com.apple.dock wvous-tr-modifier -int 0
-# Bottom-left → Desktop
-defaults write com.apple.dock wvous-bl-corner -int 4
+# Bottom-left → Mission Control
+defaults write com.apple.dock wvous-bl-corner -int 2
 defaults write com.apple.dock wvous-bl-modifier -int 0
-# Bottom-right → Mission Control
-defaults write com.apple.dock wvous-br-corner -int 2
+# Bottom-right → No action
+defaults write com.apple.dock wvous-br-corner -int 1
 defaults write com.apple.dock wvous-br-modifier -int 0
 
 ###############################################################################

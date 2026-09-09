@@ -104,3 +104,10 @@ if ! publish; then
 fi
 
 echo "  ✓ Sublime Text ($mode: $(count_managed "$destination_dir") managed file(s))"
+if [[ "$mode" == restore ]]; then
+  if [[ ! -f "$HOME/Library/Application Support/Sublime Text/Installed Packages/Package Control.sublime-package" &&
+        ! -d "$HOME/Library/Application Support/Sublime Text/Packages/Package Control" ]]; then
+    echo "  ⚠ Install Package Control from Sublime Text's command palette to restore the declared packages and themes."
+  fi
+  echo "  - Launch Sublime Text, let Package Control finish, then restart if prompted; copied settings alone do not install packages."
+fi

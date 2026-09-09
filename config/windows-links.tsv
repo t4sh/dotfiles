@@ -1,0 +1,22 @@
+Source	Target
+${DOTFILES}/agents	${HOME}/.agents
+${DOTFILES}/agents/skills	${HOME}/.cursor/skills
+${DOTFILES}/agents/skills	${HOME}/.claude/skills
+${DOTFILES}/agents/agents	${HOME}/.claude/agents
+${DOTFILES}/agents/commands	${HOME}/.claude/commands
+${DOTFILES}/agents/AGENTS.md	${HOME}/.claude/CLAUDE.md
+${DOTFILES}/config/codex/AGENTS.md	${HOME}/.codex/AGENTS.md
+${DOTFILES}/config/zed/AGENTS.md	${APPDATA}/Zed/AGENTS.md
+${DOTFILES}/git/gitconfig	${HOME}/.gitconfig
+${DOTFILES}/git/gitconfig-windows	${HOME}/.gitconfig-platform
+${DOTFILES}/git/gitignore-global	${HOME}/.config/git/ignore
+${DOTFILES}/starship/starship.toml	${HOME}/.config/starship.toml
+${DOTFILES}/starship/gruvbox-rainbow.toml	${HOME}/.config/gruvbox-rainbow.toml
+${DOTFILES}/starship/jetpack.toml	${HOME}/.config/jetpack.toml
+${DOTFILES}/config/bat/config	${APPDATA}/bat/config
+${DOTFILES}/config/lazygit/config.yml	${LOCALAPPDATA}/lazygit/config.yml
+${DOTFILES}/config/ccache/ccache.conf	${LOCALAPPDATA}/ccache/ccache.conf
+${DOTFILES}/config/gh-config.yml	${APPDATA}/GitHub CLI/config.yml
+${DOTFILES}/config/editorconfig	${HOME}/.editorconfig
+${DOTFILES}/powershell/Microsoft.PowerShell_profile.ps1	${DOCUMENTS}/PowerShell/Microsoft.PowerShell_profile.ps1
+${DOTFILES}/powershell/WindowsPowerShell.Microsoft.PowerShell_profile.ps1	${DOCUMENTS}/WindowsPowerShell/Microsoft.PowerShell_profile.ps1

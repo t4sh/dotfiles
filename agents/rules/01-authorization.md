@@ -8,7 +8,7 @@ Always on. These govern when to act vs. when to describe.
 
 - "do it", "fix it", "implement", "commit", "push", "deploy", "merge"
 - "make it", "apply", "ship it", "go ahead"
-- Note: "commit", "push", and "deploy" are action verbs but have additional constraints in 00-core rules 8–10 (no auto-commit, no auto-push, scoped commits, shared-branch fetch+rebase). This file classifies intent; 00-core governs execution.
+- Note: action verbs remain subject to repository rules and the global authorization, attribution, and safety stop conditions. "Commit", "push", and "deploy" have additional constraints in 00-core rules 8–10. When `02-attribution.md` requires a terminal merge handoff, producing that handoff instead of merging is the required action.
 
 **Proposal verbs (describe only, then STOP):**
 
@@ -38,7 +38,7 @@ If the user's reply to a clarifying question is still ambiguous, default to prop
 
 Git commands that write only git metadata may need proactive permission setup regardless of tool — they don't touch the working tree but still require elevated access.
 
-Known metadata writers: `git fetch`, `git worktree add`, `git worktree remove`, `git worktree prune`, `git cherry-pick`. `git worktree add` belongs here because the detached integration worktree in `03-worktree-hygiene.md` writes into the Git common directory, which a sandbox may expose read-only.
+Known metadata writers: `git fetch`, `git worktree remove`, `git worktree prune`, `git cherry-pick`.
 
 - **Codex** — run with the narrow persisted approval prefix when available.
 - **Claude Code** — if repeated prompts block routine work, add narrow `allowedTools` entries via the relevant config/update workflow.

@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
+# Windows uses native entry points; reject before any Unix-path mutation.
+case "${OS:-}:$(uname -s)" in
+  Windows_NT:*|*:MINGW*|*:MSYS*) echo 'This is a macOS workflow. On Windows run bin/dot.cmd help.' >&2; exit 2 ;;
+esac
 set -euo pipefail
 
-DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+export DOTFILES="$SCRIPT_DIR"
 BOOTSTRAP_SMOKE="${DOTFILES_BOOTSTRAP_SMOKE:-0}"
 
 if [[ "$BOOTSTRAP_SMOKE" == "1" && "${CI:-}" != "true" ]]; then
@@ -151,8 +156,9 @@ echo "╚═══════════════════════�
 echo ""
 echo "Manual steps remaining:"
 echo "  1. Sign into the App Store → make brew-mas"
-echo "  2. Restore ~/.secrets from DotfilesSecrets.sparseimage"
-echo "     → passphrase from independent password manager; double-click image; Remember"
+echo "  2. Restore ~/.secrets from a completed DotfilesSecrets recovery DMG set"
+echo "     → configure backup.destination (or DOTFILES_BACKUP_DEST); run: make secrets-mount"
+echo "     → passphrase from independent password manager; optionally Remember in Finder"
 echo "     → make secrets-restore       # read-only validation"
 echo "     → make secrets-restore-apply # explicit transactional ~/.secrets restore"
 echo "     → make secrets-pass-import"

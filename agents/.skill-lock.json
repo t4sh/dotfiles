@@ -46,14 +46,6 @@
       "installedAt": "2026-04-13T02:34:35.256Z",
       "updatedAt": "2026-04-13T03:19:51.459Z"
     },
-    "design-book": {
-      "source": "npm:design-book",
-      "sourceType": "local",
-      "skillPath": "design-book/SKILL.md",
-      "sourceVersion": "0.5.0",
-      "installedAt": "2026-07-31T12:58:01.000Z",
-      "updatedAt": "2026-07-31T12:58:01.000Z"
-    },
     "design-handoff": {
       "source": "anthropics/knowledge-work-plugins",
       "sourceType": "github",
@@ -131,9 +123,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/anthropics/skills.git",
       "skillPath": "skills/frontend-design/SKILL.md",
-      "skillFolderHash": "0d5b74a14bdf3ebcd64f352d06376a2ef05ed296",
+      "skillFolderHash": "d79e2a5bb4df4a386c2adcdd9ab8709bba28c3f6",
       "installedAt": "2026-04-13T02:35:29.893Z",
-      "updatedAt": "2026-06-09T20:16:11.900Z"
+      "updatedAt": "2026-09-07T21:19:24.793Z"
     },
     "theme-factory": {
       "source": "anthropics/skills",
@@ -248,9 +240,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill.git",
       "skillPath": ".claude/skills/ui-ux-pro-max/SKILL.md",
-      "skillFolderHash": "5cca2c41be4f7a85c3d8ff95e9bd42de9486745e",
+      "skillFolderHash": "f0415e89eeadda8933a49a3f432acae52fa542aa",
       "installedAt": "2026-04-13T02:36:50.857Z",
-      "updatedAt": "2026-08-14T04:57:19.958Z"
+      "updatedAt": "2026-09-07T21:19:29.059Z"
     },
     "agent-memory": {
       "source": "t4sh/skills4sh",
@@ -397,9 +389,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/pbakaus/impeccable.git",
       "skillPath": ".agents/skills/impeccable/SKILL.md",
-      "skillFolderHash": "85101df08c45f475fb29eff824b1a8ff6f5c05f8",
+      "skillFolderHash": "06efff78a5233850e8477632d577e700c9bd7994",
       "installedAt": "2026-05-03T11:49:23.273Z",
-      "updatedAt": "2026-08-25T11:30:01.196Z"
+      "updatedAt": "2026-09-09T05:10:31.658Z"
     },
     "eleventy-nunjucks": {
       "source": "t4sh/skills4sh",
@@ -460,9 +452,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/Jakubantalik/transitions.dev.git",
       "skillPath": "skills/transitions-dev/SKILL.md",
-      "skillFolderHash": "9cee42f77052ff78e848cf59e191424c9cbcf5bb",
+      "skillFolderHash": "f3f6692028d4d6f6b601d58cd6d876aaccc9d900",
       "installedAt": "2026-05-22T20:49:00.916Z",
-      "updatedAt": "2026-08-24T16:24:07.734Z"
+      "updatedAt": "2026-08-25T16:32:23.681Z"
     },
     "tauri-v2": {
       "source": "nodnarbnitram/claude-code-extensions",
@@ -478,9 +470,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/mblode/agent-skills.git",
       "skillPath": "skills/ui-animation/SKILL.md",
-      "skillFolderHash": "af4ee2a2c2779f79c8469e79361cdcc50a91512e",
+      "skillFolderHash": "a6de00b713d5149f96c16c1ec6eb2bcd0b605bc8",
       "installedAt": "2026-05-29T10:31:36.298Z",
-      "updatedAt": "2026-08-19T04:20:25.263Z"
+      "updatedAt": "2026-09-07T21:19:33.924Z"
     },
     "brandkit": {
       "source": "Leonxlnx/taste-skill",
@@ -875,63 +867,63 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/jakubkrehel/skills.git",
       "skillPath": "skills/better-accessibility/SKILL.md",
-      "skillFolderHash": "968f51a6cbe02220d4f6822f1aaab9f7f2f21d0d",
+      "skillFolderHash": "ebf9388ad7f6acc424584674ac97406e2118616f",
       "installedAt": "2026-08-01T19:07:45.239Z",
-      "updatedAt": "2026-08-20T21:43:57.470Z"
+      "updatedAt": "2026-09-07T21:19:35.904Z"
     },
     "better-colors": {
       "source": "jakubkrehel/skills",
       "sourceType": "github",
       "sourceUrl": "https://github.com/jakubkrehel/skills.git",
       "skillPath": "skills/better-colors/SKILL.md",
-      "skillFolderHash": "f17ebf5d60bc070557d162a04655c9b159c66060",
+      "skillFolderHash": "2bf09c8493b760bc4449fed26079244368eaaa16",
       "installedAt": "2026-08-01T19:07:45.243Z",
-      "updatedAt": "2026-08-20T21:44:00.265Z"
+      "updatedAt": "2026-09-07T21:19:38.117Z"
     },
     "better-interface": {
       "source": "jakubkrehel/skills",
       "sourceType": "github",
       "sourceUrl": "https://github.com/jakubkrehel/skills.git",
       "skillPath": "skills/better-interface/SKILL.md",
-      "skillFolderHash": "c333b73a1c2fd156967f3d6a3801981f1519c066",
+      "skillFolderHash": "828b477582842f5890fe307b4f95cdf05bd88d92",
       "installedAt": "2026-08-01T19:07:45.245Z",
-      "updatedAt": "2026-08-20T21:44:03.709Z"
+      "updatedAt": "2026-09-07T21:19:40.294Z"
     },
     "better-layout": {
       "source": "jakubkrehel/skills",
       "sourceType": "github",
       "sourceUrl": "https://github.com/jakubkrehel/skills.git",
       "skillPath": "skills/better-layout/SKILL.md",
-      "skillFolderHash": "ea251442f566866411d3ade307aee3bc72014d10",
+      "skillFolderHash": "8f1f1b163848cec18aea8143b9fe10cfb3226874",
       "installedAt": "2026-08-01T19:07:45.246Z",
-      "updatedAt": "2026-08-20T21:44:06.902Z"
+      "updatedAt": "2026-09-07T21:19:42.318Z"
     },
     "better-typography": {
       "source": "jakubkrehel/skills",
       "sourceType": "github",
       "sourceUrl": "https://github.com/jakubkrehel/skills.git",
       "skillPath": "skills/better-typography/SKILL.md",
-      "skillFolderHash": "bf3c544de7c0423ec6a2576387107dfdb8c2298f",
+      "skillFolderHash": "b0c51ed316e9cca63f5182bc569066985b25b9c0",
       "installedAt": "2026-08-01T19:07:45.247Z",
-      "updatedAt": "2026-08-20T21:44:10.905Z"
+      "updatedAt": "2026-09-07T21:19:44.360Z"
     },
     "better-ui": {
       "source": "jakubkrehel/skills",
       "sourceType": "github",
       "sourceUrl": "https://github.com/jakubkrehel/skills.git",
       "skillPath": "skills/better-ui/SKILL.md",
-      "skillFolderHash": "2e191f3a9607e3d3168675f8a8209fa9ec53f3d5",
+      "skillFolderHash": "710b8e9a1b4086594d24050bbb6768dbc421e9dc",
       "installedAt": "2026-08-01T19:07:45.248Z",
-      "updatedAt": "2026-08-20T21:44:13.857Z"
+      "updatedAt": "2026-09-07T21:19:46.508Z"
     },
     "better-writing": {
       "source": "jakubkrehel/skills",
       "sourceType": "github",
       "sourceUrl": "https://github.com/jakubkrehel/skills.git",
       "skillPath": "skills/better-writing/SKILL.md",
-      "skillFolderHash": "2975531c7ff9d06e66fea216ff08e98857de0218",
+      "skillFolderHash": "f0637167d46253f6f5d2d09776552df4979ea562",
       "installedAt": "2026-08-01T19:07:45.249Z",
-      "updatedAt": "2026-08-20T21:44:16.822Z"
+      "updatedAt": "2026-09-07T21:19:48.644Z"
     },
     "find-animation-opportunities": {
       "source": "emilkowalski/skills",

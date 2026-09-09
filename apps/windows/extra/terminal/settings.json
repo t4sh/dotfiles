@@ -1,0 +1,11 @@
+{
+  "copyOnSelect": false,
+  "profiles": {
+    "defaults": {
+      "font": {
+        "face": "Cascadia Mono",
+        "size": 12
+      }
+    }
+  }
+}

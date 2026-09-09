@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# Windows uses native entry points; reject before any Unix-path mutation.
+case "${OS:-}:$(uname -s)" in
+  Windows_NT:*|*:MINGW*|*:MSYS*) echo 'This is a macOS workflow. On Windows run bin/dot.cmd help.' >&2; exit 2 ;;
+esac
 # Read-only preflight checks for a fresh or re-applied Mac bootstrap.
 set -euo pipefail
 
@@ -33,6 +37,48 @@ fail() { printf '  ✗ %s\n' "$1"; FAILURES=$((FAILURES + 1)); }
 
 have() { command -v "$1" >/dev/null 2>&1; }
 
+# Classify DockerHelper records in `sfltool dumpbtm` output.
+# Prints one of: enabled | disabled | absent
+# A registered helper without an explicit [disabled] disposition is treated as
+# enabled — dumpbtm does not always print Disposition.
+docker_helper_btm_state() {
+  awk '
+    function flush() {
+      if (!helper) return
+      if (disposition ~ /\[disabled/) {
+        if (!any_enabled) any_disabled = 1
+      } else {
+        any_enabled = 1
+      }
+    }
+    /^[[:space:]]*#[0-9]+:/ {
+      flush()
+      helper = 0
+      disposition = ""
+      next
+    }
+    {
+      low = tolower($0)
+    }
+    low ~ /^[[:space:]]*name:[[:space:]]*dockerhelper[[:space:]]*$/ { helper = 1 }
+    low ~ /^[[:space:]]*bundle identifier:[[:space:]]*com\.docker\.helper[[:space:]]*$/ { helper = 1 }
+    low ~ /^[[:space:]]*identifier:[[:space:]]*/ {
+      id = low
+      sub(/^[[:space:]]*identifier:[[:space:]]*/, "", id)
+      sub(/[[:space:]]+$/, "", id)
+      sub(/^[[:digit:]]+\./, "", id)
+      if (id == "com.docker.helper") helper = 1
+    }
+    low ~ /^[[:space:]]*disposition:/ { disposition = low }
+    END {
+      flush()
+      if (any_enabled) print "enabled"
+      else if (any_disabled) print "disabled"
+      else print "absent"
+    }
+  '
+}
+
 run_with_timeout() {
   local seconds="$1" pid watchdog status
   shift
@@ -57,6 +103,46 @@ run_with_timeout() {
     return 124
   fi
   return "$status"
+}
+
+check_docker_helper() {
+  local docker_app dump status state
+  docker_app="${DOTFILES_DOCKER_APP:-/Applications/Docker.app}"
+  if [ ! -d "$docker_app" ]; then
+    note "Docker.app not installed; DockerHelper login-item check skipped"
+    return 0
+  fi
+  if ! have sfltool; then
+    note "sfltool missing; DockerHelper login-item check skipped"
+    return 0
+  fi
+  dump=""
+  status=0
+  dump="$(run_with_timeout "$CHECK_TIMEOUT" sfltool dumpbtm 2>/dev/null)" || status=$?
+  if (( status == 124 )); then
+    warn "DockerHelper login-item check timed out after ${CHECK_TIMEOUT}s"
+    return 0
+  fi
+  if (( status != 0 )); then
+    warn "DockerHelper login-item check failed (exit ${status}); inspect Docker in System Settings → General → Login Items & Extensions"
+    return 0
+  fi
+  if [ -z "${dump//[$'\t\n\r ']/}" ]; then
+    warn "DockerHelper login-item check returned no data; inspect Docker in System Settings → General → Login Items & Extensions"
+    return 0
+  fi
+  state="$(printf '%s\n' "$dump" | docker_helper_btm_state)"
+  case "$state" in
+    enabled)
+      warn "DockerHelper is an enabled macOS login item; the menu-bar tray can open the Docker dashboard even when AutoStart is off. Disable Docker / DockerHelper in System Settings → General → Login Items & Extensions → Allow in the Background. Doctor will not change this setting."
+      ;;
+    disabled)
+      ok "DockerHelper login item is disabled"
+      ;;
+    *)
+      ok "DockerHelper is not registered as a login item"
+      ;;
+  esac
 }
 
 check_command() {
@@ -142,6 +228,8 @@ if [ -d "$HOME/Library/Services/SymbolicLinker.service" ] || [ -d "/Library/Serv
 else
   warn "SymbolicLinker service missing; run: make brew-apps"
 fi
+
+check_docker_helper
 
 if [ -f "$DOTFILES/.node-version" ]; then
   ok ".node-version present ($(tr -d '[:space:]' < "$DOTFILES/.node-version"))"

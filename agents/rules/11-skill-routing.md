@@ -84,8 +84,6 @@ Use `design-an-interface` when the requested interface is a module or API bounda
 | Audit, document, or extend an entire component system | `design-system` |
 | Measure hard-coded values, token adoption, duplicates, deprecations, or gaps | `design-token-audit` |
 | Generate portable static CSS, JSON, or theme tokens | `design-tokens` |
-| Migrate static or Figma tokens into a reactive Design Book graph | `design-book` |
-| Model Design Book refs, derived values, procedural tokens, modes, or dependencies | `design-book` |
 | Implement a Tailwind CSS v4 component library or migrate Tailwind v3 → v4 | `tailwind-design-system` |
 | Generate or assess only palettes, contrast, gamut, or color semantics | `better-colors` |
 
@@ -93,7 +91,7 @@ Boundaries:
 
 - Audit the reusable system itself with `design-system`; audit a rendered screen or flow with `better-interface`.
 - Use `design-token-audit` for quantitative inventory; do not substitute the broader `design-system` audit.
-- Use `design-tokens` for static portable output. Use `design-book` only when Design Book is named, installed in the target, or explicitly selected as the migration target.
+- Use `design-tokens` for static portable output.
 - For Tailwind v4 implementation, prefer `tailwind-design-system`; a prior `design-system` specification may feed it without being redesigned.
 
 ## Interface review domains

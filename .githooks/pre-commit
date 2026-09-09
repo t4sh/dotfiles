@@ -18,6 +18,21 @@
 
 set -eu
 
+# Git Bash does not discover PowerShell's python3.cmd shim. Resolve the managed
+# interpreter explicitly instead of executing the Windows Store Python alias.
+case "${OS:-}:$(uname -s)" in
+  Windows_NT:*|*:MINGW*|*:MSYS*)
+    command -v uv >/dev/null 2>&1 || {
+      echo 'Windows hooks need uv and managed Python; run install.ps1 -Apply.' >&2
+      exit 1
+    }
+    PYTHON_BIN="$(uv python find --managed-python)" || exit 1
+    PYTHON_BIN="$(cygpath -u "$PYTHON_BIN")"
+    [[ -x "$PYTHON_BIN" ]] || { echo 'Managed Python is not executable.' >&2; exit 1; }
+    export PYTHON_BIN
+    ;;
+esac
+
 # --- 1. gitleaks --------------------------------------------------------------
 if command -v gitleaks >/dev/null 2>&1; then
   gitleaks git --pre-commit --staged --redact --no-banner || {
@@ -81,8 +96,8 @@ fi
 # Both paths are fixed, newline-free names, so line matching is safe.
 if git diff --cached --name-only --diff-filter=ACMR \
    | grep -qxE 'agents/\.skill-lock\.json|Skillsfile'; then
-  if command -v python3 >/dev/null 2>&1; then
-    python3 scripts/gen-skillsfile.py --check || {
+  if [[ -n "${PYTHON_BIN:-}" ]] || command -v python3 >/dev/null 2>&1; then
+    "${PYTHON_BIN:-python3}" scripts/gen-skillsfile.py --check || {
       printf '\n\033[31m✗ commit blocked: Skillsfile out of sync with .skill-lock.json\033[0m\n' >&2
       printf '  fix:    make skills-manifest   (regenerates + re-stage Skillsfile)\n' >&2
       printf '  bypass: git commit --no-verify\n' >&2

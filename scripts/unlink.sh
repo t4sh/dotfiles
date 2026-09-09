@@ -1,9 +1,14 @@
 #!/usr/bin/env bash
+# Windows uses native entry points; reject before any Unix-path mutation.
+case "${OS:-}:$(uname -s)" in
+  Windows_NT:*|*:MINGW*|*:MSYS*) echo 'This is a macOS workflow. On Windows run bin/dot.cmd help.' >&2; exit 2 ;;
+esac
 # Remove symlinks declared in symlinks.tsv, only if they still point at our source.
 # Idempotent — missing or foreign entries are skipped, not touched.
 set -euo pipefail
 
-DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+DOTFILES="${DOTFILES:-$(cd -- "$SCRIPT_DIR/.." && pwd -P)}"
 MANIFEST="$DOTFILES/symlinks.tsv"
 
 [ -f "$MANIFEST" ] || { echo "manifest not found: $MANIFEST" >&2; exit 1; }

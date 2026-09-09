@@ -7,7 +7,8 @@
 #   account-revealing cloud folder names, or intentionally per-machine policy.
 set -euo pipefail
 
-DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+DOTFILES="${DOTFILES:-$(cd -- "$SCRIPT_DIR/.." && pwd -P)}"
 APPS="$DOTFILES/apps"
 # Literal tilde is written into portable Sublime settings; do not expand it here.
 NODE_DEFAULT="$(tr -d '[:space:]' < "$DOTFILES/.node-version" 2>/dev/null || printf 'v22.22.0')"
@@ -67,22 +68,36 @@ normalize_tower_toolbar() {
 # from a portable Terminal profile snapshot.
 plist_delete "$APPS/terminal/terminal.plist" SecureKeyboardEntry
 
-for f in \
-  "$APPS/sublime-text/Formatter.sublime-settings" \
-  "$APPS/sublime-text/SublimeLinter.sublime-settings"; do
-  [[ -f "$f" ]] || continue
+f="$APPS/sublime-text/SublimeLinter.sublime-settings"
+if [[ -f "$f" ]]; then
   perl -i -pe '
     s#/Users/[^/]+/\.nvm/versions/node/[^"/]+/bin#'"$NVM_NODE_BIN"'#g;
     s#~/\.nvm/versions/node/[^"/]+/bin#'"$NVM_NODE_BIN"'#g;
   ' "$f"
-done
+fi
+
+# External-agent default/favorite options are machine-local runtime and
+# security state, not portable preference policy. Remove these observed fields
+# for every configured agent before backups reach Git.
+if [[ -f "$APPS/zed/settings.json" ]]; then
+  perl -0i -pe '
+    s/^  "(?:agent|context_servers)"\s*:\s*\{.*?^  \},?\n//msg;
+    for my $key (qw(default_config_options favorite_config_option_values)) {
+      s/,\s*"\Q$key\E"\s*:\s*\{[^{}]*\}//g;
+      s/"\Q$key\E"\s*:\s*\{[^{}]*\}\s*,?//g;
+    }
+    s/^[ \t]+$//mg;
+    s/\{\n(?:[ \t]*\n)+([ \t]*"type"\s*:\s*"registry")/\{\n$1/g;
+  ' "$APPS/zed/settings.json"
+fi
 
 for f in \
   "$APPS/sublime-text/GutterColor.sublime-settings" \
-  "$APPS/sublime-text/Formatter.sublime-settings" \
   "$APPS/sublime-text/SublimeLinter.sublime-settings" \
   "$APPS/vscode/settings.json" \
-  "$APPS/cursor/settings.json"; do
+  "$APPS/cursor/settings.json" \
+  "$APPS/zed/settings.json" \
+  "$APPS/zed/keymap.json"; do
   [[ -f "$f" ]] || continue
   HOMEBREW_TOKEN="$HOMEBREW_TOKEN" perl -i -pe '
     s#/(?:opt/homebrew|usr/local)(?=/(?:bin|sbin)(?:/|"))#$ENV{HOMEBREW_TOKEN}#g;
@@ -321,10 +336,14 @@ NODE
 
 sanitize_editor_settings "$APPS/vscode/settings.json"
 sanitize_editor_settings "$APPS/cursor/settings.json"
+sanitize_editor_settings "$APPS/zed/settings.json"
+# Zed keymaps are arrays; this call only redacts machine paths in comments.
+sanitize_editor_settings "$APPS/zed/keymap.json"
 
 # BetterZip records recent archive log names and absolute source paths. This is
 # runtime history, not portable preference policy, and must never enter backups.
 plist_delete "$APPS/betterzip/betterzip.plist" "MIBLogs"
+plist_delete "$APPS/betterzip/betterzip.plist" "MIBTempFolders"
 
 # Tower stores license state, App Center device/session identity, repository-ID
 # migration caches, and home-directory quick-open state. Remove those values,
@@ -404,3 +423,26 @@ if [[ -f "$DOTFILES/macos/dock-backup.plist" ]]; then
   done
 fi
 plist_delete "$DOTFILES/macos/dock-backup.plist" "persistent-others"
+
+# Public snapshots exclude app identity and device/application inventories.
+DOTFILES="$DOTFILES" python3 - <<'PUBLIC_PREFS'
+import os, plistlib, re
+from pathlib import Path
+root = Path(os.environ['DOTFILES']) / 'apps'
+for path in root.rglob('*.plist'):
+    app = path.parent.name
+    if not path.exists():
+        continue
+    data = plistlib.loads(path.read_bytes())
+    original = dict(data)
+    for key in list(data):
+        if (re.search(r'Paddle|Zephyr|SUUpdateGroupIdentifier', key)
+            or (app == 'clop' and key == 'savedPipelines')
+            or (app == 'thaw' and (key.startswith('MenuBarItemManager.')
+                or key in ('KnownDisplays', 'DisplayIceBarConfigurations',
+                           'GlobalDisplayConfiguration', 'NewItemsPlacementData',
+                           'MenuBarAppearanceConfigurationV2', 'UnconfirmedSpacingProfileScope')))):
+            del data[key]
+    if data != original:
+        path.write_bytes(plistlib.dumps(data, fmt=plistlib.FMT_BINARY))
+PUBLIC_PREFS

@@ -1,10 +1,10 @@
 # AGENTS.md — dotfiles
 
-Personal Mac configuration backup and bootstrap system.
+Personal Mac and Windows configuration backup and bootstrap system.
 
 ## Agent posture
 
-When working in this repo, act as a Mac bootstrap and dotfiles organizer, not a generic application codebase reviewer.
+When working in this repo, act as a Mac and Windows bootstrap and dotfiles organizer, not a generic application codebase reviewer.
 
 Optimize for:
 
@@ -54,3 +54,7 @@ De-prioritize:
 - Lead with the change, not the explanation.
 - Prefer structured output over long prose.
 - Ask one focused question when a decision is needed.
+
+## Windows
+
+Read WINDOWS.md before Windows operations. Public preference snapshots are curated templates; do not capture live personal settings into this repository. Use dummy data and isolated profiles for validation.

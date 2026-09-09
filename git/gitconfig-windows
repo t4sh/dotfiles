@@ -1,0 +1,26 @@
+# Windows overlay. Setup links ~/.gitconfig-platform here, independent of drive.
+[pull]
+	ff = only
+[credential]
+	helper = manager
+[core]
+	autocrlf = input
+	eol = lf
+	excludesfile = ~/.config/git/ignore
+	sshCommand = dotfiles-ssh.cmd
+[windows]
+	appendAtomically = false
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+[diff]
+	tool = meld
+[difftool "meld"]
+	cmd = meld.exe \"$LOCAL\" \"$REMOTE\"
+[merge]
+	tool = meld
+[mergetool "meld"]
+	cmd = meld.exe \"$LOCAL\" \"$BASE\" \"$REMOTE\" --output \"$MERGED\"
+	trustExitCode = true

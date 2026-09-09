@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
 # Skillsfile — declarative global skill manifest (Brewfile pattern).
 #
-# GENERATED 2026-08-25T20:41:36+05:30 from agents/.skill-lock.json by
+# GENERATED 2026-09-09T16:11:32+05:30 from agents/.skill-lock.json by
 # scripts/gen-skillsfile.py — DO NOT EDIT BY HAND. To change skills:
 #   ~/.local/bin/npx-stable skills add/remove ...   then   make skills-manifest
 #   (regenerates Skillsfile + agents/skills/README.md)
 #
 # Explicit upstream refresh: make skills-update   (or: bash Skillsfile)
-# 115 skills — 32 github sources + 3 local.
+# 114 skills — 32 github sources + 2 local.
 #
 # Prereqs (fresh Mac): node + git + GitHub auth (SSH/gh) must be set
-# up first — GitHub-hosted skill sources need auth when the registry requires it.
+# up first if a configured upstream source requires authentication.
 # Agents and MCP tooling use the stable npx shim from ~/.local/bin.
 
 set -euo pipefail
 
 NPX="${NPX:-$HOME/.local/bin/npx-stable}"
-[[ -x "$NPX" ]] || { echo "npx stable shim not found or not executable: $NPX" >&2; exit 1; }
+[[ -x "$NPX" || ( "${OS:-}" == "Windows_NT" && -f "$NPX" ) ]] || { echo "npx stable shim not found or not executable: $NPX" >&2; exit 1; }
 
 echo "→ update ComposioHQ/awesome-claude-skills"
 "$NPX" skills add ComposioHQ/awesome-claude-skills --skill file-organizer -g -y
@@ -31,7 +31,7 @@ echo "→ update Leonxlnx/taste-skill"
 "$NPX" skills add Leonxlnx/taste-skill --skill brandkit design-taste-frontend full-output-enforcement gpt-taste industrial-brutalist-ui minimalist-ui redesign-existing-projects stitch-design-taste -g -y
 
 echo "→ update anthropics/claude-code"
-"$NPX" skills add anthropics/claude-code --skill skill-development -g -y
+"$NPX" skills add anthropics/claude-code --skill 'Skill Development' -g -y
 
 echo "→ update anthropics/knowledge-work-plugins"
 "$NPX" skills add anthropics/knowledge-work-plugins --skill architecture debug deploy-checklist design-handoff design-system documentation research-synthesis system-design tech-debt user-research -g -y
@@ -117,7 +117,6 @@ echo "→ update wshobson/agents"
 # Local / repo-native skills (vendored in agents/skills/,
 # no upstream — they ship with the dotfiles repo itself):
 #   code-review-nextjs
-#   design-book
 #   init-rulebook
 
 echo "✓ Skillsfile applied"

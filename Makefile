@@ -1,6 +1,11 @@
+export DOTFILES_PUBLIC_SNAPSHOT := 1
 .DEFAULT_GOAL := help
 
-.PHONY: all help link unlink brew brew-without-mas brew-base brew-core brew-apps node brew-npm brew-mas brew-check brewfile-audit shims macos macos-user macos-dry-run macos-check touch-id-sudo touch-id-sudo-check dock terminal services services-check restore-apps restore-canary restore-shottr post-vault backup backup-canary backup-shottr audit-apps apps-drift hooks hooks-check ssh-setup skills-audit skills skills-update skills-manifest secrets-backup secrets-mount secrets-health secrets-manifest secrets-restore secrets-restore-apply secrets-pass secrets-pass-import rules-audit default-apps default-apps-check capture-default-apps doctor verify-bootstrap docs-audit
+ifeq ($(OS),Windows_NT)
+include windows.mk
+else
+
+.PHONY: all help link unlink brew brew-without-mas brew-core brew-apps node brew-npm brew-mas brew-check brewfile-audit shims macos macos-user macos-dry-run macos-check touch-id-sudo touch-id-sudo-check dock terminal services services-check restore-apps restore-canary restore-shottr post-vault backup backup-canary backup-shottr audit-apps apps-drift hooks hooks-check ssh-setup skills-audit skills skills-update skills-manifest secrets-backup secrets-backup-legacy secrets-compat-fixtures secrets-mount secrets-mount-legacy secrets-health secrets-manifest secrets-restore secrets-restore-apply secrets-pass secrets-pass-import upgrade rules-audit default-apps default-apps-check capture-default-apps doctor verify-bootstrap docs-audit
 
 export DOTFILES := $(CURDIR)
 
@@ -21,7 +26,7 @@ all: ## Re-apply the full existing-Mac setup, including node shims, in a fixed o
 # post-vault / ssh-setup stay manual: never touch canonical key material
 # before the existing secret tree has had a chance to be restored.
 # terminal is NOT in `all` (would kill parent Terminal.app shell).
-# default-apps, doctor, docs-audit, skills, and terminal stay manual.
+# default-apps, doctor, docs-audit, skills, terminal, and stay manual.
 
 help: ## Show available make targets
 	@awk 'BEGIN {FS = ":.*## "; printf "Usage: make <target>\n\nTargets:\n"} /^[a-zA-Z0-9_-]+:.*## / {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -41,6 +46,18 @@ backup-canary: ## Back up Canary Mail prefs into ~/.secrets
 backup-shottr: ## Back up Shottr prefs into ~/.secrets
 	@bash scripts/backup-shottr-vault.sh
 
+.PHONY: shottr-backup backup-dato restore-dato backup-deskflow
+shottr-backup: backup-shottr ## Alias for backup-shottr
+
+backup-dato: ## Back up full Dato preferences into ~/.secrets
+	@bash scripts/backup-dato-vault.sh
+
+restore-dato: ## Restore full Dato preferences after launching Dato once
+	@bash scripts/restore-dato-vault.sh
+
+backup-deskflow: ## Back up Mac Deskflow configuration and TLS files into ~/.secrets
+	@bash scripts/backup-deskflow-vault.sh
+
 ssh-setup: ## Verify/register restored GitHub auth + signing key
 	@bash scripts/ssh-setup.sh
 
@@ -58,6 +75,11 @@ secrets-manifest: ## Install the default vault backup manifest when absent
 # absent. Not in `all` — requires ~/.secrets first.
 post-vault: ## After secrets land: link, ssh-setup, vault app restores, restore-apps
 	@bash scripts/post-vault.sh
+
+
+upgrade: ## Update apps/tools and agent skills
+	@topgrade
+
 
 skills-audit: ## Check tracked agent skills for redistribution/license safety
 	@bash scripts/audit-skill-licenses.sh --check
@@ -86,7 +108,7 @@ skills-update: ## Explicitly refresh vendored skills from current upstream sourc
 	@bash Skillsfile
 	@$(MAKE) --no-print-directory skills-manifest
 	@$(MAKE) --no-print-directory skills-audit
-	@git status --short -- Skillsfile agents/.skill-lock.json agents/skills agents/skills/README.md THIRD_PARTY_NOTICES.md
+	@git status --short -- Skillsfile agents/.skill-lock.json agents/skills agents/skills/README.md
 
 hooks: ## Install local git hooks and diff drivers
 	@git config --local core.hooksPath .githooks
@@ -120,7 +142,7 @@ brew-without-mas: ## Install all non-App-Store Brewfile phases
 brew-base: ## Install Brewfile except npm and App Store entries
 	@DOTFILES="$(CURDIR)" bash scripts/brewfile.sh base
 
-brew-core: ## Install taps and formulae needed by the bootstrap itself
+brew-core: ## Install bootstrap taps, formulae, and uv tools
 	@DOTFILES="$(CURDIR)" bash scripts/brewfile.sh core
 
 brew-apps: ## Install casks, fonts, and editor extensions (resumable phase)
@@ -211,7 +233,10 @@ services: ## Install Automator Quick Actions into ~/Library/Services
 		count=$$((count + 1)); \
 	done; \
 	[ "$$count" -gt 0 ] || { echo "  ✗ no Automator workflows found" >&2; exit 1; }; \
-	echo "Automator services installed ($$count)."
+	echo "Automator services installed ($$count)."; \
+	if [ -x /System/Library/CoreServices/pbs ]; then /System/Library/CoreServices/pbs -update; fi; \
+	echo "Enable restored actions in System Settings > General > Login Items & Extensions > Finder."; \
+	echo "services-check compares workflow files; verify Finder menus separately."
 
 services-check: ## Compare installed Automator workflows with the repo copies
 	@bash scripts/check-services.sh
@@ -246,20 +271,34 @@ docs-audit: ## Check docs/scripts for typos when typos is installed
 		echo "  - typos not installed; run 'make brew' first"; \
 	fi
 
+
 audit-apps: ## Scan app preference snapshots for secrets/local paths
 	@bash scripts/audit-app-prefs.sh
 
 apps-drift: ## Check app preference snapshots against current system state
 	@bash scripts/audit-apps-drift.sh
 
-backup: ## Transactionally refresh repo-tracked prefs, services, and Brewfile
+backup: ## Check macOS policy, refresh repo snapshots, then capture Dato/Shottr/Deskflow into ~/.secrets
+	@$(MAKE) --no-print-directory macos-check || { echo "macOS preferences differ or could not be checked. Review and confirm each difference before backup; update policy or restore the saved value, then retry."; exit 1; }
 	@bash scripts/backup-apps.sh
+	@if [ -f "$(HOME)/Library/Containers/com.sindresorhus.Dato/Data/Library/Preferences/com.sindresorhus.Dato.plist" ]; then $(MAKE) --no-print-directory backup-dato; else echo "Dato private capture skipped: launch Dato first; previous backup retained."; fi
+	@if defaults read cc.ffitch.shottr >/dev/null 2>&1; then $(MAKE) --no-print-directory backup-shottr; else echo "Shottr private capture skipped: preferences unavailable; previous backup retained."; fi
+	@if [ -d "$(HOME)/Library/Deskflow" ]; then $(MAKE) --no-print-directory backup-deskflow; else echo "Deskflow private capture skipped: configure Deskflow first; previous backup retained."; fi
 
-secrets-backup: ## Snapshot ~/.secrets into the encrypted sparseimage vault
+secrets-backup: ## Publish an immutable encrypted APFS/UDZO recovery DMG
+	@bash scripts/secrets-backup-portable.sh
+
+secrets-backup-legacy: ## Append to the legacy mutable sparseimage vault
 	@bash scripts/secrets-backup.sh
 
-secrets-mount: ## Mount the encrypted secrets sparseimage
+secrets-compat-fixtures: ## Create disposable APFS UDSP/UDZO compatibility images
+	@bash scripts/secrets-format-compat.sh create
+
+secrets-mount: ## Verify and open the newest portable recovery DMG
 	@bash scripts/secrets-mount.sh
+
+secrets-mount-legacy: ## Open the preserved legacy sparseimage
+	@bash scripts/secrets-mount-legacy.sh
 
 secrets-health: ## Validate mounted vault snapshot freshness (day-2 check)
 	@bash scripts/secrets-health.sh
@@ -275,3 +314,4 @@ secrets-pass: ## Copy the local vault password from Keychain
 
 secrets-pass-import: ## Import a recovered vault password into the local Keychain
 	@bash scripts/secrets-pass-import.sh
+endif

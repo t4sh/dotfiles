@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# Windows uses native entry points; reject before any Unix-path mutation.
+case "${OS:-}:$(uname -s)" in
+  Windows_NT:*|*:MINGW*|*:MSYS*) echo 'This is a macOS workflow. On Windows run bin/dot.cmd help.' >&2; exit 2 ;;
+esac
 # Capture repo-managed preferences into a staged tree, validate it, then publish
 # the complete snapshot transactionally. A nonzero exit leaves the repo intact.
 set -euo pipefail
@@ -6,6 +10,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 DOTFILES="${DOTFILES:-$(cd -- "$SCRIPT_DIR/.." && pwd -P)}"
 SOURCE_DOTFILES="$DOTFILES"
+export DOTFILES_PUBLIC_SNAPSHOT=1
 MANIFEST="$DOTFILES/apps.tsv"
 STAGE="$(mktemp -d "$DOTFILES/.backup-stage.XXXXXX")"
 ROLLBACK="$(mktemp -d "$DOTFILES/.backup-rollback.XXXXXX")"
@@ -54,7 +59,12 @@ skipped=0
 while IFS=$'\t' read -r domain label plist _; do
   case "${domain:-}" in ''|'#'*) continue ;; esac
   mkdir -p "$(dirname "$STAGE/$plist")"
-  if defaults export "$domain" "$STAGE/$plist" 2>/dev/null; then
+  # A never-configured domain may export successfully as an empty dictionary.
+  # Keep its prior snapshot instead of replacing it with an empty plist.
+  if defaults export "$domain" "$STAGE/.defaults-export.plist" 2>/dev/null &&
+     plist_view="$(plutil -p "$STAGE/.defaults-export.plist" 2>/dev/null)" &&
+     rg -q '[^[:space:]{}]' <<< "$plist_view"; then
+    mv "$STAGE/.defaults-export.plist" "$STAGE/$plist"
     ok "$label"
     captured=$((captured + 1))
   else
@@ -64,30 +74,18 @@ while IFS=$'\t' read -r domain label plist _; do
 done < "$MANIFEST"
 info "defaults snapshots: $captured captured, $skipped retained"
 
-DATO_LIVE="$HOME/Library/Group Containers/group.com.sindresorhus.Dato/Library/Preferences/group.com.sindresorhus.Dato.plist"
-if [[ -f "$DATO_LIVE" ]]; then
-  cp "$DATO_LIVE" "$STAGE/apps/dato/dato.plist"
-  ok "Dato"
+# Shared time-zone lists are personal and are omitted from public snapshots.
+
+DATO_PRIMARY="$HOME/Library/Containers/com.sindresorhus.Dato/Data/Library/Preferences/com.sindresorhus.Dato.plist"
+if DATO_FORMAT="$(plutil -extract dateTimeFormat raw -o - "$DATO_PRIMARY" 2>/dev/null)"; then
+  plutil -create xml1 "$STAGE/apps/dato/display.plist"
+  plutil -insert dateTimeFormat -string "$DATO_FORMAT" "$STAGE/apps/dato/display.plist"
+  ok "Dato custom date/time format (other primary preferences are not captured)"
 else
-  warn "Dato not captured (prior snapshot retained)"
+  warn "Dato custom date/time format unavailable (prior snapshot retained)"
 fi
 
-DOTFILES="$STAGE" bash "$SOURCE_DOTFILES/scripts/sync-sublime-settings.sh" capture
-
-for editor in "Code:VS Code:vscode" "Cursor:Cursor:cursor"; do
-  IFS=: read -r directory label repo_name <<< "$editor"
-  live="$HOME/Library/Application Support/$directory/User/settings.json"
-  if [[ -f "$live" ]]; then
-    cp "$live" "$STAGE/apps/$repo_name/settings.json"
-    ok "$label settings"
-  else
-    warn "$label settings not captured (prior snapshot retained)"
-  fi
-done
-
-defaults export com.apple.dock "$STAGE/macos/dock-backup.plist" 2>/dev/null || \
-  die "Dock layout export failed; staged snapshot discarded"
-ok "Dock layout"
+ok "Curated editor and Dock templates retained"
 if defaults export com.apple.Terminal "$STAGE/apps/terminal/terminal.plist" 2>/dev/null; then
   ok "Terminal.app profiles"
 else
@@ -107,6 +105,7 @@ done
 DOTFILES="$STAGE" bash "$SOURCE_DOTFILES/scripts/sanitize-app-prefs.sh"
 ok "sanitized portable app prefs"
 DOTFILES="$SOURCE_DOTFILES" BREWFILE="$SOURCE_DOTFILES/Brewfile" \
+  DOTFILES_BREWFILE_PRESERVE_EMPTY_KINDS=1 \
   bash "$SOURCE_DOTFILES/scripts/brewfile.sh" dump "$STAGE/Brewfile"
 ok "Brewfile"
 DOTFILES="$STAGE" bash "$SOURCE_DOTFILES/scripts/audit-app-prefs.sh"
@@ -124,8 +123,10 @@ ok "backup snapshot published atomically"
 
 cat <<'EOF'
 
-Manual vault exports still needed:
+Additional private backups:
+  - make backup also captures full Dato, Shottr and Deskflow configuration into ~/.secrets.
   - Canary Mail: make backup-canary
-  - Shottr: make backup-shottr
+  - Thaw: export a profile into ~/.secrets/apps/thaw/ for manual import
   - Transmit / Raycast: export into ~/.secrets/apps/
+  - Finish with make secrets-backup to publish an encrypted recovery DMG.
 EOF

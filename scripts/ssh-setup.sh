@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# Windows uses native entry points; reject before any Unix-path mutation.
+case "${OS:-}:$(uname -s)" in
+  Windows_NT:*|*:MINGW*|*:MSYS*) echo 'This is a macOS workflow. On Windows run bin/dot.cmd help.' >&2; exit 2 ;;
+esac
 # Idempotent, restore-first GitHub SSH bootstrap.
 #   1. Require the vault-restored Ed25519 key (unless --generate is explicit)
 #   2. validate the private/public pair and chmod tightly

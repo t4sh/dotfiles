@@ -1,6 +1,6 @@
 ---
-generated: 2026-08-25T20:41:36+05:30
-skills_count: 120
+generated: 2026-09-09T16:11:32+05:30
+skills_count: 121
 gated_count: 0
 lock_file: ../.skill-lock.json
 lock_version: 4
@@ -17,7 +17,7 @@ When this file is asked to be updated. Update the following
 
 # Skills Inventory
 
-> **120 skills** installed — 112 remote + 8 local
+> **121 skills** installed — 112 remote + 9 local
 
 | # | Skill Name | Source | Disk Location | Remark |
 |---|-----------|--------|---------------|--------|
@@ -47,107 +47,108 @@ When this file is asked to be updated. Update the following
 | 24 | creative-design | cerico/macfair | `~/.agents/skills/creative-design/` | — |
 | 25 | debug | anthropics/knowledge-work-plugins | `~/.agents/skills/debug/` | — |
 | 26 | deploy-checklist | anthropics/knowledge-work-plugins | `~/.agents/skills/deploy-checklist/` | — |
-| 27 | design-book | npm:design-book | `~/.agents/skills/design-book/` | — |
-| 28 | design-handoff | anthropics/knowledge-work-plugins | `~/.agents/skills/design-handoff/` | Dev handoff spec template |
-| 29 | design-system | anthropics/knowledge-work-plugins | `~/.agents/skills/design-system/` | — |
-| 30 | design-taste-frontend | Leonxlnx/taste-skill | `~/.agents/skills/design-taste-frontend/` | — |
-| 31 | design-token-audit | owl-listener/designer-skills | `~/.agents/skills/design-token-audit/` | — |
-| 32 | design-tokens | julianoczkowski/designer-skills | `~/.agents/skills/design-tokens/` | — |
-| 33 | diagnosing-bugs | mattpocock/skills | `~/.agents/skills/diagnosing-bugs/` | — |
-| 34 | discord-harvest | t4sh/skills4sh | `~/.agents/skills/discord-harvest/` | — |
-| 35 | documentation | anthropics/knowledge-work-plugins | `~/.agents/skills/documentation/` | — |
-| 36 | domain-modeling | mattpocock/skills | `~/.agents/skills/domain-modeling/` | — |
-| 37 | eleventy-nunjucks | t4sh/skills4sh | `~/.agents/skills/eleventy-nunjucks/` | — |
-| 38 | emil-design-eng | emilkowalski/skills | `~/.agents/skills/emil-design-eng/` | — |
-| 39 | figma-to-code | t4sh/skills4sh | `~/.agents/skills/figma-to-code/` | Custom Figma-to-code workflow |
-| 40 | file-organizer | ComposioHQ/awesome-claude-skills | `~/.agents/skills/file-organizer/` | — |
-| 41 | find-animation-opportunities | emilkowalski/skills | `~/.agents/skills/find-animation-opportunities/` | — |
-| 42 | find-skills | vercel-labs/skills | `~/.agents/skills/find-skills/` | Skill discovery meta-skill |
-| 43 | frontend-design | anthropics/skills | `~/.agents/skills/frontend-design/` | — |
-| 44 | full-output-enforcement | Leonxlnx/taste-skill | `~/.agents/skills/full-output-enforcement/` | — |
-| 45 | git-commit | github/awesome-copilot | `~/.agents/skills/git-commit/` | Only awesome-copilot skill retained |
-| 46 | git-flow-branch-creator | github/awesome-copilot | `~/.agents/skills/git-flow-branch-creator/` | — |
-| 47 | git-guardrails-claude-code | mattpocock/skills | `~/.agents/skills/git-guardrails-claude-code/` | — |
-| 48 | gpt-taste | Leonxlnx/taste-skill | `~/.agents/skills/gpt-taste/` | — |
-| 49 | grill-me | mattpocock/skills | `~/.agents/skills/grill-me/` | — |
-| 50 | grill-with-docs | mattpocock/skills | `~/.agents/skills/grill-with-docs/` | — |
-| 51 | grilling | mattpocock/skills | `~/.agents/skills/grilling/` | — |
-| 52 | hallmark | nutlope/hallmark | `~/.agents/skills/hallmark/` | — |
-| 53 | handoff | mattpocock/skills | `~/.agents/skills/handoff/` | — |
-| 54 | impeccable | pbakaus/impeccable | `~/.agents/skills/impeccable/` | — |
-| 55 | implement | mattpocock/skills | `~/.agents/skills/implement/` | — |
-| 56 | improve | shadcn/improve | `~/.agents/skills/improve/` | — |
-| 57 | improve-animations | emilkowalski/skills | `~/.agents/skills/improve-animations/` | — |
-| 58 | improve-codebase-architecture | mattpocock/skills | `~/.agents/skills/improve-codebase-architecture/` | — |
-| 59 | industrial-brutalist-ui | Leonxlnx/taste-skill | `~/.agents/skills/industrial-brutalist-ui/` | — |
-| 60 | init-rulebook | local | `~/.agents/skills/init-rulebook/` | — |
-| 61 | localhost-screenshots | t4sh/skills4sh | `~/.agents/skills/localhost-screenshots/` | — |
-| 62 | loop-me | mattpocock/skills | `~/.agents/skills/loop-me/` | — |
-| 63 | marketing-psychology | coreyhaines31/marketingskills | `~/.agents/skills/marketing-psychology/` | — |
-| 64 | migrate-to-shoehorn | mattpocock/skills | `~/.agents/skills/migrate-to-shoehorn/` | — |
-| 65 | minimalist-ui | Leonxlnx/taste-skill | `~/.agents/skills/minimalist-ui/` | — |
-| 66 | monorepo-management | wshobson/agents | `~/.agents/skills/monorepo-management/` | — |
-| 67 | paseo | local | `~/.agents/skills/paseo/` | — |
-| 68 | paseo-advisor | local | `~/.agents/skills/paseo-advisor/` | — |
-| 69 | paseo-committee | local | `~/.agents/skills/paseo-committee/` | — |
-| 70 | paseo-handoff | local | `~/.agents/skills/paseo-handoff/` | — |
+| 27 | design-handoff | anthropics/knowledge-work-plugins | `~/.agents/skills/design-handoff/` | Dev handoff spec template |
+| 28 | design-system | anthropics/knowledge-work-plugins | `~/.agents/skills/design-system/` | — |
+| 29 | design-taste-frontend | Leonxlnx/taste-skill | `~/.agents/skills/design-taste-frontend/` | — |
+| 30 | design-token-audit | owl-listener/designer-skills | `~/.agents/skills/design-token-audit/` | — |
+| 31 | design-tokens | julianoczkowski/designer-skills | `~/.agents/skills/design-tokens/` | — |
+| 32 | diagnosing-bugs | mattpocock/skills | `~/.agents/skills/diagnosing-bugs/` | — |
+| 33 | discord-harvest | t4sh/skills4sh | `~/.agents/skills/discord-harvest/` | — |
+| 34 | documentation | anthropics/knowledge-work-plugins | `~/.agents/skills/documentation/` | — |
+| 35 | domain-modeling | mattpocock/skills | `~/.agents/skills/domain-modeling/` | — |
+| 36 | eleventy-nunjucks | t4sh/skills4sh | `~/.agents/skills/eleventy-nunjucks/` | — |
+| 37 | emil-design-eng | emilkowalski/skills | `~/.agents/skills/emil-design-eng/` | — |
+| 38 | figma-to-code | t4sh/skills4sh | `~/.agents/skills/figma-to-code/` | Custom Figma-to-code workflow |
+| 39 | file-organizer | ComposioHQ/awesome-claude-skills | `~/.agents/skills/file-organizer/` | — |
+| 40 | find-animation-opportunities | emilkowalski/skills | `~/.agents/skills/find-animation-opportunities/` | — |
+| 41 | find-skills | vercel-labs/skills | `~/.agents/skills/find-skills/` | Skill discovery meta-skill |
+| 42 | frontend-design | anthropics/skills | `~/.agents/skills/frontend-design/` | — |
+| 43 | full-output-enforcement | Leonxlnx/taste-skill | `~/.agents/skills/full-output-enforcement/` | — |
+| 44 | git-commit | github/awesome-copilot | `~/.agents/skills/git-commit/` | Only awesome-copilot skill retained |
+| 45 | git-flow-branch-creator | github/awesome-copilot | `~/.agents/skills/git-flow-branch-creator/` | — |
+| 46 | git-guardrails-claude-code | mattpocock/skills | `~/.agents/skills/git-guardrails-claude-code/` | — |
+| 47 | gpt-taste | Leonxlnx/taste-skill | `~/.agents/skills/gpt-taste/` | — |
+| 48 | grill-me | mattpocock/skills | `~/.agents/skills/grill-me/` | — |
+| 49 | grill-with-docs | mattpocock/skills | `~/.agents/skills/grill-with-docs/` | — |
+| 50 | grilling | mattpocock/skills | `~/.agents/skills/grilling/` | — |
+| 51 | hallmark | nutlope/hallmark | `~/.agents/skills/hallmark/` | — |
+| 52 | handoff | mattpocock/skills | `~/.agents/skills/handoff/` | — |
+| 53 | impeccable | pbakaus/impeccable | `~/.agents/skills/impeccable/` | — |
+| 54 | implement | mattpocock/skills | `~/.agents/skills/implement/` | — |
+| 55 | improve | shadcn/improve | `~/.agents/skills/improve/` | — |
+| 56 | improve-animations | emilkowalski/skills | `~/.agents/skills/improve-animations/` | — |
+| 57 | improve-codebase-architecture | mattpocock/skills | `~/.agents/skills/improve-codebase-architecture/` | — |
+| 58 | industrial-brutalist-ui | Leonxlnx/taste-skill | `~/.agents/skills/industrial-brutalist-ui/` | — |
+| 59 | init-rulebook | local | `~/.agents/skills/init-rulebook/` | — |
+| 60 | localhost-screenshots | t4sh/skills4sh | `~/.agents/skills/localhost-screenshots/` | — |
+| 61 | loop-me | mattpocock/skills | `~/.agents/skills/loop-me/` | — |
+| 62 | marketing-psychology | coreyhaines31/marketingskills | `~/.agents/skills/marketing-psychology/` | — |
+| 63 | migrate-to-shoehorn | mattpocock/skills | `~/.agents/skills/migrate-to-shoehorn/` | — |
+| 64 | minimalist-ui | Leonxlnx/taste-skill | `~/.agents/skills/minimalist-ui/` | — |
+| 65 | monorepo-management | wshobson/agents | `~/.agents/skills/monorepo-management/` | — |
+| 66 | paseo | local | `~/.agents/skills/paseo/` | — |
+| 67 | paseo-advisor | local | `~/.agents/skills/paseo-advisor/` | — |
+| 68 | paseo-committee | local | `~/.agents/skills/paseo-committee/` | — |
+| 69 | paseo-handoff | local | `~/.agents/skills/paseo-handoff/` | — |
+| 70 | paseo-help | local | `~/.agents/skills/paseo-help/` | — |
 | 71 | paseo-loop | local | `~/.agents/skills/paseo-loop/` | — |
-| 72 | pdf-harvester | mindmorass/reflex | `~/.agents/skills/pdf-harvester/` | — |
-| 73 | pick-ui-library | emilkowalski/skills | `~/.agents/skills/pick-ui-library/` | — |
-| 74 | playwright | openai/skills | `~/.agents/skills/playwright/` | — |
-| 75 | ponytail | DietrichGebert/ponytail | `~/.agents/skills/ponytail/` | — |
-| 76 | ponytail-audit | DietrichGebert/ponytail | `~/.agents/skills/ponytail-audit/` | — |
-| 77 | ponytail-help | DietrichGebert/ponytail | `~/.agents/skills/ponytail-help/` | — |
-| 78 | ponytail-review | DietrichGebert/ponytail | `~/.agents/skills/ponytail-review/` | — |
-| 79 | prototype | mattpocock/skills | `~/.agents/skills/prototype/` | — |
-| 80 | redesign-existing-projects | Leonxlnx/taste-skill | `~/.agents/skills/redesign-existing-projects/` | — |
-| 81 | research | mattpocock/skills | `~/.agents/skills/research/` | — |
-| 82 | research-synthesis | anthropics/knowledge-work-plugins | `~/.agents/skills/research-synthesis/` | UX research synthesis template |
-| 83 | resolving-merge-conflicts | mattpocock/skills | `~/.agents/skills/resolving-merge-conflicts/` | — |
-| 84 | review-animations | emilkowalski/skills | `~/.agents/skills/review-animations/` | — |
-| 85 | scaffold-exercises | mattpocock/skills | `~/.agents/skills/scaffold-exercises/` | — |
-| 86 | seo-audit | coreyhaines31/marketingskills | `~/.agents/skills/seo-audit/` | — |
-| 87 | setup-matt-pocock-skills | mattpocock/skills | `~/.agents/skills/setup-matt-pocock-skills/` | — |
-| 88 | setup-pre-commit | mattpocock/skills | `~/.agents/skills/setup-pre-commit/` | — |
-| 89 | setup-ts-deep-modules | mattpocock/skills | `~/.agents/skills/setup-ts-deep-modules/` | — |
-| 90 | skill-architect | t4sh/skills4sh | `~/.agents/skills/skill-architect/` | — |
-| 91 | skill-creator | openai/skills | `~/.agents/skills/skill-creator/` | — |
-| 92 | skill-development | anthropics/claude-code | `~/.agents/skills/skill-development/` | — |
-| 93 | stitch-design-taste | Leonxlnx/taste-skill | `~/.agents/skills/stitch-design-taste/` | — |
-| 94 | sync-figma-token | firebenders/sync-figma-token-skill | `~/.agents/skills/sync-figma-token/` | — |
-| 95 | system-design | anthropics/knowledge-work-plugins | `~/.agents/skills/system-design/` | — |
-| 96 | tailwind-design-system | wshobson/agents | `~/.agents/skills/tailwind-design-system/` | — |
-| 97 | tauri-v2 | nodnarbnitram/claude-code-extensions | `~/.agents/skills/tauri-v2/` | — |
-| 98 | tdd | mattpocock/skills | `~/.agents/skills/tdd/` | — |
-| 99 | teach | mattpocock/skills | `~/.agents/skills/teach/` | — |
-| 100 | tech-debt | anthropics/knowledge-work-plugins | `~/.agents/skills/tech-debt/` | — |
-| 101 | theme-factory | anthropics/skills | `~/.agents/skills/theme-factory/` | — |
-| 102 | to-questionnaire | mattpocock/skills | `~/.agents/skills/to-questionnaire/` | — |
-| 103 | to-spec | mattpocock/skills | `~/.agents/skills/to-spec/` | — |
-| 104 | to-tickets | mattpocock/skills | `~/.agents/skills/to-tickets/` | — |
-| 105 | top-design | wondelai/skills | `~/.agents/skills/top-design/` | — |
-| 106 | transitions-dev | Jakubantalik/transitions.dev | `~/.agents/skills/transitions-dev/` | — |
-| 107 | triage | mattpocock/skills | `~/.agents/skills/triage/` | — |
-| 108 | ui-animation | mblode/agent-skills | `~/.agents/skills/ui-animation/` | — |
-| 109 | ui-ux-pro-max | nextlevelbuilder/ui-ux-pro-max-skill | `~/.agents/skills/ui-ux-pro-max/` | — |
-| 110 | user-research | anthropics/knowledge-work-plugins | `~/.agents/skills/user-research/` | — |
-| 111 | vocabulary | index-how/vocabulary | `~/.agents/skills/vocabulary/` | — |
-| 112 | wait-what | mattpocock/skills | `~/.agents/skills/wait-what/` | — |
-| 113 | wayfinder | mattpocock/skills | `~/.agents/skills/wayfinder/` | — |
-| 114 | web-design-guidelines | vercel-labs/agent-skills | `~/.agents/skills/web-design-guidelines/` | — |
-| 115 | web-typography | wondelai/skills | `~/.agents/skills/web-typography/` | — |
-| 116 | wizard | mattpocock/skills | `~/.agents/skills/wizard/` | — |
-| 117 | writing-beats | mattpocock/skills | `~/.agents/skills/writing-beats/` | — |
-| 118 | writing-for-agents | mattpocock/skills | `~/.agents/skills/writing-for-agents/` | — |
-| 119 | writing-fragments | mattpocock/skills | `~/.agents/skills/writing-fragments/` | — |
-| 120 | writing-shape | mattpocock/skills | `~/.agents/skills/writing-shape/` | — |
+| 72 | paseo-plugin | local | `~/.agents/skills/paseo-plugin/` | — |
+| 73 | pdf-harvester | mindmorass/reflex | `~/.agents/skills/pdf-harvester/` | — |
+| 74 | pick-ui-library | emilkowalski/skills | `~/.agents/skills/pick-ui-library/` | — |
+| 75 | playwright | openai/skills | `~/.agents/skills/playwright/` | — |
+| 76 | ponytail | DietrichGebert/ponytail | `~/.agents/skills/ponytail/` | — |
+| 77 | ponytail-audit | DietrichGebert/ponytail | `~/.agents/skills/ponytail-audit/` | — |
+| 78 | ponytail-help | DietrichGebert/ponytail | `~/.agents/skills/ponytail-help/` | — |
+| 79 | ponytail-review | DietrichGebert/ponytail | `~/.agents/skills/ponytail-review/` | — |
+| 80 | prototype | mattpocock/skills | `~/.agents/skills/prototype/` | — |
+| 81 | redesign-existing-projects | Leonxlnx/taste-skill | `~/.agents/skills/redesign-existing-projects/` | — |
+| 82 | research | mattpocock/skills | `~/.agents/skills/research/` | — |
+| 83 | research-synthesis | anthropics/knowledge-work-plugins | `~/.agents/skills/research-synthesis/` | UX research synthesis template |
+| 84 | resolving-merge-conflicts | mattpocock/skills | `~/.agents/skills/resolving-merge-conflicts/` | — |
+| 85 | review-animations | emilkowalski/skills | `~/.agents/skills/review-animations/` | — |
+| 86 | scaffold-exercises | mattpocock/skills | `~/.agents/skills/scaffold-exercises/` | — |
+| 87 | seo-audit | coreyhaines31/marketingskills | `~/.agents/skills/seo-audit/` | — |
+| 88 | setup-matt-pocock-skills | mattpocock/skills | `~/.agents/skills/setup-matt-pocock-skills/` | — |
+| 89 | setup-pre-commit | mattpocock/skills | `~/.agents/skills/setup-pre-commit/` | — |
+| 90 | setup-ts-deep-modules | mattpocock/skills | `~/.agents/skills/setup-ts-deep-modules/` | — |
+| 91 | skill-architect | t4sh/skills4sh | `~/.agents/skills/skill-architect/` | — |
+| 92 | skill-creator | openai/skills | `~/.agents/skills/skill-creator/` | — |
+| 93 | skill-development | anthropics/claude-code | `~/.agents/skills/skill-development/` | — |
+| 94 | stitch-design-taste | Leonxlnx/taste-skill | `~/.agents/skills/stitch-design-taste/` | — |
+| 95 | sync-figma-token | firebenders/sync-figma-token-skill | `~/.agents/skills/sync-figma-token/` | — |
+| 96 | system-design | anthropics/knowledge-work-plugins | `~/.agents/skills/system-design/` | — |
+| 97 | tailwind-design-system | wshobson/agents | `~/.agents/skills/tailwind-design-system/` | — |
+| 98 | tauri-v2 | nodnarbnitram/claude-code-extensions | `~/.agents/skills/tauri-v2/` | — |
+| 99 | tdd | mattpocock/skills | `~/.agents/skills/tdd/` | — |
+| 100 | teach | mattpocock/skills | `~/.agents/skills/teach/` | — |
+| 101 | tech-debt | anthropics/knowledge-work-plugins | `~/.agents/skills/tech-debt/` | — |
+| 102 | theme-factory | anthropics/skills | `~/.agents/skills/theme-factory/` | — |
+| 103 | to-questionnaire | mattpocock/skills | `~/.agents/skills/to-questionnaire/` | — |
+| 104 | to-spec | mattpocock/skills | `~/.agents/skills/to-spec/` | — |
+| 105 | to-tickets | mattpocock/skills | `~/.agents/skills/to-tickets/` | — |
+| 106 | top-design | wondelai/skills | `~/.agents/skills/top-design/` | — |
+| 107 | transitions-dev | Jakubantalik/transitions.dev | `~/.agents/skills/transitions-dev/` | — |
+| 108 | triage | mattpocock/skills | `~/.agents/skills/triage/` | — |
+| 109 | ui-animation | mblode/agent-skills | `~/.agents/skills/ui-animation/` | — |
+| 110 | ui-ux-pro-max | nextlevelbuilder/ui-ux-pro-max-skill | `~/.agents/skills/ui-ux-pro-max/` | — |
+| 111 | user-research | anthropics/knowledge-work-plugins | `~/.agents/skills/user-research/` | — |
+| 112 | vocabulary | index-how/vocabulary | `~/.agents/skills/vocabulary/` | — |
+| 113 | wait-what | mattpocock/skills | `~/.agents/skills/wait-what/` | — |
+| 114 | wayfinder | mattpocock/skills | `~/.agents/skills/wayfinder/` | — |
+| 115 | web-design-guidelines | vercel-labs/agent-skills | `~/.agents/skills/web-design-guidelines/` | — |
+| 116 | web-typography | wondelai/skills | `~/.agents/skills/web-typography/` | — |
+| 117 | wizard | mattpocock/skills | `~/.agents/skills/wizard/` | — |
+| 118 | writing-beats | mattpocock/skills | `~/.agents/skills/writing-beats/` | — |
+| 119 | writing-for-agents | mattpocock/skills | `~/.agents/skills/writing-for-agents/` | — |
+| 120 | writing-fragments | mattpocock/skills | `~/.agents/skills/writing-fragments/` | — |
+| 121 | writing-shape | mattpocock/skills | `~/.agents/skills/writing-shape/` | — |
 
 ---
 
 ### Lock File vs Disk
 
 - **In lock file but missing from disk:** none
-- **On disk but not in lock file:** paseo, paseo-advisor, paseo-committee, paseo-handoff, paseo-loop
+- **On disk but not in lock file:** paseo, paseo-advisor, paseo-committee, paseo-handoff, paseo-help, paseo-loop, paseo-plugin
 
 ---
 
@@ -155,10 +156,10 @@ When this file is asked to be updated. Update the following
 
 - **mattpocock/skills** (35): ask-matt, claude-handoff, code-review, codebase-design, diagnosing-bugs, domain-modeling, git-guardrails-claude-code, grill-me, grill-with-docs, grilling, handoff, implement, improve-codebase-architecture, loop-me, migrate-to-shoehorn, prototype, research, resolving-merge-conflicts, scaffold-exercises, setup-matt-pocock-skills, setup-pre-commit, setup-ts-deep-modules, tdd, teach, to-questionnaire, to-spec, to-tickets, triage, wait-what, wayfinder, wizard, writing-beats, writing-for-agents, writing-fragments, writing-shape
 - **anthropics/knowledge-work-plugins** (10): architecture, debug, deploy-checklist, design-handoff, design-system, documentation, research-synthesis, system-design, tech-debt, user-research
+- **local** (9): code-review-nextjs, init-rulebook, paseo, paseo-advisor, paseo-committee, paseo-handoff, paseo-help, paseo-loop, paseo-plugin
 - **Leonxlnx/taste-skill** (8): brandkit, design-taste-frontend, full-output-enforcement, gpt-taste, industrial-brutalist-ui, minimalist-ui, redesign-existing-projects, stitch-design-taste
 - **emilkowalski/skills** (7): animation-vocabulary, apple-design, emil-design-eng, find-animation-opportunities, improve-animations, pick-ui-library, review-animations
 - **jakubkrehel/skills** (7): better-accessibility, better-colors, better-interface, better-layout, better-typography, better-ui, better-writing
-- **local** (7): code-review-nextjs, init-rulebook, paseo, paseo-advisor, paseo-committee, paseo-handoff, paseo-loop
 - **t4sh/skills4sh** (7): agent-memory, code-to-figma, discord-harvest, eleventy-nunjucks, figma-to-code, localhost-screenshots, skill-architect
 - **DietrichGebert/ponytail** (4): ponytail, ponytail-audit, ponytail-help, ponytail-review
 - **anthropics/skills** (3): canvas-design, frontend-design, theme-factory
@@ -179,7 +180,6 @@ When this file is asked to be updated. Update the following
 - **mindmorass/reflex** (1): pdf-harvester
 - **nextlevelbuilder/ui-ux-pro-max-skill** (1): ui-ux-pro-max
 - **nodnarbnitram/claude-code-extensions** (1): tauri-v2
-- **npm:design-book** (1): design-book
 - **nutlope/hallmark** (1): hallmark
 - **owl-listener/designer-skills** (1): design-token-audit
 - **pbakaus/impeccable** (1): impeccable

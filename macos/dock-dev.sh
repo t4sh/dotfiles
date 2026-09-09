@@ -27,38 +27,50 @@ add_spacer() {
     defaults write com.apple.dock persistent-apps -array-add '{"tile-type"="spacer-tile";}'
 }
 
-# Email
-add_app "/Applications/Airmail.app"
+add_small_spacer() {
+    defaults write com.apple.dock persistent-apps -array-add '{"tile-type"="small-spacer-tile";}'
+}
+
+# Mail
+add_app "/System/Applications/Mail.app"
+
+add_spacer
+
+# Chat
+add_app "/Applications/WhatsApp.app"
+add_app "/Applications/Discord.app"
+
+add_small_spacer
 
 # Writing
 add_app "/Applications/Sublime Text.app"
 add_app "/Applications/Obsidian.app"
-add_app "/Applications/Craft.app"
-add_app "/Applications/Notion.app"
 
-add_spacer
+add_small_spacer
 
-# Browse & Chat
-add_app "/Applications/Microsoft Edge.app"
-add_app "/Applications/Comet.app"
-add_app "/Applications/WhatsApp.app"
-add_app "/Applications/Discord.app"
-
-add_spacer
-
-# Design & Dev tools
-add_app "/Applications/Figma.app"
-add_app "/Applications/Kaleidoscope.app"
-add_app "/System/Applications/Utilities/Terminal.app"
+# AI & Code
+add_app "/Applications/ChatGPT.app"
+add_app "/Applications/Zed.app"
+add_app "/Applications/Proto.app"
 add_app "/Applications/Tower.app"
 
 add_spacer
 
-# AI & Code
-add_app "/Applications/Craft Agents.app"
-add_app "/Applications/Claude.app"
+# Browsers
+add_app "/Applications/Microsoft Edge.app"
+add_app "/Applications/Comet.app"
+add_app "/Applications/DuckDuckGo.app"
+add_app "/Applications/Safari.app"
+
+add_spacer
+
+# Dev tools
+add_app "/System/Applications/Utilities/Terminal.app"
 add_app "/Applications/Visual Studio Code.app"
 add_app "/Applications/Cursor.app"
+add_app "/Applications/Kaleidoscope.app"
+
+add_small_spacer
 
 # Right side — Downloads folder
 defaults write com.apple.dock persistent-others -array
