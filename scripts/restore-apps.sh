@@ -73,6 +73,7 @@ if [[ -f "$DOTFILES/apps/dato/dato.plist" || -f "$DOTFILES/apps/dato/display.pli
     append_restore_gate_entry "Dato" "Dato"
 fi
 [[ -d "$DOTFILES/apps/sublime-text" ]] && append_restore_gate_entry "Sublime Text" "Sublime Text"
+[[ -f "$DOTFILES/apps/mountain-duck/sync.plist" ]] && append_restore_gate_entry "Mountain Duck" "Mountain Duck"
 [[ -f "$DOTFILES/apps/vscode/settings.json" ]] && append_restore_gate_entry "VS Code" "Visual Studio Code"
 [[ -f "$DOTFILES/apps/cursor/settings.json" ]] && append_restore_gate_entry "Cursor" "Cursor"
 if [[ -f "$DOTFILES/apps/zed/settings.json" || -f "$DOTFILES/apps/zed/keymap.json" ]]; then
@@ -112,6 +113,17 @@ while IFS=$'\t' read -r domain label plist app_name; do
         esac
     fi
 done < "$DOTFILES/apps.tsv"
+
+# Restore only the managed Mountain Duck key, preserving other preferences.
+if [[ -f "$DOTFILES/apps/mountain-duck/sync.plist" ]]; then
+    if restore_app_is_deferred "Mountain Duck"; then
+        echo "  - Mountain Duck skipped because it hosts this restore"
+    else
+        mountain_duck_pattern="$(plutil -extract temporaryFilenamePattern raw -o - "$DOTFILES/apps/mountain-duck/sync.plist")"
+        defaults write io.mountainduck fs.filenames.temporary.regexp -string "$mountain_duck_pattern"
+        echo "  ✓ Mountain Duck sync exclusions"
+    fi
+fi
 
 # Tower AI prompts live outside the defaults domain; the list includes its default.
 if [[ -f "$DOTFILES/apps/tower/ai-prompts.plist" ]]; then

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Behavioral fixture for the agent rulebook's terminal integration contract.
-# Proves that branch-to-worktree discovery survives macOS path edge cases, that
+# Proves that branch-to-worktree discovery survives platform path edge cases, that
 # fast-forward/squash/merge/rebase results can be pushed by pinned OID, and that
 # locally created or replayed commits use the configured identity and signing
 # backend without modifying unrelated dirty worktrees.
@@ -29,11 +29,26 @@ cleanup() {
 }
 trap cleanup EXIT
 
+# Git for Windows reports native paths in porcelain output. Use the same form
+# for expected paths; keep spaces/Unicode coverage on every platform.
+windows_paths=0
+case "$(uname -s)" in
+  MINGW*|MSYS*|CYGWIN*)
+    windows_paths=1
+    fixture_root="$(cygpath -m "$fixture_root")"
+    ;;
+esac
+
 remote_repo="$fixture_root/remote.git"
 main_worktree="$fixture_root/Main Checkout"
 worktree_parent="$main_worktree/.worktrees"
 topic_worktree="$worktree_parent/feature/exact-object"
-unrelated_worktree="$worktree_parent/feature/unrelated"$'\n'"worktree-å"
+if [[ "$windows_paths" -eq 1 ]]; then
+  # Windows forbids newlines in filenames; Unix retains that edge case.
+  unrelated_worktree="$worktree_parent/feature/unrelated worktree-å"
+else
+  unrelated_worktree="$worktree_parent/feature/unrelated"$'\n'"worktree-å"
+fi
 squash_worktree="$worktree_parent/.integration/squash"
 merge_worktree="$worktree_parent/.integration/merge"
 rebase_worktree="$worktree_parent/.integration/rebase"
@@ -109,7 +124,7 @@ done < <(git -C "$main_worktree" worktree list --porcelain -z)
   exit 1
 }
 [[ "$resolved_unrelated_worktree" == "$unrelated_worktree" ]] || {
-  echo "NUL-safe worktree discovery lost the newline/Unicode worktree path" >&2
+  echo "NUL-safe worktree discovery lost the platform-specific Unicode worktree path" >&2
   exit 1
 }
 

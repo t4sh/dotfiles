@@ -56,6 +56,29 @@ see [SECRETS-WINDOWS.md](SECRETS-WINDOWS.md). Mac `make backup` likewise retains
 curated editor/Dock templates. Dato's personal shared-time-zone plist is omitted;
 its single display-format template is separate from full private Dato recovery.
 
+### Editor restore readiness
+
+Use `dot restore-apps -Only sublime -Apply` for Sublime, or `-Only vscode` /
+`-Only cursor` for one of the other editors. VS Code and Cursor restore also
+install the declared extensions with Windows replacements. Reviewed version pins
+are checked by version; direct VSIX releases must match their declared SHA256.
+For disposable editor validation, pass both `-RoamingRoot` and `-ExtensionsDir`
+with `-Only vscode` or `-Only cursor`; this keeps extension installation isolated.
+
+Sublime restore installs the shared default-syntax helper and checks declared
+packages, selected theme/color resources and the MultiMarkdown syntax resource.
+On a new installation, use Tools → Install Package Control, then let package
+installation finish before running `dot restore-apps -Only sublime -Check`.
+Strict doctor includes this resource check even though public preference drift
+comparison is intentionally skipped. Resource presence does not establish that
+plugins load or that a theme license is activated; verify those inside Sublime.
+
+A repeat restore with nothing to change can run while Sublime is open. Changes
+to managed files wait until it is closed. A failed or deferred Sublime stage
+does not prevent the other restore stages from being attempted; the command
+reports the combined failures at the end. Personal keybindings, snippets, tasks,
+profiles and extension state are not part of the curated public templates.
+
 ## Candidate validation
 
 Mac checks cannot establish native Windows readiness. In an isolated Windows
@@ -70,4 +93,5 @@ isolated dummy preference roots and verifies that public templates remain intact
 
 ```powershell
 pwsh -NoProfile -File tests/test_public_windows.ps1
+pwsh -NoProfile -File tests/test_public_windows_editors.ps1
 ```

@@ -9,6 +9,20 @@ extend-exclude = [
 [default.extend-identifiers]
 BigSur = "BigSur"
 
+# PowerShell's case-insensitive membership and inequality operators.
+[type.powershell]
+extend-glob = ["*.ps1"]
+[type.powershell.extend-identifiers]
+iin = "iin"
+ine = "ine"
+
+# Exact vendor/cask names in the Windows package manifest.
+[type.windows-packages]
+extend-glob = ["windows-packages.tsv"]
+[type.windows-packages.extend-identifiers]
+Canva = "Canva"
+canva = "canva"
+
 [default.extend-words]
 IST = "IST"
 ue = "ue"

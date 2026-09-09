@@ -161,7 +161,7 @@
       "skillPath": "skills/copywriting/SKILL.md",
       "skillFolderHash": "e5457b0306878bac731cda9a05e8b68d882b7b40",
       "installedAt": "2026-04-13T02:35:56.686Z",
-      "updatedAt": "2026-08-24T04:36:08.112Z"
+      "updatedAt": "2026-09-09T10:41:04.934Z"
     },
     "git-commit": {
       "source": "github/awesome-copilot",
@@ -278,7 +278,7 @@
       "skillPath": "skills/agent-browser/SKILL.md",
       "skillFolderHash": "82def67855a0d2aad7794207951820fa5422fdb0",
       "installedAt": "2026-04-13T02:37:29.244Z",
-      "updatedAt": "2026-08-24T04:36:09.259Z"
+      "updatedAt": "2026-09-09T10:42:32.059Z"
     },
     "web-design-guidelines": {
       "source": "vercel-labs/agent-skills",
@@ -314,7 +314,7 @@
       "skillPath": "skills/find-skills/SKILL.md",
       "skillFolderHash": "76a98a285cb0434f3d39e1a873823556330e398b",
       "installedAt": "2026-04-13T02:58:49.632Z",
-      "updatedAt": "2026-07-11T20:47:44.898Z"
+      "updatedAt": "2026-09-09T10:42:40.142Z"
     },
     "code-review-nextjs": {
       "source": "local",
@@ -391,7 +391,7 @@
       "skillPath": ".agents/skills/impeccable/SKILL.md",
       "skillFolderHash": "06efff78a5233850e8477632d577e700c9bd7994",
       "installedAt": "2026-05-03T11:49:23.273Z",
-      "updatedAt": "2026-09-09T05:10:31.658Z"
+      "updatedAt": "2026-09-09T10:42:19.145Z"
     },
     "eleventy-nunjucks": {
       "source": "t4sh/skills4sh",
@@ -860,7 +860,7 @@
       "skillPath": "skills/hallmark/SKILL.md",
       "skillFolderHash": "747c924c4767b4d5fa6f1c59985c87a21c918334",
       "installedAt": "2026-07-18T17:00:17.510Z",
-      "updatedAt": "2026-08-06T21:41:39.195Z"
+      "updatedAt": "2026-09-09T10:42:04.472Z"
     },
     "better-accessibility": {
       "source": "jakubkrehel/skills",

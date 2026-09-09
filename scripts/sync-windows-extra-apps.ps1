@@ -2,6 +2,7 @@
 [CmdletBinding()]
 param(
     [ValidateSet('Backup','Restore','Check')][string]$Mode='Check', [switch]$Apply,
+    [ValidateSet('sublime')][string]$Only,
     [string]$RoamingRoot=$env:APPDATA, [string]$LocalRoot=$env:LOCALAPPDATA,
     [string]$UserRoot=[Environment]::GetFolderPath('UserProfile'),
     [string]$RegistryRoot='HKCU:\Software',
@@ -91,6 +92,7 @@ function Read-ExtraLive($Spec,[string]$Path) {
 }
 $prepared=[Collections.Generic.List[hashtable]]::new();$failures=[Collections.Generic.List[string]]::new();$matched=0
 foreach($spec in Get-DotfilesExtraAppSpecs){
+    if ($Only -and $spec.App -ne $Only) { continue }
     if (-not (Test-Path -LiteralPath (Join-Path (Join-Path $SnapshotRoot $spec.App) $spec.File))) { continue }
     $live=Join-Path $roots[$spec.Root] $spec.Relative
     $snapshot=Join-Path (Join-Path $SnapshotRoot $spec.App) $spec.File
