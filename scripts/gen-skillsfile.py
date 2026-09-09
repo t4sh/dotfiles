@@ -15,6 +15,7 @@ import argparse
 import json
 import os
 import re
+import shlex
 import sys
 from collections import defaultdict
 from datetime import datetime, timezone, timedelta
@@ -35,7 +36,7 @@ GENERATED_RE = re.compile(r"^# GENERATED (?P<stamp>.+) from agents/\.skill-lock\
 
 def existing_timestamp():
     try:
-        text = SKILLSFILE.read_text()
+        text = SKILLSFILE.read_text(encoding="utf-8")
     except FileNotFoundError:
         return None
     match = GENERATED_RE.search(text)
@@ -43,7 +44,7 @@ def existing_timestamp():
 
 
 def build_skillsfile(timestamp):
-    with LOCK_FILE.open() as f:
+    with LOCK_FILE.open(encoding="utf-8") as f:
         data = json.load(f)
 
     by_source = defaultdict(list)   # source repo -> [skill names]
@@ -58,7 +59,9 @@ def build_skillsfile(timestamp):
                 )
             if not meta.get("source") or not meta.get("skillPath"):
                 raise ValueError(f"github skill {key!r} lacks source or skillPath metadata")
-            by_source[meta["source"]].append(name)
+            # The lock key is the CLI install selector. It may intentionally
+            # contain spaces/case even though the installed folder is slugged.
+            by_source[meta["source"]].append(key)
         else:
             local.append(name)
 
@@ -77,18 +80,18 @@ def build_skillsfile(timestamp):
         f"# {total} skills — {len(by_source)} github sources + {len(local)} local.",
         "#",
         "# Prereqs (fresh Mac): node + git + GitHub auth (SSH/gh) must be set",
-        "# up first — GitHub-hosted skill sources need auth when the registry requires it.",
+        "# up first if a configured upstream source requires authentication.",
         "# Agents and MCP tooling use the stable npx shim from ~/.local/bin.",
         "",
         "set -euo pipefail",
         "",
         'NPX="${NPX:-$HOME/.local/bin/npx-stable}"',
-        '[[ -x "$NPX" ]] || { echo "npx stable shim not found or not executable: $NPX" >&2; exit 1; }',
+        '[[ -x "$NPX" || ( "${OS:-}" == "Windows_NT" && -f "$NPX" ) ]] || { echo "npx stable shim not found or not executable: $NPX" >&2; exit 1; }',
         "",
     ]
 
     for src in sorted(by_source):
-        skills = " ".join(sorted(by_source[src]))
+        skills = " ".join(shlex.quote(name) for name in sorted(by_source[src]))
         lines.append(f'echo "→ update {src}"')
         lines.append(f'"$NPX" skills add {src} --skill {skills} -g -y')
         lines.append("")
@@ -116,7 +119,7 @@ def main():
     content, total, github_sources, local_count = build_skillsfile(timestamp)
 
     try:
-        current = SKILLSFILE.read_text()
+        current = SKILLSFILE.read_text(encoding="utf-8")
     except FileNotFoundError:
         current = None
 
@@ -138,7 +141,8 @@ def main():
 
     timestamp = datetime.now(IST).strftime("%Y-%m-%dT%H:%M:%S+05:30")
     content, total, github_sources, local_count = build_skillsfile(timestamp)
-    SKILLSFILE.write_text(content)
+    with SKILLSFILE.open("w", encoding="utf-8", newline="\n") as output:
+        output.write(content)
     os.chmod(SKILLSFILE, 0o755)
 
     print(f"Wrote {SKILLSFILE}")

@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# Windows uses native entry points; reject before any Unix-path mutation.
+case "${OS:-}:$(uname -s)" in
+  Windows_NT:*|*:MINGW*|*:MSYS*) echo 'This is a macOS workflow. On Windows run bin/dot.cmd help.' >&2; exit 2 ;;
+esac
 # Restore app preferences from the repo into macOS.
 #
 # Single source of truth for both first-run (install.sh) and ongoing
@@ -12,7 +16,8 @@
 # Each restore block is a no-op if the repo file is missing; order-independent.
 set -euo pipefail
 
-DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+DOTFILES="${DOTFILES:-$(cd -- "$SCRIPT_DIR/.." && pwd -P)}"
 bash "$DOTFILES/scripts/validate-manifests.sh" apps
 
 materialize_editor_file() {
@@ -63,10 +68,16 @@ while IFS=$'\t' read -r domain label plist app_name; do
     [[ "$app_name" == "-" || ! -f "$DOTFILES/$plist" ]] && continue
     append_restore_gate_entry "$label" "$app_name"
 done < "$DOTFILES/apps.tsv"
-[[ -f "$DOTFILES/apps/dato/dato.plist" ]] && append_restore_gate_entry "Dato" "Dato"
+[[ -f "$DOTFILES/apps/tower/ai-prompts.plist" ]] && append_restore_gate_entry "Tower" "Tower"
+if [[ -f "$DOTFILES/apps/dato/dato.plist" || -f "$DOTFILES/apps/dato/display.plist" ]]; then
+    append_restore_gate_entry "Dato" "Dato"
+fi
 [[ -d "$DOTFILES/apps/sublime-text" ]] && append_restore_gate_entry "Sublime Text" "Sublime Text"
 [[ -f "$DOTFILES/apps/vscode/settings.json" ]] && append_restore_gate_entry "VS Code" "Visual Studio Code"
 [[ -f "$DOTFILES/apps/cursor/settings.json" ]] && append_restore_gate_entry "Cursor" "Cursor"
+if [[ -f "$DOTFILES/apps/zed/settings.json" || -f "$DOTFILES/apps/zed/keymap.json" ]]; then
+    append_restore_gate_entry "Zed" "Zed"
+fi
 
 restore_running_app_gate "${RESTORE_GATE_ENTRIES[@]}"
 
@@ -102,6 +113,19 @@ while IFS=$'\t' read -r domain label plist app_name; do
     fi
 done < "$DOTFILES/apps.tsv"
 
+# Tower AI prompts live outside the defaults domain; the list includes its default.
+if [[ -f "$DOTFILES/apps/tower/ai-prompts.plist" ]]; then
+    if restore_app_is_deferred "Tower"; then
+        echo "  - Tower AI prompts skipped because it hosts this restore"
+    else
+        plutil -lint "$DOTFILES/apps/tower/ai-prompts.plist" >/dev/null
+        mkdir -p "$HOME/Library/Application Support/com.fournova.Tower3"
+        cp "$DOTFILES/apps/tower/ai-prompts.plist" \
+            "$HOME/Library/Application Support/com.fournova.Tower3/ai-prompts.plist"
+        echo "  ✓ Tower AI commit prompts"
+    fi
+fi
+
 # Dato (cp plist into app's container)
 DATO_DST="$HOME/Library/Group Containers/group.com.sindresorhus.Dato/Library/Preferences/group.com.sindresorhus.Dato.plist"
 if [ -f "$DOTFILES/apps/dato/dato.plist" ]; then
@@ -109,9 +133,23 @@ if [ -f "$DOTFILES/apps/dato/dato.plist" ]; then
         echo "  - Dato skipped because it hosts this restore"
     elif [ -d "$(dirname "$DATO_DST")" ]; then
         cp "$DOTFILES/apps/dato/dato.plist" "$DATO_DST"
-        echo "  ✓ Dato"
+        echo "  ⚠ Dato shared time-zone snapshot copied — this alone does not restore the active clock list; display format is handled separately"
     else
         echo "  ⚠ Dato not restored — launch it once to create its group container, then re-run make restore-apps"
+    fi
+fi
+
+# Restore only the captured display key; preserve other primary preferences.
+DATO_PRIMARY="$HOME/Library/Containers/com.sindresorhus.Dato/Data/Library/Preferences/com.sindresorhus.Dato.plist"
+if [[ -f "$DOTFILES/apps/dato/display.plist" ]]; then
+    if restore_app_is_deferred "Dato"; then
+        echo "  - Dato display skipped because it hosts this restore"
+    elif [[ -d "$(dirname "$DATO_PRIMARY")" ]]; then
+        DATO_FORMAT="$(plutil -extract dateTimeFormat raw -o - "$DOTFILES/apps/dato/display.plist")"
+        defaults write "${DATO_PRIMARY%.plist}" dateTimeFormat -string "$DATO_FORMAT"
+        echo "  ✓ Dato custom date/time format (other primary preferences are not restored)"
+    else
+        echo "  ⚠ Dato display not restored — launch Dato once, then re-run make restore-apps"
     fi
 fi
 
@@ -150,6 +188,19 @@ if [ -f "$DOTFILES/apps/cursor/settings.json" ]; then
     else
         materialize_editor_file "$DOTFILES/apps/cursor/settings.json" "$CURSOR_USER/settings.json"
         echo "  ✓ Cursor"
+    fi
+fi
+
+# Zed settings and keymap (account/provider/agent auth remains app-managed)
+if [ -f "$DOTFILES/apps/zed/settings.json" ] || [ -f "$DOTFILES/apps/zed/keymap.json" ]; then
+    if restore_app_is_deferred "Zed"; then
+        echo "  - Zed settings skipped because it hosts this restore"
+    else
+        for file in settings.json keymap.json; do
+            [ -f "$DOTFILES/apps/zed/$file" ] || continue
+            materialize_editor_file "$DOTFILES/apps/zed/$file" "$HOME/.config/zed/$file"
+        done
+        echo "  ✓ Zed"
     fi
 fi
 
@@ -215,4 +266,4 @@ if (( ${#RESTORE_DEFERRED_DOMAINS[@]} > 0 )); then
 fi
 
 echo "Done. Terminal.app is handled separately: run 'make terminal' from a"
-echo "non-Terminal shell (iTerm / Ghostty / VS Code integrated terminal)."
+echo "non-Terminal shell (iTerm / Ghostty / VS Code / Cursor / Zed integrated terminal)."

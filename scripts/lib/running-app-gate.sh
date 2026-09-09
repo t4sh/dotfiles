@@ -62,9 +62,12 @@ app_is_running() {
 }
 
 # Resolve host-editor state for this shell in the current process.
-# Prefer Cursor-specific markers, then process identity of VSCODE_PID, then
-# VS Code-only signals. Shared or unresolvable Code-family signals are
-# ambiguous, so both editors are protected rather than neither.
+# Prefer the current terminal's explicit TERM_PROGRAM. Fall back to ZED_TERM
+# only when no terminal program is declared, because child apps can inherit a
+# stale ZED_TERM from a parent Zed shell. Then use Cursor-specific markers,
+# VSCODE_PID identity, and VS Code-only signals. Shared or unresolvable
+# Code-family signals are ambiguous, so both editors are protected rather than
+# neither.
 restore_resolve_host_editor() {
   if [[ "$RESTORE_HOST_EDITOR_CACHED" -eq 1 ]]; then
     return 0
@@ -72,6 +75,13 @@ restore_resolve_host_editor() {
   RESTORE_HOST_EDITOR_CACHED=1
   RESTORE_HOST_EDITOR_RESOLVED=""
   RESTORE_HOST_EDITOR_STATE="none"
+
+  if [[ "${TERM_PROGRAM:-}" == "zed" ||
+    ( -z "${TERM_PROGRAM:-}" && "${ZED_TERM:-}" == "true" ) ]]; then
+    RESTORE_HOST_EDITOR_RESOLVED="Zed"
+    RESTORE_HOST_EDITOR_STATE="exact"
+    return 0
+  fi
 
   if [[ -n "${CURSOR_TRACE_ID:-}${CURSOR_AGENT:-}${CURSOR_EXTENSION_HOST_ROLE:-}" ]]; then
     RESTORE_HOST_EDITOR_RESOLVED="Cursor"

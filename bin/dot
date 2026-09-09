@@ -8,7 +8,8 @@
 #   dot -h | --help | help       show help
 set -euo pipefail
 
-DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+DOTFILES="$(cd -- "$SCRIPT_DIR/.." && pwd -P)"
 
 # (display-name → directory) pairs. Add new contexts here.
 CONTEXTS=(
@@ -55,18 +56,8 @@ EOF
     for pair in "${CONTEXTS[@]}"; do
         list_group "${pair%%:*}" "${pair#*:}"
     done
-    cat <<EOF
-Also available via Make (repo root):
-  make help | link | unlink | brew | brew-without-mas | brew-core | brew-apps | brew-base | node | brew-npm | brew-mas
-  make brew-check | shims | macos | macos-user | macos-dry-run | macos-check | touch-id-sudo
-  make dock | terminal | services | hooks
-  make default-apps | default-apps-check | capture-default-apps | doctor | verify-bootstrap | docs-audit
-  make rules-audit | brewfile-audit | skills-audit | audit-apps | apps-drift
-  make restore-apps | restore-shottr | restore-canary | ssh-setup | post-vault
-  make backup | backup-shottr | backup-canary
-  make secrets-backup | secrets-mount | secrets-health | secrets-restore | secrets-restore-apply
-  make secrets-pass | secrets-pass-import | skills | skills-update | all
-EOF
+    echo "Also available via Make (repo root):"
+    make -C "$DOTFILES" --no-print-directory help | sed '1,2d'
 }
 
 resolve_context() {

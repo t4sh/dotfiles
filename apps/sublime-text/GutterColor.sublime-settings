@@ -2,5 +2,5 @@
     /*
      * The location of the ImageMagic convert script.
      */
-    "convert_path" : "/usr/local/bin/convert",
+    "convert_path" : "__HOMEBREW_PREFIX__/bin/convert",
 }

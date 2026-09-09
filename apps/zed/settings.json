@@ -1,0 +1,132 @@
+// Portable Zed preferences. Account, provider, and agent credentials stay in
+// Zed's Keychain-backed or agent-native authentication stores.
+{
+  "proxy": "",
+  "collaboration_panel": {
+    "button": false
+  },
+  "base_keymap": "VSCode",
+  "multi_cursor_modifier": "cmd_or_ctrl",
+
+  "ui_font_size": 16,
+  "buffer_font_family": "FiraCode Nerd Font Mono",
+  "buffer_font_fallbacks": [
+    "Menlo",
+    "Consolas",
+    "DejaVu Sans Mono",
+    "monospace"
+  ],
+  "buffer_font_size": 14,
+  "terminal": {
+    "font_family": "FiraCode Nerd Font Mono",
+    "font_fallbacks": [
+      "Menlo",
+      "Consolas",
+      "DejaVu Sans Mono",
+      "monospace"
+    ],
+    "font_size": 13
+  },
+
+  "theme": {
+    "mode": "system",
+    "light": "One Light",
+    "dark": "KTRZ Monokai"
+  },
+  "auto_install_extensions": {
+    "astro": true,
+    "dockerfile": true,
+    "html": true,
+    "ktrz-monokai": true,
+    "make": true,
+    "nginx": true,
+    "nunjucks": true,
+    "prisma": true,
+    "scss": true,
+    "toml": true
+  },
+
+  "autosave": {
+    "after_delay": {
+      "milliseconds": 1000
+    }
+  },
+  "auto_indent_on_paste": true,
+  "colorize_brackets": true,
+  "current_line_highlight": "all",
+  "ensure_final_newline_on_save": true,
+  "line_ending": "prefer_lf",
+  "linked_edits": true,
+  "remove_trailing_whitespace_on_save": true,
+  "features": {
+    "edit_predictions": {
+      "provider": "zed"
+    }
+  },
+  "show_edit_predictions": true,
+  "show_whitespaces": "selection",
+  "gutter": {
+    "folds": true,
+    "line_numbers": true
+  },
+  "minimap": {
+    "show": "always",
+    "thumb": "hover"
+  },
+  "sticky_scroll": {
+    "enabled": true
+  },
+  "diagnostics": {
+    "button": true,
+    "include_warnings": true,
+    "inline": {
+      "enabled": true,
+      "max_severity": "warning"
+    }
+  },
+  "git": {
+    "inline_blame": {
+      "enabled": true,
+      "delay_ms": 500,
+      "show_commit_summary": true
+    },
+    "branch_picker": {
+      "show_author_name": true
+    }
+  },
+
+  "file_types": {
+    "Nginx": ["*.conf"],
+    "Nunjucks": ["*.njk", "*.nunjucks"],
+    "YAML": ["*.yaml", "*.yml"]
+  },
+  "lsp": {
+    "tailwindcss-language-server": {
+      "settings": {
+        "includeLanguages": {
+          "astro": "html"
+        },
+        "experimental": {
+          "classRegex": [
+            "class=\"([^\"]*)\"",
+            "class='([^']*)'",
+            "class:list=\"{([^}]*)}\"",
+            "class:list='{([^}]*)}'"
+          ]
+        }
+      }
+    }
+  },
+
+  "agent_servers": {
+    "cursor": {
+      "type": "registry"
+    },
+    "claude-acp": {
+      "type": "registry"
+    },
+    "codex-acp": {
+      "type": "registry"
+    }
+  }
+}

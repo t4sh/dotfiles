@@ -6,7 +6,8 @@
 # Usage: bash scripts/restore-canary-vault.sh
 set -euo pipefail
 
-DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+DOTFILES="${DOTFILES:-$(cd -- "$SCRIPT_DIR/.." && pwd -P)}"
 CONTAINER="$HOME/Library/Containers/io.canarymail.mac/Data/Library"
 PREFS_DST="$CONTAINER/Preferences/io.canarymail.mac.plist"
 DB_DST="$CONTAINER/Application Support/CanaryDB"

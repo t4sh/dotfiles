@@ -1,0 +1,19 @@
+[
+  {
+    // Workspace fallbacks keep agent surfaces reachable outside code editors.
+    "context": "Workspace",
+    "bindings": {
+      "cmd-i": "agent::ToggleFocus",
+      "cmd-shift-a": "agent::ToggleFocus",
+      "cmd-alt-j": "multi_workspace::ToggleWorkspaceSidebar"
+    }
+  },
+  {
+    // Lower editor contexts outrank Workspace in Zed's VS Code base keymap.
+    "context": "Editor && mode == full",
+    "bindings": {
+      "cmd-i": "agent::ToggleFocus",
+      "cmd-enter": "assistant::InlineAssist"
+    }
+  }
+]

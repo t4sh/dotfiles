@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Open a project from ~/Projects with Cursor/VS Code/$EDITOR, or print its path.
+# Open a project from ~/Projects with Zed/Cursor/VS Code/$EDITOR, or print its path.
 set -euo pipefail
 
 ROOT="${PROJECTS_DIR:-$HOME/Projects}"
@@ -11,8 +11,8 @@ usage() {
   cat <<'USAGE'
 Usage: j [--print] [--editor CMD] [query]
 
-Find a project under ~/Projects (or $PROJECTS_DIR) and open it in Cursor,
-VS Code, $EDITOR, or print the path.
+Find a project under ~/Projects (or $PROJECTS_DIR) and open it in Zed,
+Cursor, VS Code, $EDITOR, or print the path.
 USAGE
 }
 
@@ -70,6 +70,8 @@ fi
 
 if [ -n "$EDITOR_CMD" ]; then
   exec_with_arg "$EDITOR_CMD" "$project"
+elif command -v zed >/dev/null 2>&1; then
+  exec zed "$project"
 elif command -v cursor >/dev/null 2>&1; then
   exec cursor "$project"
 elif command -v code >/dev/null 2>&1; then

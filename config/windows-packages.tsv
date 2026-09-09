@@ -1,0 +1,183 @@
+Key	Mode	Source	Id	Note
+tap:deskflow/tap	macos-only			Homebrew tap; Windows installs Deskflow directly through WinGet.
+brew:shellcheck	native	winget	koalaman.shellcheck	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:actionlint	native	winget	rhysd.actionlint	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:age	native	winget	FiloSottile.age	Cross-platform tar.age backup and recovery tool.
+brew:agent-browser	runtime	volta	agent-browser	Explicit runtime-manager package; not a Homebrew dependency on Windows.
+brew:bat	native	winget	sharkdp.bat	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:bun	native	winget	Oven-sh.Bun	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:caddy	native	winget	CaddyServer.Caddy	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:ccache	native	winget	Ccache.Ccache	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:cmake	native	winget	Kitware.CMake	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:colima	native	winget	Docker.DockerDesktop	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:coreutils	manual			Git for Windows supplies Unix tools; use PowerShell equivalents for native scripts.
+brew:direnv	native	winget	direnv.direnv	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:docker	native	winget	Docker.DockerDesktop	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:docker-compose	native	winget	Docker.DockerDesktop	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:duti	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
+brew:exiftool	native	winget	OliverBetz.ExifTool	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:eza	native	winget	eza-community.eza	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:fd	native	winget	sharkdp.fd	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:ffmpeg	native	winget	Gyan.FFmpeg	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:findutils	manual			Git Bash supplies find; do not put its usr/bin before Windows tools globally.
+brew:fzf	native	winget	junegunn.fzf	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:gh	native	winget	GitHub.cli	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:ghostscript	manual			Official Artifex Windows installer; verify release digest.
+brew:git	native	winget	Git.Git	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:git-delta	native	winget	dandavison.delta	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:git-extras	manual			Optional Git Bash tools; install upstream manually after review.
+brew:git-filter-repo	runtime	uv	git-filter-repo	Explicit runtime-manager package; not a Homebrew dependency on Windows.
+brew:git-flow-next	native	winget	GitTower.GitFlowNext	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:git-lfs	native	winget	GitHub.GitLFS	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:gitleaks	native	winget	Gitleaks.Gitleaks	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:httpd	manual			Service setup is explicit; Caddy is the declared native alternative.
+brew:imagemagick	native	winget	ImageMagick.ImageMagick	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:jq	native	winget	jqlang.jq	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:lazygit	native	winget	JesseDuffield.lazygit	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:lcdf-typetools	manual			Optional font development toolkit; use a separately managed POSIX environment.
+brew:mas	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
+brew:mole	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
+brew:moreutils	manual			Optional POSIX toolkit; not a Windows bootstrap dependency.
+brew:nvm	native	winget	Volta.Volta	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:pi-coding-agent	runtime	volta	@earendil-works/pi-coding-agent	Explicit runtime-manager package; not a Homebrew dependency on Windows.
+brew:poppler	native	winget	oschwartz10612.Poppler	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:potrace	manual			Official Windows binary; verify upstream release before use.
+brew:pygments	runtime	uv	pygments	Explicit runtime-manager package; not a Homebrew dependency on Windows.
+brew:python-setuptools	manual			Project virtual environments own Python build dependencies.
+brew:qpdf	native	winget	QPDF.QPDF	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:ripgrep	native	winget	BurntSushi.ripgrep.MSVC	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:rtk	native	winget	rtk-ai.rtk	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:starship	native	winget	Starship.Starship	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:tlrc	runtime	uv	tldr	Official Python client; Windows application control blocks the unsigned Rust release. Mac retains tlrc.
+brew:topgrade	native	winget	topgrade-rs.topgrade	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:tree	manual			Windows tree.exe is built in.
+brew:trivy	native	winget	AquaSecurity.Trivy	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:typos-cli	native	winget	Crate-CI.Typos	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:uv	native	winget	astral-sh.uv	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:watch	manual			Use a PowerShell loop or an explicitly managed POSIX environment.
+brew:wget	native	winget	GNU.Wget2	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:yq	native	winget	MikeFarah.yq	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:yt-dlp	native	winget	yt-dlp.yt-dlp	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:zoxide	native	winget	ajeetdsouza.zoxide	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:zsh-autocomplete	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
+brew:zsh-autosuggestions	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
+brew:zsh-syntax-highlighting	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
+cask:adobe-creative-cloud	native	winget	Adobe.CreativeCloud	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:affinity	native	winget	Canva.Affinity	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:arc	native	winget	TheBrowserCompany.Arc	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:asset-catalog-tinkerer	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
+cask:betterdisplay	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
+cask:betterzip	native	winget	7zip.7zip	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:brilliant	manual			https://brilliant.design/docs/getting-started/installation
+cask:canva	native	winget	Canva.Canva	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:chatgpt	manual			Microsoft Store via https://chatgpt.com/download/
+cask:claude	native	winget	Anthropic.Claude	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:claude-code	native	winget	Anthropic.ClaudeCode	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:clop	native	winget	SaeraSoft.CaesiumImageCompressor	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:cloudflare-warp	native	winget	Cloudflare.Warp	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:codex	manual			Codex desktop via official OpenAI download; not installed as a side effect of dotfiles.
+cask:comet	native	winget	Perplexity.Comet	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:conductor	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
+cask:craft	native	winget	LukiLabs.Craft	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:craft-agents	native	winget	CraftDocs.CraftAgents	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:cursor	native	winget	Anysphere.Cursor	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:daisydisk	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
+cask:devtoys	native	winget	DevToys-app.DevToys	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:deskflow/tap/deskflow	native	winget	Deskflow.Deskflow	Share the Mac keyboard and mouse; Windows runs as a Deskflow client.
+cask:discord	native	winget	Discord.Discord	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:dockdoor	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
+cask:docker-desktop	native	winget	Docker.DockerDesktop	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:duckduckgo	manual			Microsoft Store; retain installed DuckDuckGo edition. WinGet export does not identify this Store installation.
+cask:figma	native	winget	Figma.Figma	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:firefox	native	winget	Mozilla.Firefox	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:framer	native	winget	Framer.Framer	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:gcloud-cli	native	winget	Google.CloudSDK	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:google-chrome	native	winget	Google.Chrome	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:google-gemini	manual			https://gemini.google.com/ (web/PWA)
+cask:hammerspoon	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
+cask:handbrake-app	native	winget	HandBrake.HandBrake	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:hermes-desktop	manual			https://hermes-agent.nousresearch.com/desktop
+cask:iina	native	winget	VideoLAN.VLC	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:imageoptim	native	winget	SaeraSoft.CaesiumImageCompressor	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:kaleidoscope	native	winget	Meld.Meld	Preferred Windows diff and merge tool for Tower and Git; Kaleidoscope remains the Mac choice.
+cask:keycastr	native	winget	Microsoft.PowerToys	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:latest	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
+cask:libreoffice	native	winget	TheDocumentFoundation.LibreOffice	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:linear	native	winget	LinearOrbit.Linear	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:lobehub	native	winget	LobeHub.LobeHub	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:lunacy	native	winget	Icons8.Lunacy	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:maccy	native	winget	Microsoft.PowerToys	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:markdown-preview	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
+cask:mate-translate	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
+cask:microsoft-auto-update	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
+cask:microsoft-edge	native	winget	Microsoft.Edge	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:microsoft-excel	excluded			Excluded from automatic Windows setup at user request.
+cask:microsoft-powerpoint	excluded			Excluded from automatic Windows setup at user request.
+cask:microsoft-teams	native	winget	Microsoft.Teams	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:microsoft-word	excluded			Excluded from automatic Windows setup at user request, alongside other Microsoft Office apps.
+cask:mountain-duck	manual			Windows vendor installer at https://mountainduck.io/; trial/license and remote-storage configuration are manual.
+cask:nimbalyst	native	winget	Nimbalyst.Nimbalyst	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:notion	native	winget	Notion.Notion	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:notion-calendar	native	winget	Notion.NotionCalendar	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:obsidian	native	winget	Obsidian.Obsidian	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:onyx	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
+cask:open-video-downloader	native	winget	jely2002.youtube-dl-gui	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:opencode-desktop	native	winget	SST.OpenCodeDesktop	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:paper-design	manual			https://paper.design/downloads/ (vendor installer)
+cask:paseo	manual			https://paseo.sh/download
+cask:pearcleaner	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
+cask:perplexity	native	msstore	9P9XG917PWCJ	Preserve Store edition; do not install the older desktop package.
+cask:raindropio	native	winget	RustemMussabekov.Raindrop	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:raycast	native	msstore	9PFXXSHC64H3	Store identity verified by installed inventory.
+cask:rectangle	native	winget	Microsoft.PowerToys	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:shottr	manual			ShareX; retain existing installation and configure capture shortcuts manually.
+cask:stability-matrix	manual			https://github.com/LykosAI/StabilityMatrix/releases
+cask:sublime-text	native	winget	SublimeHQ.SublimeText.4	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:suspicious-package	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
+cask:symboliclinker	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
+cask:telegram	native	winget	Telegram.TelegramDesktop	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:textsniper	native	winget	Microsoft.PowerToys	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:thaw	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
+cask:tolaria	native	winget	Refactoring.Tolaria	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:tower	native	winget	SaaSGroup.Tower	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:transmit	native	winget	WinSCP.WinSCP	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:typeface	native	winget	Levitsky.FontBase	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:upscayl	native	winget	Upscayl.Upscayl	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:visual-studio-code	native	winget	Microsoft.VisualStudioCode	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:whatsapp	manual			Microsoft Store; retain existing Store installation.
+cask:zed	native	winget	ZedIndustries.Zed	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:zen	native	winget	Zen-Team.Zen-Browser	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:zoom	native	winget	Zoom.Zoom	Native Windows counterpart; identity verified against installed WinGet inventory.
+mas:1522469944	manual			Arattai: browser extension, Store or vendor/account setup; review the official Windows route.
+mas:1206020918	macos-only			Battery Indicator: Apple platform application or system preference.
+mas:1236045954	native	msstore	9MT5MZ5H9WL6	Windows counterpart for Canary Mail
+mas:600067300	macos-only			CDRViewer: Apple platform application or system preference.
+mas:1545870783	native	winget	Microsoft.PowerToys	Windows counterpart for Color Picker
+mas:1470584107	macos-only			Dato: Apple platform application or system preference.
+mas:768053424	macos-only			Gapplin: Apple platform application or system preference.
+mas:6504861501	manual			Ghostery Privacy Ad Blocker: browser extension, Store or vendor/account setup; review the official Windows route.
+mas:1351639930	native	winget	ImageOptim.gifski	Windows counterpart for Gifski
+mas:1452453066	macos-only			Hidden Bar: Apple platform application or system preference.
+mas:1474276998	manual			HP: browser extension, Store or vendor/account setup; review the official Windows route.
+mas:967004861	manual			HP Easy Scan: browser extension, Store or vendor/account setup; review the official Windows route.
+mas:409183694	macos-only			Keynote: Apple platform application or system preference.
+mas:361285480	macos-only			Keynote: Apple platform application or system preference.
+mas:302584613	native	msstore	9P8JQ0JJSTLL	Windows counterpart for Kindle
+mas:1263070803	native	winget	Microsoft.PowerToys	Windows counterpart for Lungo
+mas:361304891	macos-only			Numbers: Apple platform application or system preference.
+mas:409203825	macos-only			Numbers: Apple platform application or system preference.
+mas:409201541	macos-only			Pages: Apple platform application or system preference.
+mas:361309726	macos-only			Pages: Apple platform application or system preference.
+mas:1549370672	manual			Save to Raindrop.io: install the browser extension manually; desktop Raindrop is mapped separately.
+mas:545519333	manual			Prime Video: browser extension, Store or vendor/account setup; review the official Windows route.
+mas:6745342698	manual			uBlock Origin Lite: browser extension, Store or vendor/account setup; review the official Windows route.
+mas:1517772049	manual			Urban VPN Desktop: browser extension, Store or vendor/account setup; review the official Windows route.
+mas:1607635845	manual			Velja: browser extension, Store or vendor/account setup; review the official Windows route.
+mas:1520333300	manual			Wappalyzer - Technology profiler: browser extension, Store or vendor/account setup; review the official Windows route.
+mas:1451685025	native	winget	WireGuard.WireGuard	Windows counterpart for WireGuard
+uv:browser-use	runtime	uv	browser-use	Explicit runtime-manager package; not a Homebrew dependency on Windows.
+npm:corepack	runtime	volta	corepack	Explicit runtime-manager package; not a Homebrew dependency on Windows.
+windows:Microsoft.PowerShell	native	winget	Microsoft.PowerShell	Independent MSI PowerShell 7 via WinGet; Store PowerShell is excluded from maintenance.
+windows:ezwinports.make	native	winget	ezwinports.make	Optional common command surface.
+windows:gerardog.gsudo	native	winget	gerardog.gsudo	Per-command Windows elevation for Topgrade; keep the outer maintenance shell unelevated.
+windows:SST.opencode	native	winget	SST.opencode	Windows CLI counterpart accompanying the desktop app.

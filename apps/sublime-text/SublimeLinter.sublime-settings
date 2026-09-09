@@ -4,7 +4,7 @@
 	"paths": {
 		"osx": [
 			"~/.nvm/versions/node/v22.23.1/bin",
-			"/opt/homebrew/bin"
+			"__HOMEBREW_PREFIX__/bin"
 		]
 	},
 	"styles": [

@@ -5,8 +5,8 @@
 # $DOTFILES_SECRETS_DIR, and $DOTFILES_LOCAL_DIR (also ${…} forms).
 # Every entry must resolve to an absolute path. Relative paths and other
 # variable/command expansion are rejected before vault mutation. Sources that
-# overlap the selected vault image or /Volumes/DotfilesSecrets are also
-# rejected; missing absolute paths are warned/skipped.
+# overlap the selected portable-artifact destination are also rejected;
+# missing absolute paths are warned/skipped.
 #
 # Recommended (single canonical tree — see README § Secrets layout):
 # This row publishes as <snapshot>/payload/secrets/ so a replacement Mac may
@@ -25,6 +25,9 @@
 #   └── apps/
 #       ├── canary-mail/                # realms + plist — make backup-canary / restore-canary
 #       ├── shottr/                     # cc.ffitch.shottr.plist — make backup-shottr / restore-shottr
+#       ├── dato/                       # full primary prefs — make backup-dato / restore-dato
+#       ├── deskflow/                   # Mac configuration + TLS archive — make backup-deskflow
+#       ├── thaw/                       # manual profile export/import
 #       ├── raycast/                    # manual .rayconfig / export bundles
 #       ├── vscode/                     # token-bearing MCP/profile data — manual restore
 #       ├── sublime-text/               # Monokai Pro license settings (not in repo)

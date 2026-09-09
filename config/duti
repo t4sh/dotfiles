@@ -3,13 +3,12 @@
 
 # File extensions
 com.apple.ScriptEditor2 .applescript all
-com.apple.dt.Xcode .c all
-com.apple.dt.Xcode .cc all
-com.apple.dt.Xcode .cpp all
+com.sublimetext.4 .c all
+com.sublimetext.4 .cc all
+com.sublimetext.4 .cpp all
 com.microsoft.VSCode .css all
-com.sublimetext.4 .env
 com.todesktop.230313mzl4w4u92 .go all
-com.apple.dt.Xcode .h all
+com.sublimetext.4 .h all
 com.sindresorhus.Velja .html all
 com.sublimetext.4 .js all
 com.sublimetext.4 .json all
@@ -37,6 +36,8 @@ com.apple.Preview .webp all
 
 # Uniform Type Identifiers
 com.sublimetext.4 net.daringfireball.markdown all
+# .env: use macOS's resolved UTI; duti's extension setter constructs a different UTI and fails with -50.
+com.sublimetext.4 dyn.ah62d4rv4ge80n5x0 all
 
 # URL schemes
 com.sindresorhus.Velja http

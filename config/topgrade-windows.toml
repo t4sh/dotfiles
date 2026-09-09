@@ -1,0 +1,39 @@
+# Windows Topgrade configuration.
+# The outer scripts/update-windows.ps1 runner owns repo-managed skill refreshes
+
+[misc]
+assume_yes = true
+ask_retry = false
+cleanup = true
+pre_sudo = false
+# Elevate only steps that require it; gsudo is a declared Windows prerequisite.
+notify_end = "on_failure"
+
+# system: Windows Update/reboots remain a deliberate Settings action.
+# winget: the outer runner upgrades the manifest; individual installers request UAC.
+# skills: the checked-in Skillsfile and license audit are the source of truth.
+# self_update: WinGet upgrades Topgrade alongside other installed apps.
+# yarn/pnpm/pi/emacs: preserve the choices in the macOS configuration.
+# wsl/wsl_update: do not maintain a separate Linux environment implicitly.
+# tldr: outer runner checks Python client update output as well as its exit code.
+disable = [
+  "tldr",
+  "system",
+  "winget",
+  "git_repos",
+  "skills",
+  "self_update",
+  "yarn",
+  "pnpm",
+  "pi",
+  "emacs",
+  "wsl",
+  "wsl_update",
+]
+
+ignore_failures = ["containers", "microsoft_office"]
+
+[windows]
+accept_all_updates = false
+updates_auto_reboot = "no"
+winget_silent_install = true

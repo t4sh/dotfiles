@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# Windows uses native entry points; reject before any Unix-path mutation.
+case "${OS:-}:$(uname -s)" in
+  Windows_NT:*|*:MINGW*|*:MSYS*) echo 'This is a macOS workflow. On Windows run bin/dot.cmd help.' >&2; exit 2 ;;
+esac
 # Restore the Dock layout from macos/dock-backup.plist (captured by `make
 # backup`). The snapshot owns layout and carries a full-domain copy of Dock
 # policy because `defaults import` replaces the domain; defaults.sh remains the
@@ -7,7 +11,8 @@
 # mode (see header there).
 set -euo pipefail
 
-DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+DOTFILES="${DOTFILES:-$(cd -- "$SCRIPT_DIR/.." && pwd -P)}"
 PLIST="$DOTFILES/macos/dock-backup.plist"
 
 if [ ! -f "$PLIST" ]; then

@@ -1,0 +1,7 @@
+Editor	Id	Reason
+code	kaleidoscope-app.vscode-ksdiff	Mac-only Kaleidoscope integration; use Windows Meld.
+cursor	kaleidoscope-app.vscode-ksdiff	Mac-only Kaleidoscope integration; use Windows Meld.
+cursor	ms-python.vscode-pylance	Use Cursor Python tooling; do not copy restricted VS Code binaries.
+cursor	ms-vscode-remote.remote-containers	Use Cursor remote tooling; do not copy VS Code binaries.
+cursor	github.remotehub	Unavailable through Cursor extension installer (not found, verified 2026-09-09); use local Git checkouts or VS Code for remote repository browsing.
+cursor	ms-vscode.azure-repos	Unavailable through Cursor extension installer (not found, verified 2026-09-09); use local Git checkouts or VS Code for remote repository browsing.

@@ -30,6 +30,7 @@ echo "Auditing app/macOS preference snapshots …"
 
 APPS="$DOTFILES/apps"
 if [[ -d "$APPS" ]]; then
+  [[ ! -e "$APPS/dato/dato.plist" ]] || report "personal Dato time-zone snapshot is excluded"
   # Never track these (gitignore); flag if they appear anyway.
   if [[ -e "$APPS/sublime-text/Theme - Monokai Pro.sublime-settings" ]]; then
     report "forbidden path present (vault-only): apps/sublime-text/Theme - Monokai Pro.sublime-settings"
@@ -65,7 +66,21 @@ scan_file() {
       ;;
   esac
 
-  pattern='license_key|"kc-license"|ghp_[A-Za-z0-9]+|glpat-[A-Za-z0-9_-]+|sk-ant-[A-Za-z0-9_-]+|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}|/Users/[^/[:space:]<"]+|OneDrive-[A-Za-z0-9._@-]+'
+  if [[ "$rel" == "apps/zed/settings.json" ]] &&
+    rg -q '"mode"[[:space:]]*:[[:space:]]*"bypassPermissions"' "$scan" 2>/dev/null; then
+    report "unsafe external-agent authorization mode: $rel"
+  fi
+
+  if [[ "$rel" == "apps/zed/settings.json" ]] &&
+    rg -q '^  "(agent|context_servers)"[[:space:]]*:|"(default_config_options|favorite_config_option_values)"[[:space:]]*:' "$scan" 2>/dev/null; then
+    report "non-portable Zed agent runtime state: $rel"
+  fi
+
+  if rg -qi 'Paddle-|ZephyrSyncKey|SUUpdateGroupIdentifier|MenuBarItemManager\.|KnownDisplays|DisplayIceBarConfigurations|GlobalDisplayConfiguration|NewItemsPlacementData|savedPipelines|"(cSpell\.words|chat\.tools\..*autoApprove|.*cloudProject|.*projectId)"|bypassPermissions' "$scan" 2>/dev/null; then
+    report "non-public identity, inventory, or editor authorization fields: $rel"
+  fi
+
+  pattern='license_key|"kc-license"|ghp_[A-Za-z0-9]+|glpat-[A-Za-z0-9_-]+|sk-ant-[A-Za-z0-9_-]+|[a-z_]*api_key"?[[:space:]]*:[[:space:]]*"|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}|/Users/[^/[:space:]<"]+|/var/folders/[^/[:space:]<"]+|OneDrive-[A-Za-z0-9._@-]+'
 
   if rg -qi "$pattern" "$scan" 2>/dev/null; then
     report "private or machine-specific content: $rel"

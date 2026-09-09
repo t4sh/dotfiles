@@ -40,7 +40,7 @@ def get_gitignored_skills():
     gated = set()
     if not gitignore.exists():
         return gated
-    with gitignore.open() as f:
+    with gitignore.open(encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line or line.startswith("#"):
@@ -53,7 +53,7 @@ def get_gitignored_skills():
 
 def get_lock_skills():
     """Parse lock file → (version, {dir_name: {source, sourceType, lock_key}})."""
-    with LOCK_FILE.open() as f:
+    with LOCK_FILE.open(encoding="utf-8") as f:
         data = json.load(f)
 
     version = data.get("version", 0)
@@ -86,7 +86,7 @@ def parse_existing_remarks():
     if not README_FILE.exists():
         return remarks
 
-    with README_FILE.open() as f:
+    with README_FILE.open(encoding="utf-8") as f:
         for line in f:
             m = re.match(r"\|\s*\d+\s*\|\s*(\S+)\s*\|[^|]*\|[^|]*\|\s*(.*?)\s*\|", line)
             if m:
@@ -254,7 +254,7 @@ def main():
     content = build_readme(
         inventory_skills, lock_version, lock_skills, remarks, gated
     )
-    current = README_FILE.read_text() if README_FILE.exists() else None
+    current = README_FILE.read_text(encoding="utf-8") if README_FILE.exists() else None
     def stable(text: str) -> str:
         return re.sub(
             r"^generated: .+$",
@@ -289,7 +289,8 @@ def main():
         print(f"  {len(disk_skills)} skills total")
         return 0
 
-    README_FILE.write_text(content)
+    with README_FILE.open("w", encoding="utf-8", newline="\n") as output:
+        output.write(content)
     print(f"\n  Wrote {README_FILE}")
     print(f"  {len(disk_skills)} skills total")
     return 0

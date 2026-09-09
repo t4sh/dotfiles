@@ -1,9 +1,14 @@
 #!/usr/bin/env bash
+# Windows uses native entry points; reject before any Unix-path mutation.
+case "${OS:-}:$(uname -s)" in
+  Windows_NT:*|*:MINGW*|*:MSYS*) echo 'This is a macOS workflow. On Windows run bin/dot.cmd help.' >&2; exit 2 ;;
+esac
 # Phased Brewfile operations. npm globals always run under .node-version, and
 # retired App Store receipts are kept out of the declarative Brewfile.
 set -euo pipefail
 
-DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+DOTFILES="${DOTFILES:-$(cd -- "$SCRIPT_DIR/.." && pwd -P)}"
 BREWFILE="${BREWFILE:-$DOTFILES/Brewfile}"
 RETIRED_MAS_IDS="${DOTFILES_RETIRED_MAS_IDS:-$DOTFILES/config/retired-mas-ids.tsv}"
 NODE_VERSION_FILE="${DOTFILES_NODE_VERSION_FILE:-$DOTFILES/.node-version}"
@@ -13,7 +18,7 @@ warn() { printf '\033[33m  ⚠\033[0m %s\n' "$*"; }
 
 usage() {
   cat <<'EOF'
-usage: scripts/brewfile.sh {core|apps|base|npm|mas|mas-optional|check|dump <destination>}
+usage: scripts/brewfile.sh {core|apps|base|npm|mas|mas-optional|check|dump|inventory} [destination]
 
   core   install taps and formulae required by the bootstrap
   apps   install casks, fonts, and editor extensions
@@ -22,7 +27,8 @@ usage: scripts/brewfile.sh {core|apps|base|npm|mas|mas-optional|check|dump <dest
   mas    install current App Store declarations only
   mas-optional  confirm App Store readiness interactively; otherwise defer
   check  check installed Brewfile entries with pinned Node active
-  dump   generate a Brewfile, filtering explicitly retired MAS receipts
+  dump   generate a backup Brewfile, retaining deferred declarations
+  inventory  generate installed declarations only, filtering retired MAS receipts
 EOF
 }
 
@@ -88,7 +94,7 @@ preserve_curated_mas_on_empty_dump() {
       if ($0 ~ /^[[:space:]]*mas[[:space:]]+/) mas[++mas_count] = $0
       next
     }
-    !inserted && $0 ~ /^[[:space:]]*(vscode|npm)[[:space:]]+/ {
+    !inserted && $0 ~ /^[[:space:]]*(vscode|uv|npm)[[:space:]]+/ {
       for (i = 1; i <= mas_count; i++) print mas[i]
       inserted = 1
     }
@@ -99,13 +105,34 @@ preserve_curated_mas_on_empty_dump() {
   ' "$BREWFILE" "$input" > "$output"
 }
 
+preserve_curated_on_empty_dump() {
+  local kind="$1" input="$2" output="$3" curated_count dumped_count
+  curated_count="$(awk -v k="$kind" '$0 ~ "^[[:space:]]*" k "[[:space:]]+" { count++ } END { print count + 0 }' "$BREWFILE")"
+  dumped_count="$(awk -v k="$kind" '$0 ~ "^[[:space:]]*" k "[[:space:]]+" { count++ } END { print count + 0 }' "$input")"
+
+  if [[ "$curated_count" -eq 0 || "$dumped_count" -gt 0 ]]; then
+    cp "$input" "$output"
+    return
+  fi
+
+  warn "brew bundle dump returned zero $kind entries; preserving $curated_count curated declarations"
+  awk -v k="$kind" '
+    NR == FNR {
+      if ($0 ~ "^[[:space:]]*" k "[[:space:]]+") keep[++keep_count] = $0
+      next
+    }
+    { print }
+    END { for (i = 1; i <= keep_count; i++) print keep[i] }
+  ' "$BREWFILE" "$input" > "$output"
+}
+
 merge_curated_declarations() {
-  local curated="$1" dumped="$2" output="$3"
-  awk '
+  local curated="$1" dumped="$2" output="$3" preserve_missing="${4:-1}"
+  awk -v preserve_missing="$preserve_missing" -v preserve_tools="${DOTFILES_BREWFILE_PRESERVE_EMPTY_KINDS:-0}" '
     function declaration_key(line, normalized, kind, rest, name, id) {
       normalized = line
       sub(/^[[:space:]]*/, "", normalized)
-      if (normalized !~ /^(tap|brew|cask|mas|vscode|npm)[[:space:]]+"/) return ""
+      if (normalized !~ /^(tap|brew|cask|mas|vscode|uv|npm)[[:space:]]+"/) return ""
       kind = normalized
       sub(/[[:space:]].*$/, "", kind)
       if (kind == "mas") {
@@ -122,13 +149,26 @@ merge_curated_declarations() {
     }
     NR == FNR {
       key = declaration_key($0)
-      if (key != "") curated[key] = $0
+      if (key != "") {
+        if (!(key in curated)) ordered[++count] = key
+        curated[key] = $0
+      }
       next
     }
     {
       key = declaration_key($0)
       if (key != "" && key in curated) print curated[key]
       else print
+      if (key != "") seen[key] = 1
+    }
+    END {
+      # A backup discovers installed packages; absence is not retirement.
+      for (i = 1; preserve_missing == "1" && i <= count; i++) {
+        key = ordered[i]
+        split(key, parts, SUBSEP)
+        # Keep the existing strict uv/npm inventory mode outside make backup.
+        if (!(key in seen) && (preserve_tools == "1" || (parts[1] != "uv" && parts[1] != "npm"))) print curated[key]
+      }
     }
   ' "$curated" "$dumped" > "$output"
 }
@@ -207,7 +247,7 @@ assert_retired_mas_absent
 
 case "${1:-}" in
   core)
-    awk '/^[[:space:]]*(tap|brew)[[:space:]]+/' "$BREWFILE" | brew bundle --file=-
+    awk '/^[[:space:]]*(tap|brew|uv)[[:space:]]+/' "$BREWFILE" | brew bundle --file=-
     ;;
   apps)
     awk '/^[[:space:]]*(tap|cask|vscode|cask_args)[[:space:]]+/' "$BREWFILE" | brew bundle --file=-
@@ -231,8 +271,8 @@ case "${1:-}" in
     activate_pinned_node
     check_installed_entries
     ;;
-  dump)
-    [[ -n "${2:-}" ]] || die "dump requires a destination path"
+  dump|inventory)
+    [[ -n "${2:-}" ]] || die "$1 requires a destination path"
     activate_pinned_node
     destination_dir="$(dirname "$2")"
     mkdir -p "$destination_dir"
@@ -247,8 +287,17 @@ case "${1:-}" in
     trap cleanup_dump EXIT HUP INT TERM
     brew bundle dump --file="$tmp" --force
     filter_retired_mas "$tmp" "$filtered"
-    preserve_curated_mas_on_empty_dump "$filtered" "$tmp"
-    merge_curated_declarations "$BREWFILE" "$tmp" "$merged"
+    if [[ "$1" == "inventory" ]]; then
+      # Audits must observe absence, even when backup preservation is enabled.
+      merge_curated_declarations "$BREWFILE" "$filtered" "$merged" 0
+    else
+      preserve_curated_mas_on_empty_dump "$filtered" "$tmp"
+      if [[ "${DOTFILES_BREWFILE_PRESERVE_EMPTY_KINDS:-0}" == "1" ]]; then
+        preserve_curated_on_empty_dump uv "$tmp" "$filtered"
+        preserve_curated_on_empty_dump npm "$filtered" "$tmp"
+      fi
+      merge_curated_declarations "$BREWFILE" "$tmp" "$merged"
+    fi
     mv "$merged" "$2"
     merged=""
     ;;

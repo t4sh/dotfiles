@@ -41,4 +41,4 @@ ok "$(basename "$DEST_PLIST")"
 
 echo ""
 ok "Shottr prefs staged under ~/.secrets/apps/shottr/"
-echo "  next: run make secrets-backup to write the encrypted sparseimage snapshot"
+echo "  next: run make secrets-backup to publish an encrypted recovery DMG"

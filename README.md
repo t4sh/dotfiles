@@ -359,3 +359,7 @@ Deliberately **not** using: GNU Stow, dotbot, chezmoi, or yadm — preferring a 
 ## Contributing
 
 This is a personal dotfiles repo published for reference and forking. Issues and PRs that fix bugs or improve portability without breaking changes are welcome; large opinion changes (editors, defaults, app policy) are better handled in your own fork.
+
+## Windows
+
+See [WINDOWS.md](WINDOWS.md) for native setup and maintenance, and [SECRETS-WINDOWS.md](SECRETS-WINDOWS.md) for encrypted backups. Windows snapshots are curated onboarding templates: backup and drift commands preserve them rather than importing your live personal settings.
