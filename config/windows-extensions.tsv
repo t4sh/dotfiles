@@ -1,7 +1,9 @@
-Editor	Id	Reason
-code	kaleidoscope-app.vscode-ksdiff	Mac-only Kaleidoscope integration; use Windows Meld.
-cursor	kaleidoscope-app.vscode-ksdiff	Mac-only Kaleidoscope integration; use Windows Meld.
-cursor	ms-python.vscode-pylance	Use Cursor Python tooling; do not copy restricted VS Code binaries.
-cursor	ms-vscode-remote.remote-containers	Use Cursor remote tooling; do not copy VS Code binaries.
-cursor	github.remotehub	Unavailable through Cursor extension installer (not found, verified 2026-09-09); use local Git checkouts or VS Code for remote repository browsing.
-cursor	ms-vscode.azure-repos	Unavailable through Cursor extension installer (not found, verified 2026-09-09); use local Git checkouts or VS Code for remote repository browsing.
+Editor	Id	Replacement	DownloadUrl	Sha256	Reason
+code	kaleidoscope-app.vscode-ksdiff				Mac-only Kaleidoscope integration; use Windows Meld.
+cursor	kaleidoscope-app.vscode-ksdiff				Mac-only Kaleidoscope integration; use Windows Meld.
+cursor	ms-python.vscode-pylance	anysphere.cursorpyright			Use Cursor Python tooling; do not copy restricted VS Code binaries.
+cursor	ms-vscode-remote.remote-containers	anysphere.remote-containers			Use Cursor remote tooling; do not copy VS Code binaries.
+cursor	github.remotehub				Unavailable through Cursor extension installer (not found, verified 2026-09-09); use local Git checkouts or VS Code for remote repository browsing.
+cursor	ms-vscode.azure-repos				Unavailable through Cursor extension installer (not found, verified 2026-09-09); use local Git checkouts or VS Code for remote repository browsing.
+code	foxundermoon.shell-format	foxundermoon.shell-format@7.2.5			7.2.8 is missing one_ini_bg.wasm (upstream issue 396); pin the verified prior release.
+cursor	foxundermoon.shell-format	foxundermoon.shell-format@7.2.5	https://github.com/foxundermoon/vs-shell-format/releases/download/7.2.5/shell-format-7.2.5.vsix	022325FC421709FA2BCF80B980BC64031B5B42E0442897AA96E5ACDD293CC692	7.2.8 cannot activate; Cursor catalog lacks 7.2.5, so use the author's MIT-licensed GitHub VSIX.

@@ -20,3 +20,4 @@ ${DOTFILES}/config/gh-config.yml	${APPDATA}/GitHub CLI/config.yml
 ${DOTFILES}/config/editorconfig	${HOME}/.editorconfig
 ${DOTFILES}/powershell/Microsoft.PowerShell_profile.ps1	${DOCUMENTS}/PowerShell/Microsoft.PowerShell_profile.ps1
 ${DOTFILES}/powershell/WindowsPowerShell.Microsoft.PowerShell_profile.ps1	${DOCUMENTS}/WindowsPowerShell/Microsoft.PowerShell_profile.ps1
+${DOTFILES}/apps/sublime-text/default_syntax.py	${APPDATA}/Sublime Text/Packages/User/default_syntax.py

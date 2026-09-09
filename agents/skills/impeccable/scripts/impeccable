@@ -25,7 +25,7 @@ probe_ok() {
 }
 probing=${IMPECCABLE_LAUNCHER_PROBE:-}
 
-dir=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
+dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 
 # What the binary needs to know about its home: the skill directory (for
 # reference/*.md and command-metadata.json) and how to name itself in the
@@ -34,7 +34,7 @@ dir=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
 # cannot find reference/*.md (so native platform refs never inline) or read its
 # own version (so UPDATE_AVAILABLE never fires). Setting it here covers every
 # candidate the launcher can exec.
-: "${IMPECCABLE_SKILL_DIR:=$(CDPATH='' cd -- "$dir/.." && pwd)}"
+: "${IMPECCABLE_SKILL_DIR:=$(CDPATH= cd -- "$dir/.." && pwd)}"
 : "${IMPECCABLE_SELF:=$0}"
 export IMPECCABLE_SKILL_DIR IMPECCABLE_SELF
 

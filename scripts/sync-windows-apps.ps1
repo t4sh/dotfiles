@@ -1,6 +1,7 @@
 #Requires -Version 7.0
 [CmdletBinding()]
 param([ValidateSet('Backup','Restore','Check')][string]$Mode='Check', [switch]$Apply,
+    [ValidateSet('sublime','vscode','cursor')][string]$Only,
     [string]$RoamingRoot=$env:APPDATA,
     [string]$SnapshotRoot=(Join-Path (Split-Path $PSScriptRoot) 'apps\windows'),
     [string]$BackupRoot=(Join-Path $HOME ('.dotfiles-backup\windows-apps-'+[guid]::NewGuid().ToString('N'))))
@@ -12,6 +13,7 @@ Assert-DotfilesWindows
 if ($Mode -in @('Backup','Check')) { Write-Output "Public templates retained; live preference $Mode is intentionally skipped."; return }
 $prepared=@(); $pending=@()
 foreach ($mapping in (Get-DotfilesAppMappings $RoamingRoot)) {
+    if ($Only -and $mapping.Editor -ne $Only) { continue }
     $snapshot=Join-Path (Join-Path $SnapshotRoot $mapping.Editor) $mapping.File
     $source=if($Mode -eq 'Backup'){$mapping.Live}else{$snapshot}
     $target=if($Mode -eq 'Backup'){$snapshot}else{$mapping.Live}
