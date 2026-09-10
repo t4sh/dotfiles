@@ -9,6 +9,19 @@ else
 
 export DOTFILES := $(CURDIR)
 
+.PHONY: cursor-extensions vscode-extensions restore-zed zed-check
+cursor-extensions: ## Install the minimal reviewed Cursor extension set
+	@cursor --install-extension esbenp.prettier-vscode
+
+vscode-extensions: ## Apply the verified formatter version; upstream 7.2.8 is broken
+	@code --install-extension foxundermoon.shell-format@7.2.5 --force
+
+restore-zed: ## Restore only Zed settings and keymap with the running-app gate
+	@bash scripts/restore-apps.sh --only zed
+
+zed-check: ## Check Zed settings, keymap, declared extensions and theme assets
+	@python3 scripts/check-zed.py
+
 all: ## Re-apply the full existing-Mac setup, including node shims, in a fixed order
 	@$(MAKE) --no-print-directory link
 	@$(MAKE) --no-print-directory rules-audit
@@ -141,12 +154,16 @@ brew-without-mas: ## Install all non-App-Store Brewfile phases
 
 brew-base: ## Install Brewfile except npm and App Store entries
 	@DOTFILES="$(CURDIR)" bash scripts/brewfile.sh base
+	@$(MAKE) --no-print-directory vscode-extensions
+	@$(MAKE) --no-print-directory cursor-extensions
 
 brew-core: ## Install bootstrap taps, formulae, and uv tools
 	@DOTFILES="$(CURDIR)" bash scripts/brewfile.sh core
 
 brew-apps: ## Install casks, fonts, and editor extensions (resumable phase)
 	@DOTFILES="$(CURDIR)" bash scripts/brewfile.sh apps
+	@$(MAKE) --no-print-directory vscode-extensions
+	@$(MAKE) --no-print-directory cursor-extensions
 
 node: ## Install and activate the exact Node version from .node-version
 	@DOTFILES="$(CURDIR)" bash scripts/setup-node.sh

@@ -176,6 +176,7 @@ mas:1607635845	manual			Velja: browser extension, Store or vendor/account setup;
 mas:1520333300	manual			Wappalyzer - Technology profiler: browser extension, Store or vendor/account setup; review the official Windows route.
 mas:1451685025	native	winget	WireGuard.WireGuard	Windows counterpart for WireGuard
 uv:browser-use	runtime	uv	browser-use	Explicit runtime-manager package; not a Homebrew dependency on Windows.
+uv:nginx-language-server	runtime	uv	nginx-language-server	External language-server dependency of Zed's Nginx extension.
 npm:corepack	runtime	volta	corepack	Explicit runtime-manager package; not a Homebrew dependency on Windows.
 windows:Microsoft.PowerShell	native	winget	Microsoft.PowerShell	Independent MSI PowerShell 7 via WinGet; Store PowerShell is excluded from maintenance.
 windows:ezwinports.make	native	winget	ezwinports.make	Optional common command surface.

@@ -43,16 +43,18 @@ add_app "/Applications/Discord.app"
 add_small_spacer
 
 # Writing
+add_app "/Applications/Craft.app"
 add_app "/Applications/Sublime Text.app"
 add_app "/Applications/Obsidian.app"
+add_app "/Applications/Tower.app"
 
 add_small_spacer
 
 # AI & Code
 add_app "/Applications/ChatGPT.app"
-add_app "/Applications/Zed.app"
+add_app "/Applications/Claude.app"
+add_app "$HOME/.hermes/hermes-agent/apps/desktop/release/mac-arm64/Hermes.app"
 add_app "/Applications/Proto.app"
-add_app "/Applications/Tower.app"
 
 add_spacer
 
@@ -67,6 +69,7 @@ add_spacer
 # Dev tools
 add_app "/System/Applications/Utilities/Terminal.app"
 add_app "/Applications/Visual Studio Code.app"
+add_app "/Applications/Zed.app"
 add_app "/Applications/Cursor.app"
 add_app "/Applications/Kaleidoscope.app"
 

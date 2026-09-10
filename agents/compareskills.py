@@ -35,7 +35,7 @@ def get_disk_skills():
 
 
 def get_gitignored_skills():
-    """Skill dir names excluded from the dotfiles git repo via .gitignore."""
+    """Skill directory names gated from public export via .gitignore."""
     gitignore = REPO_ROOT / ".gitignore"
     gated = set()
     if not gitignore.exists():
@@ -133,13 +133,13 @@ def build_readme(inventory_skills, lock_version, lock_skills, remarks, gated):
     if gated_inventory:
         gated_summary = (
             f" — {len(gated_inventory)} **gated** "
-            f"(on disk, excluded from git — see below)"
+            f"(excluded from public export — see below)"
         )
         gated_section = (
-            "### Gated — on disk, excluded from git\n\n"
-            "These load normally but are intentionally untracked in this repo: "
-            "canonical/source lives in another repo, or they are "
-            "license-restricted and kept out of the public split. Managed via "
+            "### Gated — excluded from public export\n\n"
+            "These load normally when present and remain excluded from the public split. "
+            "Authorized private recovery snapshots may be tracked in the private repo; "
+            "a gate entry does not by itself describe Git tracking state. Managed via "
             "`.gitignore` + `scripts/audit-skill-licenses.sh` — this list is "
             "derived from `.gitignore`, not hardcoded.\n\n"
             f"- **{len(gated_inventory)}:** {', '.join(gated_inventory)}\n\n---\n\n"
@@ -249,7 +249,7 @@ def main():
 
     gated_on_disk = sorted(s for s in disk_skills if s in gated)
     if gated_on_disk:
-        print(f"  Gated (on disk, excluded from git): {', '.join(gated_on_disk)}")
+        print(f"  Gated (on disk, excluded from public export): {', '.join(gated_on_disk)}")
 
     content = build_readme(
         inventory_skills, lock_version, lock_skills, remarks, gated

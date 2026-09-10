@@ -16,6 +16,10 @@ $env:EDITOR = if (Test-Path -LiteralPath $zedExecutable) { "$zedExecutable --wai
 $env:VISUAL = $env:EDITOR
 $env:STARSHIP_CONFIG = Join-Path $HOME '.config\starship.toml'
 
+# RTK tracking DB shared by agent shells (Codex, Claude Code, Zed); rtk creates the
+# parent directory. Temporary by design, so statistics may be cleared by cleanup.
+$env:RTK_DB_PATH = Join-Path $env:TEMP 'rtk-codex\history.db'
+
 if ($env:TERM -ne 'dumb' -and (Get-Command starship -ErrorAction SilentlyContinue)) {
     (& starship init powershell | Out-String) | Invoke-Expression
 }
