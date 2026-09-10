@@ -5,5 +5,31 @@ cursor	ms-python.vscode-pylance	anysphere.cursorpyright			Use Cursor Python tool
 cursor	ms-vscode-remote.remote-containers	anysphere.remote-containers			Use Cursor remote tooling; do not copy VS Code binaries.
 cursor	github.remotehub				Unavailable through Cursor extension installer (not found, verified 2026-09-09); use local Git checkouts or VS Code for remote repository browsing.
 cursor	ms-vscode.azure-repos				Unavailable through Cursor extension installer (not found, verified 2026-09-09); use local Git checkouts or VS Code for remote repository browsing.
+cursor	1000ch.svgo				Deferred: use project-pinned SVGO in the asset pipeline.
+cursor	ahmadalli.vscode-nginx-conf				Deferred: add one NGINX provider when needed; avoid duplicate language providers.
+cursor	andrejunges.handlebars				Cursor bundles Handlebars syntax; extra snippets are deferred.
+cursor	bbugh.change-color-format				Use the built-in CSS color picker for common formats; advanced conversion is deferred.
+cursor	burkeholland.simple-react-snippets				Deferred until a project needs recurring React snippets; use built-in user snippets meanwhile.
+cursor	dhedgecock.ember-syntax				Deferred until an Ember or Glimmer project needs its extended syntax.
+cursor	fabiospampinato.vscode-open-multiple-files				Use Explorer multi-select or the Cursor CLI; bulk glob opening is deferred.
+cursor	figma.figma-vscode-extension				Deferred: use Figma app/browser; configure Figma MCP only when design-to-code work needs it.
+cursor	github.codespaces				Deferred until a Codespaces workflow is needed; browser and local clones remain available.
+cursor	jacobcofman.changelog				Deferred: inspect package release notes directly; package.json changelog hover is optional.
+cursor	jasonn-porch.gitlab-mr				Deferred: use GitLab web or glab; assess official GitLab extension only for in-editor MR work.
+cursor	jasonnutter.search-node-modules				Use built-in file search with ignore filtering disabled for the query; dedicated navigation is deferred.
+cursor	kostasx.live-html-previewer-v2				Use the project dev server and browser; standalone live preview is deferred.
+cursor	matteopieroni.refresh-npm-packages				Use the repository package manager and lockfile explicitly after dependency changes.
+cursor	michelemelluso.code-beautifier	esbenp.prettier-vscode			Consolidate CSS/SCSS/Less formatting in the already-selected Prettier formatter.
+cursor	mike-co.import-sorter				Use built-in Organize Imports; project-specific ordering belongs in its lint rules.
+cursor	mrmlnc.vscode-autoprefixer				Deferred: use project-pinned PostCSS/Autoprefixer and Browserslist in the build.
+cursor	ms-vscode.remote-repositories				Deferred: use local clones; remote virtual workspaces require a separate compatibility review.
+cursor	ms-vscode.vscode-chat-customizations-evaluations				Deferred: specialized VS Code prompt evaluation is outside the baseline Cursor workflow.
+cursor	pushqrdx.inline-html				Deferred until a project uses HTML/CSS tagged template strings; not covered by plain HTML support.
+cursor	riazxrazor.html-to-jsx				Deferred: occasional HTML-to-JSX conversion can be reviewed manually or with Cursor.
+cursor	ronnidc.nunjucks				Deferred: unavailable through Cursor installer on 2026-09-09; review a source-published grammar when needed.
+cursor	sidthesloth.html5-boilerplate				Use built-in Emmet ! expansion.
+cursor	t-sauer.autolinting-for-javascript				Use the project's explicit ESLint/Biome tooling; no automatic linter selector.
+cursor	tal7aouy.indent-colorizer				Use built-in indentation guides; rainbow indentation is deferred.
+cursor	william-voyek.vscode-nginx				Deferred: unavailable through Cursor installer on 2026-09-09; review one grammar when NGINX editing is needed.
 code	foxundermoon.shell-format	foxundermoon.shell-format@7.2.5			7.2.8 is missing one_ini_bg.wasm (upstream issue 396); pin the verified prior release.
 cursor	foxundermoon.shell-format	foxundermoon.shell-format@7.2.5	https://github.com/foxundermoon/vs-shell-format/releases/download/7.2.5/shell-format-7.2.5.vsix	022325FC421709FA2BCF80B980BC64031B5B42E0442897AA96E5ACDD293CC692	7.2.8 cannot activate; Cursor catalog lacks 7.2.5, so use the author's MIT-licensed GitHub VSIX.

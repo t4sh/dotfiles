@@ -14,5 +14,5 @@ export PATH
 
 [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
 
-# RTK tracking DB for sandboxed Codex shells.
+# RTK tracking DB shared by sandboxed agent shells (Codex, Claude Code, Zed).
 export RTK_DB_PATH=/private/tmp/rtk-codex/history.db

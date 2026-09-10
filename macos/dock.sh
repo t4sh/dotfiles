@@ -22,6 +22,21 @@ if [ ! -f "$PLIST" ]; then
     exit 1
 fi
 
-defaults import com.apple.dock "$PLIST"
+materialized="$(mktemp -t dotfiles-dock.XXXXXX)"
+trap 'rm -f "$materialized"' EXIT
+python3 - "$PLIST" "$materialized" <<'PY'
+from pathlib import Path
+import plistlib
+import sys
+from urllib.parse import quote
+data = plistlib.loads(Path(sys.argv[1]).read_bytes())
+for tile in data.get("persistent-apps", []):
+    file_data = tile.get("tile-data", {}).get("file-data", {})
+    url = file_data.get("_CFURLString", "")
+    if url.startswith("file://__HOME__/"):
+        file_data["_CFURLString"] = "file://" + quote(str(Path.home()) + url[len("file://__HOME__"):], safe="/")
+Path(sys.argv[2]).write_bytes(plistlib.dumps(data))
+PY
+defaults import com.apple.dock "$materialized"
 killall Dock
 echo "  ✓ Dock layout restored from dock-backup.plist"

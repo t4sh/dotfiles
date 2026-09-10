@@ -31,7 +31,7 @@
   "theme": {
     "mode": "system",
     "light": "One Light",
-    "dark": "KTRZ Monokai"
+    "dark": "Monokai Pro (CE)"
   },
   "auto_install_extensions": {
     "astro": true,
@@ -39,6 +39,7 @@
     "html": true,
     "ktrz-monokai": true,
     "make": true,
+    "monokai-pro-ce": true,
     "nginx": true,
     "nunjucks": true,
     "prisma": true,
@@ -58,10 +59,8 @@
   "line_ending": "prefer_lf",
   "linked_edits": true,
   "remove_trailing_whitespace_on_save": true,
-  "features": {
-    "edit_predictions": {
-      "provider": "zed"
-    }
+  "edit_predictions": {
+    "provider": "zed"
   },
   "show_edit_predictions": true,
   "show_whitespaces": "selection",
@@ -96,7 +95,7 @@
   },
 
   "file_types": {
-    "Nginx": ["*.conf"],
+    "Nginx": ["nginx.conf", "**/nginx/**/*.conf", "*.nginx"],
     "Nunjucks": ["*.njk", "*.nunjucks"],
     "YAML": ["*.yaml", "*.yml"]
   },

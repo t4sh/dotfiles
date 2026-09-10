@@ -67,3 +67,6 @@ $DOTFILES/ssh/allowed_signers	$HOME/.ssh/allowed_signers
 $HOME/.secrets/ssh/github_ed25519	$HOME/.ssh/github_ed25519
 $HOME/.secrets/ssh/github_ed25519.pub	$HOME/.ssh/github_ed25519.pub
 $HOME/.secrets/ssh/known_hosts	$HOME/.ssh/known_hosts
+
+# Hermes agent config — identity (SOUL.md), aliases, skills, scripts
+# Source of truth for rules stays at .dotfiles/agents/; Hermes config is mirrored here.

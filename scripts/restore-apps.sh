@@ -18,6 +18,10 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 DOTFILES="${DOTFILES:-$(cd -- "$SCRIPT_DIR/.." && pwd -P)}"
+case "$*" in
+    ''|'--only zed'|'--only hermes') ;;
+    *) echo 'usage: restore-apps.sh [--only zed|hermes]' >&2; exit 2 ;;
+esac
 bash "$DOTFILES/scripts/validate-manifests.sh" apps
 
 materialize_editor_file() {
@@ -47,6 +51,43 @@ materialize_editor_file() {
 # shellcheck source=scripts/lib/running-app-gate.sh
 source "$DOTFILES/scripts/lib/running-app-gate.sh"
 trap restore_reopen_apps EXIT
+
+restore_zed() {
+    if restore_app_is_deferred "Zed"; then
+        echo "  - Zed settings skipped because it hosts this restore"
+        return
+    fi
+    local file
+    for file in settings.json keymap.json; do
+        [ -f "$DOTFILES/apps/zed/$file" ] || continue
+        materialize_editor_file "$DOTFILES/apps/zed/$file" "$HOME/.config/zed/$file"
+    done
+    echo "  ✓ Zed settings and keymap restored"
+    echo "    Launch Zed for automatic extension installation, then run make zed-check."
+}
+
+if [[ "$*" == '--only hermes' ]]; then
+    python3 "$SCRIPT_DIR/hermes-settings.py" audit
+    restore_running_app_gate "Hermes:Hermes"
+    if restore_app_is_deferred "Hermes"; then
+        echo "Hermes is the restore host; run make restore-hermes from another terminal." >&2
+        exit 1
+    fi
+    python3 "$SCRIPT_DIR/hermes-settings.py" restore
+    exit 0
+fi
+
+if [[ "$*" == '--only zed' ]]; then
+    # Parse both snapshots before quitting the app or replacing either file.
+    python3 "$SCRIPT_DIR/check-zed.py" --snapshot-only
+    restore_running_app_gate "Zed:Zed"
+    if restore_app_is_deferred "Zed"; then
+        echo "Zed is the restore host; run make restore-zed from another terminal." >&2
+        exit 1
+    fi
+    restore_zed
+    exit 0
+fi
 
 echo "Restoring app preferences..."
 
@@ -205,15 +246,7 @@ fi
 
 # Zed settings and keymap (account/provider/agent auth remains app-managed)
 if [ -f "$DOTFILES/apps/zed/settings.json" ] || [ -f "$DOTFILES/apps/zed/keymap.json" ]; then
-    if restore_app_is_deferred "Zed"; then
-        echo "  - Zed settings skipped because it hosts this restore"
-    else
-        for file in settings.json keymap.json; do
-            [ -f "$DOTFILES/apps/zed/$file" ] || continue
-            materialize_editor_file "$DOTFILES/apps/zed/$file" "$HOME/.config/zed/$file"
-        done
-        echo "  ✓ Zed"
-    fi
+    restore_zed
 fi
 
 # Shottr — license prefs live in the vault (make restore-shottr after secrets restore).

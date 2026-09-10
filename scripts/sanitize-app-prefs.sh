@@ -68,6 +68,30 @@ normalize_tower_toolbar() {
 # from a portable Terminal profile snapshot.
 plist_delete "$APPS/terminal/terminal.plist" SecureKeyboardEntry
 
+# Normalize Package Control's captured dependency list in backup and drift
+# staging. Never rewrite the running editor merely to sort its package list.
+if [[ -f "$APPS/sublime-text/Package Control.sublime-settings" ]]; then
+  python3 - "$APPS/sublime-text/Package Control.sublime-settings" <<'PY'
+import json
+from pathlib import Path
+import re
+import sys
+
+path = Path(sys.argv[1])
+tokens = r'"(?:\\.|[^"\\])*"|//[^\n]*|/\*[\s\S]*?\*/'
+text = re.sub(tokens, lambda m: m[0] if m[0].startswith('"') else " ", path.read_text())
+text = re.sub(r'"(?:\\.|[^"\\])*"|,\s*(?=[}\]])',
+              lambda m: m[0] if m[0].startswith('"') else "", text)
+settings = json.loads(text)
+if "installed_packages" in settings:
+    packages = settings["installed_packages"]
+    if not isinstance(packages, list) or not all(isinstance(name, str) for name in packages):
+        raise ValueError("Package Control installed_packages must be a list of names")
+    settings["installed_packages"] = sorted(set(packages), key=lambda name: (name.casefold(), name))
+path.write_text(json.dumps(settings, indent=2, sort_keys=True) + "\n")
+PY
+fi
+
 f="$APPS/sublime-text/SublimeLinter.sublime-settings"
 if [[ -f "$f" ]]; then
   perl -i -pe '

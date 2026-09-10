@@ -13,7 +13,7 @@
     "caret_extra_bottom": 2,
     "caret_extra_top": 2,
     "caret_extra_width": 2,
-    "caret_style": "wide",
+    "caret_style": "solid",
     "draw_minimap_border": true,
     "ensure_newline_at_eof_on_save": true,
     "fade_fold_buttons": true,
@@ -45,11 +45,11 @@
     "line_padding_top": 5,
     "margin": 8,
     "match_brackets_angle": true,
-    "open_files_in_new_window": false,
+    "open_files_in_new_window": "never",
     "overlay_scroll_bars": "enabled",
     "show_line_endings": true,
     "spell_check": true,
-    "trim_trailing_white_space_on_save": true,
+    "trim_trailing_white_space_on_save": "all",
 
     // isolate color scheme //
     // "theme": "gruvbox.sublime-theme",
