@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Skillsfile — declarative global skill manifest (Brewfile pattern).
 #
-# GENERATED 2026-09-11T19:07:06+05:30 from agents/.skill-lock.json by
+# GENERATED 2026-09-12T01:21:35+05:30 from agents/.skill-lock.json by
 # scripts/gen-skillsfile.py — DO NOT EDIT BY HAND. To change skills:
 #   ~/.local/bin/npx-stable skills add/remove ...   then   make skills-manifest
 #   (regenerates Skillsfile + agents/skills/README.md)
@@ -22,6 +22,21 @@ DOTFILES_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
 NPX="${NPX:-$HOME/.local/bin/npx-stable}"
 [[ -x "$NPX" || ( "${OS:-}" == "Windows_NT" && -f "$NPX" ) ]] || { echo "npx stable shim not found or not executable: $NPX" >&2; exit 1; }
+
+# skills add stamps unchanged entries too; normalize even after a partial failure.
+LOCK_SNAPSHOT="$(mktemp)"
+finish_refresh() {
+  status=$?
+  if ! "${PYTHON_BIN:-python3}" "$DOTFILES_ROOT/scripts/normalize-skill-lock.py" "$LOCK_SNAPSHOT" "$DOTFILES_ROOT/agents/.skill-lock.json"; then
+    printf "Normalization failed; pre-refresh lock retained at %s\n" "$LOCK_SNAPSHOT" >&2
+    [[ "$status" -ne 0 ]] || status=1
+    exit "$status"
+  fi
+  rm -f -- "$LOCK_SNAPSHOT"
+  exit "$status"
+}
+cp -- "$DOTFILES_ROOT/agents/.skill-lock.json" "$LOCK_SNAPSHOT" || { status=$?; rm -f -- "$LOCK_SNAPSHOT"; exit "$status"; }
+trap finish_refresh EXIT
 
 
 echo "→ update ComposioHQ/awesome-claude-skills"

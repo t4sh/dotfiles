@@ -88,10 +88,12 @@ def external_dirs(value):
     return value
 
 
-def project(data, skills_only=False):
+def project(data, skills_only=False, preserve_model_selection=False):
     result = {}
     fields = {"skills": "create_dir"} if skills_only else FIELDS
     for path, keys in fields.items():
+        if preserve_model_selection and path == "model":
+            continue
         src = section(data, path)
         for key in keys.split():
             if key not in src:
@@ -126,7 +128,7 @@ def project(data, skills_only=False):
         ):
             raise ValueError("Model aliases must map names to model identifiers")
         put(result, "model", "aliases", aliases)
-    if not skills_only and not result.get("model", {}).get("default"):
+    if not skills_only and not preserve_model_selection and not result.get("model", {}).get("default"):
         raise ValueError("Hermes model.default is missing; prior snapshot retained")
     return result
 
@@ -189,9 +191,7 @@ def main():
                 raise ValueError("Hermes snapshot contains unmanaged fields")
             if args.preserve_model_selection:
                 saved = without_model_selection(saved)
-            actual = project(read_config(args.live), args.skills_only) if args.mode == "check" else None
-            if args.preserve_model_selection and actual is not None:
-                actual = without_model_selection(actual)
+            actual = project(read_config(args.live), args.skills_only, args.preserve_model_selection) if args.mode == "check" else None
             if args.mode == "check" and actual != saved:
                 raise ValueError("Hermes preferences differ; use this helper with capture or restore and the same --live, --snapshot and --skills-only options. See docs/hermes-preferences.md.")
             if args.mode == "restore":

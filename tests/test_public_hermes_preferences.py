@@ -27,7 +27,7 @@ class HermesPreferences(unittest.TestCase):
     def test_preserve_model_and_add_skills_idempotently(self):
         with tempfile.TemporaryDirectory() as folder:
             live, saved = Path(folder)/"config.json", Path(folder)/"snapshot.json"
-            original = {"default": "fixture/local", "provider": "fixture", "base_url": "https://example.invalid/v1"}
+            original = {"default": "fixture/local", "provider": "fixture", "base_url": "https://example.invalid/v1?api-version=fixture"}
             live.write_text(json.dumps({"model": original, "skills": {"external_dirs": ["profile-skills"]}, "unmanaged": True}))
             saved.write_text(json.dumps({"model": {"default": "fixture/saved", "aliases": {"sample": "fixture/alias"}},
                 "display": {"resume_last_session": False}, "skills": {"create_dir": "~/.agents/skills", "external_dirs": ["~/.agents/skills"]}}))
@@ -41,6 +41,22 @@ class HermesPreferences(unittest.TestCase):
             result = self.run_helper("check", live, saved, "--preserve-model-selection")
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertNotEqual(self.run_helper("check", live, saved).returncode, 0)
+
+    def test_preserved_missing_model_and_snapshot_validation(self):
+        with tempfile.TemporaryDirectory() as folder:
+            live, saved = Path(folder)/"config.json", Path(folder)/"snapshot.json"
+            live.write_text(json.dumps({"display": {"resume_last_session": False}}))
+            saved.write_text(json.dumps({"model": {"default": "fixture/saved"},
+                "display": {"resume_last_session": False}}))
+            result = self.run_helper("check", live, saved, "--preserve-model-selection")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            # The option excludes live model fields, never saved-snapshot validation.
+            saved.write_text(json.dumps({"model": {"default": "fixture/saved",
+                "base_url": "https://example.invalid/v1?fixture=invalid-snapshot"}}))
+            before = live.read_bytes()
+            result = self.run_helper("restore", live, saved, "--preserve-model-selection")
+            self.assertNotEqual(result.returncode, 0)
+            self.assertEqual(live.read_bytes(), before)
 
     def test_public_template_is_skills_only(self):
         saved = ROOT / "apps/windows/hermes/config.json"

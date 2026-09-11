@@ -40,7 +40,10 @@ stopping them. `dot hermes -Check` verifies the settings and runtime skill inven
 Setup skips an uninitialized Hermes installation.
 
 Use `dot hermes-launcher -Apply` to repair just the shortcut, or `-Check` to inspect
-it. The shortcut invokes the installed Python with `desktop --source --skip-build`.
+it. Both launcher commands honor `HERMES_HOME`; explicit `-HermesHome`,
+`-HermesRoot` and `-Python` select a profile and runtime. `dot hermes -Apply`
+passes the selected Python through to the shortcut. The shortcut invokes that
+Python with `desktop --source --skip-build`.
 Launching does not install, update, package or rebuild anything. Source dependencies
 and compiled frontend assets must already be present in the installed checkout.
 The first replaced shortcut is retained as `Hermes.lnk.before-dotfiles`.

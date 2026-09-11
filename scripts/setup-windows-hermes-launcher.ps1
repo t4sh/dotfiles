@@ -1,22 +1,22 @@
 #Requires -Version 7.4
 [CmdletBinding()]
-param([switch]$Apply, [switch]$Check, [string]$HermesHome, [string]$HermesRoot,
+param([switch]$Apply, [switch]$Check, [string]$HermesHome, [string]$HermesRoot, [string]$Python,
     [string]$ProgramsDirectory = [Environment]::GetFolderPath('Programs'))
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'lib/windows-common.ps1')
 Assert-DotfilesWindows
 if ($Apply -and $Check) { throw 'Choose -Apply or -Check.' }
-if (-not $HermesHome) { $HermesHome = Join-Path $env:LOCALAPPDATA 'hermes' }
+if (-not $HermesHome) { $HermesHome = if ($env:HERMES_HOME) { $env:HERMES_HOME } else { Join-Path $env:LOCALAPPDATA 'hermes' } }
 if (-not $HermesRoot) { $HermesRoot = Join-Path $HermesHome 'hermes-agent' }
-$python = Join-Path $HermesRoot 'venv/Scripts/python.exe'
+if (-not $Python) { $Python = Join-Path $HermesRoot 'venv/Scripts/python.exe' }
 if (-not (Test-Path -LiteralPath $python -PathType Leaf)) { throw 'Initialize Hermes before configuring its launcher.' }
 Assert-DotfilesPreferenceFile $python
 $target = Resolve-DotfilesPwsh
 $launcher = Join-Path $PSScriptRoot 'start-windows-hermes.ps1'
-foreach ($path in @($launcher,$HermesHome,$HermesRoot)) {
+foreach ($path in @($launcher,$HermesHome,$HermesRoot,$Python)) {
     if ($path.Contains('"')) { throw 'Hermes launcher paths must not contain double quotes.' }
 }
-$arguments = '-NoLogo -NoProfile -WindowStyle Hidden -File "' + $launcher + '" -HermesHome "' + $HermesHome + '" -HermesRoot "' + $HermesRoot + '"'
+$arguments = '-NoLogo -NoProfile -WindowStyle Hidden -File "' + $launcher + '" -HermesHome "' + $HermesHome + '" -HermesRoot "' + $HermesRoot + '" -Python "' + $Python + '"'
 $path = Join-Path $ProgramsDirectory 'Hermes.lnk'
 if (-not $Apply -and -not $Check) { Write-Output "Preview: $path will launch Hermes in source mode without rebuilding."; return }
 $shell = New-Object -ComObject WScript.Shell
