@@ -106,6 +106,21 @@ def build_skillsfile(timestamp):
         'NPX="${NPX:-$HOME/.local/bin/npx-stable}"',
         '[[ -x "$NPX" || ( "${OS:-}" == "Windows_NT" && -f "$NPX" ) ]] || { echo "npx stable shim not found or not executable: $NPX" >&2; exit 1; }',
         "",
+        '# skills add stamps unchanged entries too; normalize even after a partial failure.',
+        'LOCK_SNAPSHOT="$(mktemp)"',
+        'finish_refresh() {',
+        '  status=$?',
+        '  if ! "${PYTHON_BIN:-python3}" "$DOTFILES_ROOT/scripts/normalize-skill-lock.py" "$LOCK_SNAPSHOT" "$DOTFILES_ROOT/agents/.skill-lock.json"; then',
+        '    printf "Normalization failed; pre-refresh lock retained at %s\\n" "$LOCK_SNAPSHOT" >&2',
+        '    [[ "$status" -ne 0 ]] || status=1',
+        '    exit "$status"',
+        '  fi',
+        '  rm -f -- "$LOCK_SNAPSHOT"',
+        '  exit "$status"',
+        '}',
+        'cp -- "$DOTFILES_ROOT/agents/.skill-lock.json" "$LOCK_SNAPSHOT" || { status=$?; rm -f -- "$LOCK_SNAPSHOT"; exit "$status"; }',
+        'trap finish_refresh EXIT',
+        "",
     ]
 
     for key, src, reason in sorted(held):

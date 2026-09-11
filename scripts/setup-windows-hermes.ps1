@@ -41,7 +41,7 @@ if ($Apply) {
     }
     if ($running) { throw 'Close Hermes Desktop and stop Hermes CLI/gateway sessions before applying preferences. No processes were stopped.' }
     Invoke-DotfilesNative $Python (@('-B',$helper,'restore') + $options)
-    & (Join-Path $PSScriptRoot 'setup-windows-hermes-launcher.ps1') -Apply -HermesHome $HermesHome -HermesRoot $HermesRoot
+    & (Join-Path $PSScriptRoot 'setup-windows-hermes-launcher.ps1') -Apply -HermesHome $HermesHome -HermesRoot $HermesRoot -Python $Python
 }
 Invoke-DotfilesNative $Python (@('-B',$helper,'check') + $options)
 Invoke-DotfilesNative $Python @('-B','-c', 'import os,sys; from pathlib import Path; os.environ["HERMES_HOME"]=sys.argv[1]; from agent.skill_utils import get_skill_create_dir; actual=get_skill_create_dir(); sys.exit(0 if actual is not None and actual.resolve()==(Path.home()/".agents/skills").resolve() else "Hermes runtime did not resolve the shared skills directory")', $HermesHome)
