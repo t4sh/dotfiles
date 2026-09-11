@@ -3,6 +3,8 @@
 # IDs, and hardcoded home paths. Run after `make backup` (Makefile invokes this).
 set -euo pipefail
 
+command -v rg >/dev/null 2>&1 || { echo 'Preference audit requires ripgrep (rg); install it before auditing.' >&2; exit 127; }
+
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 DOTFILES="${DOTFILES:-$(cd -- "$SCRIPT_DIR/.." && pwd -P)}"
 ROOTS=("$DOTFILES/apps" "$DOTFILES/macos" "$DOTFILES/services")

@@ -10,6 +10,19 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 
 class PublicBootstrap(unittest.TestCase):
+    def test_audit_requires_ripgrep(self):
+        bash = (str(Path(os.environ.get('ProgramFiles', 'C:/Program Files')) / 'Git/bin/bash.exe')
+                if os.name == 'nt' else shutil.which('bash'))
+        with tempfile.TemporaryDirectory() as directory:
+            # Clear PATH after Bash startup; only shell builtins reach the guard.
+            result = subprocess.run(
+                [bash, '-c', 'PATH="$1"; export PATH; source "$2"', 'fixture',
+                 Path(directory).as_posix(), (ROOT / 'scripts/audit-app-prefs.sh').as_posix()],
+                capture_output=True, text=True)
+            self.assertEqual(result.returncode, 127, result.stderr)
+            self.assertIn('requires ripgrep', result.stderr)
+            self.assertNotIn('no issues', result.stdout)
+
     def test_manifest_snapshots_exist(self):
         for line in (ROOT / 'apps.tsv').read_text().splitlines():
             if line and not line.startswith('#'):
