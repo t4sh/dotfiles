@@ -48,6 +48,20 @@ Launching does not install, update, package or rebuild anything. Source dependen
 and compiled frontend assets must already be present in the installed checkout.
 The first replaced shortcut is retained as `Hermes.lnk.before-dotfiles`.
 
+The shortcut owns Desktop's `com.nousresearch.hermes` Windows app identity.
+Setup and successful updates back up and retire conflicting shortcuts targeting
+this installation's Electron/Hermes executable, avoiding the bare Electron welcome
+screen. The check also detects competing app identities. Unrelated shortcuts
+remain untouched; a conflicting identity owned by another installation stops
+repair before changes. Repeated repairs retain previous shortcut backups.
+Existing Hermes taskbar pins are separate shortcuts: setup repairs their launch
+command and icon in place, preserving each original beside it. The check includes
+pinned shortcuts; unrelated pins and pin ordering remain unchanged. No new pins
+are created. The bundled `assets/icon.ico` is preferred, so source-only installs
+need no packaged executable for the icon. Missing icon assets fail clearly.
+Missing identity on an owned pin is repaired; conflicting identities stop before
+writes. Unreadable unrelated shortcuts are reported and skipped.
+
 The dedicated update stage runs the native Hermes updater once, repairs the source
 shortcut after success, then checks shared skills. The native updater controls
 checkout/dependency changes and can rebuild Desktop; this wrapper does not alter
