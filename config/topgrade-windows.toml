@@ -16,7 +16,11 @@ notify_end = "on_failure"
 # yarn/pnpm/pi/emacs: preserve the choices in the macOS configuration.
 # wsl/wsl_update: do not maintain a separate Linux environment implicitly.
 # tldr: outer runner checks Python client update output as well as its exit code.
+# codex: desktop-bundled CLI is maintained by the Codex desktop updater.
+# hermes_agent: outer runner uses the guarded native Python updater once.
 disable = [
+  "codex",
+  "hermes_agent",
   "tldr",
   "system",
   "winget",

@@ -86,7 +86,6 @@ verify_defaults() {
 NSGlobalDomain	AppleShowAllExtensions	0
 com.apple.finder	AppleShowAllFiles	1
 com.apple.finder	ShowPathbar	1
-com.apple.finder	ShowPreviewPane	1
 com.apple.finder	FXPreferredViewStyle	clmv
 com.apple.finder	FXPreferredGroupBy	Date Modified
 com.apple.dock	autohide	0
@@ -108,6 +107,9 @@ com.apple.dock	wvous-bl-modifier	0
 com.apple.dock	wvous-br-corner	1
 com.apple.dock	wvous-br-modifier	0
 EOF
+    # Column view has its own preview preference. ShowPreviewPane can be false
+    # while the requested preview column is visible; do not gate backup on it.
+    python3 "$(dirname "$0")/finder-column-settings.py" check || failures=$((failures + 1))
     capture="$(command defaults read com.apple.screencapture location 2>/dev/null || true)"
     capture="${capture%\"}"; capture="${capture#\"}"
     if [[ "$capture" == "$CAPTURE_DIR" ]]; then
@@ -393,6 +395,10 @@ defaults write com.apple.finder "FXPreferredViewStyle" -string "clmv"
 
 # Match Finder's Group By → Date Modified menu (separate from sorting within groups).
 defaults write com.apple.finder "FXPreferredGroupBy" -string "Date Modified"
+
+# Sort within column groups by Date Modified and keep the preview column on.
+# Existing folder overrides, especially Applications, remain intact.
+python3 "$(dirname "$0")/finder-column-settings.py" "$MODE"
 
 # Set the default path for new Window's location
 # Computer : `PfCm`

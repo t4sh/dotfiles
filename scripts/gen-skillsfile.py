@@ -30,6 +30,7 @@ BASE_DIR = REPO_ROOT / "agents"
 LOCK_FILE = BASE_DIR / ".skill-lock.json"
 SKILLS_DIR = BASE_DIR / "skills"
 SKILLSFILE = REPO_ROOT / "Skillsfile"
+HOLDS_FILE = REPO_ROOT / "config" / "skills-refresh-holds.json"
 IST = timezone(timedelta(hours=5, minutes=30))
 GENERATED_RE = re.compile(r"^# GENERATED (?P<stamp>.+) from agents/\.skill-lock\.json by$", re.M)
 
@@ -46,9 +47,18 @@ def existing_timestamp():
 def build_skillsfile(timestamp):
     with LOCK_FILE.open(encoding="utf-8") as f:
         data = json.load(f)
+    # Keep policy outside the installer-owned lockfile. Missing or stale policy
+    # must stop refresh, never silently make a curated skill updateable.
+    holds = json.loads(HOLDS_FILE.read_text(encoding="utf-8"))
+    if not isinstance(holds, dict) or any(
+        key not in data["skills"] or not isinstance(reason, str) or not reason.strip()
+        for key, reason in holds.items()
+    ):
+        raise ValueError("Skill refresh holds require known lock keys and nonempty reasons")
 
     by_source = defaultdict(list)   # source repo -> [skill names]
     local = []
+    held = []
     for key, meta in data.get("skills", {}).items():
         name = installed_name(key, SKILLS_DIR)
         if meta.get("sourceType") == "github":
@@ -61,11 +71,14 @@ def build_skillsfile(timestamp):
                 raise ValueError(f"github skill {key!r} lacks source or skillPath metadata")
             # The lock key is the CLI install selector. It may intentionally
             # contain spaces/case even though the installed folder is slugged.
-            by_source[meta["source"]].append(key)
+            if key in holds:
+                held.append((key, meta["source"], holds[key]))
+            else:
+                by_source[meta["source"]].append(key)
         else:
             local.append(name)
 
-    total = sum(len(v) for v in by_source.values()) + len(local)
+    total = sum(len(v) for v in by_source.values()) + len(local) + len(held)
 
     lines = [
         "#!/usr/bin/env bash",
@@ -77,7 +90,8 @@ def build_skillsfile(timestamp):
         "#   (regenerates Skillsfile + agents/skills/README.md)",
         "#",
         "# Explicit upstream refresh: make skills-update   (or: bash Skillsfile)",
-        f"# {total} skills — {len(by_source)} github sources + {len(local)} local.",
+        f"# {total} skills — {len(by_source)} refreshable github sources + {len(local)} local + {len(held)} held.",
+        "# Curated skills are held by config/skills-refresh-holds.json; review upstream changes manually.",
         "#",
         "# Prereqs (fresh Mac): node + git + GitHub auth (SSH/gh) must be set",
         "# up first if a configured upstream source requires authentication.",
@@ -85,10 +99,19 @@ def build_skillsfile(timestamp):
         "",
         "set -euo pipefail",
         "",
+        'DOTFILES_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"',
+        '# Refuse stale generated selectors before any installer can overwrite skills.',
+        '"${PYTHON_BIN:-python3}" "$DOTFILES_ROOT/scripts/gen-skillsfile.py" --check >/dev/null',
+        "",
         'NPX="${NPX:-$HOME/.local/bin/npx-stable}"',
         '[[ -x "$NPX" || ( "${OS:-}" == "Windows_NT" && -f "$NPX" ) ]] || { echo "npx stable shim not found or not executable: $NPX" >&2; exit 1; }',
         "",
     ]
+
+    for key, src, reason in sorted(held):
+        message = f"HOLD: {src} / {key}: {reason}"
+        lines.append(f"printf '%s\\n' {shlex.quote(message)}")
+    lines.append("")
 
     for src in sorted(by_source):
         skills = " ".join(shlex.quote(name) for name in sorted(by_source[src]))
@@ -106,7 +129,7 @@ def build_skillsfile(timestamp):
     lines.append('echo "✓ Skillsfile applied"')
     lines.append("")
 
-    return "\n".join(lines), total, len(by_source), len(local)
+    return "\n".join(lines), total, len(by_source), len(local), len(held)
 
 
 def main():
@@ -116,7 +139,8 @@ def main():
 
     existing_stamp = existing_timestamp()
     timestamp = existing_stamp or datetime.now(IST).strftime("%Y-%m-%dT%H:%M:%S+05:30")
-    content, total, github_sources, local_count = build_skillsfile(timestamp)
+    content, total, github_sources, local_count, held_count = build_skillsfile(timestamp)
+    summary = f"{total} skills — {github_sources} refreshable github sources, {local_count} local, {held_count} held"
 
     try:
         current = SKILLSFILE.read_text(encoding="utf-8")
@@ -130,23 +154,23 @@ def main():
         if current != content:
             print("Skillsfile is out of sync. Run: make skills-manifest", file=sys.stderr)
             return 1
-        print(f"Skillsfile is in sync ({total} skills — {github_sources} github sources, {local_count} local)")
+        print(f"Skillsfile is in sync ({summary})")
         return 0
 
     if current == content:
         os.chmod(SKILLSFILE, 0o755)
         print(f"Unchanged {SKILLSFILE}")
-        print(f"  {total} skills — {github_sources} github sources, {local_count} local")
+        print(f"  {summary}")
         return 0
 
     timestamp = datetime.now(IST).strftime("%Y-%m-%dT%H:%M:%S+05:30")
-    content, total, github_sources, local_count = build_skillsfile(timestamp)
+    content, total, github_sources, local_count, held_count = build_skillsfile(timestamp)
     with SKILLSFILE.open("w", encoding="utf-8", newline="\n") as output:
         output.write(content)
     os.chmod(SKILLSFILE, 0o755)
 
     print(f"Wrote {SKILLSFILE}")
-    print(f"  {total} skills — {github_sources} github sources, {local_count} local")
+    print(f"  {summary}")
     return 0
 
 

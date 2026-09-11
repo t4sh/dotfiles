@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Encrypted-sparseimage snapshot backup, Keychain-backed, destination-prompted.
+# Keychain-backed snapshot backup. --persistent uses one UDRW DMG and five
+# verified snapshots; no flag preserves the legacy sparseimage workflow below.
 #
 # First run: prompts for vault destination (cached for subsequent runs),
 #            generates a random passphrase to the login Keychain, creates
@@ -20,6 +21,15 @@
 
 set -euo pipefail
 
+PERSISTENT=0
+case "${1:-}" in
+  --persistent) PERSISTENT=1 ;;
+  "") ;;
+  *) echo "usage: $0 [--persistent]" >&2; exit 2 ;;
+esac
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+if (( PERSISTENT )); then umask 077; fi
+
 VOLNAME="DotfilesSecrets"
 MOUNT="/Volumes/$VOLNAME"
 KC_SERVICE="DotfilesSecretsVault"
@@ -28,6 +38,7 @@ MANIFEST="${DOTFILES_BACKUP_MANIFEST:-$LOCAL_DIR/backup.manifest}"
 DEST_CACHE="$LOCAL_DIR/backup.destination"
 RECOVERY_ACK="$LOCAL_DIR/vault-recovery.confirmed"
 KEEP="${DOTFILES_BACKUP_KEEP:-10}"
+if (( PERSISTENT )); then KEEP="${DOTFILES_BACKUP_KEEP:-5}"; fi
 SIZE_CAP="${DOTFILES_VAULT_SIZE:-4g}"
 STAMP="$(date +%Y%m%d-%H%M%S)"
 SECRETS_DIR="${DOTFILES_SECRETS_DIR:-$HOME/.secrets}"
@@ -133,6 +144,13 @@ DEST="${DEST/#\~/$HOME}"
 [[ -w "$DEST" ]] || die "destination not writable: $DEST"
 
 VAULT="$DEST/DotfilesSecrets.sparseimage"
+if (( PERSISTENT )); then VAULT="$DEST/DotfilesSecrets.dmg"; fi
+FINAL_VAULT="$VAULT"
+WORK=""
+PUBLISH_PARTIAL=""
+if (( PERSISTENT )); then
+  [[ ! -L "$FINAL_VAULT" ]] || die "persistent vault must be a regular image, not a symlink"
+fi
 
 path_contains_or_is() {
   local container="$1" candidate="$2"
@@ -236,7 +254,7 @@ get_pass() {
 }
 
 if ! get_pass >/dev/null; then
-  if [[ -e "$VAULT" ]]; then
+  if [[ -e "$VAULT" ]] || { (( PERSISTENT )) && find "$DEST" -maxdepth 1 -name 'DotfilesSecrets*' -print -quit | grep -q .; }; then
     die "existing vault found but its local Keychain password is missing: $VAULT
   recover the password from your independent password manager, then run:
   make secrets-pass-import"
@@ -296,16 +314,6 @@ confirm_recovery_copy() {
 
 confirm_recovery_copy
 
-# --- vault: create once ---
-if [[ ! -e "$VAULT" ]]; then
-  info "creating encrypted sparseimage at $VAULT ($SIZE_CAP cap, grows on demand)"
-  get_pass | hdiutil create \
-    -type SPARSE -encryption AES-256 -stdinpass \
-    -volname "$VOLNAME" -fs APFS -size "$SIZE_CAP" \
-    "$VAULT" >/dev/null
-  ok "created $VAULT"
-fi
-
 # --- mount selected vault and verify its exact returned device identity ---
 is_mounted() {
   mount | grep -F " on $MOUNT " >/dev/null 2>&1
@@ -324,17 +332,23 @@ cleanup() {
   [[ -n "$ATTACH_PLIST" ]] && rm -f -- "$ATTACH_PLIST"
   if [[ $MOUNTED_BY_US -eq 1 ]]; then
     if [[ -n "$ATTACHED_DEVICE" ]]; then
-      hdiutil detach "$ATTACHED_DEVICE" >/dev/null 2>&1 || true
+      if hdiutil detach "$ATTACHED_DEVICE" >/dev/null 2>&1; then MOUNTED_BY_US=0; fi
     elif [[ -n "$ATTACH_CLEANUP_DEVICE" ]]; then
-      hdiutil detach "$ATTACH_CLEANUP_DEVICE" >/dev/null 2>&1 || true
+      if hdiutil detach "$ATTACH_CLEANUP_DEVICE" >/dev/null 2>&1; then MOUNTED_BY_US=0; fi
     elif is_mounted; then
       hdiutil detach "$MOUNT" >/dev/null 2>&1 || true
     fi
   fi
+  if [[ -n "$PUBLISH_PARTIAL" ]]; then rm -f -- "$PUBLISH_PARTIAL"; fi
+  # Keep the encrypted working image if detach failed; never delete an attached image.
+  if [[ -n "$WORK" && $MOUNTED_BY_US -eq 0 ]]; then rm -rf -- "$WORK"; fi
   release_lock
   return "$status"
 }
 trap cleanup EXIT
+trap 'exit 129' HUP
+trap 'exit 130' INT
+trap 'exit 143' TERM
 
 # Resolve the selected image before calling attach. `hdiutil attach` reports an
 # already-attached image as though this process attached it, so mountpoint-only
@@ -389,6 +403,44 @@ resolve_selected_vault_attachment() {
   rm -f -- "$info_plist"
   return 1
 }
+
+# Persistent mode edits a local encrypted copy of the same image. This retains
+# disk-image/volume identity and keeps the sync destination closed while writing.
+if (( PERSISTENT )); then
+  attachment_status=0
+  resolve_selected_vault_attachment >/dev/null || attachment_status=$?
+  [[ $attachment_status -eq 1 ]] || die "eject the persistent vault before backing up (or inspect hdiutil info if unavailable)"
+  if [[ -e "$FINAL_VAULT" ]]; then
+    if ! python3 "$SCRIPT_DIR/vault-integrity.py" check-image "$FINAL_VAULT"; then
+      warn "outer checksum/sidecars changed (a writable Finder mount can do this); all internal snapshot receipts must pass before any update"
+    fi
+  fi
+  WORK="$(mktemp -d "${TMPDIR:-/private/tmp}/dotfiles-persistent-vault.XXXXXX")"
+  WORK="$(cd "$WORK" && pwd -P)"
+  VAULT="$WORK/DotfilesSecrets.dmg"
+  MOUNT="$WORK/mount"
+  validate_manifest_containment
+  if [[ -e "$FINAL_VAULT" ]]; then
+    ORIGINAL_SHA="$(shasum -a 256 "$FINAL_VAULT" | awk '{print $1}')"
+    cp "$FINAL_VAULT" "$VAULT"
+    [[ "$(shasum -a 256 "$VAULT" | awk '{print $1}')" == "$ORIGINAL_SHA" ]] || die "working copy checksum mismatch"
+  else
+    info "creating persistent encrypted UDRW/APFS image ($SIZE_CAP capacity)"
+    get_pass | hdiutil create -type UDIF -layout GPTSPUD -encryption AES-256 \
+      -stdinpass -volname "$VOLNAME" -fs APFS -size "$SIZE_CAP" "$VAULT" >/dev/null
+  fi
+  [[ "$(get_pass | hdiutil imageinfo -stdinpass -format "$VAULT")" == "UDRW" ]] || die "persistent vault must be a writable UDRW image"
+else
+  # Legacy vault: create once, then append in place.
+  if [[ ! -e "$VAULT" ]]; then
+    info "creating encrypted sparseimage at $VAULT ($SIZE_CAP cap, grows on demand)"
+    get_pass | hdiutil create \
+      -type SPARSE -encryption AES-256 -stdinpass \
+      -volname "$VOLNAME" -fs APFS -size "$SIZE_CAP" \
+      "$VAULT" >/dev/null
+    ok "created $VAULT"
+  fi
+fi
 
 WAS_MOUNTED=0
 EXISTING_ATTACHMENT=""
@@ -506,7 +558,18 @@ check_vault_space() {
 # Enforce any explicitly lowered/exceeded retention before checking capacity,
 # but never delete below KEEP merely to attempt a backup. A failed copy must
 # preserve every snapshot within policy. Normal pruning happens after publish.
-prune_snapshots "$KEEP"
+if (( PERSISTENT )); then
+  mount | grep -F " on $MOUNT (apfs," >/dev/null || die "persistent vault did not mount as APFS"
+  python3 "$SCRIPT_DIR/vault-integrity.py" check-all "$MOUNT"
+  if [[ -n "${ORIGINAL_SHA:-}" ]]; then
+    [[ -n "$(find "$MOUNT" -maxdepth 1 -type d -name '????????-??????' -print -quit)" ]] || die "existing vault has no snapshots; refusing to replace its history"
+  fi
+  for src in "${MANIFEST_PATHS[@]}"; do
+    [[ -e "$src" ]] || die "manifest source missing; existing vault preserved"
+  done
+else
+  prune_snapshots "$KEEP"
+fi
 check_vault_space
 
 # --- snapshot into a hidden partial folder, then publish atomically ---
@@ -530,7 +593,7 @@ for src in "${MANIFEST_PATHS[@]}"; do
     mkdir -p "$destination"
     source_path="$src"
   fi
-  if ! rsync -aL --quiet \
+  if ! rsync -aL --no-devices --no-specials --quiet \
         --exclude='.DS_Store' --exclude='*.sock' --exclude='sockets' \
         --exclude='node_modules' --exclude='__pycache__' --exclude='*.pyc' \
         --exclude='com.microsoft.appcenter' \
@@ -538,27 +601,98 @@ for src in "${MANIFEST_PATHS[@]}"; do
     die "rsync failed copying $src — partial snapshot will be removed
   if the vault was full, prune or resize before retrying (see check_vault_space hints above)"
   fi
+  if (( PERSISTENT )); then
+    comparison="$(rsync -aLnc --delete --no-devices --no-specials --itemize-changes \
+      --out-format='DOTFILES_VERIFY:%i' \
+      --exclude='.DS_Store' --exclude='*.sock' --exclude='sockets' \
+      --exclude='node_modules' --exclude='__pycache__' --exclude='*.pyc' \
+      --exclude='com.microsoft.appcenter' \
+      "$source_path" "$destination/")" || die "snapshot copy verification failed"
+    # openrsync also writes "skipping non-regular file" notices to stdout.
+    # Only tagged itemized changes indicate drift. --quiet would hide real
+    # changes too, so filter the notices instead; omit filenames from diagnostics.
+    comparison="$(printf '%s\n' "$comparison" | sed -n '/^DOTFILES_VERIFY:/p')"
+    [[ -z "$comparison" ]] || printf '%s\n' "$comparison" >&2
+    [[ -z "$comparison" ]] || die "source changed or snapshot copy differs; existing vault preserved"
+  fi
   COUNT=$((COUNT + 1))
 done
 if (( COUNT == 0 )); then
   die "manifest produced 0 snapshot paths; partial snapshot will be removed"
 fi
+if (( PERSISTENT )); then
+  python3 "$SCRIPT_DIR/vault-integrity.py" record "$PARTIAL"
+fi
 mv "$PARTIAL" "$SNAP"
 PARTIAL=""
 ok "published $STAMP with $COUNT path(s)"
-prune_snapshots "$KEEP"
+if (( PERSISTENT )); then
+  python3 "$SCRIPT_DIR/vault-integrity.py" prune "$MOUNT" --keep "$KEEP"
+  SNAPSHOT_NAMES=()
+  while IFS= read -r name; do SNAPSHOT_NAMES+=("$name"); done < <(
+    find "$MOUNT" -maxdepth 1 -type d -name '????????-??????' -exec basename {} \; | LC_ALL=C sort
+  )
+  BASELINE_NAMES=()
+  if [[ -d "$MOUNT/baselines" ]]; then
+    while IFS= read -r name; do BASELINE_NAMES+=("$name"); done < <(
+      find "$MOUNT/baselines" -maxdepth 1 -type d -name '????????-??????' -exec basename {} \; | LC_ALL=C sort
+    )
+  fi
+else
+  prune_snapshots "$KEEP"
+fi
 
 # --- unmount + compact so destination uploads stay small ---
 if [[ $MOUNTED_BY_US -eq 1 ]]; then
-  info "unmounting + compacting"
+  info "unmounting completed snapshot"
   hdiutil detach "$ATTACHED_DEVICE" >/dev/null
   MOUNTED_BY_US=0
   ATTACHED_DEVICE=""
   ATTACH_CLEANUP_DEVICE=""
-  if ! get_pass | hdiutil compact "$VAULT" -stdinpass >/dev/null 2>&1; then
+  if (( ! PERSISTENT )) && ! get_pass | hdiutil compact "$VAULT" -stdinpass >/dev/null 2>&1; then
     die "snapshot succeeded, but vault compaction failed: $VAULT"
   fi
-  ok "compacted"
+  if (( ! PERSISTENT )); then ok "compacted"; fi
 fi
 
+if (( PERSISTENT )); then
+  # Reopen read-only to prove the finalized filesystem and all retained receipts.
+  get_pass | hdiutil attach "$VAULT" -readonly -nobrowse -stdinpass -mountpoint "$MOUNT" >/dev/null
+  MOUNTED_BY_US=1
+  ATTACHED_DEVICE="$MOUNT"
+  python3 "$SCRIPT_DIR/vault-integrity.py" check-all "$MOUNT"
+  hdiutil detach "$MOUNT" >/dev/null
+  MOUNTED_BY_US=0
+  ATTACHED_DEVICE=""
+  python3 "$SCRIPT_DIR/vault-integrity.py" sidecars "$WORK/DotfilesSecrets.dmg" --snapshots "${SNAPSHOT_NAMES[@]}" --baselines "${BASELINE_NAMES[@]}"
+  # Recheck destination attachment immediately before replacing its closed bytes.
+  VAULT="$FINAL_VAULT"
+  attachment_status=0
+  resolve_selected_vault_attachment >/dev/null || attachment_status=$?
+  [[ $attachment_status -eq 1 ]] || die "persistent vault was opened during backup; eject it and retry"
+  if [[ -n "${ORIGINAL_SHA:-}" ]]; then
+    [[ "$(shasum -a 256 "$FINAL_VAULT" | awk '{print $1}')" == "$ORIGINAL_SHA" ]] || die "destination changed during backup; existing image preserved"
+  else
+    [[ ! -e "$FINAL_VAULT" ]] || die "destination appeared during backup; existing image preserved"
+  fi
+  for suffix in dmg json sha256; do
+    candidate="$DEST/.DotfilesSecrets.$suffix.partial"
+    [[ ! -e "$candidate" && ! -L "$candidate" ]] || die "stale publication partial exists; inspect it before retrying"
+  done
+  PUBLISH_PARTIAL="$DEST/.DotfilesSecrets.dmg.partial"
+  cp "$WORK/DotfilesSecrets.dmg" "$PUBLISH_PARTIAL"
+  chmod 600 "$PUBLISH_PARTIAL"
+  [[ "$(shasum -a 256 "$PUBLISH_PARTIAL" | awk '{print $1}')" == "$(shasum -a 256 "$WORK/DotfilesSecrets.dmg" | awk '{print $1}')" ]] || die "published copy checksum mismatch"
+  mv -f "$PUBLISH_PARTIAL" "$FINAL_VAULT"
+  PUBLISH_PARTIAL=""
+  for suffix in json sha256; do
+    PUBLISH_PARTIAL="$DEST/.DotfilesSecrets.$suffix.partial"
+    cp "$WORK/DotfilesSecrets.$suffix" "$PUBLISH_PARTIAL"
+    chmod 600 "$PUBLISH_PARTIAL"
+    mv -f "$PUBLISH_PARTIAL" "$DEST/DotfilesSecrets.$suffix"
+    PUBLISH_PARTIAL=""
+  done
+  python3 "$SCRIPT_DIR/vault-integrity.py" check-image "$FINAL_VAULT"
+  ok "persistent vault and completion sidecars published; cloud upload completion is managed by your sync app"
+fi
 info "done — vault at $VAULT"

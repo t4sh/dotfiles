@@ -6,3 +6,6 @@ ZSH_LIB="$HOME/.dotfiles/zsh/lib"
 for f in "$ZSH_LIB"/*.zsh(N); do
   source "$f"
 done
+
+# Keep local tools available without overriding the selected Node runtime.
+export PATH="$PATH:$HOME/.local/bin"

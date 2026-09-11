@@ -307,8 +307,6 @@ cask "stability-matrix"
 cask "sublime-text"
 # Application for inspecting installer packages
 cask "suspicious-package"
-# Service that allows users to make symbolic links in the Finder
-cask "symboliclinker"
 # Messaging app with a focus on speed and security
 cask "telegram"
 # Extract text from images and other digital documents

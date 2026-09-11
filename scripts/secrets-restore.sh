@@ -31,6 +31,10 @@ fi
 
 SNAPSHOT="$SOURCE_ROOT/$STAMP"
 [[ -d "$SNAPSHOT" ]] || die "snapshot not found: $SNAPSHOT"
+if [[ -f "$SNAPSHOT/.dotfiles-snapshot.json" ]]; then
+  SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+  python3 "$SCRIPT_DIR/vault-integrity.py" check "$SNAPSHOT"
+fi
 
 if [[ -n "${DOTFILES_RESTORE_SECRETS_SOURCE:-}" ]]; then
   SNAPSHOT_SECRETS="$DOTFILES_RESTORE_SECRETS_SOURCE"

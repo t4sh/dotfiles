@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Verify and open the newest completed portable recovery DMG in Finder.
+# Verify and open the persistent vault, with a legacy portable fallback.
 
 set -euo pipefail
 
@@ -27,6 +27,12 @@ DEST="${DEST/#\~/$HOME}"
   exit 1
 }
 DEST="$(cd -- "$DEST" && pwd -P)"
+if [[ -f "$DEST/DotfilesSecrets.dmg" ]]; then
+  SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+  python3 "$SCRIPT_DIR/vault-integrity.py" check-image "$DEST/DotfilesSecrets.dmg"
+  open "$DEST/DotfilesSecrets.dmg"
+  exit 0
+fi
 VAULT=""
 while IFS= read -r candidate; do
   candidate_base="${candidate%.dmg}"

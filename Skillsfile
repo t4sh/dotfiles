@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 # Skillsfile — declarative global skill manifest (Brewfile pattern).
 #
-# GENERATED 2026-09-09T16:11:32+05:30 from agents/.skill-lock.json by
+# GENERATED 2026-09-11T19:07:06+05:30 from agents/.skill-lock.json by
 # scripts/gen-skillsfile.py — DO NOT EDIT BY HAND. To change skills:
 #   ~/.local/bin/npx-stable skills add/remove ...   then   make skills-manifest
 #   (regenerates Skillsfile + agents/skills/README.md)
 #
 # Explicit upstream refresh: make skills-update   (or: bash Skillsfile)
-# 114 skills — 32 github sources + 2 local.
+# 114 skills — 32 refreshable github sources + 2 local + 0 held.
+# Curated skills are held by config/skills-refresh-holds.json; review upstream changes manually.
 #
 # Prereqs (fresh Mac): node + git + GitHub auth (SSH/gh) must be set
 # up first if a configured upstream source requires authentication.
@@ -15,8 +16,13 @@
 
 set -euo pipefail
 
+DOTFILES_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+# Refuse stale generated selectors before any installer can overwrite skills.
+"${PYTHON_BIN:-python3}" "$DOTFILES_ROOT/scripts/gen-skillsfile.py" --check >/dev/null
+
 NPX="${NPX:-$HOME/.local/bin/npx-stable}"
 [[ -x "$NPX" || ( "${OS:-}" == "Windows_NT" && -f "$NPX" ) ]] || { echo "npx stable shim not found or not executable: $NPX" >&2; exit 1; }
+
 
 echo "→ update ComposioHQ/awesome-claude-skills"
 "$NPX" skills add ComposioHQ/awesome-claude-skills --skill file-organizer -g -y

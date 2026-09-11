@@ -95,7 +95,8 @@
 #   [ ] Dock shows the apps declared in macos/dock.sh in the right order
 #   [ ] Raycast config imported from ~/.secrets/apps/raycast/ + extensions if needed (manual)
 #   [ ] Default browser / mail client set (manual)
-#   [ ] SymbolicLinker service is installed by the Brewfile cask (`make brew-apps`)
+#   [ ] `make services-check` passes for the workflows installed by `make services`;
+#       verify `Make Symlinks To` is available in Finder's Quick Actions menu.
 #
 # For agents doing this verification: report findings as a structured list
 # of (surface, status, evidence). Do NOT silently treat known-noise drift as

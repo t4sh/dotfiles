@@ -20,3 +20,15 @@ if command -v brew >/dev/null 2>&1; then
   eval "$(brew shellenv)"
 fi
 export PATH="/Applications/Sublime Text.app/Contents/SharedSupport/bin:$PATH"
+
+# Hermes Agent — ensure ~/.local/bin is on PATH
+export PATH="$HOME/.local/bin:$PATH"
+
+# Login automation does not read .zshrc. Select the same npm inventory here,
+# after Homebrew's shellenv has prepended its own Node installation.
+if [[ -r "$HOME/.dotfiles/.node-version" ]]; then
+  DOTFILES_NODE_VERSION="$(<"$HOME/.dotfiles/.node-version")"
+  DOTFILES_NODE_BIN="${NVM_DIR:-$HOME/.nvm}/versions/node/$DOTFILES_NODE_VERSION/bin"
+  [[ -x "$DOTFILES_NODE_BIN/node" ]] && export PATH="$DOTFILES_NODE_BIN:$PATH"
+  unset DOTFILES_NODE_VERSION DOTFILES_NODE_BIN
+fi

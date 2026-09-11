@@ -74,6 +74,11 @@ if [[ "$*" == '--only hermes' ]]; then
         exit 1
     fi
     python3 "$SCRIPT_DIR/hermes-settings.py" restore
+    echo "  ✓ Hermes backend preferences restored; Desktop UI restoration is not verified."
+    echo "    In Hermes Desktop, select the default/local backend, then open Settings → Appearance → Message Reactions."
+    echo "    Match your saved display.message_reactions value: false = Off, true = On."
+    echo "    A stored Desktop On value can overwrite backend false on reconnect."
+    echo "    See docs/hermes-preferences.md for reconciliation and verification."
     exit 0
 fi
 

@@ -69,6 +69,34 @@ Boundaries:
 
 Use `skill-architect` for creating, editing, auditing, comparing, or evaluating agent skills. Do not route to the retired `writing-skills` skill; its reusable behavior-evidence principles are preserved in `skill-architect` references.
 
+### Shared skill quality (all authors)
+
+Every new or substantively updated shared skill must provide:
+
+- **Trigger:** the concrete task or condition that should load it, and its scope.
+- **Procedure:** reusable steps and checkable completion criteria, independent of
+  the originating conversation.
+- **Capabilities:** required tools, permissions, dependencies, and supported
+  operating systems. Describe the capability before naming a runtime-specific tool.
+- **Adapters:** isolate Hermes, Codex, Claude, or other client-specific calls in
+  clearly labeled sections or linked references. Provide a supported equivalent
+  or an explicit unavailable-capability stop; never invent a tool or claim an
+  untested alternative works.
+- **Paths and platforms:** use user-home or project-relative paths and discover
+  machine-specific configuration. Distinguish PowerShell and POSIX commands where
+  they differ. A legitimately platform-specific skill declares that boundary;
+  portability does not require pretending every workflow works everywhere.
+- **Verification and pitfalls:** include a representative success check, relevant
+  failure conditions, and known recovery steps. Record which runtime/platform was
+  actually exercised and which remain unverified.
+
+Before marking a skill ready, check for duplicate names, resolve referenced
+files, run the collection's applicable manifest/license/validation checks, and
+exercise new executable instructions against a safe representative fixture when
+feasible. Include a prompt scenario showing when the skill should apply and
+when it should not. Keep the entry point concise; link longer supporting detail.
+Untested instructions must be labeled as such, not presented as verified skill.
+
 ## Debugging
 
 Use `diagnosing-bugs` for hypothesis-driven bug and performance diagnosis. Do not route to the retired `systematic-debugging` skill; its durable root-cause, layered-defense, condition-waiting, and three-failed-fixes guidance is preserved in `20-code-posture.md` and `23-verification.md`.

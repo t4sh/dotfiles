@@ -80,6 +80,21 @@ function Invoke-DotfilesNative {
     if ($LASTEXITCODE -notin $SuccessCodes) { throw "$([IO.Path]::GetFileName($File)) failed (exit $LASTEXITCODE)" }
     $global:LASTEXITCODE = 0 # Only after an explicitly accepted result.
 }
+function Invoke-DotfilesNativeUtf8 {
+    param([Parameter(Mandatory)][string]$File, [string[]]$Arguments = @())
+    # Git Bash and Python emit UTF-8 into pipes; the inherited OEM code page
+    # otherwise turns arrows/checkmarks into mojibake before filters see them.
+    $previousEncoding = [Console]::OutputEncoding
+    $previousPythonEncoding = $env:PYTHONIOENCODING
+    try {
+        [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false)
+        $env:PYTHONIOENCODING = 'utf-8'
+        Invoke-DotfilesNative $File $Arguments
+    } finally {
+        [Console]::OutputEncoding = $previousEncoding
+        $env:PYTHONIOENCODING = $previousPythonEncoding
+    }
+}
 function Merge-DotfilesPath {
     param([string[]]$Segments)
     $seen = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
