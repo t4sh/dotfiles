@@ -15,7 +15,8 @@ notify_end = "on_failure"
 # yarn / pnpm: npm + corepack cover globals; no global pnpm packages installed.
 # pi: installed as the Homebrew pi-coding-agent formula; avoid its redundant
 # self-updater (`pi update --self`), which cannot reliably resolve Brew installs.
-disable = ["system", "emacs", "git_repos", "yarn", "pnpm", "pi"]
+# skills: use the repository workflow so local curation holds are honored.
+disable = ["system", "emacs", "git_repos", "yarn", "pnpm", "pi", "skills"]
 
 # Non-fatal when the engine is down or the vendor check is slow/no-op.
 ignore_failures = ["containers", "microsoft_office"]
@@ -25,5 +26,6 @@ greedy_auto_updates = true
 autoremove = true
 
 [commands]
+"Skills" = "make -C ~/.dotfiles skills-update"
 # After brew/npm/etc.: fail the run if Brewfile declarations drift from system state.
 "Brewfile audit" = "bash ~/.dotfiles/scripts/audit-brewfile.sh --check"

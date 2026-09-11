@@ -6,3 +6,7 @@
 # diff viewers that honor git attributes. Requires matching textconv in
 # .git/config (set by `git config diff.plist.textconv "plutil -p"`).
 *.plist diff=plist
+
+# Preserve these vendored upstream files verbatim, including their whitespace.
+agents/skills/copywriting/references/copy-frameworks.md whitespace=-blank-at-eol
+agents/skills/hallmark/references/component-cookbook.md whitespace=-blank-at-eof

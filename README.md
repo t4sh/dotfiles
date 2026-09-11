@@ -17,7 +17,7 @@ Most [awesome-dotfiles](https://github.com/webpro/awesome-dotfiles) examples sto
 | Packages | Brewfile | Brewfile as **single source of truth** (formulae, casks, MAS, VS Code extensions) |
 | App prefs | mackup or manual | [`apps.tsv`](apps.tsv) + `make backup` / `make restore-apps`; convergent Sublime managed files; licensed prefs in vault |
 | Default apps | Rare | [`config/duti`](config/duti) as **repo policy** → `make default-apps` |
-| Secrets | `*.local` files | `~/.secrets/` + encrypted sparseimage (`make secrets-backup`) |
+| Secrets | `*.local` files | `~/.secrets/` + encrypted recovery DMG (`make secrets-backup`) |
 | Verification | Uncommon | `make doctor`, `brewfile-audit`, `verify-idempotency.sh`, gitleaks |
 | AI agents | Emerging (e.g. nicksp) | Whole [`agents/`](agents/) tree, skills lockfile, license gate |
 
@@ -135,7 +135,7 @@ Add a new symlink: one row in [`symlinks.tsv`](symlinks.tsv). No Stow/dotbot con
 | `make default-apps` | Apply repo default-app policy from `config/duti` (after `make brew`) |
 | `make default-apps-check` | Compare live Launch Services handlers with `config/duti` |
 | `make capture-default-apps` | Refresh `config/duti` when you change editor/URL handlers |
-| `make doctor` | Read-only bootstrap preflight (Touch ID, duti receipt, SymbolicLinker, vault note) |
+| `make doctor` | Read-only bootstrap preflight (Touch ID, duti receipt, managed Automator workflows, vault note) |
 | `make docs-audit` | Typo check docs/scripts (`typos` from Brewfile) |
 | `make brewfile-audit` | Strict Brewfile ↔ system drift check |
 | `make rules-audit` | Agent rule includes in sync |
@@ -149,7 +149,8 @@ Add a new symlink: one row in [`symlinks.tsv`](symlinks.tsv). No Stow/dotbot con
 | `make backup` | Refresh repo-tracked app prefs, Dock, services, Brewfile |
 | `make backup-canary` / `make restore-canary` | Canary Mail vault workflow (restore quits/reopens Canary) |
 | `make backup-shottr` / `make restore-shottr` | Shottr license prefs vault workflow (restore quits/reopens Shottr) |
-| `make secrets-backup` | Snapshot `~/.secrets/` into encrypted sparseimage |
+| `make secrets-backup` | Update an encrypted DMG with five verified snapshots of `~/.secrets/` |
+| `make secrets-backup-portable` | Create a separate immutable recovery DMG |
 | `make secrets-mount` / `make secrets-pass` | Vault mount / local password-copy helper |
 | `make secrets-restore` / `secrets-restore-apply` | Validate / transactionally restore only `~/.secrets` |
 | `make secrets-health` | Mounted-vault snapshot freshness check |
@@ -256,7 +257,7 @@ Nothing secret lives in git. `~/.secrets/` is the single canonical tree; tools r
     └── vscode/       # token-bearing MCP/profile data — manual restore
 ```
 
-Vault workflow:
+Vault workflow (details and recovery limitations in [SECRETS.md](SECRETS.md)):
 
 ```bash
 make secrets-backup   # requires a separately stored, verified recovery copy
@@ -265,7 +266,7 @@ make secrets-pass     # copy the local Keychain password without printing it
 make secrets-pass-import  # import a recovered password on a replacement Mac
 ```
 
-The CLI-created Keychain item is local and is not assumed to synchronize through iCloud Keychain. Store and verify a separate recovery copy in an independently synchronized password manager. Before attach, vault scripts detect the selected image at any mountpoint, reuse only the verified expected mount, and never claim an operator-owned alternate attachment. Backups stage through hidden partial directories, retain complete snapshots on copy failure, and prune only finalized snapshots.
+The CLI-created Keychain item is local and is not assumed to synchronize through iCloud Keychain. Store and verify a separate recovery copy in an independently synchronized password manager. Before attach, vault scripts detect the selected image at any mountpoint, reuse only the verified expected mount, and never claim an operator-owned alternate attachment. Backups stage through a working copy, retain the published vault on failure, and prune to five verified snapshots. Portable and legacy backup commands remain available; see [SECRETS.md](SECRETS.md).
 
 ## Safety gates
 
@@ -363,3 +364,7 @@ This is a personal dotfiles repo published for reference and forking. Issues and
 ## Windows
 
 See [WINDOWS.md](WINDOWS.md) for native setup and maintenance, and [SECRETS-WINDOWS.md](SECRETS-WINDOWS.md) for encrypted backups. Windows snapshots are curated onboarding templates: backup and drift commands preserve them rather than importing your live personal settings.
+
+Hermes preference backup is user-owned and excluded from this public repository. See [Hermes preferences](docs/hermes-preferences.md) for restoring settings and disabling Desktop message reactions.
+
+Checkout-safe regression fixtures: `make test-public` on macOS; `pwsh -NoProfile -File tests/test_public_windows_maintenance.ps1` on a bootstrapped Windows checkout. Fixtures do not replace fresh-machine or GUI verification.

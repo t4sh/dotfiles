@@ -9,7 +9,7 @@
 #   2. shellcheck — warns on shell-script issues (non-blocking).
 #   3. skill-license gate — blocks if a restrictive-licensed skill is not
 #      gitignored (would leak into the public split). Self-skips pre-bootstrap.
-#   4. Skillsfile sync gate — when .skill-lock.json or Skillsfile is staged,
+#   4. Skillsfile sync gate — when its lock, hold policy, generator or output is staged,
 #      blocks if they drifted (regenerate with `make skills-manifest`).
 #   5. Rulebook ownership gate — when the index, rules, or init loader changes,
 #      blocks membership, applicability, or loader-contract drift.
@@ -22,8 +22,15 @@ set -eu
 # interpreter explicitly instead of executing the Windows Store Python alias.
 case "${OS:-}:$(uname -s)" in
   Windows_NT:*|*:MINGW*|*:MSYS*)
+    # GUI Git clients can inherit a stale/restricted PATH. Read the persisted
+    # Windows paths without loading a shell profile or changing machine settings.
+    windows_powershell="$(cygpath -u "${SYSTEMROOT:-C:\\Windows}")/System32/WindowsPowerShell/v1.0/powershell.exe"
+    windows_path="$("$windows_powershell" -NoLogo -NoProfile -NonInteractive -Command '[Console]::OutputEncoding = New-Object System.Text.UTF8Encoding; [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User")')" || exit 1
+    windows_path="${windows_path//$'\r'/}"
+    windows_path="$(cygpath -u -p "$windows_path")" || exit 1
+    export PATH="$PATH:$windows_path"
     command -v uv >/dev/null 2>&1 || {
-      echo 'Windows hooks need uv and managed Python; run install.ps1 -Apply.' >&2
+      echo 'Windows hooks cannot find uv in the process or saved Windows PATH. Verify the uv installation and its PATH entry.' >&2
       exit 1
     }
     PYTHON_BIN="$(uv python find --managed-python)" || exit 1
@@ -89,13 +96,13 @@ if [ -x scripts/audit-skill-licenses.sh ]; then
 fi
 
 # --- 4. Skillsfile sync gate (blocking, only when the manifest changed) --------
-# .skill-lock.json (the source) and Skillsfile (the generated manifest) must
-# move together. Only fires when either is staged, so unrelated commits aren't
+# The lock, hold policy, generator and Skillsfile (the generated manifest) must
+# move together. Only fires when one is staged, so unrelated commits aren't
 # coupled to python3 / a clean tree.
 # Newline-mode grep -xE (not -z): BSD grep on macOS doesn't honor --null-data.
-# Both paths are fixed, newline-free names, so line matching is safe.
+# These paths are fixed, newline-free names, so line matching is safe.
 if git diff --cached --name-only --diff-filter=ACMR \
-   | grep -qxE 'agents/\.skill-lock\.json|Skillsfile'; then
+   | grep -qxE 'agents/\.skill-lock\.json|Skillsfile|config/skills-refresh-holds\.json|scripts/gen-skillsfile\.py'; then
   if [[ -n "${PYTHON_BIN:-}" ]] || command -v python3 >/dev/null 2>&1; then
     "${PYTHON_BIN:-python3}" scripts/gen-skillsfile.py --check || {
       printf '\n\033[31m✗ commit blocked: Skillsfile out of sync with .skill-lock.json\033[0m\n' >&2

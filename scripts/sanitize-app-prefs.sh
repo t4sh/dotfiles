@@ -71,7 +71,7 @@ plist_delete "$APPS/terminal/terminal.plist" SecureKeyboardEntry
 # Normalize Package Control's captured dependency list in backup and drift
 # staging. Never rewrite the running editor merely to sort its package list.
 if [[ -f "$APPS/sublime-text/Package Control.sublime-settings" ]]; then
-  python3 - "$APPS/sublime-text/Package Control.sublime-settings" <<'PY'
+  "${PYTHON_BIN:-python3}" - "$APPS/sublime-text/Package Control.sublime-settings" <<'PY'
 import json
 from pathlib import Path
 import re
@@ -445,6 +445,24 @@ if [[ -f "$DOTFILES/macos/dock-backup.plist" ]]; then
     plist_delete "$DOTFILES/macos/dock-backup.plist" "persistent-apps:$idx:tile-data:parent-mod-date"
     idx=$((idx + 1))
   done
+  # Some apps (Hermes Desktop) are installed beneath the operator's home.
+  # Store a portable marker; dock.sh expands it only at restore time.
+  python3 - "$DOTFILES/macos/dock-backup.plist" <<'PY'
+from pathlib import Path
+import plistlib
+import sys
+from urllib.parse import unquote
+p = Path(sys.argv[1])
+raw = p.read_bytes()
+data = plistlib.loads(raw)
+home = str(Path.home())
+for tile in data.get("persistent-apps", []):
+    file_data = tile.get("tile-data", {}).get("file-data", {})
+    url = file_data.get("_CFURLString", "")
+    if unquote(url).startswith("file://" + home + "/"):
+        file_data["_CFURLString"] = "file://__HOME__" + unquote(url)[len("file://" + home):]
+p.write_bytes(plistlib.dumps(data, fmt=plistlib.FMT_BINARY if raw.startswith(b"bplist") else plistlib.FMT_XML))
+PY
 fi
 plist_delete "$DOTFILES/macos/dock-backup.plist" "persistent-others"
 

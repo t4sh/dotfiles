@@ -27,4 +27,4 @@ jobs:
         run: |
           bash scripts/validate-manifests.sh all
           make audit-apps
-          python3 tests/test_bootstrap_health.py
+          make test-public

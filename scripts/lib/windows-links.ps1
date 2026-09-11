@@ -27,6 +27,10 @@ public static class DotfilesFileIdentity {
 }
 function Get-DotfilesLinkMode([string]$Source,[string]$Target) {
     if (-not (Test-Path -LiteralPath $Source)) { throw "Missing source: $Source" }
+    # Check physical files before identity checks or repair can accept an MSIX
+    # overlay as an ordinary consumer. Set-DotfilesLink shares this guard.
+    if (Test-Path -LiteralPath $Source -PathType Leaf) { Assert-DotfilesPreferenceFile $Source }
+    if (Test-Path -LiteralPath $Target -PathType Leaf) { Assert-DotfilesPreferenceFile $Target }
     $item = Get-Item -LiteralPath $Target -Force -ErrorAction SilentlyContinue
     if (-not $item) { return 'Missing' }
     if ($item.LinkType -in @('SymbolicLink','Junction')) {

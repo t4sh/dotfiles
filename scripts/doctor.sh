@@ -223,10 +223,10 @@ case "$touch_id_hardware_status" in
   *) warn "Touch ID hardware detection failed; run: make touch-id-sudo-check" ;;
 esac
 
-if [ -d "$HOME/Library/Services/SymbolicLinker.service" ] || [ -d "/Library/Services/SymbolicLinker.service" ]; then
-  ok "SymbolicLinker service installed (Brewfile cask)"
+if bash "$DOTFILES/scripts/check-services.sh" >/dev/null 2>&1; then
+  ok "managed Automator workflows match installed copies"
 else
-  warn "SymbolicLinker service missing; run: make brew-apps"
+  warn "managed Automator workflows missing or drifted; run: make services-check"
 fi
 
 check_docker_helper

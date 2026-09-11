@@ -1,4 +1,23 @@
 # Windows workflow
+## Maintenance scope and diagnostics
+
+Use `update-all -SkipSkills` for apps only, or `update-all -SkipApps` for skills.
+Each stage reports elapsed seconds. Topgrade output is retained in
+`%TEMP%/dotfiles-topgrade-*.log`; failures point to that run's log. Retry only the
+named failing step instead of repeating all maintenance.
+Codex's desktop-bundled CLI is maintained with the desktop app; Topgrade's
+standalone Codex updater is disabled. Hermes is updated once using
+`scripts/update-windows-hermes.ps1`, through its native Python runtime.
+It uses `HERMES_HOME` or `%LOCALAPPDATA%/hermes`, skips an absent installation,
+and rejects incomplete or hidden MSIX-redirected installations. Its output is
+retained in `%TEMP%/dotfiles-hermes-update-*.log`.
+
+Maintenance prepares gcloud's copied update Python only for Topgrade and restores
+the caller's `CLOUDSDK_PYTHON` afterward. After Topgrade, VS Code and Cursor
+extensions are reconciled with the declared versions. Skill refresh shows one
+progress line per source; failures point to `%TEMP%/dotfiles-skills-*.log`.
+Inventory and license diagnostics are in `%TEMP%/dotfiles-skills-checks.log`.
+Dry runs skip Python preparation, extension changes and skill refresh.
 
 This checkout provides native Windows setup alongside the Mac bootstrap. The
 Brewfile and agent tree are shared; Windows packages, links and templates have
@@ -27,6 +46,9 @@ ZIP extractions before changes. Bootstrap installs or upgrades the standard
 PowerShell runtime and installs Git, uv, Volta and Make as needed. It then applies
 package, link, hook, skill and preference stages. Review `config/windows-links.tsv`
 before linking: existing destinations may be backed up and replaced.
+Link checks and repair reject existing files hidden behind MSIX cache redirection.
+If reported, open standard PowerShell directly from Windows Run or Explorer and
+retry so the workflow reaches the actual configuration files.
 
 ## Daily commands
 
@@ -43,6 +65,9 @@ Run from the checkout, or use `dot` after setup adds its directory to PATH:
 | `bin\dot.cmd backup -Apply` | Retain curated public app templates |
 | `bin\dot.cmd upgrade` | Update apps, runtimes and skills |
 | `make skills` | Verify checked-in skill metadata |
+
+Skill checks and refresh output use UTF-8 even in a legacy-code-page console;
+the caller's encoding is restored afterward. Native failures remain failures.
 
 Windows public preference files are **curated onboarding templates**. Backup and
 preference Check entry points intentionally skip live capture/comparison, even
@@ -94,4 +119,5 @@ isolated dummy preference roots and verifies that public templates remain intact
 ```powershell
 pwsh -NoProfile -File tests/test_public_windows.ps1
 pwsh -NoProfile -File tests/test_public_windows_editors.ps1
+pwsh -NoProfile -File tests/test_public_windows_maintenance.ps1
 ```

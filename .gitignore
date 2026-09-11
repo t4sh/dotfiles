@@ -19,6 +19,7 @@ backup.destination
 # Vault-backed app exports and licensed prefs
 ssh/config
 config/gh-hosts.yml
+apps/hermes/
 apps/transmit/
 apps/raycast/
 apps/shottr/

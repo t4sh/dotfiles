@@ -39,13 +39,17 @@ all: ## Re-apply the full existing-Mac setup, including node shims, in a fixed o
 # post-vault / ssh-setup stay manual: never touch canonical key material
 # before the existing secret tree has had a chance to be restored.
 # terminal is NOT in `all` (would kill parent Terminal.app shell).
-# default-apps, doctor, docs-audit, skills, terminal, and stay manual.
+# default-apps, doctor, docs-audit, skills, and terminal stay manual.
 
 help: ## Show available make targets
 	@awk 'BEGIN {FS = ":.*## "; printf "Usage: make <target>\n\nTargets:\n"} /^[a-zA-Z0-9_-]+:.*## / {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 restore-apps: ## Restore repo-tracked app preference snapshots
 	@bash scripts/restore-apps.sh
+
+.PHONY: sublime-check
+sublime-check: ## Check Sublime helper, declared packages, theme and syntax resources
+	@python3 scripts/check-sublime.py
 
 restore-canary: ## Restore Canary Mail prefs from the secrets vault
 	@bash scripts/restore-canary-vault.sh
@@ -71,7 +75,12 @@ restore-dato: ## Restore full Dato preferences after launching Dato once
 backup-deskflow: ## Back up Mac Deskflow configuration and TLS files into ~/.secrets
 	@bash scripts/backup-deskflow-vault.sh
 
-ssh-setup: ## Verify/register restored GitHub auth + signing key
+.PHONY: ssh-sockets
+ssh-sockets: ## Create the local SSH connection-sharing directory
+	@mkdir -p "$(HOME)/.ssh/sockets"
+	@chmod 700 "$(HOME)/.ssh/sockets"
+
+ssh-setup: ssh-sockets ## Verify/register restored GitHub auth + signing key
 	@bash scripts/ssh-setup.sh
 
 secrets-manifest: ## Install the default vault backup manifest when absent
@@ -289,6 +298,10 @@ docs-audit: ## Check docs/scripts for typos when typos is installed
 	fi
 
 
+.PHONY: test-public
+test-public: ## Run checkout-safe public bootstrap, recovery and preference fixtures
+	@python3 -m unittest discover -s tests -p "test_*.py"
+
 audit-apps: ## Scan app preference snapshots for secrets/local paths
 	@bash scripts/audit-app-prefs.sh
 
@@ -302,7 +315,11 @@ backup: ## Check macOS policy, refresh repo snapshots, then capture Dato/Shottr/
 	@if defaults read cc.ffitch.shottr >/dev/null 2>&1; then $(MAKE) --no-print-directory backup-shottr; else echo "Shottr private capture skipped: preferences unavailable; previous backup retained."; fi
 	@if [ -d "$(HOME)/Library/Deskflow" ]; then $(MAKE) --no-print-directory backup-deskflow; else echo "Deskflow private capture skipped: configure Deskflow first; previous backup retained."; fi
 
-secrets-backup: ## Publish an immutable encrypted APFS/UDZO recovery DMG
+secrets-backup: ## Update DotfilesSecrets.dmg with five verified snapshots
+	@bash scripts/secrets-backup.sh --persistent
+
+.PHONY: secrets-backup-portable
+secrets-backup-portable: ## Publish a separate immutable APFS/UDZO recovery DMG
 	@bash scripts/secrets-backup-portable.sh
 
 secrets-backup-legacy: ## Append to the legacy mutable sparseimage vault
@@ -311,7 +328,7 @@ secrets-backup-legacy: ## Append to the legacy mutable sparseimage vault
 secrets-compat-fixtures: ## Create disposable APFS UDSP/UDZO compatibility images
 	@bash scripts/secrets-format-compat.sh create
 
-secrets-mount: ## Verify and open the newest portable recovery DMG
+secrets-mount: ## Verify and open the persistent vault (or latest portable fallback)
 	@bash scripts/secrets-mount.sh
 
 secrets-mount-legacy: ## Open the preserved legacy sparseimage

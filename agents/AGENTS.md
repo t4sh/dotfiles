@@ -46,6 +46,10 @@ Trigger signals: a package manifest (`package.json`, `pyproject.toml`, `Cargo.to
 
 @./rules/05-paseo-orchestration.md
 
+## Activate when Hermes captures learning or performs skill maintenance
+
+@./rules/06-hermes-learning.md
+
 ## Activate for research validation projects
 
 @./rules/30-research-mode.md

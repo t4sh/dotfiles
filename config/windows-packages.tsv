@@ -134,7 +134,6 @@ cask:shottr	manual			ShareX; retain existing installation and configure capture 
 cask:stability-matrix	manual			https://github.com/LykosAI/StabilityMatrix/releases
 cask:sublime-text	native	winget	SublimeHQ.SublimeText.4	Native Windows counterpart; identity verified against installed WinGet inventory.
 cask:suspicious-package	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
-cask:symboliclinker	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
 cask:telegram	native	winget	Telegram.TelegramDesktop	Native Windows counterpart; identity verified against installed WinGet inventory.
 cask:textsniper	native	winget	Microsoft.PowerToys	Native Windows counterpart; identity verified against installed WinGet inventory.
 cask:thaw	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
