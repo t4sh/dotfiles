@@ -29,3 +29,34 @@ In Hermes Desktop, select the default/local backend and open **Settings → Appe
 a message and confirm no heart reaction or reaction feedback occurs. Repeat after
 restarting Desktop. This setting concerns message reactions; completion and prompt
 bells are separate preferences. Backend restoration alone does not verify the GUI.
+
+## Windows source launcher and shared skills
+
+After initializing Hermes, `dot hermes -Apply` adds `~/.agents/skills` to skill
+creation and discovery, preserving other skill directories and personal settings.
+It also configures Start → Hermes for source launch. Close Desktop, CLI and gateway
+sessions before applying preferences; the command reports busy processes without
+stopping them. `dot hermes -Check` verifies the settings and runtime skill inventory.
+Setup skips an uninitialized Hermes installation.
+
+Use `dot hermes-launcher -Apply` to repair just the shortcut, or `-Check` to inspect
+it. The shortcut invokes the installed Python with `desktop --source --skip-build`.
+Launching does not install, update, package or rebuild anything. Source dependencies
+and compiled frontend assets must already be present in the installed checkout.
+The first replaced shortcut is retained as `Hermes.lnk.before-dotfiles`.
+
+The dedicated update stage runs the native Hermes updater once, repairs the source
+shortcut after success, then checks shared skills. The native updater controls
+checkout/dependency changes and can rebuild Desktop; this wrapper does not alter
+that upstream behavior. Keeping the source shortcut avoids selecting a newly
+packaged executable that Windows may block. If open Hermes processes lock runtime
+files, the updater may fail: its exit status and log are retained. Resolve the
+reported busy process before retrying that stage. There is no automatic process
+termination or retry loop.
+
+Personal models, aliases, appearance and credentials remain outside this checkout.
+The generic helper now includes `display.resume_last_session`. For an explicit
+user-owned snapshot, `--preserve-model-selection` on full restore/check preserves
+the current provider, endpoint and model while merging saved aliases and other
+managed preferences. It cannot be combined with capture or `--skills-only`.
+Desktop theme, scale and other renderer settings still require manual restoration.

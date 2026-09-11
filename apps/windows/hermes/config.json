@@ -1,0 +1,6 @@
+{
+  "skills": {
+    "create_dir": "~/.agents/skills",
+    "external_dirs": ["~/.agents/skills"]
+  }
+}
