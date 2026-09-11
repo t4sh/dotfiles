@@ -13,8 +13,12 @@ try {
     $runtimeHome = Join-Path $fixture 'profile with spaces'
     $runtime = Join-Path $runtimeHome 'hermes-agent'
     $programs = Join-Path $fixture 'Programs'
+    $taskbar = Join-Path $fixture 'TaskBar'
+    [IO.Directory]::CreateDirectory($taskbar) | Out-Null
     [IO.Directory]::CreateDirectory((Join-Path $runtime 'venv/Scripts')) | Out-Null
     [IO.Directory]::CreateDirectory($programs) | Out-Null
+    [IO.Directory]::CreateDirectory((Join-Path $runtime 'apps/desktop/assets')) | Out-Null
+    [IO.File]::WriteAllText((Join-Path $runtime 'apps/desktop/assets/icon.ico'), 'icon path fixture; never rendered')
     [IO.File]::WriteAllText((Join-Path $runtime 'venv/Scripts/python.exe'), 'fixture; never executed')
     $shortcutPath = Join-Path $programs 'Hermes.lnk'
     $shell = New-Object -ComObject WScript.Shell
@@ -24,14 +28,72 @@ try {
     $shortcut.Save()
     $originalHash = (Get-FileHash -LiteralPath $shortcutPath).Hash
     $launcher = Join-Path $root 'scripts/setup-windows-hermes-launcher.ps1'
-    $options = @{ HermesHome=$runtimeHome; HermesRoot=$runtime; ProgramsDirectory=$programs }
+    $options = @{ HermesHome=$runtimeHome; HermesRoot=$runtime; ProgramsDirectory=$programs; TaskbarDirectory=$taskbar }
     & $launcher @options | Out-Null
     if ((Get-FileHash $shortcutPath).Hash -ne $originalHash) { throw 'Preview changed shortcut' }
     $failed = $false
     try { & $launcher -Check @options | Out-Null } catch { $failed = $_.Exception.Message -match 'launcher differs' }
     if (-not $failed) { throw 'Drift check accepted packaged shortcut' }
+    . (Join-Path $root 'scripts/lib/windows-shortcuts.ps1')
+    $collisionPath = Join-Path $programs 'Electron.lnk'
+    $bare = $shell.CreateShortcut($collisionPath)
+    $bare.TargetPath = Join-Path $runtime 'apps/desktop/node_modules/electron/dist/electron.exe'
+    $bare.Save()
+    [Dotfiles.ShortcutIdentity]::Set($collisionPath, 'com.nousresearch.hermes')
+    $collisionHash = (Get-FileHash $collisionPath).Hash
+    $pin = Join-Path $taskbar 'Electron.lnk'
+    Copy-Item -LiteralPath $collisionPath -Destination $pin
+    $pinBefore = (Get-FileHash $pin).Hash
     & $launcher -Apply @options | Out-Null
     & $launcher -Check @options | Out-Null
+    if ([Dotfiles.ShortcutIdentity]::Get($shortcutPath) -cne 'com.nousresearch.hermes') { throw 'Canonical Hermes app identity missing' }
+    $pinned = $shell.CreateShortcut($pin)
+    $managed = $shell.CreateShortcut($shortcutPath)
+    if ($managed.IconLocation -ine ((Join-Path $runtime 'apps/desktop/assets/icon.ico')+',0')) { throw 'Source-only launch has no bundled Hermes icon' }
+    if ($pinned.TargetPath -ine $managed.TargetPath -or $pinned.Arguments -cne $managed.Arguments -or $pinned.IconLocation -cne $managed.IconLocation) { throw 'Taskbar pin does not match managed Hermes launch and icon' }
+    if ((Get-FileHash ($pin+'.before-dotfiles')).Hash -ne $pinBefore) { throw 'Taskbar backup missing or changed' }
+    $pinAfter=(Get-FileHash $pin).Hash
+    & $launcher -Apply @options | Out-Null
+    if ((Get-FileHash $pin).Hash -ne $pinAfter) { throw 'Taskbar repair is not idempotent' }
+    Copy-Item -LiteralPath ($pin+'.before-dotfiles') -Destination $pin -Force
+    $failed=$false
+    try { & $launcher -Check @options | Out-Null } catch { $failed=$true }
+    if (-not $failed) { throw 'Taskbar drift was accepted' }
+    & $launcher -Apply @options | Out-Null
+    if (Test-Path $collisionPath) { throw 'Bare Electron identity remains active' }
+    [Dotfiles.ShortcutIdentity]::Set($pin, '')
+    $failed=$false
+    try { & $launcher -Check @options | Out-Null } catch { $failed=$true }
+    if (-not $failed) { throw 'Missing pinned identity was ignored' }
+    & $launcher -Apply @options | Out-Null
+    if ([Dotfiles.ShortcutIdentity]::Get($pin) -cne 'com.nousresearch.hermes') { throw 'Missing pinned identity not repaired' }
+    [Dotfiles.ShortcutIdentity]::Set($pin, 'fixture.foreign')
+    $failed=$false
+    try { & $launcher -Apply @options | Out-Null } catch { $failed=$true }
+    if (-not $failed) { throw 'Conflicting pinned identity was overwritten' }
+    [Dotfiles.ShortcutIdentity]::Set($pin, 'com.nousresearch.hermes')
+    foreach ($directory in @($programs,$taskbar)) { Set-Content (Join-Path $directory 'Unrelated-broken.lnk') 'broken fixture' }
+    & $launcher -Check @options -WarningVariable warnings 3>$null | Out-Null
+    if (@($warnings).Count -ne 2) { throw 'Unreadable unrelated shortcuts not reported' }
+    if ((Get-FileHash ($collisionPath+'.before-dotfiles')).Hash -ne $collisionHash) { throw 'Electron collision backup changed' }
+    Copy-Item -LiteralPath ($collisionPath+'.before-dotfiles') -Destination $collisionPath
+    $failed=$false
+    try { & $launcher -Check @options | Out-Null } catch { $failed=$true }
+    if (-not $failed) { throw 'Recreated identity conflict was accepted' }
+    & $launcher -Apply @options | Out-Null
+    if ((Get-FileHash ($collisionPath+'.before-dotfiles')).Hash -ne $collisionHash) { throw 'Repeated repair replaced original backup' }
+    $unrelated = $shell.CreateShortcut($collisionPath)
+    $unrelated.TargetPath=$pwsh; $unrelated.Save()
+    [Dotfiles.ShortcutIdentity]::Set($collisionPath, 'fixture.other')
+    $unrelatedHash=(Get-FileHash $collisionPath).Hash
+    & $launcher -Apply @options | Out-Null
+    if ((Get-FileHash $collisionPath).Hash -ne $unrelatedHash) { throw 'Unrelated Electron shortcut modified' }
+    [Dotfiles.ShortcutIdentity]::Set($collisionPath, 'com.nousresearch.hermes')
+    $managedHash=(Get-FileHash $shortcutPath).Hash
+    $failed=$false
+    try { & $launcher -Apply @options | Out-Null } catch { $failed=$true }
+    if (-not $failed -or (Get-FileHash $shortcutPath).Hash -ne $managedHash) { throw 'Foreign identity collision did not fail before writes' }
+    [Dotfiles.ShortcutIdentity]::Set($collisionPath, 'fixture.other')
     $configured = (Get-FileHash $shortcutPath).Hash
     & $launcher -Apply @options | Out-Null
     if ((Get-FileHash $shortcutPath).Hash -ne $configured) { throw 'Repeated setup rewrote shortcut' }
@@ -41,7 +103,7 @@ try {
 
     # Repair honors the environment; explicit paths and Python take precedence.
     $env:HERMES_HOME = $runtimeHome
-    & $launcher -Check -ProgramsDirectory $programs | Out-Null
+    & $launcher -Check -ProgramsDirectory $programs -TaskbarDirectory $taskbar | Out-Null
     $alternatePython = Join-Path $fixture 'alternate python.exe'
     [IO.File]::WriteAllText($alternatePython, 'fixture; never executed')
     $env:HERMES_HOME = Join-Path $fixture 'unused environment home'
