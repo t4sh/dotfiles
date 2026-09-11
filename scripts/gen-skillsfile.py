@@ -107,7 +107,7 @@ def build_skillsfile(timestamp):
         '[[ -x "$NPX" || ( "${OS:-}" == "Windows_NT" && -f "$NPX" ) ]] || { echo "npx stable shim not found or not executable: $NPX" >&2; exit 1; }',
         "",
         '# skills add stamps unchanged entries too; normalize even after a partial failure.',
-        'LOCK_SNAPSHOT="$(mktemp)"',
+        'LOCK_SNAPSHOT="$(mktemp "${TMPDIR:-/tmp}/dotfiles-skills-lock.XXXXXXXXXX")"',
         'finish_refresh() {',
         '  status=$?',
         '  if ! "${PYTHON_BIN:-python3}" "$DOTFILES_ROOT/scripts/normalize-skill-lock.py" "$LOCK_SNAPSHOT" "$DOTFILES_ROOT/agents/.skill-lock.json"; then',
