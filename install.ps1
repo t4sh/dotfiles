@@ -46,5 +46,6 @@ Invoke-SetupStage 'hooks' { & (Join-Path $PSScriptRoot 'scripts\setup-windows-ho
 Invoke-SetupStage 'skills' { & (Join-Path $PSScriptRoot 'scripts\check-windows-skills.ps1') }
 Invoke-SetupStage 'skill engine' { & (Join-Path $PSScriptRoot 'scripts\setup-windows-skill-engine.ps1') -Apply }
 if (-not $SkipApps) { Invoke-SetupStage 'restore-apps' { & (Join-Path $PSScriptRoot 'scripts\restore-apps-windows.ps1') -Apply } }
+if (-not $SkipApps) { Invoke-SetupStage 'Hermes skills' { & (Join-Path $PSScriptRoot 'scripts/setup-windows-hermes.ps1') -Apply -SkipMissing } }
 if ($failed.Count) { throw "Setup incomplete: $($failed -join ', '). Rerun the named dot commands after resolving their errors." }
 Write-Output 'Setup stages completed. Run dot doctor -Strict; manual packages, account sign-in and secrets recovery are separate.'

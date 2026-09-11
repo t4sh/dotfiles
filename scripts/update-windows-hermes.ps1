@@ -15,7 +15,7 @@ if (-not (Test-Path -LiteralPath $python -PathType Leaf)) {
 }
 Assert-DotfilesPreferenceFile $python
 if ($DryRun) {
-    Write-Output 'Preview: Hermes native update --yes (Windows runtime).'
+    Write-Output 'Preview: Hermes native update --yes, then repair its source launcher and check shared skills.'
     return
 }
 # Invoke the installed Python module, avoiding unsigned generated exe launchers.
@@ -29,6 +29,8 @@ $log = Join-Path $env:TEMP ('dotfiles-hermes-update-' + [guid]::NewGuid().ToStri
 Write-Output "Hermes update log: $log"
 try {
     Invoke-DotfilesNativeUtf8 $python @('-u','-m','hermes_cli.main','update','--yes') 2>&1 | Tee-Object -FilePath $log
+    & (Join-Path $PSScriptRoot 'setup-windows-hermes-launcher.ps1') -Apply -HermesHome $hermesHome -HermesRoot $checkout
+    & (Join-Path $PSScriptRoot 'setup-windows-hermes.ps1') -Check -HermesHome $hermesHome
 } catch {
     throw "Hermes update failed: $($_.Exception.Message). Log: $log"
 }

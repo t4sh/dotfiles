@@ -14,7 +14,7 @@ from urllib.parse import urlsplit
 FIELDS = {
     "model": "default provider base_url context_length streaming api_mode",
     "agent": "max_turns service_tier fast_auto_seconds verbose reasoning_effort",
-    "display": "compact busy_input_mode bell_on_complete bell_on_prompt show_reasoning background_process_notifications streaming skin interim_assistant_messages tool_progress cleanup_progress long_running_notifications busy_ack_detail message_reactions",
+    "display": "compact busy_input_mode bell_on_complete bell_on_prompt show_reasoning background_process_notifications streaming skin interim_assistant_messages tool_progress cleanup_progress long_running_notifications busy_ack_detail message_reactions resume_last_session",
     "compression": "enabled checkpoint_required progress_notices threshold target_ratio protect_last_n min_tail_user_messages max_attempts proactive_prune_tokens proactive_prune_min_result_chars proactive_prune_min_reclaim_tokens hygiene_max_turn_hold_seconds protect_first_n codex_gpt55_autoraise codex_app_server_auto codex_responses_native idle_compact_after_seconds",
     "memory": "memory_enabled user_profile_enabled memory_char_limit user_char_limit nudge_interval",
     "prompt_caching": "cache_ttl",
@@ -160,13 +160,26 @@ def merge(base, saved):
     return base
 
 
+def without_model_selection(data):
+    """Keep shared aliases, but leave this machine's provider/endpoint/model alone."""
+    result = {key: value for key, value in data.items() if key != "model"}
+    aliases = data.get("model", {}).get("aliases")
+    if aliases is not None:
+        result["model"] = {"aliases": aliases}
+    return result
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("mode", choices=("capture", "check", "restore", "audit"))
     parser.add_argument("--live", type=Path, default=hermes_home() / "config.yaml")
     parser.add_argument("--skills-only", action="store_true", help="Manage portable skill creation and additive shared discovery")
+    parser.add_argument("--preserve-model-selection", action="store_true",
+                        help="Restore/check shared preferences and aliases without changing the live model/provider/endpoint")
     parser.add_argument("--snapshot", type=Path, default=Path(os.environ.get("DOTFILES", Path(__file__).resolve().parents[1])) / "apps/hermes/config.json")
     args = parser.parse_args()
+    if args.preserve_model_selection and (args.skills_only or args.mode not in ("restore", "check")):
+        parser.error("--preserve-model-selection requires a full restore or check")
     try:
         if args.mode == "capture":
             write_atomic(args.snapshot, project(read_config(args.live), args.skills_only))
@@ -174,7 +187,12 @@ def main():
             saved = read_config(args.snapshot)
             if project(saved, args.skills_only) != saved:
                 raise ValueError("Hermes snapshot contains unmanaged fields")
-            if args.mode == "check" and project(read_config(args.live), args.skills_only) != saved:
+            if args.preserve_model_selection:
+                saved = without_model_selection(saved)
+            actual = project(read_config(args.live), args.skills_only) if args.mode == "check" else None
+            if args.preserve_model_selection and actual is not None:
+                actual = without_model_selection(actual)
+            if args.mode == "check" and actual != saved:
                 raise ValueError("Hermes preferences differ; use this helper with capture or restore and the same --live, --snapshot and --skills-only options. See docs/hermes-preferences.md.")
             if args.mode == "restore":
                 base = read_config(args.live) if args.live.exists() else {}

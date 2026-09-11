@@ -27,6 +27,7 @@ Check-Dotfiles 'Windows Git overlay' {
 Check-Dotfiles 'Tracked hooks' { & (Join-Path $PSScriptRoot 'setup-windows-hooks.ps1') -Check }
 Check-Dotfiles 'Skills and rules' { & (Join-Path $PSScriptRoot 'check-windows-skills.ps1') }
 Check-Dotfiles 'Impeccable engine' { & (Join-Path $PSScriptRoot 'setup-windows-skill-engine.ps1') }
+Check-Dotfiles 'Hermes skill preference (when initialized)' { & (Join-Path $PSScriptRoot 'setup-windows-hermes.ps1') -Check -SkipMissing }
 Check-Dotfiles 'Editor preferences' { & (Join-Path $PSScriptRoot 'sync-windows-apps.ps1') -Mode Check }
 Check-Dotfiles 'Sublime readiness' { & (Join-Path $PSScriptRoot 'restore-apps-windows.ps1') -Only sublime -Check }
 Check-Dotfiles 'Extended app preferences' { & (Join-Path $PSScriptRoot 'sync-windows-extra-apps.ps1') -Mode Check }

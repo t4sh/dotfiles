@@ -10,7 +10,9 @@ standalone Codex updater is disabled. Hermes is updated once using
 `scripts/update-windows-hermes.ps1`, through its native Python runtime.
 It uses `HERMES_HOME` or `%LOCALAPPDATA%/hermes`, skips an absent installation,
 and rejects incomplete or hidden MSIX-redirected installations. Its output is
-retained in `%TEMP%/dotfiles-hermes-update-*.log`.
+retained in `%TEMP%/dotfiles-hermes-update-*.log`. After a successful update, the
+source shortcut is repaired and shared skills are checked. See
+[Hermes Windows setup](docs/hermes-preferences.md#windows-source-launcher-and-shared-skills).
 
 Maintenance prepares gcloud's copied update Python only for Topgrade and restores
 the caller's `CLOUDSDK_PYTHON` afterward. After Topgrade, VS Code and Cursor
@@ -64,6 +66,8 @@ Run from the checkout, or use `dot` after setup adds its directory to PATH:
 | `bin\dot.cmd restore-apps -Apply` | Merge shipped template settings; close affected apps first |
 | `bin\dot.cmd backup -Apply` | Retain curated public app templates |
 | `bin\dot.cmd upgrade` | Update apps, runtimes and skills |
+| `bin\dot.cmd hermes -Apply` | Apply shared-skill paths and source launcher; close Hermes first |
+| `bin\dot.cmd hermes-launcher -Check` | Verify Start → Hermes selects source launch |
 | `make skills` | Verify checked-in skill metadata |
 
 Skill checks and refresh output use UTF-8 even in a legacy-code-page console;
@@ -120,4 +124,5 @@ isolated dummy preference roots and verifies that public templates remain intact
 pwsh -NoProfile -File tests/test_public_windows.ps1
 pwsh -NoProfile -File tests/test_public_windows_editors.ps1
 pwsh -NoProfile -File tests/test_public_windows_maintenance.ps1
+pwsh -NoProfile -File tests/test_public_windows_hermes.ps1
 ```

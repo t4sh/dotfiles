@@ -52,3 +52,9 @@ MAC_ONLY := macos macos-user macos-dry-run macos-check dock services services-ch
 .PHONY: $(MAC_ONLY)
 $(MAC_ONLY):
 	$(error $@ is macOS-only; use the Windows commands in WINDOWS.md)
+
+.PHONY: restore-hermes hermes-check
+restore-hermes:
+	@$(DOT) hermes -Apply
+hermes-check:
+	@$(DOT) hermes -Check
