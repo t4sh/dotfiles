@@ -104,6 +104,15 @@ function Resolve-DotfilesVoltaRuntime {
     if (-not (Test-Path -LiteralPath $runtime -PathType Leaf)) { throw "Volta runtime shim missing: $Name. Repair the Volta installation." }
     return $runtime
 }
+function Resolve-DotfilesHermesHome([string]$HermesHome) {
+    # The PowerShell entry points must agree on one profile, and a script one of
+    # them invokes must inherit that selection: prefer an explicit choice, then
+    # the live HERMES_HOME, then the default installation directory. The Python
+    # helpers resolve their own home because they also run on Mac.
+    if ($HermesHome) { return $HermesHome }
+    if ($env:HERMES_HOME) { return $env:HERMES_HOME }
+    return (Join-Path $env:LOCALAPPDATA 'hermes')
+}
 function Invoke-DotfilesNative {
     param([Parameter(Mandatory)][string]$File, [string[]]$Arguments = @(), [int[]]$SuccessCodes = @(0))
     & $File @Arguments

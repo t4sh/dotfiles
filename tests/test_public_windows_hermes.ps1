@@ -151,7 +151,8 @@ function Test-Path {
     Microsoft.PowerShell.Management\Test-Path @options
 }
 '@
-    [IO.File]::WriteAllText((Join-Path $scripts 'lib/windows-common.ps1'), $common)
+    $realCommon = [IO.File]::ReadAllText((Join-Path $root 'scripts/lib/windows-common.ps1'))
+    [IO.File]::WriteAllText((Join-Path $scripts 'lib/windows-common.ps1'), $realCommon + [Environment]::NewLine + $common)
     [IO.File]::WriteAllText((Join-Path $scripts 'setup-windows-hermes-launcher.ps1'), 'param([switch]$Apply,[string]$HermesHome,[string]$HermesRoot,[string]$Python); if ($global:PublicHermesFixtureState.checkSelectedPython -and $Python -cne $global:PublicHermesFixtureState.selectedPython) { throw "Settings setup omitted launcher Python" }; $global:PublicHermesFixtureState.repairCalls++')
     [IO.File]::WriteAllText((Join-Path $scripts 'setup-windows-hermes.ps1'), 'param([switch]$Check,[string]$HermesHome); $global:PublicHermesFixtureState.checkCalls++')
     [IO.Directory]::CreateDirectory((Join-Path $runtime 'hermes_cli')) | Out-Null

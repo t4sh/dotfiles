@@ -4,7 +4,7 @@ param([string]$HermesHome, [string]$HermesRoot, [string]$Python)
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'lib/windows-common.ps1')
 Assert-DotfilesWindows
-if (-not $HermesHome) { $HermesHome = if ($env:HERMES_HOME) { $env:HERMES_HOME } else { Join-Path $env:LOCALAPPDATA 'hermes' } }
+$HermesHome = Resolve-DotfilesHermesHome $HermesHome
 if (-not $HermesRoot) { $HermesRoot = Join-Path $HermesHome 'hermes-agent' }
 $env:HERMES_HOME = $HermesHome
 $env:HERMES_DESKTOP_HERMES_ROOT = $HermesRoot
