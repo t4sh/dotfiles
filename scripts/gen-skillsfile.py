@@ -86,7 +86,7 @@ def build_skillsfile(timestamp):
         "#",
         f"# GENERATED {timestamp} from agents/.skill-lock.json by",
         "# scripts/gen-skillsfile.py — DO NOT EDIT BY HAND. To change skills:",
-        "#   ~/.local/bin/npx-stable skills add/remove ...   then   make skills-manifest",
+        "#   ~/.local/bin/npx-stable skills add ... --agent codex   then   make skills-manifest",
         "#   (regenerates Skillsfile + agents/skills/README.md)",
         "#",
         "# Explicit upstream refresh: make skills-update   (or: bash Skillsfile)",
@@ -96,6 +96,7 @@ def build_skillsfile(timestamp):
         "# Prereqs (fresh Mac): node + git + GitHub auth (SSH/gh) must be set",
         "# up first if a configured upstream source requires authentication.",
         "# Agents and MCP tooling use the stable npx shim from ~/.local/bin.",
+        "# Target the canonical shared collection only; Hermes uses external_dirs, not installer aliases.",
         "",
         "set -euo pipefail",
         "",
@@ -131,7 +132,7 @@ def build_skillsfile(timestamp):
     for src in sorted(by_source):
         skills = " ".join(shlex.quote(name) for name in sorted(by_source[src]))
         lines.append(f'echo "→ update {src}"')
-        lines.append(f'"$NPX" skills add {src} --skill {skills} -g -y')
+        lines.append(f'"$NPX" skills add {src} --skill {skills} -g -y --agent codex')
         lines.append("")
 
     if local:

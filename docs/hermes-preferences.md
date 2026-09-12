@@ -39,6 +39,10 @@ sessions before applying preferences; the command reports busy processes without
 stopping them. `dot hermes -Check` verifies the settings and runtime skill inventory.
 Setup skips an uninitialized Hermes installation.
 
+Existing profiles with skill-directory links into the shared collection must first
+follow the isolation procedure below. The settings helper refuses to restore
+preferences while those links are present.
+
 Use `dot hermes-launcher -Apply` to repair just the shortcut, or `-Check` to inspect
 it. Both launcher commands honor `HERMES_HOME`; explicit `-HermesHome`,
 `-HermesRoot` and `-Python` select a profile and runtime. `dot hermes -Apply`
@@ -77,3 +81,58 @@ user-owned snapshot, `--preserve-model-selection` on full restore/check preserve
 the current provider, endpoint and model while merging saved aliases and other
 managed preferences. It cannot be combined with capture or `--skills-only`.
 Desktop theme, scale and other renderer settings still require manual restoration.
+
+## Keep bundled categories out of shared skills
+
+Hermes uses its profile-local `skills/` directory for bundled and hub content.
+Use `skills.external_dirs` to discover `~/.agents/skills`, and `skills.create_dir`
+for deliberate creation of shared skills. Do not link profile-local skill
+directories into the shared collection: bundled category sync follows directory
+symlinks and Windows junctions and can write metadata into their targets.
+
+The generated `Skillsfile` selects `--agent codex` once on both operating systems.
+The Windows installer wrapper passes it through and adds npm consent, closed
+stdin and logging. Keep that selector on manual `skills add` commands too;
+unscoped installs can recreate Hermes-local links. Existing client links and
+Hermes external discovery provide access to the canonical collection.
+
+With Hermes stopped and shared external discovery already configured, run from
+this checkout on Mac:
+
+```sh
+python3 scripts/hermes-settings.py isolate-skills
+python3 scripts/hermes-settings.py check-skills
+```
+
+On Windows, select the initialized profile and its Python explicitly:
+
+```powershell
+$hermesProfile = if ($env:HERMES_HOME) { $env:HERMES_HOME } else { Join-Path $env:LOCALAPPDATA 'hermes' }
+$hermesPython = Join-Path $hermesProfile 'hermes-agent/venv/Scripts/python.exe'
+& $hermesPython -B scripts/hermes-settings.py isolate-skills --live (Join-Path $hermesProfile 'config.yaml')
+if ($LASTEXITCODE -ne 0) { throw 'Skill isolation failed; inspect the reported condition.' }
+& $hermesPython -B scripts/hermes-settings.py check-skills --live (Join-Path $hermesProfile 'config.yaml')
+if ($LASTEXITCODE -ne 0) { throw 'Skill boundary check failed.' }
+```
+
+For a custom runtime, substitute its Python path. For another Mac profile, pass
+its config with `--live`; the Mac default intentionally ignores `HERMES_HOME`.
+
+Isolation moves only matching alias objects into the profile's
+`skill-alias-backups/`; shared targets and real Hermes directories are retained.
+Repeated runs are safe. Existing backup conflicts, aliased profile roots and
+unreadable directories fail clearly. Relative links may be dangling in backup;
+moving them back would restore the unsafe boundary.
+
+Capture, restore and check reject shared aliases before preference writes.
+This is a settings guard, not a patch to Hermes: direct Hermes operations and
+deliberate shared-skill edits still have their normal permissions.
+The shared `research/DESCRIPTION.md` path is also gitignored to prevent accidental
+staging. Ignoring does not prevent writes, and existing files need provenance
+review before relocation or removal.
+
+Public fixtures cover isolation, idempotency, unchanged targets, later local
+category writes and failure preservation. The migration fixture uses a real
+junction when run on Windows. Mac fixture verification does not establish native
+Windows acceptance; run the Windows fixtures before relying on that platform's
+runtime behavior.
