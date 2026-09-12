@@ -2,6 +2,10 @@
 # Public-owned fixtures. Shortcuts and fake updater state stay under Windows Temp.
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot
+# This public-owned wrapper must work without private integration files.
+if ((Get-Content (Join-Path $root 'scripts/update-windows-hermes.ps1') -Raw).Contains('install-hermes-rulebook.py')) {
+    throw 'Public Hermes updater depends on the private rulebook installer'
+}
 . (Join-Path $root 'scripts/lib/windows-common.ps1')
 Assert-DotfilesWindows
 $pwsh = Resolve-DotfilesPwsh
@@ -121,6 +125,11 @@ try {
     }
     $common = @'
 function Assert-DotfilesWindows {}
+function Assert-DotfilesPythonRuntime([string]$Path,[string]$Label) {
+    if ($Label -ne 'Hermes Python') { throw 'Unexpected runtime probe label' }
+    $global:PublicHermesFixtureState.runtimeCalls++
+    if ($global:PublicHermesFixtureState.failRuntime) { throw 'fixture Application Control block' }
+}
 function Assert-DotfilesPreferenceFile([string]$Path) { if (-not (Test-Path -LiteralPath $Path)) { throw 'Fixture runtime missing' } }
 function Invoke-DotfilesNativeUtf8([string]$File,[string[]]$Arguments) {
     $global:PublicHermesFixtureState.nativeCalls++
@@ -169,6 +178,11 @@ function Test-Path {
     $updater = Join-Path $scripts 'update-windows-hermes.ps1'
     & $updater -DryRun | Out-Null
     if ($global:PublicHermesFixtureState.nativeCalls -or $global:PublicHermesFixtureState.repairCalls -or $global:PublicHermesFixtureState.checkCalls) { throw 'Dry run performed work' }
+    $global:PublicHermesFixtureState.failRuntime=$true
+    $failed=$false
+    try { & $updater | Out-Null } catch { $failed=$_.Exception.Message -match 'fixture Application Control block.*Log:' }
+    if (!$failed -or $global:PublicHermesFixtureState.nativeCalls -or $global:PublicHermesFixtureState.repairCalls -or $global:PublicHermesFixtureState.checkCalls) { throw 'Blocked runtime ran update/follow-up actions or lost its diagnostic' }
+    $global:PublicHermesFixtureState.failRuntime=$false
     & $updater | Out-Null
     if ($global:PublicHermesFixtureState.nativeCalls -ne 1 -or $global:PublicHermesFixtureState.repairCalls -ne 1 -or $global:PublicHermesFixtureState.checkCalls -ne 1) { throw 'Update did not run once and verify both follow-ups' }
     if (($global:PublicHermesFixtureState.observedArguments -join ' ') -cne '-u -m hermes_cli.main update --yes') { throw 'Native update arguments changed' }

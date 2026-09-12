@@ -156,7 +156,7 @@
       "skillPath": "file-organizer/SKILL.md",
       "skillFolderHash": "c7ed3669de10cf3eac013320906e82187d69999b",
       "installedAt": "2026-04-13T02:35:51.830Z",
-      "updatedAt": "2026-09-11T12:14:11.656Z"
+      "updatedAt": "2026-09-12T08:21:31.879Z"
     },
     "copywriting": {
       "source": "coreyhaines31/marketingskills",
@@ -476,9 +476,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/mblode/agent-skills.git",
       "skillPath": "skills/ui-animation/SKILL.md",
-      "skillFolderHash": "a6de00b713d5149f96c16c1ec6eb2bcd0b605bc8",
+      "skillFolderHash": "a6299181de0119813f8c808ee538ba43da05e737",
       "installedAt": "2026-05-29T10:31:36.298Z",
-      "updatedAt": "2026-09-11T12:15:31.830Z"
+      "updatedAt": "2026-09-11T22:10:30.220Z"
     },
     "brandkit": {
       "source": "Leonxlnx/taste-skill",

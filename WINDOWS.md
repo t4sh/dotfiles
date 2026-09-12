@@ -6,12 +6,20 @@ Each stage reports elapsed seconds. Topgrade output is retained in
 `%TEMP%/dotfiles-topgrade-*.log`; failures point to that run's log. Retry only the
 named failing step instead of repeating all maintenance.
 Codex's desktop-bundled CLI is maintained with the desktop app; Topgrade's
-standalone Codex updater is disabled. Hermes is updated once using
-`scripts/update-windows-hermes.ps1`, through its native Python runtime.
-It uses `HERMES_HOME` or `%LOCALAPPDATA%/hermes`, skips an absent installation,
-and rejects incomplete or hidden MSIX-redirected installations. Its output is
-retained in `%TEMP%/dotfiles-hermes-update-*.log`. After a successful update, the
-source shortcut is repaired and shared skills are checked. See
+standalone Codex updater is disabled.
+
+Hermes is excluded from Windows `update-all`, including Topgrade, as of
+September 12, 2026: Application Control blocks its managed Python
+([upstream issue #99590](https://github.com/NousResearch/hermes-agent/issues/99590)).
+Other updates and Mac maintenance remain independent. Re-enable only after a
+supported runtime passes launch and update verification. The installation,
+settings, source launcher and taskbar repairs remain available.
+
+For deliberate standalone testing, use `scripts/update-windows-hermes.ps1`.
+It honors `HERMES_HOME`, probes the interpreter before updating, and logs startup
+failures with the OS error and exact executable path in
+`%TEMP%/dotfiles-hermes-update-*.log`. After a successful update it repairs the
+source shortcut and checks shared skills. See
 [Hermes Windows setup](docs/hermes-preferences.md#windows-source-launcher-and-shared-skills).
 
 Maintenance prepares gcloud's copied update Python only for Topgrade and restores
@@ -19,6 +27,11 @@ the caller's `CLOUDSDK_PYTHON` afterward. After Topgrade, VS Code and Cursor
 extensions are reconciled with the declared versions. Skill refresh shows one
 progress line per source; failures point to `%TEMP%/dotfiles-skills-*.log`.
 Inventory and license diagnostics are in `%TEMP%/dotfiles-skills-checks.log`.
+The wrapper passes npm's `--yes` before `skills` and closes stdin to prevent
+a first-use CLI installation from waiting on a hidden confirmation.
+Python discovery checks the physical executable and runs a bounded version probe.
+Resolve an Application Control denial before reinstalling dependent uv tools.
+Topgrade output is decoded as UTF-8.
 Dry runs skip Python preparation, extension changes and skill refresh.
 
 This checkout provides native Windows setup alongside the Mac bootstrap. The
@@ -124,5 +137,8 @@ isolated dummy preference roots and verifies that public templates remain intact
 pwsh -NoProfile -File tests/test_public_windows.ps1
 pwsh -NoProfile -File tests/test_public_windows_editors.ps1
 pwsh -NoProfile -File tests/test_public_windows_maintenance.ps1
+pwsh -NoProfile -File tests/test_windows_skills_prompt.ps1
+pwsh -NoProfile -File tests/test_windows_python_discovery.ps1
+pwsh -NoProfile -File tests/test_windows_update_reporting.ps1
 pwsh -NoProfile -File tests/test_public_windows_hermes.ps1
 ```

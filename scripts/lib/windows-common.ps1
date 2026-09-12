@@ -65,7 +65,37 @@ function Resolve-DotfilesPython {
     $uv = (Get-Command uv.exe -ErrorAction Stop).Source
     $candidate = @(& $uv python find --managed-python 2>$null)
     if ($LASTEXITCODE -ne 0 -or $candidate.Count -ne 1 -or -not (Test-Path -LiteralPath $candidate[0] -PathType Leaf)) { throw 'Managed Python is missing. Run: uv python install' }
+    # Existence is not readiness: Application Control can reject a new uv build.
+    # Check the physical file and avoid PowerShell's misleading shell fallback.
+    Assert-DotfilesPythonRuntime -Path $candidate[0] -Label 'Managed Python'
     return $candidate[0]
+}
+function Assert-DotfilesPythonRuntime {
+    param([Parameter(Mandatory)][string]$Path, [string]$Label = 'Python')
+    Assert-DotfilesPreferenceFile $Path
+    $start = [Diagnostics.ProcessStartInfo]::new($Path)
+    $start.UseShellExecute = $false
+    $start.RedirectStandardOutput = $true
+    $start.RedirectStandardError = $true
+    $start.ArgumentList.Add('--version')
+    $process = [Diagnostics.Process]::new()
+    $process.StartInfo = $start
+    try {
+        [void]$process.Start()
+        $stdout = $process.StandardOutput.ReadToEndAsync()
+        $stderr = $process.StandardError.ReadToEndAsync()
+        # A version probe should finish immediately; never hang runtime discovery.
+        if (-not $process.WaitForExit(10000)) {
+            $process.Kill($true)
+            $process.WaitForExit()
+            throw 'version check timed out after 10 seconds'
+        }
+        $version = $stdout.GetAwaiter().GetResult().Trim()
+        if ($process.ExitCode -ne 0 -or $version -notmatch '^Python 3\.') {
+            throw "version check failed (exit $($process.ExitCode)): $($stderr.GetAwaiter().GetResult().Trim())"
+        }
+    } catch { throw "$Label cannot run at ${Path}: $($_.Exception.GetBaseException().Message)" }
+    finally { $process.Dispose() }
 }
 function Resolve-DotfilesVoltaRuntime {
     param([ValidateSet('node','npx')][string]$Name)

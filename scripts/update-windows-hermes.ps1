@@ -19,7 +19,8 @@ if ($DryRun) {
     return
 }
 # Invoke the installed Python module, avoiding unsigned generated exe launchers.
-# Hermes owns update backups and local-change handling. Never reset its checkout.
+# Native updates own checkout/dependency changes and may rebuild Desktop. On
+# Windows use source launch; a freshly packaged Hermes.exe can be blocked by SAC.
 $checkout = Join-Path $hermesHome 'hermes-agent'
 foreach ($relative in @('hermes_cli/main.py','.git/HEAD','.git/index','.git/shallow')) {
     $file = Join-Path $checkout $relative
@@ -28,9 +29,15 @@ foreach ($relative in @('hermes_cli/main.py','.git/HEAD','.git/index','.git/shal
 $log = Join-Path $env:TEMP ('dotfiles-hermes-update-' + [guid]::NewGuid().ToString('N') + '.log')
 Write-Output "Hermes update log: $log"
 try {
+    # PowerShell can mask an OS execution-policy rejection as an encoding error.
+    # Probe this install's interpreter directly; never substitute another runtime.
+    Assert-DotfilesPythonRuntime -Path $python -Label 'Hermes Python'
     Invoke-DotfilesNativeUtf8 $python @('-u','-m','hermes_cli.main','update','--yes') 2>&1 | Tee-Object -FilePath $log
+    # Repair upstream's shortcut before checking shared skills.
     & (Join-Path $PSScriptRoot 'setup-windows-hermes-launcher.ps1') -Apply -HermesHome $hermesHome -HermesRoot $checkout
     & (Join-Path $PSScriptRoot 'setup-windows-hermes.ps1') -Check -HermesHome $hermesHome
 } catch {
-    throw "Hermes update failed: $($_.Exception.Message). Log: $log"
+    $failure = "Hermes update failed: $($_.Exception.Message). Log: $log"
+    Add-Content -LiteralPath $log -Value $failure -Encoding utf8
+    throw $failure
 }
