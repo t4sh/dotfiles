@@ -15,7 +15,9 @@ if not defined PYTHON_BIN (
   exit /b 1
 )
 set "SKILL_LOG=%TEMP%\dotfiles-skills-%RANDOM%-%RANDOM%.log"
-call "%NPX_REAL%" %* --agent codex >"%SKILL_LOG%" 2>&1
+rem npm options must precede the positional command; the trailing -y is for skills.
+rem Never wait on a hidden prompt in this unattended maintenance wrapper.
+call "%NPX_REAL%" --yes %* --agent codex <nul >"%SKILL_LOG%" 2>&1
 set "SKILL_EXIT=%errorlevel%"
 "%PYTHON_BIN%" "%~dp0summarize-skills-update.py" "%SKILL_EXIT%" "%SKILL_LOG%" %*
 exit /b %SKILL_EXIT%

@@ -76,7 +76,9 @@ if (-not $SkipApps) {
         $arguments = @('--config', (Join-Path $dotfiles 'config\topgrade-windows.toml'))
         if ($DryRun) { $arguments += '--dry-run' }
         $previousCloudPython = $env:CLOUDSDK_PYTHON
+        $previousTopgradeEncoding = [Console]::OutputEncoding
         try {
+            [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false)
             if (-not $DryRun -and (Get-Command gcloud.cmd -ErrorAction SilentlyContinue)) {
                 $copied = @(& gcloud.cmd components copy-bundled-python)
                 if ($LASTEXITCODE -ne 0) { throw 'gcloud could not prepare its update Python runtime.' }
@@ -90,7 +92,10 @@ if (-not $SkipApps) {
             if ($LASTEXITCODE -ne 0) {
                 throw "Topgrade exited $LASTEXITCODE. Inspect FAILED entries and their preceding errors in $topgradeLog. Retry only the failed step with: topgrade --config `"$(Join-Path $dotfiles 'config/topgrade-windows.toml')`" --only <step> --verbose."
             }
-        } finally { $env:CLOUDSDK_PYTHON = $previousCloudPython }
+        } finally {
+            $env:CLOUDSDK_PYTHON = $previousCloudPython
+            [Console]::OutputEncoding = $previousTopgradeEncoding
+        }
     }
     foreach ($editor in @('code','cursor')) {
         Invoke-Stage -Name "$editor extension policy" -Action {
@@ -100,9 +105,9 @@ if (-not $SkipApps) {
             catch { throw "Extension reconciliation failed: $($_.Exception.Message). Log: $extensionLog" }
         }
     }
-    Invoke-Stage -Name 'Hermes' -Action {
-        & (Join-Path $PSScriptRoot 'update-windows-hermes.ps1') -DryRun:$DryRun
-    }
+    # Paused while Application Control rejects Hermes's managed Python (#99590).
+    # Keep the standalone updater available for deliberate testing.
+    Write-Output 'Hermes: excluded from Windows maintenance (runtime blocked; see WINDOWS.md).'
     Invoke-Stage -Name 'TLDR pages' -Action {
         & (Join-Path $PSScriptRoot 'update-windows-tldr.ps1') -DryRun:$DryRun
     }
