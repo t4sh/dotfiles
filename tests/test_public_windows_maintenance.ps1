@@ -12,7 +12,6 @@ $encodingBefore = [Console]::OutputEncoding
 $pythonEncodingBefore = $env:PYTHONIOENCODING
 $pythonBinBefore = $env:PYTHON_BIN
 $npxRealBefore = $env:NPX_REAL
-$agentBefore = $env:DOTFILES_SKILLS_AGENT
 $tempBefore = $env:TEMP
 $cloudPythonBefore = $env:CLOUDSDK_PYTHON
 $alias = Join-Path $fixture 'visible'
@@ -72,14 +71,13 @@ try {
 
     # Exercise the public cmd wrapper without invoking a real installer.
     $env:TEMP = $fixture
-    $env:DOTFILES_SKILLS_AGENT = 'codex'
     $env:NPX_REAL = Join-Path $fixture 'fake installer.cmd'
     $wrapper = Join-Path $root 'scripts/npx-skills-windows.cmd'
     [IO.File]::WriteAllText($env:NPX_REAL, "@echo off`r`necho installer diagnostic`r`nexit /b 0`r`n")
-    $output = @(& $wrapper skills add fixture/source --skill alpha -g -y)
+    $output = @(& $wrapper skills add fixture/source --skill alpha -g -y --agent codex)
     if ($LASTEXITCODE -ne 0 -or $output.Count -ne 1 -or $output[0] -cne 'Checking skills from source: fixture/source') { throw 'Wrapper success output is incorrect' }
     [IO.File]::WriteAllText($env:NPX_REAL, "@echo off`r`necho installer failure diagnostic`r`nexit /b 17`r`n")
-    $output = @(& $wrapper skills add fixture/source --skill alpha -g -y)
+    $output = @(& $wrapper skills add fixture/source --skill alpha -g -y --agent codex)
     if ($LASTEXITCODE -ne 17 -or $output.Count -ne 2 -or $output[1] -notlike '  Failed to update skills from fixture/source (exit 17); log:*') { throw 'Wrapper lost failure status or log path' }
     $installerLog = $output[1] -replace '^.*; log: ', ''
     if ((Get-Content -Raw -LiteralPath $installerLog) -notmatch 'installer failure diagnostic') { throw 'Wrapper discarded installer diagnostics' }
@@ -123,7 +121,6 @@ try {
     $env:PYTHONIOENCODING = $pythonEncodingBefore
     $env:PYTHON_BIN = $pythonBinBefore
     $env:NPX_REAL = $npxRealBefore
-    $env:DOTFILES_SKILLS_AGENT = $agentBefore
     $env:TEMP = $tempBefore
     $env:CLOUDSDK_PYTHON = $cloudPythonBefore
     $resolved = [IO.Path]::GetFullPath($fixture)

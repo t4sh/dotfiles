@@ -113,7 +113,7 @@ def project(data, skills_only=False, preserve_model_selection=False):
     if "external_dirs" in section(data, "skills"):
         # Snapshot owns only this required entry, never the user's other paths.
         entries = external_dirs(section(data, "skills")["external_dirs"])
-        shared = Path("~/.agents/skills").expanduser().resolve()
+        shared = (Path.home() / ".agents/skills").resolve()
         # Relative paths belong to the active Hermes home, not this process's cwd.
         # Only normalize unambiguous absolute paths; restore adds the canonical entry.
         expanded = (Path(os.path.expandvars(entry)).expanduser() for entry in entries if entry)
@@ -171,9 +171,70 @@ def without_model_selection(data):
     return result
 
 
+def shared_skill_aliases(live):
+    """Find profile-local directory aliases that expose the shared collection to sync."""
+    shared = (Path.home() / ".agents/skills").resolve()
+    local = live.parent / "skills"
+    if local.resolve().is_relative_to(shared):
+        raise ValueError("Hermes skills root points into shared skills; separate the profile-local root first")
+    # An uninitialized profile can have no local skills yet. Other stat/scan
+    # failures are not evidence that the boundary is clean.
+    try:
+        local.stat()
+    except FileNotFoundError:
+        if os.path.lexists(local):
+            raise ValueError("Hermes skills root is a dangling link")
+        return []
+    if not local.is_dir():
+        raise ValueError("Hermes skills root must be a directory")
+
+    def scan_error(error):
+        raise error
+
+    aliases = []
+    for root, directories, _ in os.walk(local, followlinks=False, onerror=scan_error):
+        for name in list(directories):
+            path = Path(root) / name
+            # resolve follows directory symlinks on Mac and junctions on Windows.
+            if path.resolve().is_relative_to(shared):
+                aliases.append(path)
+                directories.remove(name)
+    return sorted(aliases)
+
+
+def check_skill_boundary(live):
+    aliases = shared_skill_aliases(live)
+    if aliases:
+        raise ValueError(
+            f"Hermes has {len(aliases)} directory alias(es) into shared skills; "
+            "stop Hermes, then run hermes-settings.py isolate-skills --live " + str(live))
+
+
+def isolate_shared_skills(live):
+    """Move alias objects out of discovery; never copy, delete or rename their targets."""
+    config = project(read_config(live), skills_only=True)
+    if config.get("skills", {}).get("external_dirs") != ["~/.agents/skills"]:
+        raise ValueError("Configure skills.external_dirs with ~/.agents/skills before isolating aliases")
+    aliases = shared_skill_aliases(live)
+    backup = live.parent / "skill-alias-backups"
+    if backup.is_symlink() or getattr(backup, "is_junction", lambda: False)():
+        raise ValueError("Skill alias backup directory must not be a link")
+    destinations = [(path, backup / path.relative_to(live.parent / "skills")) for path in aliases]
+    for _, dest in destinations:
+        if os.path.lexists(dest):
+            raise ValueError("Skill alias backup already exists; retained everything: " + str(dest))
+        if dest.parent.resolve().is_relative_to((Path.home() / ".agents/skills").resolve()):
+            raise ValueError("Skill alias backup points into shared skills")
+    for path, dest in destinations:
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        path.rename(dest)
+    check_skill_boundary(live)
+    print(f"Hermes skill isolation: moved {len(aliases)} aliases to {backup}; shared targets retained")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("mode", choices=("capture", "check", "restore", "audit"))
+    parser.add_argument("mode", choices=("capture", "check", "restore", "audit", "isolate-skills", "check-skills"))
     parser.add_argument("--live", type=Path, default=hermes_home() / "config.yaml")
     parser.add_argument("--skills-only", action="store_true", help="Manage portable skill creation and additive shared discovery")
     parser.add_argument("--preserve-model-selection", action="store_true",
@@ -183,6 +244,14 @@ def main():
     if args.preserve_model_selection and (args.skills_only or args.mode not in ("restore", "check")):
         parser.error("--preserve-model-selection requires a full restore or check")
     try:
+        if args.mode == "isolate-skills":
+            isolate_shared_skills(args.live)
+            return 0
+        if args.mode != "audit":
+            check_skill_boundary(args.live)
+        if args.mode == "check-skills":
+            print("Hermes skill boundary: check passed")
+            return 0
         if args.mode == "capture":
             write_atomic(args.snapshot, project(read_config(args.live), args.skills_only))
         else:

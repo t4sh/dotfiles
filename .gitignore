@@ -53,3 +53,6 @@ git/hooks/
 .backup-rollback.*/
 .proto/
 .proto-logs/
+
+# Hermes bundled category metadata belongs in its profile, not shared skills.
+/agents/skills/research/DESCRIPTION.md

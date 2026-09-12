@@ -83,7 +83,7 @@ exit "${FIXTURE_EXIT:-0}"
             self.assertIn("HOLD: fixture/shared / Curated Skill", result.stdout)
             self.assert_curated_unchanged()
         calls = (self.root / "calls").read_text().splitlines()
-        self.assertEqual(calls, ["skills add fixture/shared --skill ordinary -g -y"] * 2)
+        self.assertEqual(calls, ["skills add fixture/shared --skill ordinary -g -y --agent codex"] * 2)
         self.assertEqual((self.root / "agents/skills/ordinary/SKILL.md").read_text(),
                          "new upstream content\n")
 
@@ -92,6 +92,19 @@ exit "${FIXTURE_EXIT:-0}"
         result = self.refresh()
         self.assertEqual(result.returncode, 17, result.stderr)
         self.assert_curated_unchanged()
+
+    @unittest.skipUnless(os.name == "nt", "real CMD wrapper requires Windows")
+    def test_generated_refresh_passes_one_agent_through_real_windows_wrapper(self):
+        for name in ("npx-skills-windows.cmd", "summarize-skills-update.py"):
+            shutil.copy2(ROOT / "scripts" / name, self.root / "scripts" / name)
+        installer = self.root / "fake npx.cmd"
+        installer.write_text('@echo off\necho %*>>"%FIXTURE_ROOT%/calls"\nexit /b 0\n', encoding="utf-8")
+        self.env.update(NPX=(self.root / "scripts/npx-skills-windows.cmd").as_posix(),
+                        NPX_REAL=str(installer))
+        result = self.refresh()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        calls = (self.root / "calls").read_text().splitlines()
+        self.assertEqual(calls, ["--yes skills add fixture/shared --skill ordinary -g -y --agent codex"])
 
     def test_timestamp_only_refresh_is_byte_identical_even_on_failure(self):
         lock = self.root / "agents/.skill-lock.json"

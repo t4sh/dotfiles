@@ -1,13 +1,139 @@
 """Public-owned Hermes fixtures: synthetic preferences, no installed app access."""
+import importlib.util
+import io
+import os
 import json
 from pathlib import Path
 import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 HELPER = ROOT / "scripts/hermes-settings.py"
+
+spec = importlib.util.spec_from_file_location("public_hermes_settings", HELPER)
+helper = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(helper)
+
+class HermesSkillBoundary(unittest.TestCase):
+    def test_skill_boundary_reports_scan_errors_instead_of_clean(self):
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory)
+            skills = home / ".hermes/skills"
+            skills.mkdir(parents=True)
+            with patch.object(helper.Path, "home", return_value=home):
+                with patch.object(helper.os, "scandir", side_effect=PermissionError("fixture access denied")):
+                    with self.assertRaisesRegex(PermissionError, "access denied"):
+                        helper.check_skill_boundary(skills.parent / "config.yaml")
+                    with self.assertRaisesRegex(PermissionError, "access denied"):
+                        helper.shared_skill_aliases(skills.parent / "config.yaml")
+
+    def test_skill_boundary_accepts_missing_root_but_rejects_a_file(self):
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory)
+            profile = home / ".hermes"
+            profile.mkdir()
+            with patch.object(helper.Path, "home", return_value=home):
+                helper.check_skill_boundary(profile / "config.yaml")
+                (profile / "skills").write_text("unexpected file", encoding="utf-8")
+                with self.assertRaisesRegex(ValueError, "must be a directory"):
+                    helper.check_skill_boundary(profile / "config.yaml")
+
+    def test_skill_isolation_preserves_shared_files_and_confines_later_bundle_writes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory)
+            shared = home / ".agents/skills/research"
+            shared.mkdir(parents=True)
+            skill = shared / "SKILL.md"
+            skill.write_text("personal research", encoding="utf-8")
+            local = home / ".hermes/skills"
+            local.mkdir(parents=True)
+            alias = local / "research"
+            if sys.platform == "win32":
+                subprocess.run(["cmd", "/c", "mklink", "/J", str(alias), str(shared)], check=True, capture_output=True)
+            else:
+                alias.symlink_to(shared, target_is_directory=True)
+            live = local.parent / "config.yaml"
+            live.write_text(json.dumps({"skills": {"external_dirs": [str(shared.parent)]}}), encoding="utf-8")
+            before = skill.read_bytes()
+            try:
+                with patch.object(helper.Path, "home", return_value=home):
+                    with self.assertRaisesRegex(ValueError, "directory alias"):
+                        helper.check_skill_boundary(live)
+                    helper.isolate_shared_skills(live)
+                    helper.isolate_shared_skills(live)
+                    helper.check_skill_boundary(live)
+                self.assertEqual(skill.read_bytes(), before)
+                self.assertTrue(os.path.lexists(local.parent / "skill-alias-backups/research"))
+                alias.mkdir()
+                (alias / "DESCRIPTION.md").write_text("Hermes category", encoding="utf-8")
+                self.assertFalse((shared / "DESCRIPTION.md").exists())
+                self.assertEqual(skill.read_bytes(), before)
+            finally:
+                # Explicitly remove only the fixture link/junction before temp cleanup.
+                for candidate in (alias, local.parent / "skill-alias-backups/research"):
+                    if candidate.is_symlink():
+                        candidate.unlink()
+                    elif getattr(candidate, "is_junction", lambda: False)():
+                        candidate.rmdir()
+
+    def test_skill_isolation_requires_external_discovery_and_preserves_real_directories(self):
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory)
+            local = home / ".hermes/skills/research"
+            local.mkdir(parents=True)
+            owned = local / "SKILL.md"
+            owned.write_text("Hermes-owned skill", encoding="utf-8")
+            live = local.parent.parent / "config.yaml"
+            live.write_text('{"skills": {"create_dir": "~/.agents/skills"}}', encoding="utf-8")
+            with patch.object(helper.Path, "home", return_value=home):
+                with self.assertRaisesRegex(ValueError, "external_dirs"):
+                    helper.isolate_shared_skills(live)
+                helper.check_skill_boundary(live)
+            self.assertEqual(owned.read_text(encoding="utf-8"), "Hermes-owned skill")
+
+    @unittest.skipIf(sys.platform == "win32", "POSIX symlink fixture; junction migration covered separately")
+    def test_skill_boundary_blocks_restore_and_preserves_conflicting_backup(self):
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory)
+            shared = home / ".agents/skills/research"
+            shared.mkdir(parents=True)
+            local = home / ".hermes/skills"
+            local.mkdir(parents=True)
+            alias = local / "research"
+            alias.symlink_to(shared, target_is_directory=True)
+            live = local.parent / "config.yaml"
+            live.write_text(json.dumps({"skills": {"external_dirs": [str(shared.parent)]}}), encoding="utf-8")
+            before = live.read_bytes()
+            backup = local.parent / "skill-alias-backups/research"
+            backup.parent.mkdir()
+            backup.write_text("existing backup", encoding="utf-8")
+            args = ["hermes-settings", "restore", "--skills-only", "--live", str(live),
+                    "--snapshot", str(ROOT / "apps/windows/hermes/config.json")]
+            with patch.object(helper.Path, "home", return_value=home):
+                with patch.object(sys, "argv", args), patch("sys.stdout", new_callable=io.StringIO):
+                    self.assertEqual(helper.main(), 1)
+                with self.assertRaisesRegex(ValueError, "backup already exists"):
+                    helper.isolate_shared_skills(live)
+            self.assertEqual(live.read_bytes(), before)
+            self.assertTrue(alias.is_symlink())
+            self.assertEqual(backup.read_text(encoding="utf-8"), "existing backup")
+
+    @unittest.skipIf(sys.platform == "win32", "POSIX symlink fixture")
+    def test_skill_boundary_refuses_aliased_profile_root(self):
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory)
+            shared = home / ".agents/skills"
+            shared.mkdir(parents=True)
+            profile = home / ".hermes"
+            profile.mkdir()
+            (profile / "skills").symlink_to(shared, target_is_directory=True)
+            with patch.object(helper.Path, "home", return_value=home):
+                with self.assertRaisesRegex(ValueError, "skills root"):
+                    helper.check_skill_boundary(profile / "config.yaml")
+
 
 class HermesPreferences(unittest.TestCase):
     def run_helper(self, mode, live, snapshot, *options):

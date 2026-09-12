@@ -20,17 +20,28 @@ if not "%~2"=="skills" exit /b 42
 if not "%~3"=="add" exit /b 43
 if not "%~4"=="fixture/source" exit /b 44
 if not "%~6"=="two words" exit /b 45
+set "agentCount=0"
+:nextarg
+if "%~1"=="" goto checked
+if "%~1"=="--agent" (
+  set /a agentCount+=1 >nul
+  if not "%~2"=="codex" exit /b 47
+)
+shift
+goto nextarg
+:checked
+if not "%agentCount%"=="1" exit /b 48
 set "answer="
 set /p "answer="
 if defined answer exit /b 46
 exit /b 0
 '@
-    $output = @('unexpected terminal input' | & (Join-Path $Repository 'scripts/npx-skills-windows.cmd') skills add fixture/source --skill 'two words' -g -y)
+    $output = @('unexpected terminal input' | & (Join-Path $Repository 'scripts/npx-skills-windows.cmd') skills add fixture/source --skill 'two words' -g -y --agent codex)
     if ($LASTEXITCODE -ne 0) { throw "npm confirmation regression: wrapper exited $LASTEXITCODE" }
     if (($output -join '|') -notmatch 'Checking skills from source: fixture/source') { throw 'Source progress lost' }
-    Write-Output 'PASS: npm consent precedes the command; arguments survive; child stdin is closed.'
+    Write-Output 'PASS: npm consent precedes the command; arguments survive; exactly one canonical agent target; child stdin is closed.'
     Write-DotfilesText $env:NPX_REAL "@echo off`r`necho installer failure fixture`r`nexit /b 17`r`n"
-    $output = @(& (Join-Path $Repository 'scripts/npx-skills-windows.cmd') skills add fixture/source --skill alpha -g -y)
+    $output = @(& (Join-Path $Repository 'scripts/npx-skills-windows.cmd') skills add fixture/source --skill alpha -g -y --agent codex)
     if ($LASTEXITCODE -ne 17 -or ($output -join '|') -notmatch 'exit 17.*log:') { throw 'Installer failure status/log lost' }
     Write-Output 'PASS: installer failures retain exit status and diagnostic log location.'
 } finally {
