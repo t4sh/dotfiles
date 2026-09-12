@@ -10,7 +10,11 @@ $ErrorActionPreference='Stop'
 . (Join-Path $PSScriptRoot 'lib/windows-links.ps1')
 Assert-DotfilesWindows
 if ($ExtensionsDir -and $Only -notin @('vscode','cursor')) { throw '-ExtensionsDir requires -Only vscode or -Only cursor.' }
-if ($RoamingRoot -ne $env:APPDATA -and $Only -ne 'sublime' -and -not $ExtensionsDir) {
+$isolatedRoaming = [IO.Path]::GetFullPath($RoamingRoot).TrimEnd('\','/') -ine [IO.Path]::GetFullPath($env:APPDATA).TrimEnd('\','/')
+if ($ExtensionsDir -and -not $isolatedRoaming) {
+    throw 'An isolated editor restore requires a separate -RoamingRoot and -ExtensionsDir; no live preferences will be changed.'
+}
+if ($isolatedRoaming -and $Only -ne 'sublime' -and -not $ExtensionsDir) {
     throw 'An isolated editor restore requires -Only vscode or -Only cursor and -ExtensionsDir; no live extensions will be changed.'
 }
 $mode=if($Check){'Check'}else{'Restore'}
