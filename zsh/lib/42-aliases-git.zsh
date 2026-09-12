@@ -2,8 +2,8 @@
 # Each gh function uses existing `gh auth` credentials — no PATs, no env vars.
 
 # --- dotfiles management ---
-alias dotlink='bash ~/.dotfiles/scripts/link.sh'
-dotbackup() {
+alias dot-link='bash ~/.dotfiles/scripts/link.sh'
+dot-backup() {
   cd ~/.dotfiles || return
   # Surface Brewfile drift before `make backup` silently absorbs it into the dump.
   bash scripts/audit-brewfile.sh || true
@@ -26,7 +26,7 @@ dotbackup() {
   local msg
   vared -p "commit message [${default}]: " -c msg
   # --only builds the commit from this pathspec while preserving any unrelated
-  # entries the operator already had staged before running dotbackup.
+  # entries the operator already had staged before running dot-backup.
   git commit --only -m "${msg:-$default}" -- "${backup_paths[@]}"
 }
 
@@ -65,11 +65,11 @@ pr-digest() {
   done
 
   for repo in "${repos[@]}"; do
-    if ! pr_output="$(gh pr list --repo "$repo" --state open \
+    if ! pr_output="$(gh pr list --repo "$repo" --state open --limit 1000 \
       --json number,url,title,author,autoMergeRequest,mergeStateStatus,statusCheckRollup,comments \
-      --jq '.[] |
+      --jq 'if length >= 1000 then error("pr-digest: 1000-PR limit reached; results may be incomplete") else . end | .[] |
         (if   any(.comments[]?;         .body | startswith("dependabot-auto-merge: held")) then "1|HELD"
-         elif any(.statusCheckRollup[]?; .conclusion == "FAILURE")                         then "2|FAIL"
+         elif any(.statusCheckRollup[]?; .conclusion == "FAILURE" or .conclusion == "TIMED_OUT" or .conclusion == "CANCELLED" or .conclusion == "ACTION_REQUIRED" or .conclusion == "STARTUP_FAILURE" or .state == "FAILURE" or .state == "ERROR")                         then "2|FAIL"
          elif .autoMergeRequest == null and .author.login != "app/dependabot"              then "3|HUMAN"
          elif .autoMergeRequest != null and .mergeStateStatus == "BEHIND"                  then "4|AUTO-BH"
          elif .autoMergeRequest != null                                                    then "5|AUTO"
@@ -94,9 +94,9 @@ pr-digest() {
 }
 
 # -----------------------------------------------------------------------------
-# local-merged — local branches whose PR has landed on main (squash-safe)
+# pr-merged — local branches whose current tip matches a PR merged into the default branch (squash-safe)
 #
-#   Usage:  local-merged
+#   Usage:  pr-merged
 #
 #   Why: `git branch --merged` (and every git client that uses it, including
 #   Tower) relies on commit reachability. A squash-merge creates a new commit
@@ -114,25 +114,34 @@ pr-digest() {
 #   Runtime: ~1s per local branch (one gh call each).
 #   Skips:   default branch (main/master), currently-checked-out branch.
 # -----------------------------------------------------------------------------
-local-merged() {
-  local current default
+pr-merged() {
+  local current default branches
   current=$(git symbolic-ref --short HEAD 2>/dev/null) || return 1
-  default=$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed 's|^origin/||')
-  default=${default:-main}
+  default=$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null) || {
+    echo "pr-merged: cannot resolve origin/HEAD; set the remote default branch first" >&2
+    return 1
+  }
+  default=${default#origin/}
+  branches=$(git branch --format='%(refname:short)|%(upstream:track)|%(objectname)') || return 1
 
   local rows=""
-  while IFS='|' read -r b track; do
-    [[ "$b" == "$default" || "$b" == "master" || "$b" == "$current" ]] && continue
+  local b track tip
+  while IFS='|' read -r b track tip; do
+    [[ -z "$b" || "$b" == "$default" || "$b" == "master" || "$b" == "$current" ]] && continue
     local pr_line
-    pr_line=$(gh pr list --head "$b" --state merged --limit 1 \
-      --json number,url,mergedAt \
-      --jq '.[0] | select(. != null) | [(.number|tostring), .url, (.mergedAt[0:10])] | @tsv' 2>/dev/null)
+    if ! pr_line=$(gh pr list --head "$b" --base "$default" --state merged --limit 1 \
+      --json number,url,mergedAt,headRefOid \
+      --jq '.[0] | select(. != null) | [(.number|tostring), .url, (.mergedAt[0:10]), .headRefOid] | @tsv'); then
+      echo "pr-merged: failed to query merged PRs for $b" >&2
+      return 1
+    fi
     [[ -z "$pr_line" ]] && continue
-    local number url merged_at upstream='-'
-    IFS=$'\t' read -r number url merged_at <<<"$pr_line"
+    local number url merged_at pr_tip upstream='-'
+    IFS=$'\t' read -r number url merged_at pr_tip <<<"$pr_line"
+    [[ "$tip" == "$pr_tip" ]] || continue
     [[ "$track" == *gone* ]] && upstream='gone'
     rows+="$b"$'\t'"#$number"$'\t'"$merged_at"$'\t'"$upstream"$'\t'"$url"$'\n'
-  done < <(git branch --format='%(refname:short)|%(upstream:track)')
+  done <<<"$branches"
 
   if [[ -z "$rows" ]]; then
     echo "(no merged local branches)"
@@ -143,3 +152,8 @@ local-merged() {
     print -rn -- "$rows"
   } | column -t -s $'\t'
 }
+
+# Compatibility names.
+alias dotlink='dot-link'
+alias dotbackup='dot-backup'
+alias local-merged='pr-merged'

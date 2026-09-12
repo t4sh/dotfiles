@@ -1,7 +1,9 @@
 # Generic aliases
 
-alias lis='command ls -lahtGFp'
-alias dstClean="find . -name '.DS_Store' -delete"
+alias ls-recent='command ls -lahtGFp'
+# Heavy cleanup below the current physical directory; no depth limit or symlink following.
+# Preserve home metadata and every Applications tree. No backup is made.
+alias ds-clean='find "$(pwd -P)" \( -type d -iname applications -prune \) -o \( -type f -name .DS_Store ! -path "${HOME:A}/.DS_Store" ! -ipath "*/applications/*" -exec rm -f {} + \)'
 alias mkdir='mkdir -p'
 alias path='print -l ${(s.:.)PATH}'
 
@@ -28,3 +30,7 @@ fi
 if command -v lazygit >/dev/null 2>&1; then
   alias lg='lazygit'
 fi
+
+# Compatibility names; implementations above use the canonical names.
+alias lis='ls-recent'
+alias dstClean='ds-clean'

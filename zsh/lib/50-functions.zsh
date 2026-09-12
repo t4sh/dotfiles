@@ -23,8 +23,12 @@ jcd() {
   [[ -n "$project" ]] && cd -- "$project"
 }
 
-# Free a port gracefully. Escalate to SIGKILL only with explicit --force.
-free-port() {
+# Remove retired public functions when an existing shell reloads this file.
+unfunction free-port free-ports list-ports 2>/dev/null || true
+unalias free-port 2>/dev/null || true
+
+# Internal single-port operation. Free a port gracefully. Escalate to SIGKILL only with explicit --force.
+_port_reset_one() {
   local force=0 port
   if [[ "${1:-}" == "--force" ]]; then
     force=1
@@ -32,7 +36,7 @@ free-port() {
   fi
   port="${1:-}"
   [[ "$port" == <-> && "$port" -ge 1 && "$port" -le 65535 ]] || {
-    echo "Usage: free-port [--force] <1-65535>"
+    echo "Usage: port-reset [--force] <port> [port ...]"
     return 1
   }
   local raw
@@ -63,24 +67,45 @@ free-port() {
         return 1
       }
     else
-      echo "Port $port is still in use; retry with: free-port --force $port"
+      echo "Port $port is still in use; retry with: port-reset --force $port"
       return 1
     fi
   fi
   echo "Port $port freed."
 }
 
-# Free multiple ports.
-free-ports() {
+# One public command for one or several ports. Validate the whole request first.
+port-reset() {
+  local port failed=0
+  local -a options
+  if [[ "${1:-}" == --force ]]; then
+    options=(--force)
+    shift
+  fi
+  if (( $# == 0 )); then
+    echo "Usage: port-reset [--force] <port> [port ...]"
+    return 1
+  fi
   for port in "$@"; do
-    free-port "$port"
+    [[ "$port" == <-> && "$port" -ge 1 && "$port" -le 65535 ]] || {
+      echo "Invalid port: $port (expected 1-65535)" >&2
+      return 1
+    }
   done
+  for port in "$@"; do
+    _port_reset_one "${options[@]}" "$port" || failed=1
+  done
+  return "$failed"
 }
 
+# Compatibility for the former multi-port and inspection commands only.
+alias free-ports='port-reset'
+alias list-ports='port-info'
+
 # List listening ports.
-list-ports() {
+port-info() {
   echo "Listening ports:"
-  sudo lsof -iTCP -sTCP:LISTEN -P -n | grep -E 'COMMAND|localhost|\*:' | sort -u
+  sudo lsof -iTCP -sTCP:LISTEN -P -n
 }
 
 # Auto-switch Node from the nearest parent .nvmrc and restore the dotfiles pin
