@@ -142,3 +142,6 @@ pwsh -NoProfile -File tests/test_windows_python_discovery.ps1
 pwsh -NoProfile -File tests/test_windows_update_reporting.ps1
 pwsh -NoProfile -File tests/test_public_windows_hermes.ps1
 ```
+
+The PowerShell `port-info <port>` helper inspects connections. The misleading former
+`free-port` name is removed when the profile reloads; it never terminated listeners.

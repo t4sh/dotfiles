@@ -1,18 +1,21 @@
 #!/usr/bin/env bash
-# Flush common daemons and optionally remove old user log files.
+# Remove old user log files; daemon resets are an explicit troubleshooting option.
 # Safe default is a dry run. Destructive cleanup requires an explicit --yes.
 
 set -euo pipefail
 
 DRY_RUN=1
+RESET_SERVICES=0
 LOG_AGE_DAYS="${CLEAN_MAC_LOG_AGE_DAYS:-30}"
 
 usage() {
   cat <<'EOF'
-Usage: clean-mac.sh [--dry-run | --yes]
+Usage: clean-mac.sh [--dry-run | --yes] [--reset-services]
 
   --dry-run   List user log files older than the retention threshold (default).
-  --yes       Delete those old user log files, purge memory, and restart daemons.
+  --yes       Delete those old user log files.
+  --reset-services  Also purge memory, flush DNS caches, and restart audio,
+                    SystemUIServer, Finder and Dock (requires sudo with --yes).
 
 Environment:
   CLEAN_MAC_LOG_AGE_DAYS  Retention threshold in days (default: 30).
@@ -21,12 +24,16 @@ This script never deletes /private/var/log.
 EOF
 }
 
-case "${1:---dry-run}" in
-  -n|--dry-run) DRY_RUN=1 ;;
-  -y|--yes) DRY_RUN=0 ;;
-  -h|--help|help) usage; exit 0 ;;
-  *) echo "unknown option: $1" >&2; usage >&2; exit 1 ;;
-esac
+while (($#)); do
+  case "$1" in
+    -n|--dry-run) DRY_RUN=1 ;;
+    -y|--yes) DRY_RUN=0 ;;
+    --reset-services) RESET_SERVICES=1 ;;
+    -h|--help|help) usage; exit 0 ;;
+    *) echo "unknown option: $1" >&2; usage >&2; exit 1 ;;
+  esac
+  shift
+done
 
 [[ "$LOG_AGE_DAYS" =~ ^[0-9]+$ ]] || {
   echo "CLEAN_MAC_LOG_AGE_DAYS must be a non-negative integer" >&2
@@ -50,12 +57,17 @@ if (( DRY_RUN )); then
   if [[ -d "$LOG_ROOT" ]]; then
     /usr/bin/find "$LOG_ROOT" -type f -mtime "+$LOG_AGE_DAYS" -print
   fi
-  echo "No files changed. Re-run with --yes to clean and restart daemons."
+  if (( RESET_SERVICES )); then
+    echo "Would purge memory, flush DNS caches, and restart mDNSResponder, mDNSResponderHelper, coreaudiod, SystemUIServer, Finder and Dock."
+  else
+    echo "Log cleanup only; no memory purge or daemon restarts."
+  fi
+  echo "No files changed. Re-run with --yes to apply the selected actions."
   exit 0
 fi
 
-if [[ $EUID -ne 0 ]]; then
-  echo "--yes requires sudo: sudo bash ~/.dotfiles/scripts/clean-mac.sh --yes" >&2
+if (( RESET_SERVICES )) && [[ $EUID -ne 0 ]]; then
+  echo "--reset-services --yes requires sudo" >&2
   exit 1
 fi
 
@@ -64,14 +76,16 @@ if [[ -d "$LOG_ROOT" ]]; then
   /usr/bin/find "$LOG_ROOT" -type f -mtime "+$LOG_AGE_DAYS" -print -delete
 fi
 
-purge
+if (( RESET_SERVICES )); then
+  purge
 
-dscacheutil -flushcache
-killall -HUP mDNSResponder       || true
-killall -HUP mDNSResponderHelper || true
-killall coreaudiod               || true
-killall SystemUIServer           || true
-killall Finder                   || true
-killall Dock                     || true
+  dscacheutil -flushcache
+  killall -HUP mDNSResponder       || true
+  killall -HUP mDNSResponderHelper || true
+  killall coreaudiod               || true
+  killall SystemUIServer           || true
+  killall Finder                   || true
+  killall Dock                     || true
+fi
 
 echo "Cleanup complete. System logs were preserved."

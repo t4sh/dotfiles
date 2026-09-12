@@ -201,8 +201,9 @@ macos-dry-run: ## Preview macOS defaults without changing the machine
 	@bash macos/defaults.sh --dry-run
 	@bash scripts/touch-id-sudo.sh --dry-run
 
-macos-check: ## Read back representative managed macOS defaults
+macos-check: ## Read back managed macOS defaults and Finder view policy
 	@bash macos/defaults.sh --check
+	@if [ "$(SKIP_FINDER_VIEWS)" != "1" ]; then python3 scripts/apply-finder-views.py --check; fi
 	@bash scripts/touch-id-sudo.sh --check
 
 touch-id-sudo: ## Idempotently enable Touch ID authentication for sudo
@@ -309,7 +310,7 @@ apps-drift: ## Check app preference snapshots against current system state
 	@bash scripts/audit-apps-drift.sh
 
 backup: ## Check macOS policy, refresh repo snapshots, then capture Dato/Shottr/Deskflow into ~/.secrets
-	@$(MAKE) --no-print-directory macos-check || { echo "macOS preferences differ or could not be checked. Review and confirm each difference before backup; update policy or restore the saved value, then retry."; exit 1; }
+	@$(MAKE) --no-print-directory macos-check SKIP_FINDER_VIEWS=1 || { echo "macOS preferences differ or could not be checked. Review and confirm each difference before backup; update policy or restore the saved value, then retry."; exit 1; }
 	@bash scripts/backup-apps.sh
 	@if [ -f "$(HOME)/Library/Containers/com.sindresorhus.Dato/Data/Library/Preferences/com.sindresorhus.Dato.plist" ]; then $(MAKE) --no-print-directory backup-dato; else echo "Dato private capture skipped: launch Dato first; previous backup retained."; fi
 	@if defaults read cc.ffitch.shottr >/dev/null 2>&1; then $(MAKE) --no-print-directory backup-shottr; else echo "Shottr private capture skipped: preferences unavailable; previous backup retained."; fi

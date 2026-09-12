@@ -368,3 +368,50 @@ See [WINDOWS.md](WINDOWS.md) for native setup and maintenance, and [SECRETS-WIND
 Hermes preference backup is user-owned and excluded from this public repository. See [Hermes preferences](docs/hermes-preferences.md) for restoring settings and disabling Desktop message reactions.
 
 Checkout-safe regression fixtures: `make test-public` on macOS; `pwsh -NoProfile -File tests/test_public_windows_maintenance.ps1` on a bootstrapped Windows checkout. Fixtures do not replace fresh-machine or GUI verification.
+
+## Daily shell maintenance
+
+| Command | Purpose |
+| --- | --- |
+| `ls-recent` | Detailed listing, newest first |
+| `view-reset` | Apply Finder/Open–Save policy and limited layout reset |
+| `ds-clean` | Recursive `.DS_Store` cleanup from the current directory |
+| `logs-check` / `logs-clean` | Preview/delete old user logs |
+| `up-brew` / `re-brew` | Upgrade packages / upgrade plus maintenance |
+| `dock-lock` / `dock-unlock` | Lock/unlock Dock settings |
+| `dock-gap`, `dock-gap-small`, `dock-gap-files`, `dock-gap-files-small` | Add Dock spacers |
+| `colima-up` / `colima-down` / `colima-status` | Manage Colima |
+| `dot-link` / `dot-backup` | Link configuration / capture managed snapshots |
+| `pr-digest <org>` / `pr-merged` | PR summaries / local tips matching merged PRs |
+| `port-info` / `port-reset [--force] <port> ...` | Inspect listeners / free one or several ports |
+
+Historical names remain compatibility aliases except `free-port`, which is removed.
+`logs-clean` does not restart services; the script's explicit `--reset-services` option does.
+
+### Finder policy
+
+`view-reset` uses Columns, Date Modified groups, Name sorting within groups, previews,
+hidden items and 13-point text. Home and existing `/Applications`, `/System/Applications`,
+and `~/Applications` use List view with Name ascending. Set **Group By → None** manually
+for those exceptions; the native check verifies only view and sorting.
+
+Daily metadata discovery uses an optional `~/FileVault` directory and its directory
+symlink targets, with one child level below each root. It does not scrub all folders.
+Use `--root <directory>` and `--depth <levels>` for an explicit scope, or `--dry-run`
+to preview. Cloud target discovery, validation, directory reads and backups have
+30-second deadlines; the paused deletion phase has a separate total deadline.
+Originals are backed up outside Git when metadata files are selected for deletion.
+Home metadata and Applications trees are protected. Finder may recreate metadata after relaunch.
+
+`ds-clean` is separate: no depth limit, timeout or backup; it preserves Home metadata
+and Applications trees and does not follow symlinks. Starting it from Home can traverse
+cloud storage for a long time. Run `view-reset` afterward to reapply preferences.
+
+`make macos` applies the shared policy with `--policy-only`, without metadata scrubbing.
+`make macos-check` checks global preferences; `view-reset --check-folders` verifies
+exceptions through Finder in a GUI session. Backup preflight skips daily view-policy drift.
+Native Open/Save Columns/Date Modified defaults are fallbacks; apps may override them,
+and native panels do not support Finder-style grouping. Reopen existing dialogs.
+
+Privacy reviewers and fork users: read the [intentional public identity baseline](PRIVACY.md).
+The documented noreply Git identity and public verification key are deliberately published.

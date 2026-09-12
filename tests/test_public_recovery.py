@@ -23,7 +23,8 @@ def load(name, relative):
 
 
 vault = load('public_vault', 'scripts/vault-integrity.py')
-finder = load('public_finder', 'macos/finder-column-settings.py')
+finder = load('public_finder', 'scripts/apply-finder-views.py')
+legacy_finder = load('public_finder_bridge', 'macos/finder-column-settings.py')
 
 
 class PublicRecoveryTests(unittest.TestCase):
@@ -85,22 +86,41 @@ class PublicRecoveryTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual((target / 'keep').read_text(), 'existing dummy value')
 
-    def test_finder_changes_only_managed_column_preferences(self):
-        options = {'OtherView': {'keep': 1},
-                   'ColumnViewOptions': {'ColumnWidth': 300, 'ShowPreview': False}}
-        response = subprocess.CompletedProcess([], 0, stdout=plistlib.dumps({
-            'StandardViewOptions': options, 'Unrelated': 'preserve'}))
-        with patch.object(finder.subprocess, 'run', return_value=response) as run:
+    def test_finder_policy_preserves_unmanaged_options(self):
+        original = {'StandardViewOptions': {
+            'OtherView': {'keep': 1}, 'ColumnViewOptions': {'ColumnWidth': 300}}}
+        changes = finder.preference_changes(original, {})
+        options = changes['com.apple.finder']['StandardViewOptions']
+        self.assertEqual(options['OtherView'], {'keep': 1})
+        self.assertEqual(options['ColumnViewOptions']['ColumnWidth'], 300)
+        self.assertEqual(changes['com.apple.finder']['FXArrangeGroupViewBy'], 'Name')
+        self.assertEqual(changes['NSGlobalDomain']['NSNavPanelFileListModeForOpenMode2'], 3)
+        effective = {**original, **changes['com.apple.finder']}
+        self.assertFalse(any(finder.preference_changes(effective, changes['NSGlobalDomain']).values()))
+
+    def test_finder_bridge_delegates_without_live_commands(self):
+        with patch.object(legacy_finder.subprocess, 'call', return_value=0) as call:
             with patch.object(sys, 'argv', ['finder', 'apply']):
-                self.assertEqual(finder.main(), 0)
-            written = plistlib.loads(run.call_args.args[0][-1].encode())
-            self.assertEqual(written['OtherView'], options['OtherView'])
-            self.assertEqual(written['ColumnViewOptions'], {
-                'ColumnWidth': 300, 'ShowPreview': True, 'ArrangeBy': 'modd'})
-            run.reset_mock()
-            with patch.object(sys, 'argv', ['finder', 'dry-run']), contextlib.redirect_stdout(io.StringIO()):
-                self.assertEqual(finder.main(), 0)
-            run.assert_not_called()
+                self.assertEqual(legacy_finder.main(), 0)
+            self.assertEqual(call.call_args.args[0][-1], '--policy-only')
+
+    def test_finder_reset_preserves_protected_and_changed_metadata(self):
+        home = self.root.resolve()
+        metadata = home / '.DS_Store'
+        metadata.write_bytes(b'home layout')
+        folder = home / 'example'
+        folder.mkdir()
+        child = folder / '.DS_Store'
+        child.write_bytes(b'old layout')
+        with patch.object(finder.Path, 'home', return_value=home):
+            self.assertEqual(finder.find_stores([home], [], 1), [child])
+            with self.assertRaises(ValueError):
+                finder.reset_store(metadata, b'home layout')
+            saved = finder.backup_store(child, home / 'backups')
+            child.write_bytes(b'new layout')
+            with self.assertRaises(RuntimeError):
+                finder.reset_store(child, saved)
+        self.assertEqual(child.read_bytes(), b'new layout')
 
 
 if __name__ == '__main__':

@@ -20,7 +20,7 @@ De-prioritize:
 
 ## First Steps
 
-1. Read this file.
+1. Read this file. For privacy/security reviews, also read `PRIVACY.md` before classifying findings.
 2. If `.agent-memory/` exists in a local/private checkout, read `.agent-memory/index.yaml` and load relevant memory. Public checkouts may not include project memory.
 
 ## Project Structure
@@ -44,10 +44,11 @@ De-prioritize:
 
 ## Key Rules
 
-- Never commit secrets. API keys, tokens, SSH keys, and credentials live under `~/.secrets/`.
+- Never commit secrets. API keys, tokens, private SSH keys, and credentials live under `~/.secrets/`.
 - Brewfile is the package source of truth. Install via phased targets: `brew-base` → `node` → `brew-npm` → `brew-mas` (`make brew` runs that sequence).
 - `~/.agents` is a whole-directory symlink to `~/.dotfiles/agents/`.
 - No mackup. Manual file-based backup only.
+- The public identity and verification key in `PRIVACY.md` are intentional. Verify the baseline; do not repeat matching entries as fresh privacy caveats. Report unexpected changes or new evidence.
 
 ## How to Respond
 

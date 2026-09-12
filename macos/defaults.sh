@@ -86,8 +86,6 @@ verify_defaults() {
 NSGlobalDomain	AppleShowAllExtensions	0
 com.apple.finder	AppleShowAllFiles	1
 com.apple.finder	ShowPathbar	1
-com.apple.finder	FXPreferredViewStyle	clmv
-com.apple.finder	FXPreferredGroupBy	Date Modified
 com.apple.dock	autohide	0
 com.apple.dock	show-recents	0
 com.apple.screensaver	askForPassword	1
@@ -107,9 +105,8 @@ com.apple.dock	wvous-bl-modifier	0
 com.apple.dock	wvous-br-corner	1
 com.apple.dock	wvous-br-modifier	0
 EOF
-    # Column view has its own preview preference. ShowPreviewPane can be false
-    # while the requested preview column is visible; do not gate backup on it.
-    python3 "$(dirname "$0")/finder-column-settings.py" check || failures=$((failures + 1))
+    # Finder view/preview choices are daily workspace state. Reset them explicitly
+    # with view-reset; they must not block unrelated preference backups.
     capture="$(command defaults read com.apple.screencapture location 2>/dev/null || true)"
     capture="${capture%\"}"; capture="${capture#\"}"
     if [[ "$capture" == "$CAPTURE_DIR" ]]; then
@@ -371,14 +368,11 @@ defaults write com.apple.finder "QuitMenuItem" -bool "false"
 # Show all filename extensions in the Finder (default value is "false")
 defaults write NSGlobalDomain "AppleShowAllExtensions" -bool "false"
 
-# Show hidden files in the Finder (default value is "false")
-defaults write com.apple.finder "AppleShowAllFiles" -bool "true"
+# Finder view/hidden-item preferences are applied by the shared policy below.
 
 # Show path bar in the bottom of the Finder windows (default value is "false")
 defaults write com.apple.finder "ShowPathbar" -bool "true"
 
-# Keep Finder's Preview pane visible when switching folder views.
-defaults write com.apple.finder "ShowPreviewPane" -bool "true"
 
 # Display full POSIX path as Finder window title
 defaults write com.apple.finder "_FXShowPosixPathInTitle" -bool "true"
@@ -386,19 +380,8 @@ defaults write com.apple.finder "_FXShowPosixPathInTitle" -bool "true"
 # Show status bar in the bottom of the Finder windows (default value is "false")
 defaults write com.apple.finder "ShowStatusBar" -bool "true"
 
-# Set the default view style for folders without custom setting (default value is "icnv")
-# Icon View : `icnv`
-# List View : `Nlsv`
-# Column View : `clmv`
-# Gallery View : `Flwv`   (was "Cover Flow" before Mojave)
-defaults write com.apple.finder "FXPreferredViewStyle" -string "clmv"
-
-# Match Finder's Group By → Date Modified menu (separate from sorting within groups).
-defaults write com.apple.finder "FXPreferredGroupBy" -string "Date Modified"
-
-# Sort within column groups by Date Modified and keep the preview column on.
-# Existing folder overrides, especially Applications, remain intact.
-python3 "$(dirname "$0")/finder-column-settings.py" "$MODE"
+# Finder view policy is owned by scripts/apply-finder-views.py (--policy-only
+# at the end relaunches Finder). Use view-reset for the separate daily scrub.
 
 # Set the default path for new Window's location
 # Computer : `PfCm`
@@ -549,9 +532,7 @@ defaults write com.apple.AppleMultitouchMouse MouseTwoFingerDoubleTapGesture -in
 # Panels                      https://macos-defaults.com/#💻-list-of-commands #
 ###############################################################################
 
-# Expand save panel by default
-defaults write NSGlobalDomain "NSNavPanelExpandedStateForSaveMode" -bool "true"
-defaults write NSGlobalDomain "NSNavPanelExpandedStateForSaveMode2" -bool "true"
+# Save-panel defaults are owned by scripts/apply-finder-views.py.
 
 # Expand print panel by default
 defaults write NSGlobalDomain "NSNavPanelExpandedStateForPrintMode" -bool "true"
@@ -843,11 +824,18 @@ for app in "Activity Monitor" \
 	"Screenshot" \
 	"SystemUIServer" \
 	"ControlCenter" \
-	"Finder" \
 	"WindowManager" \
 	"TextEdit"; do
 	killall "${app}" &> /dev/null || true
 done
+# Finder is relaunched by apply-finder-views.py --policy-only (SIGKILL).
+# A graceful killall here would write stale .DS_Store files first.
+
+if [[ "$MODE" == dry-run ]]; then
+    python3 "$(dirname "$0")/../scripts/apply-finder-views.py" --policy-only --dry-run
+else
+    python3 "$(dirname "$0")/../scripts/apply-finder-views.py" --policy-only
+fi
 
 if [[ "$MODE" == dry-run ]]; then
     echo "macOS dry-run complete. No settings were changed."

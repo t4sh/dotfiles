@@ -35,7 +35,9 @@ function ..... { Set-Location ../../../.. }
 function path { $env:Path -split ';' }
 function which([string]$Name) { Get-Command $Name | Select-Object -ExpandProperty Source }
 function mcd([string]$Path) { New-Item -ItemType Directory -Force $Path | Out-Null; Set-Location $Path }
-function free-port([int]$Port) {
+# Remove the misleading old name when reloading an existing session.
+Remove-Item Function:\free-port -ErrorAction SilentlyContinue
+function port-info([int]$Port) {
     Get-NetTCPConnection -LocalPort $Port -ErrorAction SilentlyContinue |
         Select-Object LocalAddress, LocalPort, State, OwningProcess
 }
