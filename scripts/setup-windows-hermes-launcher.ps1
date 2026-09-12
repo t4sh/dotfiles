@@ -7,7 +7,7 @@ $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'lib/windows-common.ps1')
 Assert-DotfilesWindows
 if ($Apply -and $Check) { throw 'Choose -Apply or -Check.' }
-if (-not $HermesHome) { $HermesHome = if ($env:HERMES_HOME) { $env:HERMES_HOME } else { Join-Path $env:LOCALAPPDATA 'hermes' } }
+$HermesHome = Resolve-DotfilesHermesHome $HermesHome
 if (-not $HermesRoot) { $HermesRoot = Join-Path $HermesHome 'hermes-agent' }
 if (-not $Python) { $Python = Join-Path $HermesRoot 'venv/Scripts/python.exe' }
 if (-not (Test-Path -LiteralPath $python -PathType Leaf)) { throw 'Initialize Hermes before configuring its launcher.' }
