@@ -87,6 +87,25 @@ exit "${FIXTURE_EXIT:-0}"
         self.assertEqual((self.root / "agents/skills/ordinary/SKILL.md").read_text(),
                          "new upstream content\n")
 
+    def test_installer_noise_is_hidden_but_failure_diagnostics_survive(self):
+        self.env["TMPDIR"] = self.root.as_posix()
+        installer = self.root / "installer"
+        installer.write_text('#!/usr/bin/env bash\necho noisy-banner\necho diagnostic >&2\nexit "${FIXTURE_EXIT:-0}"\n', encoding="utf-8")
+        result = self.refresh()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout.count("Checking skills from source: fixture/shared"), 1)
+        self.assertNotIn("noisy-banner", result.stdout + result.stderr)
+        self.assertNotIn("diagnostic", result.stdout + result.stderr)
+        self.env["FIXTURE_EXIT"] = "17"
+        result = self.refresh()
+        self.assertEqual(result.returncode, 17)
+        self.assertIn("noisy-banner", result.stderr)
+        self.assertIn("diagnostic", result.stderr)
+        self.assertIn("Skills update failed (exit 17); log:", result.stderr)
+        logs = list(self.root.glob("dotfiles-skills.*"))
+        self.assertEqual(len(logs), 1)
+        self.assertIn("diagnostic", logs[0].read_text())
+
     def test_failed_installer_never_receives_curated_skills(self):
         self.env["FIXTURE_EXIT"] = "17"
         result = self.refresh()
@@ -188,7 +207,8 @@ exit "${FIXTURE_EXIT:-0}"
             self.env["FIXTURE_EXIT"] = code
             result = self.refresh()
             self.assertEqual(result.returncode, expected, result.stderr)
-            snapshots = set(temporary.iterdir()) - existing
+            snapshots = {path for path in set(temporary.iterdir()) - existing
+                         if path.name.startswith("dotfiles-skills-lock.")}
             self.assertEqual(len(snapshots), 1)
             snapshot = snapshots.pop()
             self.assertEqual(snapshot.read_bytes(), before)

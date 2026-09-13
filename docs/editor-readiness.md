@@ -39,3 +39,8 @@ Sublime's Package Control snapshot is normalized during backup and drift staging
 package names are unique and alphabetically sorted, and other settings are
 preserved. Live files remain owned by Sublime. Thaw and Battery Indicator remain
 Mac snapshots; Windows has no corresponding app-preference restore.
+
+Shared skill authoring uses `skill-architect`; the redundant standalone
+`skill-development` installation is retired. Use `interface-review` explicitly
+for UI change reviews and `variant` explicitly to compare versions of a component
+or section. Reload the agent session after updating its shared skill inventory.

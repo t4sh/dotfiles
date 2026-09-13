@@ -4,12 +4,24 @@ import os
 import shutil
 import plistlib
 import subprocess
+import sys
 import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 
 class PublicBootstrap(unittest.TestCase):
+    def test_skill_manifest_selectors_and_inventory_are_current(self):
+        for script in ('scripts/gen-skillsfile.py', 'agents/compareskills.py'):
+            result = subprocess.run([sys.executable, str(ROOT / script), '--check'],
+                                    capture_output=True, text=True, cwd=ROOT)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        selectors = [line.split(' --skill ', 1)[1].split(' -g ', 1)[0]
+                     for line in (ROOT / 'Skillsfile').read_text().splitlines()
+                     if line.startswith('update_skill_source "$NPX" skills add ')]
+        self.assertTrue(selectors)
+        self.assertTrue(all(',' not in selector for selector in selectors))
+
     def test_audit_requires_ripgrep(self):
         bash = (str(Path(os.environ.get('ProgramFiles', 'C:/Program Files')) / 'Git/bin/bash.exe')
                 if os.name == 'nt' else shutil.which('bash'))

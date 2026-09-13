@@ -81,6 +81,7 @@ cask:conductor	macos-only			Apple/Homebrew-specific app or shell integration; no
 cask:craft	native	winget	LukiLabs.Craft	Native Windows counterpart; identity verified against installed WinGet inventory.
 cask:craft-agents	native	winget	CraftDocs.CraftAgents	Native Windows counterpart; identity verified against installed WinGet inventory.
 cask:cursor	native	winget	Anysphere.Cursor	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:cyberduck	manual			Mac inventory addition; Windows file transfers use the existing WinSCP counterpart.
 cask:daisydisk	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
 cask:devtoys	native	winget	DevToys-app.DevToys	Native Windows counterpart; identity verified against installed WinGet inventory.
 cask:deskflow/tap/deskflow	native	winget	Deskflow.Deskflow	Share the Mac keyboard and mouse; Windows runs as a Deskflow client.

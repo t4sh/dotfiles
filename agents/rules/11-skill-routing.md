@@ -26,10 +26,10 @@ Do not invoke the retired `brainstorming`, `writing-plans`, or `feature-dev` ski
 | Build throwaway UI or logic to answer one concrete design question | `prototype` |
 | Design a system, API, data model, or service boundary | `system-design` |
 | Record or evaluate one architecture decision and its trade-offs | `architecture` |
-| Synthesize an already-settled conversation into a tracker specification | `to-spec` |
+| Synthesize an already-settled conversation into a tracker specification | `to-spec` — explicit invocation only |
 | Produce an executor-ready implementation plan for known work | `improve` in `plan <description>` mode |
-| Break a plan or specification into tracker-native vertical slices | `to-tickets` |
-| Map work too large or uncertain for one agent session | `wayfinder` |
+| Break a plan or specification into tracker-native vertical slices | `to-tickets` — explicit invocation only |
+| Map work too large or uncertain for one agent session | `wayfinder` — explicit invocation only |
 | Implement explicitly test-first with a red-green loop and agreed seams | `tdd` |
 | Review changes since a fixed commit, branch, tag, or merge-base | `code-review` |
 
@@ -37,6 +37,7 @@ Boundaries:
 
 - A sufficiently specified action request proceeds through the core workflow after reading the relevant context. Do not manufacture a discovery, architecture, planning, TDD, multi-agent, or review approval gate.
 - `prototype` resolves an uncertain design question with disposable evidence; it does not replace requirements discovery or a durable specification.
+- `to-spec`, `to-tickets`, and `wayfinder` require explicit user invocation; do not auto-load them from a matching deliverable.
 - `to-spec` synthesizes settled context and does not conduct the interview itself.
 - `improve plan` authors the plan but does not own execution; use the written-plan execution authority above afterward.
 - `to-tickets` owns tracker decomposition and dependency edges, not file-level implementation instructions.
@@ -68,6 +69,8 @@ Boundaries:
 ## Skill authoring and review
 
 Use `skill-architect` for creating, editing, auditing, comparing, or evaluating agent skills. Do not route to the retired `writing-skills` skill; its reusable behavior-evidence principles are preserved in `skill-architect` references.
+
+The standalone Anthropic `skill-development` (`Skill Development`) skill is also retired. Its reusable structural guidance remains referenced by `skill-architect`; consult upstream Claude plugin details only when needed, without reinstalling the overlapping skill.
 
 ### Shared skill quality (all authors)
 
@@ -103,7 +106,7 @@ Use `diagnosing-bugs` for hypothesis-driven bug and performance diagnosis. Do no
 
 ## Software interface architecture
 
-Use `design-an-interface` when the requested interface is a module or API boundary and the deliverable is multiple radically different signatures/shapes with trade-off comparison. It is read-only design exploration, not visual UI design or implementation.
+Use `system-design` when the requested interface is a module or API boundary. When asked to explore alternatives, compare distinct signatures/shapes and their trade-offs before implementation. `better-interface` owns visual UI review, not module/API design.
 
 ## Design systems and tokens
 
@@ -127,6 +130,7 @@ Boundaries:
 | Request | Primary owner |
 | --- | --- |
 | Holistic screen, flow, feature, or product-interface review | `better-interface` |
+| Review UI changes in a branch, PR, staged work, or uncommitted work | `interface-review` — explicit invocation only; hands scoped findings to `better-interface` |
 | Focus, keyboard, ARIA, forms, screen readers, hit areas, reduced motion | `better-accessibility` |
 | Grouping, alignment, reading order, responsive layout, RTL | `better-layout` |
 | Product-interface labels, errors, settings, empty states, microcopy | `better-writing` |
@@ -135,6 +139,13 @@ Boundaries:
 | Surfaces, radius, shadows, icons, micro-interactions, UI polish | `better-ui` |
 
 Use `better-interface` only for holistic coverage. Route a narrow request directly to its single domain owner.
+
+For UI change reviews, `interface-review` resolves the diff and affected surfaces,
+classifies introduced, regression, and pre-existing findings, then hands them to
+`better-interface`. Do not auto-invoke it from a generic review request. General
+correctness, tests, and security remain with `code-review`. Apply the project-local
+worktree placement and verification rules in `03-worktree-hygiene.md` and
+`24-frontend-verification.md` over upstream temporary-worktree or preview defaults.
 
 ## Typography and writing boundaries
 
@@ -167,7 +178,7 @@ Boundaries:
 | Install a named portable CSS transition recipe or normalize motion to its token set | `transitions-dev` |
 | Apply explicitly Apple/WWDC-style physical gestures, momentum, springs, or materials | `apple-design` |
 | Discover where motion should exist (and reject where it should not); propose recipes without implementing | `find-animation-opportunities` |
-| Review an existing motion diff or animation code against a strict bar | `review-animations` |
+| Review an existing motion diff or animation code against a strict bar | `review-animations` — explicit invocation only |
 | Audit repository-wide motion and produce implementation plans | `improve-animations` |
 | Create cinematic, scroll-driven, immersive motion | `top-design` |
 
@@ -176,6 +187,7 @@ Boundaries:
 - Use `better-ui` for small polish within broader interface work; use `ui-animation` when motion itself is the implementation task.
 - Use `transitions-dev` for its named recipes and token-refinement workflow, not as a general motion authority.
 - Use `apple-design` only when Apple-style physical interaction is explicit, not as a default for routine product motion.
+- `review-animations` requires explicit user invocation; references to it below identify its scope and do not authorize automatic invocation.
 - Use `find-animation-opportunities` for read-only discovery of new motion moments ("what could be animated?", "make this feel more alive"). Do not use it to review or fix existing animations — that is `review-animations` / `improve-animations`.
 - Do not use a repository-wide motion auditor for a single component, or cinematic direction for routine product interactions.
 
@@ -187,8 +199,14 @@ Boundaries:
 | Establish distinctive brief-specific visual direction | `frontend-design` |
 | Landing page, portfolio, or visual redesign needing anti-template constraints | `design-taste-frontend` |
 | Explicit Awwwards-level, cinematic, or immersive experience | `top-design` |
+| Build and compare distinct versions of one UI component or section | `variant` — explicit invocation only |
 
 Select one primary creative workflow. Do not automatically stack these skills. Use domain skills afterward for focused verification when requested.
+
+`variant` builds alternatives in their real page context and lets the user choose;
+it does not own whole-page design or select a winner unasked. Use it for a bounded
+hero, pricing section, or component comparison. It may consult the `better-*`
+domains for that task; do not auto-load it for ordinary implementation or review.
 
 ## Broad overlapping alternatives
 

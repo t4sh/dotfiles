@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Skillsfile — declarative global skill manifest (Brewfile pattern).
 #
-# GENERATED 2026-09-13T01:16:01+05:30 from agents/.skill-lock.json by
+# GENERATED 2026-09-13T07:25:38+05:30 from agents/.skill-lock.json by
 # scripts/gen-skillsfile.py — DO NOT EDIT BY HAND. To change skills:
 #   ~/.local/bin/npx-stable skills add ... --agent codex   then   make skills-manifest
 #   (regenerates Skillsfile + agents/skills/README.md)
 #
 # Explicit upstream refresh: make skills-update   (or: bash Skillsfile)
-# 114 skills — 32 refreshable github sources + 2 local + 0 held.
+# 115 skills — 31 refreshable github sources + 2 local + 0 held.
 # Curated skills are held by config/skills-refresh-holds.json; review upstream changes manually.
 #
 # Prereqs (fresh Mac): node + git + GitHub auth (SSH/gh) must be set
@@ -39,102 +39,113 @@ finish_refresh() {
 cp -- "$DOTFILES_ROOT/agents/.skill-lock.json" "$LOCK_SNAPSHOT" || { status=$?; rm -f -- "$LOCK_SNAPSHOT"; exit "$status"; }
 trap finish_refresh EXIT
 
+# Keep installer banners/progress out of routine maintenance output.
+update_skill_source() {
+  local log status
+  log="$(mktemp "${TMPDIR:-/tmp}/dotfiles-skills.XXXXXXXXXX")"
+  if npm_config_yes=true "$@" >"$log" 2>&1; then
+    rm -f -- "$log"
+  else
+    status=$?
+    cat "$log" >&2
+    printf "Skills update failed (exit %s); log: %s\n" "$status" "$log" >&2
+    return "$status"
+  fi
+}
 
-echo "→ update ComposioHQ/awesome-claude-skills"
-"$NPX" skills add ComposioHQ/awesome-claude-skills --skill file-organizer -g -y --agent codex
 
-echo "→ update DietrichGebert/ponytail"
-"$NPX" skills add DietrichGebert/ponytail --skill ponytail ponytail-audit ponytail-help ponytail-review -g -y --agent codex
+echo "Checking skills from source: ComposioHQ/awesome-claude-skills"
+update_skill_source "$NPX" skills add ComposioHQ/awesome-claude-skills --skill file-organizer -g -y --agent codex
 
-echo "→ update Jakubantalik/transitions.dev"
-"$NPX" skills add Jakubantalik/transitions.dev --skill transitions-dev -g -y --agent codex
+echo "Checking skills from source: DietrichGebert/ponytail"
+update_skill_source "$NPX" skills add DietrichGebert/ponytail --skill ponytail ponytail-audit ponytail-help ponytail-review -g -y --agent codex
 
-echo "→ update Leonxlnx/taste-skill"
-"$NPX" skills add Leonxlnx/taste-skill --skill brandkit design-taste-frontend full-output-enforcement gpt-taste industrial-brutalist-ui minimalist-ui redesign-existing-projects stitch-design-taste -g -y --agent codex
+echo "Checking skills from source: Jakubantalik/transitions.dev"
+update_skill_source "$NPX" skills add Jakubantalik/transitions.dev --skill transitions-dev -g -y --agent codex
 
-echo "→ update anthropics/claude-code"
-"$NPX" skills add anthropics/claude-code --skill 'Skill Development' -g -y --agent codex
+echo "Checking skills from source: Leonxlnx/taste-skill"
+update_skill_source "$NPX" skills add Leonxlnx/taste-skill --skill brandkit design-taste-frontend full-output-enforcement gpt-taste industrial-brutalist-ui minimalist-ui redesign-existing-projects stitch-design-taste -g -y --agent codex
 
-echo "→ update anthropics/knowledge-work-plugins"
-"$NPX" skills add anthropics/knowledge-work-plugins --skill architecture debug deploy-checklist design-handoff design-system documentation research-synthesis system-design tech-debt user-research -g -y --agent codex
+echo "Checking skills from source: anthropics/knowledge-work-plugins"
+update_skill_source "$NPX" skills add anthropics/knowledge-work-plugins --skill architecture debug deploy-checklist design-handoff design-system documentation research-synthesis system-design tech-debt user-research -g -y --agent codex
 
-echo "→ update anthropics/skills"
-"$NPX" skills add anthropics/skills --skill canvas-design frontend-design theme-factory -g -y --agent codex
+echo "Checking skills from source: anthropics/skills"
+update_skill_source "$NPX" skills add anthropics/skills --skill canvas-design frontend-design theme-factory -g -y --agent codex
 
-echo "→ update benjitaylor/agentation"
-"$NPX" skills add benjitaylor/agentation --skill agentation agentation-self-driving -g -y --agent codex
+echo "Checking skills from source: benjitaylor/agentation"
+update_skill_source "$NPX" skills add benjitaylor/agentation --skill agentation agentation-self-driving -g -y --agent codex
 
-echo "→ update cerico/macfair"
-"$NPX" skills add cerico/macfair --skill creative-design -g -y --agent codex
+echo "Checking skills from source: cerico/macfair"
+update_skill_source "$NPX" skills add cerico/macfair --skill creative-design -g -y --agent codex
 
-echo "→ update coreyhaines31/marketingskills"
-"$NPX" skills add coreyhaines31/marketingskills --skill copywriting marketing-psychology seo-audit -g -y --agent codex
+echo "Checking skills from source: coreyhaines31/marketingskills"
+update_skill_source "$NPX" skills add coreyhaines31/marketingskills --skill copywriting marketing-psychology seo-audit -g -y --agent codex
 
-echo "→ update emilkowalski/skills"
-"$NPX" skills add emilkowalski/skills --skill animation-vocabulary apple-design emil-design-eng find-animation-opportunities improve-animations pick-ui-library review-animations -g -y --agent codex
+echo "Checking skills from source: emilkowalski/skills"
+update_skill_source "$NPX" skills add emilkowalski/skills --skill animation-vocabulary apple-design emil-design-eng find-animation-opportunities improve-animations pick-ui-library review-animations -g -y --agent codex
 
-echo "→ update firebenders/sync-figma-token-skill"
-"$NPX" skills add firebenders/sync-figma-token-skill --skill sync-figma-token -g -y --agent codex
+echo "Checking skills from source: firebenders/sync-figma-token-skill"
+update_skill_source "$NPX" skills add firebenders/sync-figma-token-skill --skill sync-figma-token -g -y --agent codex
 
-echo "→ update github/awesome-copilot"
-"$NPX" skills add github/awesome-copilot --skill git-commit git-flow-branch-creator -g -y --agent codex
+echo "Checking skills from source: github/awesome-copilot"
+update_skill_source "$NPX" skills add github/awesome-copilot --skill git-commit git-flow-branch-creator -g -y --agent codex
 
-echo "→ update index-how/vocabulary"
-"$NPX" skills add index-how/vocabulary --skill vocabulary -g -y --agent codex
+echo "Checking skills from source: index-how/vocabulary"
+update_skill_source "$NPX" skills add index-how/vocabulary --skill vocabulary -g -y --agent codex
 
-echo "→ update jakubkrehel/skills"
-"$NPX" skills add jakubkrehel/skills --skill better-accessibility better-colors better-interface better-layout better-typography better-ui better-writing -g -y --agent codex
+echo "Checking skills from source: jakubkrehel/skills"
+update_skill_source "$NPX" skills add jakubkrehel/skills --skill better-accessibility better-colors better-interface better-layout better-typography better-ui better-writing interface-review variant -g -y --agent codex
 
-echo "→ update julianoczkowski/designer-skills"
-"$NPX" skills add julianoczkowski/designer-skills --skill design-tokens -g -y --agent codex
+echo "Checking skills from source: julianoczkowski/designer-skills"
+update_skill_source "$NPX" skills add julianoczkowski/designer-skills --skill design-tokens -g -y --agent codex
 
-echo "→ update mattpocock/skills"
-"$NPX" skills add mattpocock/skills --skill ask-matt claude-handoff code-review codebase-design diagnosing-bugs domain-modeling git-guardrails-claude-code grill-me grill-with-docs grilling handoff implement improve-codebase-architecture loop-me migrate-to-shoehorn prototype research resolving-merge-conflicts scaffold-exercises setup-matt-pocock-skills setup-pre-commit setup-ts-deep-modules tdd teach to-questionnaire to-spec to-tickets triage wait-what wayfinder wizard writing-beats writing-for-agents writing-fragments writing-shape -g -y --agent codex
+echo "Checking skills from source: mattpocock/skills"
+update_skill_source "$NPX" skills add mattpocock/skills --skill ask-matt claude-handoff code-review codebase-design diagnosing-bugs domain-modeling git-guardrails-claude-code grill-me grill-with-docs grilling handoff implement improve-codebase-architecture loop-me migrate-to-shoehorn prototype research resolving-merge-conflicts scaffold-exercises setup-matt-pocock-skills setup-pre-commit setup-ts-deep-modules tdd teach to-questionnaire to-spec to-tickets triage wait-what wayfinder wizard writing-beats writing-for-agents writing-fragments writing-shape -g -y --agent codex
 
-echo "→ update mblode/agent-skills"
-"$NPX" skills add mblode/agent-skills --skill ui-animation -g -y --agent codex
+echo "Checking skills from source: mblode/agent-skills"
+update_skill_source "$NPX" skills add mblode/agent-skills --skill ui-animation -g -y --agent codex
 
-echo "→ update mindmorass/reflex"
-"$NPX" skills add mindmorass/reflex --skill pdf-harvester -g -y --agent codex
+echo "Checking skills from source: mindmorass/reflex"
+update_skill_source "$NPX" skills add mindmorass/reflex --skill pdf-harvester -g -y --agent codex
 
-echo "→ update nextlevelbuilder/ui-ux-pro-max-skill"
-"$NPX" skills add nextlevelbuilder/ui-ux-pro-max-skill --skill ui-ux-pro-max -g -y --agent codex
+echo "Checking skills from source: nextlevelbuilder/ui-ux-pro-max-skill"
+update_skill_source "$NPX" skills add nextlevelbuilder/ui-ux-pro-max-skill --skill ui-ux-pro-max -g -y --agent codex
 
-echo "→ update nodnarbnitram/claude-code-extensions"
-"$NPX" skills add nodnarbnitram/claude-code-extensions --skill tauri-v2 -g -y --agent codex
+echo "Checking skills from source: nodnarbnitram/claude-code-extensions"
+update_skill_source "$NPX" skills add nodnarbnitram/claude-code-extensions --skill tauri-v2 -g -y --agent codex
 
-echo "→ update nutlope/hallmark"
-"$NPX" skills add nutlope/hallmark --skill hallmark -g -y --agent codex
+echo "Checking skills from source: nutlope/hallmark"
+update_skill_source "$NPX" skills add nutlope/hallmark --skill hallmark -g -y --agent codex
 
-echo "→ update openai/skills"
-"$NPX" skills add openai/skills --skill playwright skill-creator -g -y --agent codex
+echo "Checking skills from source: openai/skills"
+update_skill_source "$NPX" skills add openai/skills --skill playwright skill-creator -g -y --agent codex
 
-echo "→ update owl-listener/designer-skills"
-"$NPX" skills add owl-listener/designer-skills --skill design-token-audit -g -y --agent codex
+echo "Checking skills from source: owl-listener/designer-skills"
+update_skill_source "$NPX" skills add owl-listener/designer-skills --skill design-token-audit -g -y --agent codex
 
-echo "→ update pbakaus/impeccable"
-"$NPX" skills add pbakaus/impeccable --skill impeccable -g -y --agent codex
+echo "Checking skills from source: pbakaus/impeccable"
+update_skill_source "$NPX" skills add pbakaus/impeccable --skill impeccable -g -y --agent codex
 
-echo "→ update shadcn/improve"
-"$NPX" skills add shadcn/improve --skill improve -g -y --agent codex
+echo "Checking skills from source: shadcn/improve"
+update_skill_source "$NPX" skills add shadcn/improve --skill improve -g -y --agent codex
 
-echo "→ update t4sh/skills4sh"
-"$NPX" skills add t4sh/skills4sh --skill agent-memory code-to-figma discord-harvest eleventy-nunjucks figma-to-code localhost-screenshots skill-architect -g -y --agent codex
+echo "Checking skills from source: t4sh/skills4sh"
+update_skill_source "$NPX" skills add t4sh/skills4sh --skill agent-memory code-to-figma discord-harvest eleventy-nunjucks figma-to-code localhost-screenshots skill-architect -g -y --agent codex
 
-echo "→ update vercel-labs/agent-browser"
-"$NPX" skills add vercel-labs/agent-browser --skill agent-browser -g -y --agent codex
+echo "Checking skills from source: vercel-labs/agent-browser"
+update_skill_source "$NPX" skills add vercel-labs/agent-browser --skill agent-browser -g -y --agent codex
 
-echo "→ update vercel-labs/agent-skills"
-"$NPX" skills add vercel-labs/agent-skills --skill web-design-guidelines -g -y --agent codex
+echo "Checking skills from source: vercel-labs/agent-skills"
+update_skill_source "$NPX" skills add vercel-labs/agent-skills --skill web-design-guidelines -g -y --agent codex
 
-echo "→ update vercel-labs/skills"
-"$NPX" skills add vercel-labs/skills --skill find-skills -g -y --agent codex
+echo "Checking skills from source: vercel-labs/skills"
+update_skill_source "$NPX" skills add vercel-labs/skills --skill find-skills -g -y --agent codex
 
-echo "→ update wondelai/skills"
-"$NPX" skills add wondelai/skills --skill top-design web-typography -g -y --agent codex
+echo "Checking skills from source: wondelai/skills"
+update_skill_source "$NPX" skills add wondelai/skills --skill top-design web-typography -g -y --agent codex
 
-echo "→ update wshobson/agents"
-"$NPX" skills add wshobson/agents --skill monorepo-management tailwind-design-system -g -y --agent codex
+echo "Checking skills from source: wshobson/agents"
+update_skill_source "$NPX" skills add wshobson/agents --skill monorepo-management tailwind-design-system -g -y --agent codex
 
 # Local / repo-native skills (vendored in agents/skills/,
 # no upstream — they ship with the dotfiles repo itself):
