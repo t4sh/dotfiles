@@ -161,6 +161,8 @@ cask "craft"
 cask "craft-agents"
 # Write, edit, and chat about your code with AI
 cask "cursor"
+# File transfer client for FTP, SFTP, WebDAV and cloud storage
+cask "cyberduck"
 # Disk space visualiser
 cask "daisydisk"
 # Mouse and keyboard sharing utility

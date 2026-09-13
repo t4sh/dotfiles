@@ -1,15 +1,6 @@
 {
   "version": 4,
   "skills": {
-    "Skill Development": {
-      "source": "anthropics/claude-code",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/anthropics/claude-code.git",
-      "skillPath": "plugins/plugin-dev/skills/skill-development/SKILL.md",
-      "skillFolderHash": "3dd57083301fd1ba1a4e04967c6fc055c6d740eb",
-      "installedAt": "2026-04-13T02:34:04.636Z",
-      "updatedAt": "2026-09-11T12:14:29.894Z"
-    },
     "architecture": {
       "source": "anthropics/knowledge-work-plugins",
       "sourceType": "github",
@@ -1053,6 +1044,24 @@
       "skillFolderHash": "b7df7bc32b6e4e8bbde8acb2ef3c97ee7e7638f7",
       "installedAt": "2026-08-23T20:39:38.352Z",
       "updatedAt": "2026-09-11T12:14:15.381Z"
+    },
+    "interface-review": {
+      "source": "jakubkrehel/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/jakubkrehel/skills.git",
+      "skillPath": "skills/interface-review/SKILL.md",
+      "skillFolderHash": "af8fbfa0733bb1c16f7e6c625161cdbef18aefda",
+      "installedAt": "2026-09-13T01:38:22.188Z",
+      "updatedAt": "2026-09-13T01:38:22.188Z"
+    },
+    "variant": {
+      "source": "jakubkrehel/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/jakubkrehel/skills.git",
+      "skillPath": "skills/variant/SKILL.md",
+      "skillFolderHash": "10e4d83f2f34cf226cf9819ab6b4dd6f8d7a0e6a",
+      "installedAt": "2026-09-13T01:38:22.193Z",
+      "updatedAt": "2026-09-13T01:38:22.193Z"
     }
   },
   "dismissed": {

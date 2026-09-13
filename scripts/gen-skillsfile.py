@@ -122,6 +122,20 @@ def build_skillsfile(timestamp):
         'cp -- "$DOTFILES_ROOT/agents/.skill-lock.json" "$LOCK_SNAPSHOT" || { status=$?; rm -f -- "$LOCK_SNAPSHOT"; exit "$status"; }',
         'trap finish_refresh EXIT',
         "",
+        '# Keep installer banners/progress out of routine maintenance output.',
+        'update_skill_source() {',
+        '  local log status',
+        '  log="$(mktemp "${TMPDIR:-/tmp}/dotfiles-skills.XXXXXXXXXX")"',
+        '  if npm_config_yes=true "$@" >"$log" 2>&1; then',
+        '    rm -f -- "$log"',
+        '  else',
+        '    status=$?',
+        '    cat "$log" >&2',
+        '    printf "Skills update failed (exit %s); log: %s\\n" "$status" "$log" >&2',
+        '    return "$status"',
+        '  fi',
+        '}',
+        "",
     ]
 
     for key, src, reason in sorted(held):
@@ -131,8 +145,8 @@ def build_skillsfile(timestamp):
 
     for src in sorted(by_source):
         skills = " ".join(shlex.quote(name) for name in sorted(by_source[src]))
-        lines.append(f'echo "→ update {src}"')
-        lines.append(f'"$NPX" skills add {src} --skill {skills} -g -y --agent codex')
+        lines.append(f'echo "Checking skills from source: {src}"')
+        lines.append(f'update_skill_source "$NPX" skills add {src} --skill {skills} -g -y --agent codex')
         lines.append("")
 
     if local:
