@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
-"""Capture the checked macOS preference subset; never export whole domains."""
+"""Read and apply the portable macOS preference policy."""
 import argparse
 import json
 import os
 from pathlib import Path
 import subprocess
 import sys
-import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 # Shift, control, option and command are the only modifiers a hot corner accepts.
@@ -58,17 +57,6 @@ def fallback_dir():
     return str(Path.home() / 'Desktop/Screengrabs')
 
 
-def gate(payload, note):
-    """Run the real backup check against a candidate snapshot, never the saved one."""
-    with tempfile.TemporaryDirectory(prefix='macos-preferences-') as temp:
-        candidate = Path(temp) / 'candidate.json'
-        candidate.write_text(payload)
-        checked = subprocess.run(['make', '--no-print-directory', 'macos-check', 'SKIP_FINDER_VIEWS=1'],
-                                 cwd=ROOT, env={**os.environ, 'DOTFILES_MACOS_PREFERENCES': str(candidate)})
-    if checked.returncode:
-        raise ValueError(note)
-
-
 def validate(data, entries):
     if not isinstance(data, dict) or set(data) != {'version', 'values', 'screenshot_location'} or data['version'] != 1:
         raise ValueError('Unsupported macOS preference snapshot')
@@ -100,24 +88,10 @@ def default_when_unset(key):
     return key.startswith('NSStatusItem Visible')
 
 
-def read_int(domain, key, default):
-    try:
-        raw = run('defaults', 'read', domain, key)
-    except subprocess.CalledProcessError:
-        if default_when_unset(key):
-            return default
-        raise ValueError(f'Could not read {domain} {key}') from None
-    try:
-        return int(raw)
-    except ValueError:
-        raise ValueError(f'Invalid integer preference: {domain} {key}') from None
-
-
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('mode', choices=('capture', 'expected', 'capture-dir', 'fallback-dir', 'validate', 'apply'))
+    parser.add_argument('mode', choices=('expected', 'capture-dir', 'fallback-dir', 'validate', 'apply'))
     parser.add_argument('--dry-run', action='store_true')
-    parser.add_argument('--interactive', action='store_true', help='Confirm each changed preference before saving')
     args = parser.parse_args()
     if sys.platform != 'darwin':
         parser.error('This workflow requires macOS')
@@ -135,71 +109,6 @@ def main():
         print(fallback_dir())
         return
     major = int(run('sw_vers', '-productVersion').split('.')[0])
-    if args.mode == 'capture':
-        if os.environ.get('DOTFILES_PUBLIC_SNAPSHOT') == '1':
-            raise ValueError('Personal macOS preference capture is private-only')
-        # 27 provisionally uses the 26+ preference mapping. Fixture-tested;
-        # native read-back/restore verification remains pending (macos/KEYBOARD.md).
-        if major not in (15, 26, 27):
-            raise ValueError('Capture requires a supported macOS major (15, 26, or 27)')
-        values = {}
-        for name, (domain, key, _, default) in entries.items():
-            values[name] = read_int(domain, actual_key(key, major), default)
-        try:
-            location = destination(run('defaults', 'read', 'com.apple.screencapture', 'location'))
-        except subprocess.CalledProcessError:
-            raise ValueError('Could not read com.apple.screencapture location') from None
-        home = str(Path.home())
-        if location.startswith(home + '/'):
-            location = '~/' + location[len(home) + 1:]
-        data = validate({'version': 1, 'values': values, 'screenshot_location': location}, entries)
-        payload = json.dumps(data, indent=2, sort_keys=True) + '\n'
-        # Validate the full backup gate against the candidate before publication.
-        gate(payload, 'Backup checks still fail with the current preferences adopted. '
-                      'Something outside the adoptable set is failing (firewall, stealth mode '
-                      'or Touch ID sudo); resolve that, then rerun make backup.')
-        old = saved['values'] if saved else {name: row[3] for name, row in entries.items()}
-        changes = [(name, old[name], value) for name, value in values.items() if value != old[name]]
-        # Consent concerns persisted values; an environment override only affects checks.
-        previous = saved['screenshot_location'] if saved else fallback_dir()
-        if destination(previous) != destination(location):
-            changes.append(('screenshot location', previous, location))
-        if args.interactive and not changes:
-            raise ValueError('No adoptable preference drift; resolve the failed backup check before retrying')
-        if args.interactive and not sys.stdin.isatty():
-            raise ValueError('Drift needs terminal confirmation; rerun make backup in a terminal or use OVERRIDE=1')
-        for name, previous, current in changes:
-            print(f'{name}:\n  Saved:   {previous}\n  Current: {current}')
-            if args.interactive:
-                while True:
-                    answer = input('Accept this change? [y/N]: ').strip().lower()
-                    if answer in ('y', 'yes'):
-                        break
-                    if answer in ('', 'n', 'no'):
-                        raise ValueError('Change rejected; backup stopped. No preferences or snapshot changed')
-                    print('Enter y to accept or n to reject.')
-        # Recheck after the operator answers: live values may have changed during review.
-        if args.interactive:
-            gate(payload, 'Live settings changed while the review was open; nothing was saved. '
-                          'Rerun make backup to review the current values.')
-        if args.dry_run:
-            print('Preview only; no preferences or snapshot changed.')
-            return
-        if saved == data:
-            print('macOS preference snapshot already matches; unchanged.')
-            return
-        fd, temporary = tempfile.mkstemp(prefix='.macos-preferences-', dir=snapshot.parent)
-        try:
-            with os.fdopen(fd, 'w') as stream:
-                stream.write(payload)
-            # mkstemp is 0600; tracked repo files stay 0644.
-            os.chmod(temporary, 0o644)
-            os.replace(temporary, snapshot)
-        finally:
-            if os.path.exists(temporary):
-                os.unlink(temporary)
-        print('Saved current supported macOS preferences.')
-        return
     if args.mode == 'apply' and not saved:
         return
     for name, (domain, key, kind, default) in entries.items():
