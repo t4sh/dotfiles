@@ -2,6 +2,13 @@ Source	Target
 ${DOTFILES}/agents	${HOME}/.agents
 ${DOTFILES}/agents/skills	${HOME}/.cursor/skills
 ${DOTFILES}/agents/skills	${HOME}/.claude/skills
+${DOTFILES}/agents/skills/paseo	${HOME}/.codex/skills/paseo
+${DOTFILES}/agents/skills/paseo-advisor	${HOME}/.codex/skills/paseo-advisor
+${DOTFILES}/agents/skills/paseo-committee	${HOME}/.codex/skills/paseo-committee
+${DOTFILES}/agents/skills/paseo-handoff	${HOME}/.codex/skills/paseo-handoff
+${DOTFILES}/agents/skills/paseo-help	${HOME}/.codex/skills/paseo-help
+${DOTFILES}/agents/skills/paseo-loop	${HOME}/.codex/skills/paseo-loop
+${DOTFILES}/agents/skills/paseo-plugin	${HOME}/.codex/skills/paseo-plugin
 ${DOTFILES}/agents/agents	${HOME}/.claude/agents
 ${DOTFILES}/agents/commands	${HOME}/.claude/commands
 ${DOTFILES}/agents/AGENTS.md	${HOME}/.claude/CLAUDE.md

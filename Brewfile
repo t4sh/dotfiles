@@ -59,6 +59,8 @@ brew "git-flow-next"
 brew "git-lfs"
 # Audit git repos for secrets
 brew "gitleaks"
+# GNU Privacy Guard (OpenPGP)
+brew "gnupg"
 # Apache HTTP server
 brew "httpd"
 # Tools and libraries to manipulate images in select formats
@@ -81,6 +83,8 @@ brew "nvm"
 brew "pi-coding-agent"
 # PDF rendering library (based on the xpdf-3.0 code base)
 brew "poppler"
+# Stable named HTTPS URLs for local development servers
+brew "portless"
 # Convert bitmaps to vector graphics
 brew "potrace"
 # Generic syntax highlighter
@@ -161,12 +165,12 @@ cask "craft"
 cask "craft-agents"
 # Write, edit, and chat about your code with AI
 cask "cursor"
-# File transfer client for FTP, SFTP, WebDAV and cloud storage
+# Server and cloud storage browser
 cask "cyberduck"
 # Disk space visualiser
 cask "daisydisk"
 # Mouse and keyboard sharing utility
-cask "deskflow/tap/deskflow"
+cask "deskflow/tap/deskflow", trusted: true
 # Utilities designed to make common development tasks easier
 cask "devtoys"
 # Voice and text chat software
@@ -235,6 +239,8 @@ cask "hammerspoon"
 cask "handbrake-app"
 # Open-source desktop AI agent
 cask "hermes-desktop"
+# Homebrew's official GUI
+cask "homebrew-app"
 # Free and open-source media player
 cask "iina"
 # Tool to optimise images to a smaller size
@@ -255,8 +261,6 @@ cask "lobehub"
 cask "lunacy"
 # Clipboard manager
 cask "maccy"
-# Markdown previewer with bundled Quick Look extension
-cask "markdown-preview"
 # Select text in any app and translate it
 cask "mate-translate"
 # Provides updates to various Microsoft products
@@ -311,8 +315,6 @@ cask "sublime-text"
 cask "suspicious-package"
 # Messaging app with a focus on speed and security
 cask "telegram"
-# Extract text from images and other digital documents
-cask "textsniper"
 # Menu bar manager
 cask "thaw"
 # Markdown knowledgebase manager
@@ -351,11 +353,12 @@ mas "Keynote", id: 409183694
 mas "Keynote", id: 361285480
 mas "Kindle", id: 302584613
 mas "Lungo", id: 1263070803
-mas "Numbers", id: 361304891
 mas "Numbers", id: 409203825
+mas "Numbers", id: 361304891
 mas "Pages", id: 361309726
 mas "Pages", id: 409201541
 mas "Prime Video", id: 545519333
+mas "QuickLookPro", id: 6812534537
 mas "Save to Raindrop.io", id: 1549370672
 mas "uBlock Origin Lite", id: 6745342698
 mas "Urban VPN Desktop", id: 1517772049
@@ -439,6 +442,7 @@ vscode "ms-vscode.sublime-keybindings"
 vscode "ms-vscode.vscode-chat-customizations-evaluations"
 vscode "nize.oklch-preview"
 vscode "openai.chatgpt"
+vscode "openai.codex-audio"
 vscode "paulmolluzzo.convert-css-in-js"
 vscode "pflannery.vscode-versionlens"
 vscode "pranaygp.vscode-css-peek"

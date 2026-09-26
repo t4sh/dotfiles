@@ -258,7 +258,7 @@ phase_diff() {
     if ! bash "$DOTFILES/scripts/audit-skill-licenses.sh" --check; then actionable=1; fi
 
     echo ""
-    echo "=== rulebook sync (AGENTS.md @-includes match agents/rules/*.md) ==="
+    echo "=== rulebook sync (indexed links, loading classes, and rules match) ==="
     if ! bash "$DOTFILES/scripts/audit-rules.sh"; then actionable=1; fi
 
     echo ""

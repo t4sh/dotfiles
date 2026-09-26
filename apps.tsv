@@ -38,8 +38,18 @@ com.alienator88.Pearcleaner	Pearcleaner	apps/pearcleaner/pearcleaner.plist
 # macOS system UX domains — too deeply nested to hand-write in macos/defaults.sh,
 # so snapshotted whole. Plists live in macos/ (next to dock-backup.plist), not
 # apps/. Changes need a logout (or killall cfprefsd) to take effect on import.
+# Includes the macOS screenshot keyboard shortcuts.
 com.apple.symbolichotkeys	Keyboard Shortcuts	macos/symbolichotkeys.plist	-
+# Includes AppleFnUsageType (Globe key: Change Input Source).
 com.apple.HIToolbox	Input Sources	macos/hitoolbox.plist	-
+# Services checkboxes/shortcuts and Finder Quick Action preferences. Captured
+# automatically (no per-setting prompt); log out/in after restoring to refresh menus.
+pbs	Services and Quick Actions	macos/services.plist	-
+# Keep device domains separate: gesture and secondary-click choices can differ.
+com.apple.AppleMultitouchTrackpad	Built-in Trackpad	macos/trackpad.plist	-
+com.apple.driver.AppleBluetoothMultitouch.trackpad	Bluetooth Trackpad	macos/bluetooth-trackpad.plist	-
+com.apple.AppleMultitouchMouse	Multitouch Mouse	macos/mouse.plist	-
+com.apple.driver.AppleBluetoothMultitouch.mouse	Bluetooth Mouse	macos/bluetooth-mouse.plist	-
 
 # Shottr license prefs (kc-license) — vault via make backup-shottr / restore-shottr.
 # Monokai Pro license settings are NOT kept in the repo — vault only

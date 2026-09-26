@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Keychain-backed snapshot backup. --persistent uses one UDRW DMG and five
-# verified snapshots; no flag preserves the legacy sparseimage workflow below.
+# Keychain-backed snapshot backup. --persistent uses one UDRW DMG with capacity-based
+# verified snapshot retention; no flag preserves the legacy sparseimage workflow below.
 #
 # First run: prompts for vault destination (cached for subsequent runs),
 #            generates a random passphrase to the login Keychain, creates
@@ -38,15 +38,21 @@ MANIFEST="${DOTFILES_BACKUP_MANIFEST:-$LOCAL_DIR/backup.manifest}"
 DEST_CACHE="$LOCAL_DIR/backup.destination"
 RECOVERY_ACK="$LOCAL_DIR/vault-recovery.confirmed"
 KEEP="${DOTFILES_BACKUP_KEEP:-10}"
-if (( PERSISTENT )); then KEEP="${DOTFILES_BACKUP_KEEP:-5}"; fi
+if (( PERSISTENT )); then KEEP="${DOTFILES_BACKUP_KEEP:-auto}"; fi
 SIZE_CAP="${DOTFILES_VAULT_SIZE:-4g}"
+if (( PERSISTENT )); then SIZE_CAP="${DOTFILES_VAULT_SIZE:-1g}"; fi
 STAMP="$(date +%Y%m%d-%H%M%S)"
 SECRETS_DIR="${DOTFILES_SECRETS_DIR:-$HOME/.secrets}"
 
-[[ "$KEEP" =~ ^[1-9][0-9]*$ ]] || {
-  printf '\033[31merror:\033[0m DOTFILES_BACKUP_KEEP must be a positive integer (got: %s)\n' "$KEEP" >&2
-  exit 1
-}
+if [[ "$KEEP" == auto ]]; then
+  (( PERSISTENT )) || { echo "auto retention requires --persistent" >&2; exit 1; }
+else
+  [[ "$KEEP" =~ ^[1-9][0-9]*$ ]] || { echo "DOTFILES_BACKUP_KEEP must be a positive integer or auto" >&2; exit 1; }
+  if (( PERSISTENT )) && (( KEEP < 2 )); then
+    echo "persistent retention must preserve at least two rolling snapshots" >&2
+    exit 1
+  fi
+fi
 
 info() { printf '\033[36m==>\033[0m %s\n' "$*"; }
 ok()   { printf '\033[32m  ✓\033[0m %s\n' "$*"; }
@@ -404,6 +410,15 @@ resolve_selected_vault_attachment() {
   return 1
 }
 
+# Avoid macOS cp's slow sparse-file traversal for encrypted UDRW images.
+copy_vault_image() {
+  python3 - "$1" "$2" <<'PYTHON'
+import shutil, sys
+with open(sys.argv[1], "rb") as source, open(sys.argv[2], "xb") as target:
+    shutil.copyfileobj(source, target, 1024 * 1024)
+PYTHON
+}
+
 # Persistent mode edits a local encrypted copy of the same image. This retains
 # disk-image/volume identity and keeps the sync destination closed while writing.
 if (( PERSISTENT )); then
@@ -422,7 +437,8 @@ if (( PERSISTENT )); then
   validate_manifest_containment
   if [[ -e "$FINAL_VAULT" ]]; then
     ORIGINAL_SHA="$(shasum -a 256 "$FINAL_VAULT" | awk '{print $1}')"
-    cp "$FINAL_VAULT" "$VAULT"
+    info "copying encrypted vault to local working storage"
+    copy_vault_image "$FINAL_VAULT" "$VAULT"
     [[ "$(shasum -a 256 "$VAULT" | awk '{print $1}')" == "$ORIGINAL_SHA" ]] || die "working copy checksum mismatch"
   else
     info "creating persistent encrypted UDRW/APFS image ($SIZE_CAP capacity)"
@@ -521,24 +537,45 @@ prune_snapshots() {
       done
 }
 
+# Keep sizing, copying and verification on exactly the same exclusion policy.
+RSYNC_EXCLUDES=(--exclude='.DS_Store' --exclude='*.sock' --exclude='sockets'
+  --exclude='node_modules' --exclude='__pycache__' --exclude='*.pyc'
+  --exclude='com.microsoft.appcenter')
+
 estimate_manifest_kb() {
-  local total=0 src kb
+  local total=0 src stats bytes files block_size estimate_dir
+  if (( ! PERSISTENT )); then
+    for src in "${MANIFEST_PATHS[@]}"; do
+      [[ -e "$src" || -L "$src" ]] || continue
+      bytes="$(du -skL "$src" | awk '{print $1}')" || return 1
+      [[ "$bytes" =~ ^[0-9]+$ ]] || return 1
+      total=$((total + bytes))
+    done
+    printf '%s' "$total"
+    return
+  fi
+  block_size="$(python3 -c 'import os,sys; print(os.statvfs(sys.argv[1]).f_frsize)' "$MOUNT")"
+  estimate_dir="$(mktemp -d "${TMPDIR:-/tmp}/dotfiles-size-estimate.XXXXXX")"
   for src in "${MANIFEST_PATHS[@]}"; do
-    if [[ ! -e "$src" && ! -L "$src" ]]; then
-      continue
-    fi
-    # The snapshot uses rsync -L, so estimate the dereferenced target too.
-    if ! kb="$(du -skL "$src" 2>/dev/null | awk '{print $1}')"; then
-      warn "could not measure manifest path: $src" >&2
+    [[ -e "$src" || -L "$src" ]] || continue
+    if ! stats="$(rsync -aLn --no-devices --no-specials "${RSYNC_EXCLUDES[@]}" \
+        --stats "$src" "$estimate_dir/")"; then
+      rmdir "$estimate_dir"
+      warn "could not estimate manifest source" >&2
       return 1
     fi
-    [[ -n "$kb" ]] || {
-      warn "empty size result for manifest path: $src" >&2
+    bytes="$(awk '/^Total file size:/ {gsub(/,/, "", $4); print $4}' <<< "$stats")"
+    files="$(awk '/^Number of files:/ {gsub(/,/, "", $4); print $4}' <<< "$stats")"
+    if [[ ! "$bytes" =~ ^[0-9]+$ || ! "$files" =~ ^[0-9]+$ ]]; then
+      rmdir "$estimate_dir"
+      warn "could not parse rsync size estimate" >&2
       return 1
-    }
-    total=$((total + kb))
+    fi
+    # One extra allocation block per entry covers rounding and directories.
+    total=$((total + bytes + files * block_size))
   done
-  printf '%s' "$total"
+  rmdir "$estimate_dir"
+  printf '%s' "$(( (total + 1023) / 1024 ))"
 }
 
 check_vault_space() {
@@ -550,14 +587,13 @@ check_vault_space() {
   # ~10% headroom for APFS metadata and concurrent writes
   if (( needed_kb * 11 / 10 > avail_kb )); then
     die "vault low on space: manifest needs ~${needed_mb}Mi free, mount has ~${avail_mb}Mi
-  prune: lower retention and re-run, e.g. DOTFILES_BACKUP_KEEP=5 make secrets-backup
+  prune: lower retention and re-run, e.g. DOTFILES_BACKUP_KEEP=2 make secrets-backup-legacy
   grow:  hdiutil resize -size 8g \"$VAULT\"  (then re-run)"
   fi
 }
 
-# Enforce any explicitly lowered/exceeded retention before checking capacity,
-# but never delete below KEEP merely to attempt a backup. A failed copy must
-# preserve every snapshot within policy. Normal pruning happens after publish.
+# Validate all saved content before modifying the disposable persistent image.
+# Legacy mode retains its existing count-based pruning behavior.
 if (( PERSISTENT )); then
   mount | grep -F " on $MOUNT (apfs," >/dev/null || die "persistent vault did not mount as APFS"
   python3 "$SCRIPT_DIR/vault-integrity.py" check-all "$MOUNT"
@@ -570,7 +606,17 @@ if (( PERSISTENT )); then
 else
   prune_snapshots "$KEEP"
 fi
-check_vault_space
+if (( PERSISTENT )); then
+  # Pre-copy pruning affects only the disposable image; a failed run never
+  # publishes it. One previous snapshot plus the incoming one preserves two.
+  SNAPSHOT_ESTIMATE_KB="$(estimate_manifest_kb)"
+  SNAPSHOT_RESERVE_BYTES=$(( (SNAPSHOT_ESTIMATE_KB * 1024 * 11 + 9) / 10 ))
+  (( SNAPSHOT_RESERVE_BYTES > 0 )) || die "empty manifest size estimate"
+  python3 "$SCRIPT_DIR/vault-integrity.py" prune-space "$MOUNT" \
+    --reserve-bytes "$SNAPSHOT_RESERVE_BYTES" --min-keep 1
+else
+  check_vault_space
+fi
 
 # --- snapshot into a hidden partial folder, then publish atomically ---
 SNAP="$MOUNT/$STAMP"
@@ -594,19 +640,19 @@ for src in "${MANIFEST_PATHS[@]}"; do
     source_path="$src"
   fi
   if ! rsync -aL --no-devices --no-specials --quiet \
-        --exclude='.DS_Store' --exclude='*.sock' --exclude='sockets' \
-        --exclude='node_modules' --exclude='__pycache__' --exclude='*.pyc' \
-        --exclude='com.microsoft.appcenter' \
+        "${RSYNC_EXCLUDES[@]}" \
         "$source_path" "$destination/"; then
+    if (( PERSISTENT )); then
+      die "rsync failed copying $src — partial snapshot will be removed
+  if the working image was full, increase capacity and retry; a failed copy never publishes"
+    fi
     die "rsync failed copying $src — partial snapshot will be removed
   if the vault was full, prune or resize before retrying (see check_vault_space hints above)"
   fi
   if (( PERSISTENT )); then
     comparison="$(rsync -aLnc --delete --no-devices --no-specials --itemize-changes \
       --out-format='DOTFILES_VERIFY:%i' \
-      --exclude='.DS_Store' --exclude='*.sock' --exclude='sockets' \
-      --exclude='node_modules' --exclude='__pycache__' --exclude='*.pyc' \
-      --exclude='com.microsoft.appcenter' \
+      "${RSYNC_EXCLUDES[@]}" \
       "$source_path" "$destination/")" || die "snapshot copy verification failed"
     # openrsync also writes "skipping non-regular file" notices to stdout.
     # Only tagged itemized changes indicate drift. --quiet would hide real
@@ -627,7 +673,13 @@ mv "$PARTIAL" "$SNAP"
 PARTIAL=""
 ok "published $STAMP with $COUNT path(s)"
 if (( PERSISTENT )); then
-  python3 "$SCRIPT_DIR/vault-integrity.py" prune "$MOUNT" --keep "$KEEP"
+  # Account for source growth and destination filesystem allocation. Keep room
+  # for two more snapshots with the same 10% metadata margin used above.
+  snapshot_kb="$(du -sk "$SNAP" | awk '{print $1}')"
+  reserve_bytes=$(( (snapshot_kb * 1024 * 22 + 9) / 10 ))
+  retention_args=(prune-space "$MOUNT" --reserve-bytes "$reserve_bytes" --min-keep 2)
+  [[ "$KEEP" == auto ]] || retention_args+=(--keep "$KEEP")
+  python3 "$SCRIPT_DIR/vault-integrity.py" "${retention_args[@]}"
   SNAPSHOT_NAMES=()
   while IFS= read -r name; do SNAPSHOT_NAMES+=("$name"); done < <(
     find "$MOUNT" -maxdepth 1 -type d -name '????????-??????' -exec basename {} \; | LC_ALL=C sort
@@ -664,7 +716,12 @@ if (( PERSISTENT )); then
   hdiutil detach "$MOUNT" >/dev/null
   MOUNTED_BY_US=0
   ATTACHED_DEVICE=""
-  python3 "$SCRIPT_DIR/vault-integrity.py" sidecars "$WORK/DotfilesSecrets.dmg" --snapshots "${SNAPSHOT_NAMES[@]}" --baselines "${BASELINE_NAMES[@]}"
+  (( ${#SNAPSHOT_NAMES[@]} > 0 )) || die "persistent snapshot list was empty after publish"
+  sidecar_args=(sidecars "$WORK/DotfilesSecrets.dmg" --snapshots "${SNAPSHOT_NAMES[@]}")
+  if (( ${#BASELINE_NAMES[@]} > 0 )); then
+    sidecar_args+=(--baselines "${BASELINE_NAMES[@]}")
+  fi
+  python3 "$SCRIPT_DIR/vault-integrity.py" "${sidecar_args[@]}"
   # Recheck destination attachment immediately before replacing its closed bytes.
   VAULT="$FINAL_VAULT"
   attachment_status=0
@@ -680,7 +737,8 @@ if (( PERSISTENT )); then
     [[ ! -e "$candidate" && ! -L "$candidate" ]] || die "stale publication partial exists; inspect it before retrying"
   done
   PUBLISH_PARTIAL="$DEST/.DotfilesSecrets.dmg.partial"
-  cp "$WORK/DotfilesSecrets.dmg" "$PUBLISH_PARTIAL"
+  info "publishing encrypted vault"
+  copy_vault_image "$WORK/DotfilesSecrets.dmg" "$PUBLISH_PARTIAL"
   chmod 600 "$PUBLISH_PARTIAL"
   [[ "$(shasum -a 256 "$PUBLISH_PARTIAL" | awk '{print $1}')" == "$(shasum -a 256 "$WORK/DotfilesSecrets.dmg" | awk '{print $1}')" ]] || die "published copy checksum mismatch"
   mv -f "$PUBLISH_PARTIAL" "$FINAL_VAULT"

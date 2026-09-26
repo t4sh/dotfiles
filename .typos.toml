@@ -3,11 +3,13 @@ extend-exclude = [
   "agents/skills/**",
   "apps/**/*.plist",
   "macos/*.plist",
+  "git/keys/**",
   "services/**/*.workflow/**",
 ]
 
 [default.extend-identifiers]
 BigSur = "BigSur"
+fpr = "fpr"
 
 # PowerShell's case-insensitive membership and inequality operators.
 [type.powershell]

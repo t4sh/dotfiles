@@ -1,6 +1,6 @@
 # 04 — Codex host tooling
 
-Always on. These rules prevent sandbox and browser-tooling false negatives from being treated as real project state.
+Activate for host-authenticated, browser, localhost, or sandbox-sensitive tooling. These rules prevent tooling-context false negatives from being treated as real project state.
 
 ## Host-native first for known sandbox-hostile operations
 
@@ -28,6 +28,7 @@ This section is recovery guidance for genuinely unexpected failures. It does not
 - Do not report "blocked by sandbox" until the escalated/native path has also failed, approval was denied, or the operation is unsafe without explicit user input.
 - For GitHub operations and live auth checks, prefer native/host `gh` as the source of truth over sandboxed `gh` output.
 - If a command is important and likely failed because of sandbox or network restrictions, immediately request the narrow escalation instead of stopping to describe the sandbox failure.
+- RTK is an optional output wrapper. If its WinGet executable is inaccessible in Codex's normal Windows sandbox, run the original command there. Do not elevate solely to use RTK; escalate only when the underlying command independently needs host access.
 
 ## Nimbalyst exceptions
 

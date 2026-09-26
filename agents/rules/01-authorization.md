@@ -8,7 +8,7 @@ Always on. These govern when to act vs. when to describe.
 
 - "do it", "fix it", "implement", "commit", "push", "deploy", "merge"
 - "make it", "apply", "ship it", "go ahead"
-- Note: action verbs remain subject to repository rules and the global authorization, attribution, and safety stop conditions. "Commit", "push", and "deploy" have additional constraints in 00-core rules 8–10. When `02-attribution.md` requires a terminal merge handoff, producing that handoff instead of merging is the required action.
+- Note: action verbs remain subject to repository rules and the global authorization, attribution, and safety stop conditions. "Commit", "push", and "deploy" have additional constraints in `00-core.md` rule 8, `02-attribution.md`, and `07-worktree-lifecycle.md`. When `02-attribution.md` requires a terminal merge handoff, producing that handoff instead of merging is the required action.
 
 **Proposal verbs (describe only, then STOP):**
 

@@ -11,8 +11,8 @@
 #      gitignored (would leak into the public split). Self-skips pre-bootstrap.
 #   4. Skillsfile sync gate — when its lock, hold policy, generator or output is staged,
 #      blocks if they drifted (regenerate with `make skills-manifest`).
-#   5. Rulebook ownership gate — when the index, rules, or init loader changes,
-#      blocks membership, applicability, or loader-contract drift.
+#   5. Rulebook ownership gate — when the index, rules, init loader, audit, or a
+#      skill entrypoint changes, blocks loader, routing, or token-budget drift.
 #
 # Bypass (emergencies only): `git commit --no-verify`
 
@@ -116,8 +116,8 @@ if git diff --cached --name-only --diff-filter=ACMR \
 fi
 
 # --- 5. Rulebook ownership gate (blocking, only for rulebook changes) ---------
-if git diff --cached --name-only --diff-filter=ACMR \
-   | grep -qE '^agents/AGENTS\.md$|^agents/rules/[^/]+\.md$|^agents/skills/init-rulebook/SKILL\.md$'; then
+if git diff --cached --name-only --diff-filter=ACMRD \
+   | grep -qE '^agents/AGENTS\.md$|^agents/rules/.+\.md$|^agents/skills/[^/]+/SKILL\.md$|^scripts/audit-rules\.sh$'; then
   scripts/audit-rules.sh || {
     printf '\n\033[31m✗ commit blocked: rulebook ownership contract drifted\033[0m\n' >&2
     printf '  fix:    make rules-audit\n' >&2

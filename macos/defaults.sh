@@ -37,14 +37,21 @@ fi
 [[ "$(uname -s)" == "Darwin" ]] || { echo "macos/defaults.sh requires macOS" >&2; exit 1; }
 MACOS_VERSION="$(sw_vers -productVersion)"
 MACOS_MAJOR="${MACOS_VERSION%%.*}"
-DEFAULT_CAPTURE_PARENT="$HOME/odrive/ash.a.t@live/Workspace"
+PREFERENCE_HELPER="$(dirname "$0")/../scripts/macos-preferences.py"
+python3 "$PREFERENCE_HELPER" validate
+SAVED_CAPTURE_DIR="$(python3 "$PREFERENCE_HELPER" capture-dir)"
+# Workspace parents live in the private config/capture-parents.tsv, not in this
+# publicly projected script. The helper is the single resolver for both.
+FALLBACK_CAPTURE_DIR="$(python3 "$PREFERENCE_HELPER" fallback-dir)"
 if [[ -n "${DOTFILES_CAPTURE_DIR:-}" ]]; then
     CAPTURE_DIR="$DOTFILES_CAPTURE_DIR"
-elif [[ -d "$DEFAULT_CAPTURE_PARENT" ]]; then
-    CAPTURE_DIR="$DEFAULT_CAPTURE_PARENT/Screengrabs"
+elif [[ -n "$SAVED_CAPTURE_DIR" ]]; then
+    CAPTURE_DIR="$SAVED_CAPTURE_DIR"
 else
-    CAPTURE_DIR="$HOME/Desktop/Screengrabs"
-    echo "  ⚠ odrive workspace unavailable; screenshot policy uses $CAPTURE_DIR until make macos is rerun" >&2
+    CAPTURE_DIR="$FALLBACK_CAPTURE_DIR"
+    if [[ "$CAPTURE_DIR" == "$HOME/Desktop/Screengrabs" ]]; then
+        echo "  ⚠ no configured workspace parent available; screenshot policy uses $CAPTURE_DIR until make macos is rerun" >&2
+    fi
 fi
 [[ "$CAPTURE_DIR" == /* && -n "${CAPTURE_DIR//\//}" ]] || {
     echo "screenshot destination must be an absolute non-root path: $CAPTURE_DIR" >&2
@@ -72,43 +79,30 @@ echo "macOS defaults policy: mode=$MODE scope=$([[ $PRIVILEGED -eq 1 ]] && echo 
 
 verify_defaults() {
     local failures=0 actual domain key expected firewall stealth capture
-    local cc_key cc_actual module
-    while IFS=$'\t' read -r domain key expected; do
+    local expected_rows
+    expected_rows="$(python3 "$PREFERENCE_HELPER" expected)" || return $?
+    while IFS=$'\t' read -r domain key expected missing_default; do
         actual="$(command defaults read "$domain" "$key" 2>/dev/null || true)"
         actual="${actual%\"}"; actual="${actual#\"}"
+        # Control Center visibility is omitted until customized; the helper
+        # supplies the allowlist default in the fourth column for those keys.
+        if [[ -z "$actual" && -n "${missing_default:-}" ]]; then
+            actual="$missing_default"
+        fi
         if [[ "$actual" == "$expected" ]]; then
             printf '  ✓ %s %s = %s\n' "$domain" "$key" "$expected"
         else
             printf '  ✗ %s %s expected %s, got %s\n' "$domain" "$key" "$expected" "${actual:-<unset>}" >&2
             failures=$((failures + 1))
         fi
-    done <<'EOF'
-NSGlobalDomain	AppleShowAllExtensions	0
-com.apple.finder	AppleShowAllFiles	1
-com.apple.finder	ShowPathbar	1
-com.apple.dock	autohide	0
-com.apple.dock	show-recents	0
-com.apple.screensaver	askForPassword	1
-com.apple.screensaver	askForPasswordDelay	0
-com.apple.desktopservices	DSDontWriteNetworkStores	1
-com.apple.SoftwareUpdate	AutomaticCheckEnabled	1
-com.apple.AppleMultitouchMouse	MouseTwoFingerHorizSwipeGesture	1
-com.apple.universalaccess	closeViewHotkeysEnabled	1
-NSGlobalDomain	AppleInterfaceStyleSwitchesAutomatically	1
-com.apple.controlcenter	BatteryShowPercentage	0
-com.apple.dock	wvous-tl-corner	4
-com.apple.dock	wvous-tl-modifier	0
-com.apple.dock	wvous-tr-corner	1
-com.apple.dock	wvous-tr-modifier	0
-com.apple.dock	wvous-bl-corner	2
-com.apple.dock	wvous-bl-modifier	0
-com.apple.dock	wvous-br-corner	1
-com.apple.dock	wvous-br-modifier	0
-EOF
+    done <<< "$expected_rows"
     # Finder view/preview choices are daily workspace state. Reset them explicitly
     # with view-reset; they must not block unrelated preference backups.
     capture="$(command defaults read com.apple.screencapture location 2>/dev/null || true)"
     capture="${capture%\"}"; capture="${capture#\"}"
+    # A literal '~/' prefix in the stored value is matched, not expanded.
+    # shellcheck disable=SC2088
+    case "$capture" in '~/'*) capture="$HOME/${capture#\~/}" ;; esac
     if [[ "$capture" == "$CAPTURE_DIR" ]]; then
         printf '  ✓ com.apple.screencapture location = %s\n' "$CAPTURE_DIR"
     else
@@ -128,19 +122,6 @@ EOF
             failures=$((failures + 1))
         }
     fi
-    # Control Center module visibility — macOS 26 introduced the VisibleCC key.
-    for module in "${CONTROL_CENTER_MODULES[@]}"; do
-        cc_key="$CONTROL_CENTER_VISIBILITY_KEY $module"
-        cc_actual="$(command defaults read com.apple.controlcenter "$cc_key" 2>/dev/null || true)"
-        cc_actual="${cc_actual%\"}"; cc_actual="${cc_actual#\"}"
-        if [[ "$cc_actual" == "1" ]]; then
-            printf '  ✓ com.apple.controlcenter %s = 1\n' "$cc_key"
-        else
-            printf '  ✗ com.apple.controlcenter %s expected 1, got %s\n' \
-                "$cc_key" "${cc_actual:-<unset>}" >&2
-            failures=$((failures + 1))
-        fi
-    done
     (( failures == 0 ))
 }
 
@@ -560,8 +541,8 @@ defaults write com.apple.TextEdit PlainTextEncodingForWrite -int 4
 #         5=Screen Saver, 6=Disable Screen Saver, 10=Put Display to Sleep,
 #         11=Launchpad, 12=Notification Center, 13=Lock Screen, 14=Quick Note
 
-# Top-left → Desktop
-defaults write com.apple.dock wvous-tl-corner -int 4
+# Top-left → No action
+defaults write com.apple.dock wvous-tl-corner -int 1
 defaults write com.apple.dock wvous-tl-modifier -int 0
 # Top-right → No action
 defaults write com.apple.dock wvous-tr-corner -int 1
@@ -814,6 +795,13 @@ warn_on_fail "could not set Accessibility zoom modifier (Full Disk Access/Access
     defaults write com.apple.universalaccess closeViewScrollWheelModifiersInt -int 262144
 warn_on_fail "could not set Accessibility zoom hotkeys (Full Disk Access/Accessibility may be required)" \
     defaults write com.apple.universalaccess closeViewHotkeysEnabled -bool "true"
+
+# Apply captured preferences after built-in defaults and before restarting consumers.
+if [[ "$MODE" == dry-run ]]; then
+    python3 "$PREFERENCE_HELPER" apply --dry-run
+else
+    python3 "$PREFERENCE_HELPER" apply
+fi
 
 ###############################################################################
 # Kill affected applications                                                  #

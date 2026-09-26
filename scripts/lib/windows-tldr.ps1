@@ -40,7 +40,8 @@ function Invoke-DotfilesTldrProcess {
         $Prefix = @('-I','-m','tldr')
     }
     $start = [Diagnostics.ProcessStartInfo]::new()
-    $start.FileName = (Get-Command $Executable -CommandType Application -ErrorAction Stop | Select-Object -First 1).Source
+    try { $start.FileName = (Get-Command $Executable -CommandType Application -ErrorAction Stop | Select-Object -First 1).Source }
+    catch { throw "TLDR launch failed: $($_.Exception.GetBaseException().Message)" }
     $start.UseShellExecute = $false
     $start.RedirectStandardOutput = $true
     $start.RedirectStandardError = $true

@@ -23,7 +23,7 @@ usage: scripts/brewfile.sh {core|apps|base|npm|mas|mas-optional|check|dump|inven
   core   install taps and formulae required by the bootstrap
   apps   install casks, fonts, and editor extensions
   base   run core, then apps (backward-compatible strict aggregate)
-  npm    install npm globals under the pinned .node-version runtime
+  npm    install npm globals under the pinned .node-version runtime, then enable Corepack
   mas    install current App Store declarations only
   mas-optional  confirm App Store readiness interactively; otherwise defer
   check  check installed Brewfile entries with pinned Node active
@@ -259,6 +259,8 @@ case "${1:-}" in
   npm)
     activate_pinned_node
     awk '/^[[:space:]]*npm[[:space:]]+/' "$BREWFILE" | brew bundle --file=-
+    # Corepack is a Brewfile npm global; enable shims after it is installed.
+    corepack enable
     ;;
   mas)
     command -v mas >/dev/null 2>&1 || die "mas missing; run: make brew-base"

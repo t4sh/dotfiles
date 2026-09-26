@@ -22,6 +22,7 @@ brew:ffmpeg	native	winget	Gyan.FFmpeg	Native Windows counterpart; identity verif
 brew:findutils	manual			Git Bash supplies find; do not put its usr/bin before Windows tools globally.
 brew:fzf	native	winget	junegunn.fzf	Native Windows counterpart; identity verified against installed WinGet inventory.
 brew:gh	native	winget	GitHub.cli	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:gnupg	manual			Mac Tower restore installs GnuPG explicitly; Windows GPG key and trust setup remains manual.
 brew:ghostscript	manual			Official Artifex Windows installer; verify release digest.
 brew:git	native	winget	Git.Git	Native Windows counterpart; identity verified against installed WinGet inventory.
 brew:git-delta	native	winget	dandavison.delta	Native Windows counterpart; identity verified against installed WinGet inventory.
@@ -41,6 +42,7 @@ brew:moreutils	manual			Optional POSIX toolkit; not a Windows bootstrap dependen
 brew:nvm	native	winget	Volta.Volta	Native Windows counterpart; identity verified against installed WinGet inventory.
 brew:pi-coding-agent	runtime	volta	@earendil-works/pi-coding-agent	Explicit runtime-manager package; not a Homebrew dependency on Windows.
 brew:poppler	native	winget	oschwartz10612.Poppler	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:portless	manual			Windows local HTTPS setup is deferred; Mac uses the Homebrew formula.
 brew:potrace	manual			Official Windows binary; verify upstream release before use.
 brew:pygments	runtime	uv	pygments	Explicit runtime-manager package; not a Homebrew dependency on Windows.
 brew:python-setuptools	manual			Project virtual environments own Python build dependencies.
@@ -98,6 +100,7 @@ cask:google-gemini	manual			https://gemini.google.com/ (web/PWA)
 cask:hammerspoon	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
 cask:handbrake-app	native	winget	HandBrake.HandBrake	Native Windows counterpart; identity verified against installed WinGet inventory.
 cask:hermes-desktop	manual			https://hermes-agent.nousresearch.com/desktop
+cask:homebrew-app	macos-only			Homebrew's GUI requires macOS 26 or newer; not applied on Windows.
 cask:iina	native	winget	VideoLAN.VLC	Native Windows counterpart; identity verified against installed WinGet inventory.
 cask:imageoptim	native	winget	SaeraSoft.CaesiumImageCompressor	Native Windows counterpart; identity verified against installed WinGet inventory.
 cask:kaleidoscope	native	winget	Meld.Meld	Preferred Windows diff and merge tool for Tower and Git; Kaleidoscope remains the Mac choice.
@@ -108,7 +111,6 @@ cask:linear	native	winget	LinearOrbit.Linear	Native Windows counterpart; identit
 cask:lobehub	native	winget	LobeHub.LobeHub	Native Windows counterpart; identity verified against installed WinGet inventory.
 cask:lunacy	native	winget	Icons8.Lunacy	Native Windows counterpart; identity verified against installed WinGet inventory.
 cask:maccy	native	winget	Microsoft.PowerToys	Native Windows counterpart; identity verified against installed WinGet inventory.
-cask:markdown-preview	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
 cask:mate-translate	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
 cask:microsoft-auto-update	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
 cask:microsoft-edge	native	winget	Microsoft.Edge	Native Windows counterpart; identity verified against installed WinGet inventory.
@@ -168,8 +170,9 @@ mas:361304891	macos-only			Numbers: Apple platform application or system prefere
 mas:409203825	macos-only			Numbers: Apple platform application or system preference.
 mas:409201541	macos-only			Pages: Apple platform application or system preference.
 mas:361309726	macos-only			Pages: Apple platform application or system preference.
-mas:1549370672	manual			Save to Raindrop.io: install the browser extension manually; desktop Raindrop is mapped separately.
 mas:545519333	manual			Prime Video: browser extension, Store or vendor/account setup; review the official Windows route.
+mas:6812534537	macos-only			QuickLookPro: Apple platform application or system preference.
+mas:1549370672	manual			Save to Raindrop.io: install the browser extension manually; desktop Raindrop is mapped separately.
 mas:6745342698	manual			uBlock Origin Lite: browser extension, Store or vendor/account setup; review the official Windows route.
 mas:1517772049	manual			Urban VPN Desktop: browser extension, Store or vendor/account setup; review the official Windows route.
 mas:1607635845	manual			Velja: browser extension, Store or vendor/account setup; review the official Windows route.
@@ -182,3 +185,4 @@ windows:Microsoft.PowerShell	native	winget	Microsoft.PowerShell	Independent MSI 
 windows:ezwinports.make	native	winget	ezwinports.make	Optional common command surface.
 windows:gerardog.gsudo	native	winget	gerardog.gsudo	Per-command Windows elevation for Topgrade; keep the outer maintenance shell unelevated.
 windows:SST.opencode	native	winget	SST.opencode	Windows CLI counterpart accompanying the desktop app.
+windows:rsync	manual			Required for Linux-only deployment workflows; run it in WSL with Linux-owned credentials instead of declaring a native rsync.

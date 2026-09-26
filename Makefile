@@ -9,7 +9,13 @@ else
 
 export DOTFILES := $(CURDIR)
 
-.PHONY: cursor-extensions vscode-extensions restore-zed zed-check
+.PHONY: cursor-extensions vscode-extensions restore-zed zed-check restore-cursor-cli cursor-cli-check backup-text-replacements
+restore-cursor-cli: ## Merge saved Cursor CLI attribution preferences
+	@bash scripts/restore-apps.sh --only cursor-cli
+
+cursor-cli-check: ## Check Cursor CLI attribution against the saved snapshot
+	@python3 scripts/cursor-cli-settings.py check
+
 cursor-extensions: ## Install the minimal reviewed Cursor extension set
 	@cursor --install-extension esbenp.prettier-vscode
 
@@ -75,6 +81,9 @@ restore-dato: ## Restore full Dato preferences after launching Dato once
 backup-deskflow: ## Back up Mac Deskflow configuration and TLS files into ~/.secrets
 	@bash scripts/backup-deskflow-vault.sh
 
+backup-text-replacements: ## Back up Mac Text Replacements into ~/.secrets
+	@python3 scripts/backup-text-replacements.py
+
 .PHONY: ssh-sockets
 ssh-sockets: ## Create the local SSH connection-sharing directory
 	@mkdir -p "$(HOME)/.ssh/sockets"
@@ -107,7 +116,7 @@ skills-audit: ## Check tracked agent skills for redistribution/license safety
 	@bash scripts/audit-skill-licenses.sh --check
 
 # Assert agents/AGENTS.md @-includes and agents/rules/*.md stay 1:1 in sync.
-rules-audit: ## Check agent rule includes stay in sync
+rules-audit: ## Check agent rule, routing, and token-budget contracts
 	@bash scripts/audit-rules.sh
 
 brewfile-audit: ## Check Brewfile consistency rules
@@ -177,7 +186,7 @@ brew-apps: ## Install casks, fonts, and editor extensions (resumable phase)
 node: ## Install and activate the exact Node version from .node-version
 	@DOTFILES="$(CURDIR)" bash scripts/setup-node.sh
 
-brew-npm: ## Install Brewfile npm globals under the pinned Node runtime
+brew-npm: ## Install pinned-Node npm globals and enable Corepack shims
 	@DOTFILES="$(CURDIR)" bash scripts/brewfile.sh npm
 
 brew-mas: ## Install only App Store apps after signing into the App Store
@@ -293,7 +302,7 @@ verify-bootstrap: ## Fail unless the post-vault Mac bootstrap is complete
 
 docs-audit: ## Check docs/scripts for typos when typos is installed
 	@if command -v typos >/dev/null 2>&1; then \
-		typos README.md AGENTS.md Makefile install.sh scripts macos zsh config hammerspoon bin git starship; \
+		typos README.md AGENTS.md WINDOWS.md SECRETS-WINDOWS.md Makefile windows.mk install.sh install.ps1 scripts macos zsh powershell config hammerspoon bin git starship; \
 	else \
 		echo "  - typos not installed; run 'make brew' first"; \
 	fi
@@ -309,14 +318,15 @@ audit-apps: ## Scan app preference snapshots for secrets/local paths
 apps-drift: ## Check app preference snapshots against current system state
 	@bash scripts/audit-apps-drift.sh
 
-backup: ## Check macOS policy, refresh repo snapshots, then capture Dato/Shottr/Deskflow into ~/.secrets
+backup: ## Check macOS policy, refresh public snapshots, and capture vault preferences
 	@$(MAKE) --no-print-directory macos-check SKIP_FINDER_VIEWS=1 || { echo "macOS preferences differ or could not be checked. Review and confirm each difference before backup; update policy or restore the saved value, then retry."; exit 1; }
-	@bash scripts/backup-apps.sh
+	@OVERRIDE="$(OVERRIDE)" bash scripts/backup-apps.sh
 	@if [ -f "$(HOME)/Library/Containers/com.sindresorhus.Dato/Data/Library/Preferences/com.sindresorhus.Dato.plist" ]; then $(MAKE) --no-print-directory backup-dato; else echo "Dato private capture skipped: launch Dato first; previous backup retained."; fi
 	@if defaults read cc.ffitch.shottr >/dev/null 2>&1; then $(MAKE) --no-print-directory backup-shottr; else echo "Shottr private capture skipped: preferences unavailable; previous backup retained."; fi
 	@if [ -d "$(HOME)/Library/Deskflow" ]; then $(MAKE) --no-print-directory backup-deskflow; else echo "Deskflow private capture skipped: configure Deskflow first; previous backup retained."; fi
+	@$(MAKE) --no-print-directory backup-text-replacements
 
-secrets-backup: ## Update DotfilesSecrets.dmg with five verified snapshots
+secrets-backup: ## Update vault; preserve baselines and fill capacity with verified snapshots
 	@bash scripts/secrets-backup.sh --persistent
 
 .PHONY: secrets-backup-portable

@@ -2,8 +2,8 @@
 # are not backup inputs. Slash-separated paths select individual JSON properties.
 function Get-DotfilesExtraAppSpecs {
     $items=[Collections.Generic.List[hashtable]]::new()
-    function Add-Extra($App,$File,$Root,$Relative,$Kind,$Paths,$Process) {
-        $items.Add(@{App=$App;File=$File;Root=$Root;Relative=$Relative;Kind=$Kind;Paths=@($Paths);Process=@($Process)})
+    function Add-Extra($App,$File,$Root,$Relative,$Kind,$Paths,$Process,$SharedSource) {
+        $items.Add(@{App=$App;File=$File;Root=$Root;Relative=$Relative;Kind=$Kind;Paths=@($Paths);Process=@($Process);SharedSource=$SharedSource})
     }
     Add-Extra terminal settings.json Local 'Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json' terminal @('defaultProfile','copyFormatting','copyOnSelect','newTabMenu','profiles','schemes','themes','actions','keybindings','theme','launchMode','initialCols','initialRows','tabWidthMode','alwaysShowTabs','showTabsInTitlebar','useAcrylicInTabRow','confirmCloseAllTabs') WindowsTerminal
     Add-Extra powertoys settings.json Local 'Microsoft/PowerToys/settings.json' json @('enabled','startup','theme','system_theme','show_tray_icon','show_theme_adaptive_tray_icon','enable_quick_access','quick_access_shortcut','enable_warnings_elevated_apps','dashboard_sort_order','download_updates_automatically','include_prerelease_updates','show_new_updates_toast_notification','show_whats_new_after_updates') PowerToys
@@ -41,7 +41,9 @@ function Get-DotfilesExtraAppSpecs {
     Add-Extra powertoys 'Peek/preview-settings.json' Local 'Microsoft/PowerToys/Peek/preview-settings.json' json @('SourceCodeWrapText','SourceCodeTryFormat','SourceCodeFontSize','SourceCodeStickyScroll','SourceCodeMinimap') @('PowerToys','PowerToys.*')
     Add-Extra powertoys 'PowerRename/settings.json' Local 'Microsoft/PowerToys/PowerRename/power-rename-settings.json' json @('ShowIcon','ExtendedContextMenuOnly','PersistState','MRUEnabled','MaxMRUSize','UseBoostLib') @('PowerToys','PowerToys.*')
     Add-Extra sublime 'keybindings.json' Roaming 'Sublime Text/Packages/User/Default (Windows).sublime-keymap' keymap @() sublime_text
-    Add-Extra zed keymap.json Roaming 'Zed/keymap.json' keymap @() zed
+    # Zed's keymap is Mac-authored: Windows restores it and never captures it, so
+    # this machine cannot write it back into the repository.
+    Add-Extra zed keymap.json Roaming 'Zed/keymap.json' keymap @() zed (Get-DotfilesSharedPreferencePath 'apps/zed/keymap.json')
     $plugins=[ordered]@{
         'A File Icon'=@('size'); Markdown=@('extensions'); MultiMarkdown=@('extensions')
         MarkdownPreview=@('enable_autoreload')
