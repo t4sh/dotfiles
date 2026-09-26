@@ -427,5 +427,11 @@ exceptions through Finder in a GUI session. Backup preflight skips daily view-po
 Native Open/Save Columns/Date Modified defaults are fallbacks; apps may override them,
 and native panels do not support Finder-style grouping. Reopen existing dialogs.
 
+On an existing Mac, run `make macos` and `make default-apps` to reapply the saved
+Finder/Open–Save and handler policies, then run `make macos-check`,
+`view-reset --check-folders`, and `make default-apps-check` to read them back.
+If this public checkout uses a personal screenshot folder, set `DOTFILES_CAPTURE_DIR`
+for `make macos-check`; the unset policy uses the portable Desktop fallback.
+
 Privacy reviewers and fork users: read the [intentional public identity baseline](PRIVACY.md).
 The documented noreply Git identity and public verification key are deliberately published.
