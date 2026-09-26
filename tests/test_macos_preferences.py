@@ -10,18 +10,21 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 
 
-@unittest.skipUnless(sys.platform == "darwin", "macOS workflow")
 class PublicMacPreferences(unittest.TestCase):
     def test_personal_capture_refused_before_reading_preferences(self):
         with tempfile.TemporaryDirectory() as temporary:
             snapshot = Path(temporary) / "personal.json"
-            env = {**os.environ, "DOTFILES_PUBLIC_SNAPSHOT": "1",
-                   "DOTFILES_MACOS_PREFERENCES": str(snapshot)}
+            env = {**os.environ, "DOTFILES_MACOS_PREFERENCES": str(snapshot)}
+            env.pop("DOTFILES_PUBLIC_SNAPSHOT", None)
             result = subprocess.run([sys.executable, str(ROOT / "scripts/macos-preferences.py"), "capture"],
                                     env=env, text=True, capture_output=True)
             self.assertNotEqual(result.returncode, 0)
-            self.assertIn("private-only", result.stderr)
+            self.assertIn("invalid choice", result.stderr)
             self.assertFalse(snapshot.exists())
+
+    def test_personal_snapshot_is_gitignored(self):
+        result = subprocess.run(["git", "check-ignore", "-q", "config/macos-preferences.json"], cwd=ROOT)
+        self.assertEqual(result.returncode, 0)
 
     def test_keyboard_policy_and_major_mapping(self):
         spec = importlib.util.spec_from_file_location("mac_preferences", ROOT / "scripts/macos-preferences.py")

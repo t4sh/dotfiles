@@ -15,6 +15,7 @@ secrets-*.tar.gz*
 backup.manifest
 backup.destination
 .dotfiles-local/
+config/macos-preferences.json
 
 # Vault-backed app exports and licensed prefs
 ssh/config
