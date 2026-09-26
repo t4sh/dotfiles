@@ -49,6 +49,7 @@ class PublicBootstrap(unittest.TestCase):
                 else:
                     self.assertTrue((ROOT / snapshot).is_file(), label)
 
+    @unittest.skipUnless(sys.platform == 'darwin', 'Requires macOS preference tools')
     def test_mac_capture_retains_templates_and_omits_dato(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory) / 'checkout'
@@ -76,6 +77,7 @@ class PublicBootstrap(unittest.TestCase):
             for p, data in before.items():
                 self.assertEqual(p.read_bytes(), data, str(p.relative_to(root)))
 
+    @unittest.skipUnless(sys.platform == 'darwin', 'Requires macOS plutil')
     def test_public_app_sanitization_and_audit(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

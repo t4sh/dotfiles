@@ -124,6 +124,7 @@ class PublicRecoveryTests(unittest.TestCase):
                 self.assertEqual(legacy_finder.main(), 0)
             self.assertEqual(call.call_args.args[0][-1], '--policy-only')
 
+    @unittest.skipIf(os.name == 'nt', 'Finder traversal requires POSIX SIGALRM')
     def test_finder_reset_preserves_protected_and_changed_metadata(self):
         home = self.root.resolve()
         metadata = home / '.DS_Store'

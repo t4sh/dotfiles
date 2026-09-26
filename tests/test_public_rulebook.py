@@ -19,23 +19,25 @@ class PublicRulebookAudit(unittest.TestCase):
         shutil.copy2(ROOT / 'scripts/audit-rules.sh', self.root / 'scripts/audit-rules.sh')
 
     def audit(self):
-        return subprocess.run(['bash', str(self.root / 'scripts/audit-rules.sh')],
-                              env={**os.environ, 'DOTFILES': str(self.root)},
-                              capture_output=True, text=True)
+        bash = (str(Path(os.environ.get('ProgramFiles', 'C:/Program Files')) / 'Git/bin/bash.exe')
+                if os.name == 'nt' else 'bash')
+        return subprocess.run([bash, (self.root / 'scripts/audit-rules.sh').as_posix()],
+                              env={**os.environ, 'DOTFILES': self.root.as_posix()},
+                              capture_output=True, text=True, encoding='utf-8')
 
     def test_duplicate_index_entry_fails(self):
         index = self.root / 'agents/AGENTS.md'
-        text = index.read_text()
+        text = index.read_text(encoding='utf-8')
         entry = '- [Core principles](./rules/00-core.md)'
         self.assertIn(entry, text)
-        index.write_text(text.replace(entry, entry + '\n' + entry, 1))
+        index.write_text(text.replace(entry, entry + '\n' + entry, 1), encoding='utf-8', newline='\n')
         result = self.audit()
         self.assertNotEqual(result.returncode, 0)
         self.assertIn('duplicate top-level rule', result.stderr)
 
     def test_unlinked_nested_route_fails(self):
         route = self.root / 'agents/rules/routing/forgotten.md'
-        route.write_text('# Fixture\n')
+        route.write_text('# Fixture\n', encoding='utf-8', newline='\n')
         result = self.audit()
         self.assertNotEqual(result.returncode, 0)
         self.assertIn('unlinked reference', result.stderr)

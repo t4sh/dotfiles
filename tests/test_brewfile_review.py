@@ -4,6 +4,7 @@ from pathlib import Path
 import importlib.util
 import os
 import subprocess
+import sys
 import tempfile
 import unittest
 
@@ -88,7 +89,7 @@ class BrewfileReviewTests(unittest.TestCase):
             env = {**os.environ, 'OVERRIDE': '1'}
             result = subprocess.run(
                 [
-                    'python3',
+                    sys.executable,
                     str(ROOT / 'scripts/brewfile-review.py'),
                     '--saved',
                     str(saved),
@@ -111,7 +112,7 @@ class BrewfileReviewTests(unittest.TestCase):
             candidate.write_text('cask "arc"\ncask "homebrew-app"\n')
             result = subprocess.run(
                 [
-                    'python3',
+                    sys.executable,
                     str(ROOT / 'scripts/brewfile-review.py'),
                     '--saved',
                     str(saved),
@@ -130,10 +131,10 @@ class BrewfileReviewTests(unittest.TestCase):
 
 class BackupAppsReviewWiringTests(unittest.TestCase):
     def test_backup_dumps_then_reviews_with_override(self):
-        makefile = (ROOT / 'Makefile').read_text()
+        makefile = (ROOT / 'Makefile').read_text(encoding='utf-8')
         backup = makefile.split('\nbackup:', 1)[1].split('\n\n', 1)[0]
         self.assertIn('OVERRIDE="$(OVERRIDE)" bash scripts/backup-apps.sh', backup)
-        apps = (ROOT / 'scripts/backup-apps.sh').read_text()
+        apps = (ROOT / 'scripts/backup-apps.sh').read_text(encoding='utf-8')
         self.assertIn('scripts/brewfile-review.py', apps)
         self.assertIn('--saved "$SOURCE_DOTFILES/Brewfile"', apps)
         self.assertIn('--candidate "$STAGE/Brewfile"', apps)

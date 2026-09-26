@@ -45,14 +45,17 @@ def write(path, data):
     content = json.dumps(data, indent=2) + "\n"
     if path.exists() and path.read_text() == content:
         return
-    with tempfile.NamedTemporaryFile(mode="w", dir=path.parent, delete=False) as f:
-        temporary = Path(f.name)
-        try:
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(mode="w", dir=path.parent, delete=False) as f:
+            temporary = Path(f.name)
             f.write(content)
             f.flush()
             os.fsync(f.fileno())
-            os.replace(temporary, path)
-        finally:
+        # Windows cannot replace an open NamedTemporaryFile.
+        os.replace(temporary, path)
+    finally:
+        if temporary is not None:
             temporary.unlink(missing_ok=True)
 
 
