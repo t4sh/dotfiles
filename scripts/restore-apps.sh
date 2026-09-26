@@ -19,8 +19,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 DOTFILES="${DOTFILES:-$(cd -- "$SCRIPT_DIR/.." && pwd -P)}"
 case "$*" in
-    ''|'--only zed'|'--only hermes') ;;
-    *) echo 'usage: restore-apps.sh [--only zed|hermes]' >&2; exit 2 ;;
+    ''|'--only zed'|'--only hermes'|'--only cursor-cli') ;;
+    *) echo 'usage: restore-apps.sh [--only zed|hermes|cursor-cli]' >&2; exit 2 ;;
 esac
 bash "$DOTFILES/scripts/validate-manifests.sh" apps
 
@@ -65,6 +65,12 @@ restore_zed() {
     echo "  ✓ Zed settings and keymap restored"
     echo "    Launch Zed for automatic extension installation, then run make zed-check."
 }
+
+if [[ "$*" == '--only cursor-cli' ]]; then
+    python3 "$SCRIPT_DIR/cursor-cli-settings.py" restore
+    python3 "$SCRIPT_DIR/cursor-cli-settings.py" check
+    exit 0
+fi
 
 if [[ "$*" == '--only hermes' ]]; then
     python3 "$SCRIPT_DIR/hermes-settings.py" audit
@@ -171,6 +177,13 @@ if [[ -f "$DOTFILES/apps/mountain-duck/sync.plist" ]]; then
     fi
 fi
 
+# Tower verifies GitHub web commits using GitHub's published GPG key.
+# Public snapshots omit Tower preferences; install the verifier when Tower is present.
+if [[ -d /Applications/Tower.app || -d "$HOME/Applications/Tower.app" ]] &&
+   ! restore_app_is_deferred "Tower"; then
+    bash "$SCRIPT_DIR/restore-github-signing.sh"
+fi
+
 # Tower AI prompts live outside the defaults domain; the list includes its default.
 if [[ -f "$DOTFILES/apps/tower/ai-prompts.plist" ]]; then
     if restore_app_is_deferred "Tower"; then
@@ -247,6 +260,12 @@ if [ -f "$DOTFILES/apps/cursor/settings.json" ]; then
         materialize_editor_file "$DOTFILES/apps/cursor/settings.json" "$CURSOR_USER/settings.json"
         echo "  ✓ Cursor"
     fi
+fi
+
+# CLI attribution is independent of desktop preferences.
+if [[ -f "$DOTFILES/apps/cursor/cli-config.json" ]]; then
+    python3 "$SCRIPT_DIR/cursor-cli-settings.py" restore
+    python3 "$SCRIPT_DIR/cursor-cli-settings.py" check
 fi
 
 # Zed settings and keymap (account/provider/agent auth remains app-managed)

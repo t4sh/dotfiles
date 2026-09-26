@@ -31,6 +31,9 @@ fi
 echo "Auditing app/macOS preference snapshots …"
 
 APPS="$DOTFILES/apps"
+if [[ -f "$APPS/cursor/cli-config.json" ]]; then
+  python3 "$SCRIPT_DIR/cursor-cli-settings.py" audit --snapshot "$APPS/cursor/cli-config.json" || report "invalid Cursor CLI attribution snapshot"
+fi
 if [[ -d "$APPS" ]]; then
   [[ ! -e "$APPS/dato/dato.plist" ]] || report "personal Dato time-zone snapshot is excluded"
   # Never track these (gitignore); flag if they appear anyway.

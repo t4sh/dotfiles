@@ -22,7 +22,9 @@ Check-Dotfiles 'Windows Git overlay' {
     if ($LASTEXITCODE -ne 0 -or $helper -ne 'manager') { throw 'Windows GCM overlay is not selected.' }
     $ssh = & git.exe config --global --includes --get core.sshCommand
     if ($LASTEXITCODE -ne 0 -or $ssh -ne 'dotfiles-ssh.cmd') { throw 'Windows native OpenSSH launcher is not selected.' }
-    $null=Get-Command dotfiles-ssh.cmd -ErrorAction Stop
+    if (-not (Get-Command dotfiles-ssh.cmd -ErrorAction SilentlyContinue)) {
+        throw 'dotfiles-ssh.cmd is not resolvable. It lives in %USERPROFILE%\.local\bin, which must be on PATH; a process started with a Machine-only PATH cannot spawn it, and every git fetch then fails with "cannot spawn dotfiles-ssh.cmd". Relaunch from a shell that has the full user PATH, or run: dot path'
+    }
 }
 Check-Dotfiles 'Tracked hooks' { & (Join-Path $PSScriptRoot 'setup-windows-hooks.ps1') -Check }
 Check-Dotfiles 'Skills and rules' { & (Join-Path $PSScriptRoot 'check-windows-skills.ps1') }

@@ -21,6 +21,14 @@ try {
     New-Item -ItemType Directory -Path (Split-Path $dummy) -Force | Out-Null
     [IO.File]::WriteAllText($dummy, '{"editor.fontSize":52,"cSpell.words":["dummy-personal-word"]}')
     New-Item -ItemType Directory -Path $env:LOCALAPPDATA -Force | Out-Null
+    # Restore Mac-authored Zed sources into this disposable profile before Check.
+    if (Test-Path -LiteralPath (Join-Path $root 'apps/windows/zed/settings.json')) { throw 'Windows-authored Zed settings must not ship.' }
+    if (Test-Path -LiteralPath (Join-Path $root 'apps/windows/extra/zed/keymap.json')) { throw 'Windows-authored Zed keymap must not ship.' }
+    & (Join-Path $root 'scripts/sync-windows-apps.ps1') -Mode Restore -Only zed -Apply -RoamingRoot $env:APPDATA -SnapshotRoot $snapshot
+    & (Join-Path $root 'scripts/sync-windows-extra-apps.ps1') -Mode Restore -Only zed -Apply -RoamingRoot $env:APPDATA -LocalRoot $env:LOCALAPPDATA -UserRoot $fixture -RegistryRoot 'HKCU:\Software\DotfilesPublicFixtureAbsent' -SnapshotRoot (Join-Path $snapshot 'extra')
+    foreach ($file in @('settings.json','keymap.json')) {
+        if (-not (Test-Path -LiteralPath (Join-Path $env:APPDATA "Zed/$file"))) { throw "Shared Zed $file was not restored." }
+    }
     $before = TreeHash $snapshot
     $repoBefore = TreeHash (Join-Path $root 'apps')
     $liveBefore = TreeHash $fixture
@@ -32,7 +40,7 @@ try {
     if ((TreeHash $snapshot) -cne $before) { throw 'Public fixture templates changed.' }
     if ((TreeHash (Join-Path $root 'apps')) -cne $repoBefore) { throw 'Public repository templates changed.' }
     if ((TreeHash $fixture) -cne $liveBefore) { throw 'Dummy live preferences changed.' }
-    Write-Output 'PASS: direct and wrapper public backup preserve templates and dummy preferences.'
+    Write-Output 'PASS: public backup preserves templates; shared Zed sources restore and check.'
 } finally {
     $env:APPDATA = $savedRoaming
     $env:LOCALAPPDATA = $savedLocal

@@ -10,6 +10,7 @@ Usage:  python3 agents/compareskills.py
 import json
 import argparse
 import re
+import subprocess
 import sys
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
@@ -27,10 +28,10 @@ IST = timezone(timedelta(hours=5, minutes=30))
 
 
 def get_disk_skills():
-    """Sorted list of skill directory names on disk."""
+    """Sorted list of discoverable skills on disk."""
     return sorted(
         f.name for f in SKILLS_DIR.iterdir()
-        if f.is_dir() and not f.name.startswith(".")
+        if (f / "SKILL.md").is_file() and not f.name.startswith(".")
     )
 
 
@@ -70,9 +71,22 @@ def get_lock_skills():
     return version, skills
 
 
-def inventory_skills_for_manifest(disk_skills, lock_skills, gated):
-    """Return the reproducible full inventory, including gated lock entries."""
-    return sorted(set(disk_skills) | (set(lock_skills) & set(gated)))
+def get_tracked_skills():
+    """Discover repository-owned skills without including machine-local installs."""
+    result = subprocess.run(
+        ["git", "ls-files", "-z", "--", "agents/skills/*/SKILL.md"],
+        cwd=REPO_ROOT, capture_output=True, text=True, encoding="utf-8",
+        check=True,
+    )
+    return sorted({
+        parts[2] for name in result.stdout.split("\0")
+        if len(parts := name.split("/")) == 4 and parts[-1] == "SKILL.md"
+    })
+
+
+def inventory_skills_for_manifest(tracked_skills, lock_skills):
+    """Keep the committed inventory independent of a machine's extra skill folders."""
+    return sorted(set(tracked_skills) | set(lock_skills))
 
 
 def required_lock_misses(in_lock_only, gated):
@@ -109,8 +123,7 @@ def build_readme(inventory_skills, lock_version, lock_skills, remarks, gated):
 
     gated_inventory = sorted(s for s in inventory_skills if s in gated)
 
-    on_disk_only = sorted(s for s in inventory_skills if s not in lock_skills)
-    in_lock_only = sorted(s for s in lock_skills if s not in set(inventory_skills))
+    tracked_local = sorted(s for s in inventory_skills if s not in lock_skills)
 
     rows = []
     for i, name in enumerate(inventory_skills, 1):
@@ -127,8 +140,7 @@ def build_readme(inventory_skills, lock_version, lock_skills, remarks, gated):
         for src, lst in sorted(groups.items(), key=lambda x: (-len(x[1]), x[0]))
     )
 
-    lock_miss = ", ".join(in_lock_only) if in_lock_only else "none"
-    disk_miss = ", ".join(on_disk_only) if on_disk_only else f"none (all {total} skills tracked)"
+    local_names = ", ".join(tracked_local) if tracked_local else "none"
 
     if gated_inventory:
         gated_summary = (
@@ -138,8 +150,8 @@ def build_readme(inventory_skills, lock_version, lock_skills, remarks, gated):
         gated_section = (
             "### Gated — excluded from public export\n\n"
             "These load normally when present and remain excluded from the public split. "
-            "Authorized private recovery snapshots may be tracked in the private repo; "
-            "a gate entry does not by itself describe Git tracking state. Managed via "
+            "Private Git may track gated skills with git add -f; a gate entry does not "
+            "by itself describe Git tracking state. Managed via "
             "`.gitignore` + `scripts/audit-skill-licenses.sh` — this list is "
             "derived from `.gitignore`, not hardcoded.\n\n"
             f"- **{len(gated_inventory)}:** {', '.join(gated_inventory)}\n\n---\n\n"
@@ -169,7 +181,7 @@ When this file is asked to be updated. Update the following
 
 # Skills Inventory
 
-> **{total} skills** installed \u2014 {remote} remote + {local} local{gated_summary}
+> **{total} managed skills** \u2014 {remote} remote + {local} local{gated_summary}
 
 | # | Skill Name | Source | Disk Location | Remark |
 |---|-----------|--------|---------------|--------|
@@ -177,10 +189,13 @@ When this file is asked to be updated. Update the following
 
 ---
 
-### Lock File vs Disk
+### Inventory ownership
 
-- **In lock file but missing from disk:** {lock_miss}
-- **On disk but not in lock file:** {disk_miss}
+This inventory contains lock-declared skills and Git-tracked local skills.
+Machine-local additions do not change it. Run `python3 agents/compareskills.py --check`
+for live disk differences and missing managed skills; generation requires a Git checkout.
+
+- **Tracked local skills not in lock file:** {local_names}
 
 ---
 
@@ -216,6 +231,11 @@ def main():
     parser.add_argument("--check", action="store_true", help="fail on missing locked skills or inventory drift")
     args = parser.parse_args()
 
+    try:
+        tracked_skills = get_tracked_skills()
+    except (OSError, subprocess.CalledProcessError) as error:
+        print(f"ERROR: cannot read tracked skill inventory; use a Git checkout: {error}", file=sys.stderr)
+        return 1
     disk_skills = get_disk_skills()
     lock_version, lock_skills = get_lock_skills()
     remarks = parse_existing_remarks()
@@ -225,8 +245,9 @@ def main():
     in_lock_only = sorted(s for s in lock_skills if s not in set(disk_skills))
     expected_gated_absent = sorted(set(in_lock_only) & gated)
     missing_required = required_lock_misses(in_lock_only, gated)
+    missing_local = sorted(set(tracked_skills) - set(lock_skills) - set(disk_skills) - gated)
     inventory_skills = inventory_skills_for_manifest(
-        disk_skills, lock_skills, gated
+        tracked_skills, lock_skills
     )
     matched = len([s for s in disk_skills if s in lock_skills])
 
@@ -269,6 +290,9 @@ def main():
         failed = False
         if missing_required:
             print("  ERROR: locked skills are missing from disk", file=sys.stderr)
+            failed = True
+        if missing_local:
+            print(f"  ERROR: tracked local skills are missing from disk: {', '.join(missing_local)}", file=sys.stderr)
             failed = True
         if not inventory_matches:
             print("  ERROR: agents/skills/README.md is out of sync", file=sys.stderr)

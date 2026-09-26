@@ -54,6 +54,13 @@ $DOTFILES/hammerspoon	$HOME/.hammerspoon
 # Agents — whole-directory symlink (must precede ~/.claude/* entries below)
 $DOTFILES/agents	$HOME/.agents
 $DOTFILES/config/codex/AGENTS.md	$HOME/.codex/AGENTS.md
+$DOTFILES/agents/skills/paseo	$HOME/.codex/skills/paseo
+$DOTFILES/agents/skills/paseo-advisor	$HOME/.codex/skills/paseo-advisor
+$DOTFILES/agents/skills/paseo-committee	$HOME/.codex/skills/paseo-committee
+$DOTFILES/agents/skills/paseo-handoff	$HOME/.codex/skills/paseo-handoff
+$DOTFILES/agents/skills/paseo-help	$HOME/.codex/skills/paseo-help
+$DOTFILES/agents/skills/paseo-loop	$HOME/.codex/skills/paseo-loop
+$DOTFILES/agents/skills/paseo-plugin	$HOME/.codex/skills/paseo-plugin
 $DOTFILES/config/zed/AGENTS.md	$HOME/.config/zed/AGENTS.md
 $HOME/.agents/skills	$HOME/.cursor/skills
 $HOME/.agents/skills	$HOME/.claude/skills

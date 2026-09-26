@@ -1,44 +1,17 @@
 ---
 name: skill-architect
-description: "Architect and audit portable agent skills for retrieval, predictability, progressive disclosure, evals, and repository gates. Use when the user asks to \"create a skill\", \"author a skill\", \"improve a skill\", \"review a skill\", \"refactor a skill\", \"compare skill rubrics\", \"distill a skill from sessions\", \"reconcile skill plans\", or \"teach skill authoring\"; when paths include `skills/<name>/SKILL.md`, `references/*.md`, helper scripts, evals, lockfiles, security manifests, or vendor adapters; or when mentions include skill-creator, Skill Development, skills.sh, trigger descriptions, completion criteria, leading words, or model/user invocation."
+description: "Architect and audit portable agent skills for retrieval, predictability, progressive disclosure, evals, and repository gates. Use when asked to \"create a skill\", \"author a skill\", \"improve a skill\", \"review a skill\", \"refactor a skill\", \"compare skill rubrics\", \"distill a skill from sessions\", \"reconcile skill plans\", or \"teach skill authoring\"; when paths include `skills/<name>/SKILL.md`, `references/*.md`, helper scripts, evals, lockfiles, security manifests, or vendor adapters; or when mentions include skill-creator, Skill Development, skills.sh, trigger descriptions, completion criteria, leading words, or model/user invocation."
 license: MIT
-compatibility: macOS, Linux, or Windows; optional helper scripts require Python >=3.10
+compatibility: macOS, Linux, or Windows; optional helper scripts require Python >=3.10; validation and inspection require PyYAML 6.0.3
 metadata:
   author: t4sh
-  version: "0.1.3"
-  tags: skill-authoring, skill-creator, skill-review, skill-rubric, agent-skills, multi-agent, claude, codex, openai, anthropic, antigravity, azure
+  version: "0.1.6"
+  tags: skill-authoring, skill-creator, skill-review, skill-rubric, agent-skills, multi-agent, anthropic, openai, grok, openclaw
 ---
 
 # Skill Architect
 
 Architect portable, high-quality agent skills from a vendor-neutral perspective. Use this skill as an independent planning, creation, review, refactoring, comparison, distillation, reconciliation, and teaching layer for any agent skill repository or runtime.
-
-## Why this skill exists
-
-Several high-signal upstream skills overlap while emphasizing different strengths:
-
-| Source | Strength to preserve | Boundary to avoid |
-|---|---|---|
-| [Agent Skills **open specification**](https://agentskills.io/specification) | Canonical portable folder/frontmatter contract, progressive-disclosure directories, compatibility metadata, and validation baseline | Experimental fields such as `allowed-tools` are runtime-dependent and do not override a repository's accepted schema |
-| [Anthropic **Skill Development**](https://github.com/anthropics/claude-code/tree/main/plugins/plugin-dev/skills/skill-development) | Strong structure, trigger descriptions, progressive disclosure, validation checklist | Claude Code plugin-specific assumptions are not portable as-is |
-| [Anthropic **skill-creator**](https://www.skills.sh/anthropics/skills/skill-creator) | Skill evals, baseline-vs-with-skill testing, trigger optimization, blind comparison, benchmark loops | Too heavy and Claude-specific to be the whole portable rubric |
-| [OpenAI **skill-creator**](https://github.com/openai/skills/tree/main/skills/.system/skill-creator) | Codex/OpenAI compatibility, concise scaffold guidance, `agents/openai.yaml` metadata | Too OpenAI-specific to be the central standard |
-
-Treat the Agent Skills specification as the portable syntax baseline, then use this skill as a quality and governance synthesis: it directs, plans, and reviews skill work at the architecture level, then routes into source-specific, project-specific, or repository-specific details only when needed. Concrete examples of this rubric in practice can be inspected across the `skills4sh` skills.
-
-## Operating mode
-
-Start with the current working context, not an upstream rubric. Check the CWD, project files, installed skill location, or repository convention first. Use the Agent Skills specification for portable baseline syntax; external rubrics inform content quality, while local rules win on accepted frontmatter fields, manifests, lockfiles, CI, and release gates. Do not add experimental `allowed-tools` unless the target runtime and repository schema both accept and enforce it.
-
-Use this order:
-
-1. **Classify the request** — choose `plan`, `create`, `audit`, `fix`, `refactor`, `compare`, `distill`, `reconcile`, or `teach` before deciding files or checks.
-2. **Read the local standard** — find the CWD/project/repository authoring standard, agent instructions, check commands, and target skill before editing.
-3. **Select the lens** — structure, quality/evals, vendor compatibility, distribution governance, or predictability.
-4. **Run the predictability pass** — check invocation fit, branch uniqueness, information hierarchy, completion criteria, leading words, duplication, sediment, sprawl, no-op lines, and premature-completion risk before proposing edits.
-5. **Plan the artifact** — decide the portable core, references, optional assets/scripts, vendor metadata, and validation path.
-6. **Patch narrowly** — avoid churn-only rewrites; improve only the requested surface and directly related standard violations.
-7. **Verify mechanically** — run repo checks or the closest local equivalent before handing back.
 
 ## Command modes
 
@@ -68,16 +41,30 @@ Use command-like modes when the user names one explicitly. If no mode is named, 
 - **Reconcile** must verify whether prior plans, findings, and proposals still match the current context; retire fixed or rejected items instead of re-reporting them.
 - **Teach** should explain the smallest useful rule, then give one concrete example rather than dumping the whole rubric.
 
+## Operating mode
+
+Start with the current working context, not an upstream rubric. Check the CWD, project files, installed skill location, or repository convention first. Use the Agent Skills specification for portable baseline syntax; external rubrics inform content quality, while local rules win on accepted frontmatter fields, manifests, lockfiles, CI, and release gates. Do not add experimental `allowed-tools` unless the target runtime and repository schema both accept and enforce it.
+
+Use this order:
+
+1. **Classify the request** — choose `plan`, `create`, `audit`, `fix`, `refactor`, `compare`, `distill`, `reconcile`, or `teach` before deciding files or checks.
+2. **Read the local standard** — find the CWD/project/repository authoring standard, agent instructions, check commands, and target skill before editing.
+3. **Select the lens** — structure, quality/evals, vendor compatibility, distribution governance, or predictability.
+4. **Run the predictability pass** — check invocation fit, branch uniqueness, information hierarchy, completion criteria, leading words, duplication, sediment, sprawl, no-op lines, and premature-completion risk before proposing edits.
+5. **Plan the artifact** — decide the portable core, references, optional assets/scripts, vendor metadata, and validation path.
+6. **Patch narrowly** — avoid churn-only rewrites; improve only the requested surface and directly related standard violations.
+7. **Verify mechanically** — run repo checks or the closest local equivalent before handing back.
+
 ## Skill architecture workflow
 
 ### 1. Gather concrete use cases
 
 Capture only the details that determine structure:
 
-- exact user phrases that should trigger the skill
+- exact request phrases that should trigger the skill
 - file paths, tools, APIs, or error messages that imply the skill
 - repeated task shape: quick reference, workflow, router, review rubric, or deterministic helper
-- target runtimes: Claude, Codex/OpenAI, Craft, Cursor, Antigravity, Azure/Copilot-style agents, or generic file-reading agents
+- target runtime capabilities: check required tools, permissions, and instruction loading; use [vendor-adapters.md](references/vendor-adapters.md) when host-specific execution or packaging details matter
 - whether the skill needs references, assets, examples, or helper scripts
 
 Ask one focused question if a structural choice is ambiguous. Otherwise infer from the CWD/project/repository pattern and state the assumption.
@@ -144,11 +131,13 @@ Use a bounded executable-surface triage before invoking a full code-review lens.
 
 For eval and adapter claims, calibrate the finding to local policy and evidence quality: prompt-only eval catalogs are useful retrieval vectors but incomplete evidence for high-risk behavior claims, and missing vendor adapters are packaging defects only when the local repo requires them. Weak descriptions are deterministic failures only when the rule is portable and low-false-positive; in `skills4sh`, generic trigger-only wording such as `Use when creating skills.` fails mechanically.
 
+**Authors/reviewers evaluating Skill Architect itself only:** skip this catalog when using Skill Architect for another task. The [mode scenario catalog](assets/evals/scenarios.json) supplies self-contained fixture files for all nine modes, isolation instructions, grading criteria, and description-only routing prompts. Materialize a fresh case directory and withhold grading from the executor; the catalog is test input, not evidence that those modes passed.
+
 For test vectors, harness setup, enumeration consistency, and severity calibration, use [Eval methodology](references/eval-methodology.md) and [Portable rubric](references/house-rubric.md) rather than expanding `SKILL.md`.
 
 ### 5. Make handoffs executable
 
-When producing a plan, proposal, audit packet, or distilled skill spec for another agent or a future session, write for the weakest plausible executor. Include exact paths, relevant excerpts, local conventions, scope boundaries, verification commands with expected results, drift checks when source state matters, and STOP conditions for mismatches.
+When producing a plan, proposal, audit packet, or distilled skill spec for another agent or a future session, write for the weakest plausible executor. Reference accessible authoritative artifacts with exact paths or URLs; include essential excerpts only when the executor needs them. Preserve local conventions, scope boundaries, verification commands with expected results, drift checks, and STOP conditions. For dependent tasks, specify consumed/produced interfaces and requirement coverage using the [handoff plan rubric](references/house-rubric.md#handoff-plan-rubric).
 
 Record rejected findings or non-adopted patterns with one-line rationales so they do not return in the next audit or reconciliation pass.
 
@@ -179,16 +168,58 @@ Optional helper scripts live under `assets/scripts/` so they ship as inert skill
 | [`assets/scripts/validate_skill.py`](assets/scripts/validate_skill.py) | Run a local portable-skill validation pass against one skill folder, with warning-only progressive-disclosure hints |
 | [`assets/scripts/fix_skill.py`](assets/scripts/fix_skill.py) | Dry-run or apply conservative deterministic fixes to `SKILL.md`, then rerun validation |
 | [`assets/scripts/scaffold_skill.py`](assets/scripts/scaffold_skill.py) | Create a starter skill folder using the portable rubric |
+| [`assets/scripts/run_uv.py`](assets/scripts/run_uv.py) | Start `uv` after removing inherited `UV_*` host configuration |
+
+`inspect_skill.py` and `validate_skill.py` each accept **one skill folder per invocation**. For multiple skills, invoke each helper separately for each folder; reuse the same Python environment.
+
+Validation and inspection require Python >=3.10 plus the version-and-hash-pinned [Python dependency file](assets/scripts/requirements.txt). Use an isolated runner; never install validation dependencies into the global Python environment.
+
+Prefer `uv` when it is available. It is the preferred adapter, not a portable requirement. Invoke it through `run_uv.py`, which removes the entire inherited `UV_*` namespace before `uv` starts; `--no-config` only ignores persistent files and does not neutralize variables such as `UV_INDEX` or `UV_NO_VERIFY_HASHES`. `--isolated` alone still installs a surrounding project: add `--no-project` so a nearby `pyproject.toml` is not built or imported, `--no-build` so only wheels are used (the same pin as `pip install --only-binary=:all:`), and `--no-config` so host `uv.toml` / `uv.ini` is ignored. Run helpers with `python -E` so `PYTHONPATH` cannot replace pinned PyYAML. Do not use `python -I`; it drops the script directory from `sys.path` and breaks `inspect_skill.py`'s sibling import of `validate_skill.py`.
+
+```bash
+python3 -E "/path/to/skill-architect/assets/scripts/run_uv.py" run --isolated --no-project --no-build --no-config --with-requirements "/path/to/skill-architect/assets/scripts/requirements.txt" python -E \
+  "/path/to/skill-architect/assets/scripts/inspect_skill.py" "/path/to/target-skill"
+python3 -E "/path/to/skill-architect/assets/scripts/run_uv.py" run --isolated --no-project --no-build --no-config --with-requirements "/path/to/skill-architect/assets/scripts/requirements.txt" python -E \
+  "/path/to/skill-architect/assets/scripts/validate_skill.py" "/path/to/target-skill"
+```
+
+On Windows, use `py -3 -E` instead of `python3 -E` for the launcher command.
+
+If `uv` is unavailable or cannot prepare its isolated environment, fall back to a temporary virtual environment. On macOS or Linux:
+
+```bash
+VALIDATION_VENV="$(mktemp -d)/venv"
+python3 -E -m venv "$VALIDATION_VENV"
+"$VALIDATION_VENV/bin/python" -E -m pip --isolated install --require-hashes --only-binary=:all: \
+  -r "/path/to/skill-architect/assets/scripts/requirements.txt"
+"$VALIDATION_VENV/bin/python" -E "/path/to/skill-architect/assets/scripts/inspect_skill.py" "/path/to/target-skill"
+"$VALIDATION_VENV/bin/python" -E "/path/to/skill-architect/assets/scripts/validate_skill.py" "/path/to/target-skill"
+```
+
+On Windows PowerShell:
+
+```powershell
+$ValidationVenv = Join-Path ([System.IO.Path]::GetTempPath()) ([guid]::NewGuid().ToString())
+py -3 -E -m venv $ValidationVenv
+& "$ValidationVenv\Scripts\python.exe" -E -m pip --isolated install --require-hashes --only-binary=:all: `
+  -r "/path/to/skill-architect/assets/scripts/requirements.txt"
+& "$ValidationVenv\Scripts\python.exe" -E "/path/to/skill-architect/assets/scripts/inspect_skill.py" "/path/to/target-skill"
+& "$ValidationVenv\Scripts\python.exe" -E "/path/to/skill-architect/assets/scripts/validate_skill.py" "/path/to/target-skill"
+```
+
+A helper that starts and reports findings produced an available result, even when validation exits non-zero. Retry with the temporary-environment fallback only when `uv`, dependency resolution, or helper startup fails. Report validation or inspection as unavailable only after both isolated runner paths are unavailable or fail; name the attempted commands and setup errors. Do not silently substitute shape checks for YAML validation.
+
+Scaffold and fix helpers need only Python. The fixer accepts column-zero literal mapping keys and simple single-line literal names; it refuses unsupported key or name syntax before any edits. Use manual review for those cases, then validate.
 
 Read or run scripts only when the task needs deterministic inspection or scaffolding. Local validation commands and CI, when present, remain the source of truth.
 
 ### Deterministic checks vs judgment
 
-Skill work splits across three layers — keep them separate and route each check to the layer that can decide it:
+Skill work splits across four layers — keep them separate and route each check to the layer that can decide it:
 
 | Layer | Owns | Examples |
 |---|---|---|
-| Portable validator (`validate_skill.py`) | Minimal deterministic checks that hold inside one skill folder, no repo metadata or network | frontmatter present + `name`/directory match + kebab-case, description has concrete trigger detail, body within the hard size cap, `references/*.md` linked from `SKILL.md`, in-skill relative Markdown link targets, and same/cross-file Markdown heading anchors |
+| Portable validator (`validate_skill.py`) | Minimal deterministic checks that hold inside one skill folder, no repo metadata or network | valid YAML and typed, non-empty fields; specification length limits + `name`/directory match + kebab-case, description has concrete trigger detail, body within the hard size cap, `references/*.md` linked from `SKILL.md`, in-skill relative Markdown link targets, and same/cross-file Markdown heading anchors |
 | Portable fixer (`fix_skill.py`) | Safe mechanical edits that require no taste or domain judgment; dry-run unless `--write` is explicit | frontmatter `name` normalization and insertion of missing `references/*.md` links in `SKILL.md` |
 | Local binding gate (project CI) | Deterministic checks that depend on repo conventions; **binding and a superset** | file hashes, `skills-lock.json`, security manifests, doc-sync, semver — in `skills4sh`: `check:drift`, `check:guardskills`, `hash-check`, `npm test` |
 | This skill's rubric (judgment) | What no script can decide | trigger *quality*, executable-surface triage, embedded-code *correctness* (review + fixture run), body altitude beyond the cap, vendor-isolation, narrative bloat |
@@ -201,7 +232,7 @@ The litmus test: **if a script can decide it, automate it; if it needs reasoning
 |---|---|
 | [references/comparative-study.md](references/comparative-study.md) | Comparing Anthropic, OpenAI, Matt Pocock, Obra, Azure, Antigravity, or other skill-development/authoring/creator patterns |
 | [references/house-rubric.md](references/house-rubric.md) | Creating or reviewing a portable rubric; checking predictability, invocation fit, completion criteria, pruning, enumeration consistency, executable-surface triage, and severity calibration |
-| [references/vendor-adapters.md](references/vendor-adapters.md) | Separating portable core instructions from Claude, OpenAI/Codex, Craft, Cursor, Antigravity, Azure, or future agent metadata |
+| [references/vendor-adapters.md](references/vendor-adapters.md) | Runtime install roots, pointer files, and vendor metadata that must stay out of the portable workflow |
 | [references/eval-methodology.md](references/eval-methodology.md) | Testing triggers, building test-vector catalogs, setting up lightweight harnesses, comparing baseline behavior, or planning pressure tests |
 | [references/naming-and-packaging.md](references/naming-and-packaging.md) | Avoiding slug collisions, deciding names, updating lockfiles/security manifests, and packaging repo updates |
 

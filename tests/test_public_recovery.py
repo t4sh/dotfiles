@@ -9,6 +9,7 @@ import plistlib
 import subprocess
 import sys
 import tempfile
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
@@ -46,7 +47,7 @@ class PublicRecoveryTests(unittest.TestCase):
         for number in range(7):
             self.snapshot(f'20260201-00000{number}')
         command = [sys.executable, str(ROOT / 'scripts/vault-integrity.py'),
-                   'prune', str(self.root)]
+                   'prune', str(self.root), '--keep', '5']
         oldest = self.root / '20260201-000000/payload/secrets/example'
         oldest.write_text('damaged')
         self.assertNotEqual(subprocess.run(command, capture_output=True).returncode, 0)
@@ -55,6 +56,25 @@ class PublicRecoveryTests(unittest.TestCase):
         subprocess.run(command, check=True, capture_output=True)
         self.assertEqual(len(vault.verified_snapshots(self.root)), 5)
         self.assertTrue(baseline.is_dir())
+
+    def test_capacity_retention_keeps_baseline_and_reserves_space(self):
+        baseline = self.snapshot('baselines/20260101-000000')
+        for number in range(7):
+            self.snapshot(f'20260201-00000{number}')
+        def usage(_):
+            return SimpleNamespace(free=70 - 10 * len(vault.snapshots(self.root)))
+        with patch.object(vault.shutil, 'disk_usage', side_effect=usage):
+            vault.prune_space(self.root, 20)
+        self.assertEqual(len(vault.snapshots(self.root)), 5)
+        vault.check(baseline)
+
+    def test_capacity_retention_refuses_to_delete_final_two(self):
+        for number in range(2):
+            self.snapshot(f'20260201-00000{number}')
+        with patch.object(vault.shutil, 'disk_usage', return_value=SimpleNamespace(free=0)):
+            with self.assertRaises(ValueError):
+                vault.prune_space(self.root, 20)
+        self.assertEqual(len(vault.snapshots(self.root)), 2)
 
     def test_receipt_allows_finder_metadata_but_rejects_changed_payload(self):
         snapshot = self.snapshot('20260201-000000')

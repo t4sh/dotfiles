@@ -1,7 +1,7 @@
 #Requires -Version 7.0
 [CmdletBinding()]
 param([ValidateSet('Backup','Restore','Check')][string]$Mode='Check', [switch]$Apply,
-    [ValidateSet('sublime','vscode','cursor')][string]$Only,
+    [ValidateSet('sublime','vscode','cursor','zed')][string]$Only,
     [string]$RoamingRoot=$env:APPDATA,
     [string]$SnapshotRoot=(Join-Path (Split-Path $PSScriptRoot) 'apps\windows'),
     [string]$BackupRoot=(Join-Path $HOME ('.dotfiles-backup\windows-apps-'+[guid]::NewGuid().ToString('N'))))
@@ -10,13 +10,15 @@ $ErrorActionPreference='Stop'
 . (Join-Path $PSScriptRoot 'lib\windows-common.ps1')
 Assert-DotfilesWindows
 # Public snapshots are curated; never replace them with this machine's settings.
-if ($Mode -in @('Backup','Check')) { Write-Output "Public templates retained; live preference $Mode is intentionally skipped."; return }
+if ($Mode -eq 'Backup' -or ($Mode -eq 'Check' -and $Only -and $Only -ne 'zed')) { Write-Output "Public templates retained; live preference $Mode is intentionally skipped."; return }
 $prepared=@(); $pending=@()
 foreach ($mapping in (Get-DotfilesAppMappings $RoamingRoot)) {
     if ($Only -and $mapping.Editor -ne $Only) { continue }
+    if ($Mode -eq 'Check' -and -not $mapping.ContainsKey('SharedSource')) { continue }
     $snapshot=Join-Path (Join-Path $SnapshotRoot $mapping.Editor) $mapping.File
-    $source=if($Mode -eq 'Backup'){$mapping.Live}else{$snapshot}
-    $target=if($Mode -eq 'Backup'){$snapshot}else{$mapping.Live}
+    # Mac-authored Zed files are restore-only on Windows.
+    $source=if($mapping.ContainsKey('SharedSource')){$mapping.SharedSource}else{$snapshot}
+    $target=$mapping.Live
     if (-not (Test-Path -LiteralPath $source)) { $pending += "$($mapping.Editor)/$($mapping.File): missing source"; continue }
     if ($Mode -eq 'Backup') { Assert-DotfilesPreferenceFile $source }
     elseif (Test-Path -LiteralPath $target -PathType Leaf) { Assert-DotfilesPreferenceFile $target }

@@ -2,7 +2,7 @@
 [CmdletBinding()]
 param(
     [ValidateSet('Backup','Restore','Check')][string]$Mode='Check', [switch]$Apply,
-    [ValidateSet('sublime')][string]$Only,
+    [ValidateSet('sublime','tower','zed')][string]$Only,
     [string]$RoamingRoot=$env:APPDATA, [string]$LocalRoot=$env:LOCALAPPDATA,
     [string]$UserRoot=[Environment]::GetFolderPath('UserProfile'),
     [string]$RegistryRoot='HKCU:\Software',
@@ -14,7 +14,7 @@ $ErrorActionPreference='Stop'
 . (Join-Path $PSScriptRoot 'lib/windows-extra-apps.ps1')
 Assert-DotfilesWindows
 # Public snapshots are curated; never replace them with this machine's settings.
-if ($Mode -in @('Backup','Check')) { Write-Output "Public templates retained; live preference $Mode is intentionally skipped."; return }
+if ($Mode -eq 'Backup' -or ($Mode -eq 'Check' -and $Only -and $Only -ne 'zed')) { Write-Output "Public templates retained; live preference $Mode is intentionally skipped."; return }
 $roots=@{Roaming=$RoamingRoot;Local=$LocalRoot;Registry=$RegistryRoot}
 
 function Read-ExtraIni([string]$Path) {
@@ -93,11 +93,13 @@ function Read-ExtraLive($Spec,[string]$Path) {
 $prepared=[Collections.Generic.List[hashtable]]::new();$failures=[Collections.Generic.List[string]]::new();$matched=0
 foreach($spec in Get-DotfilesExtraAppSpecs){
     if ($Only -and $spec.App -ne $Only) { continue }
-    if (-not (Test-Path -LiteralPath (Join-Path (Join-Path $SnapshotRoot $spec.App) $spec.File))) { continue }
+    if ($Mode -eq 'Check' -and -not $spec.SharedSource) { continue }
+    if (-not $spec.SharedSource -and -not (Test-Path -LiteralPath (Join-Path (Join-Path $SnapshotRoot $spec.App) $spec.File))) { continue }
     $live=Join-Path $roots[$spec.Root] $spec.Relative
     $snapshot=Join-Path (Join-Path $SnapshotRoot $spec.App) $spec.File
     $label="$($spec.App)/$($spec.File)"
-    $source=if($Mode -eq 'Backup'){$live}else{$snapshot}
+    # Mac-authored Zed files are restored from the shared source.
+    $source=if($spec.SharedSource){$spec.SharedSource}else{$snapshot}
     if(-not (Test-Path -LiteralPath $source)){
         # Optional until first configured/captured. Never delete an earlier snapshot.
         if($Mode -eq 'Backup'){Write-Output "Not configured/preserved: $label"}

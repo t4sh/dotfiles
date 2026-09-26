@@ -44,7 +44,7 @@ format = '[$duration](bold yellow)'
 symbol = " "
 
 [directory]
-read_only = " "
+read_only = " 󰌾"
 truncation_length = 10
 truncation_symbol = "…/"
 truncate_to_repo = true
@@ -59,7 +59,7 @@ truncate_to_repo = true
 symbol = " "
 
 [gcloud]
-format = 'on [$symbol(\($region\))]($style) '
+format = '[$symbol]($style)'
 symbol = "☁️  "
 style = "bold blue"
 
@@ -127,7 +127,8 @@ symbol = " "
 symbol = " "
 
 [memory_usage]
-symbol = " "
+symbol = "󰍛 "
+format = '$symbol[$ram]($style) '
 threshold = 70
 style = "bold dimmed white"
 disabled = false
@@ -136,7 +137,7 @@ disabled = false
 symbol = "󰔷 "
 
 [nim]
-symbol = " "
+symbol = " "
 
 [nix_shell]
 symbol = " "
@@ -150,7 +151,7 @@ Linux = " "
 Windows = "󰍲 "
 
 [package]
-symbol = " "
+symbol = " 󰏗"
 # format = '[$symbol--> $version]($style) '
 format = '[$symbol: \[$version\]]($style) '
 

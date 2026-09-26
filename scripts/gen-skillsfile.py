@@ -91,7 +91,7 @@ def build_skillsfile(timestamp):
         "#",
         "# Explicit upstream refresh: make skills-update   (or: bash Skillsfile)",
         f"# {total} skills — {len(by_source)} refreshable github sources + {len(local)} local + {len(held)} held.",
-        "# Curated skills are held by config/skills-refresh-holds.json; review upstream changes manually.",
+        "# Exceptional refresh holds, if any, live in config/skills-refresh-holds.json.",
         "#",
         "# Prereqs (fresh Mac): node + git + GitHub auth (SSH/gh) must be set",
         "# up first if a configured upstream source requires authentication.",

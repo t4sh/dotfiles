@@ -87,11 +87,20 @@ Skill checks and refresh output use UTF-8 even in a legacy-code-page console;
 the caller's encoding is restored afterward. Native failures remain failures.
 
 Windows public preference files are **curated onboarding templates**. Backup and
-preference Check entry points intentionally skip live capture/comparison, even
-when called directly. They report this explicitly. This is not a claim that live
-preferences match the templates. Restore applies only shipped settings; unshipped
+preference Backup entry points intentionally skip live capture, even when called
+directly. Check compares the two Mac-authored Zed surfaces only; other template
+comparisons remain skipped. This is not a claim that every live preference matches
+the templates. Restore applies only shipped settings; unshipped
 extra-app surfaces are skipped. Personal dictionaries, extension inventories,
 accounts, device names and host layouts should stay outside this checkout.
+
+Zed settings and keymap come from `apps/zed/` on the Mac side. Windows restores
+them and never writes them back into the repository; the obsolete Windows-authored
+Zed snapshots are removed. The shared keymap uses `secondary-` for Cmd on macOS
+and Ctrl on Windows.
+
+`-Only tower` scopes the extended-app restore to shipped Tower templates. Public
+backup still retains templates and never captures live Tower preferences.
 
 Private app exports can be placed in `~/.secrets/apps/` and encrypted separately;
 see [SECRETS-WINDOWS.md](SECRETS-WINDOWS.md). Mac `make backup` likewise retains its
