@@ -77,6 +77,31 @@ class CursorCliSettingsTests(unittest.TestCase):
         self.run_helper("restore", success=False)
         self.assertFalse(self.live.exists())
 
+    def test_running_app_cleanup_handles_empty_and_populated_arrays(self):
+        bash = (str(Path(os.environ.get("ProgramFiles", "C:/Program Files")) / "Git/bin/bash.exe")
+                if os.name == "nt" else "/bin/bash")
+        script = r'''
+set -eu
+source "$1"
+RESTORE_OPEN_BIN=record_open
+record_open() { printf '%s\n' "$3"; }
+restore_reopen_apps
+if restore_app_is_deferred "Dummy App"; then exit 7; fi
+append_reopen_unique "Dummy App"
+append_reopen_unique "Dummy App"
+append_deferred_unique "Dummy App"
+append_deferred_unique "Dummy App"
+restore_app_is_deferred "Dummy App"
+restore_reopen_apps
+restore_reopen_apps
+'''
+        result = subprocess.run(
+            [bash, "-c", script, "fixture", (ROOT / "scripts/lib/running-app-gate.sh").as_posix()],
+            capture_output=True, text=True, encoding="utf-8")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(result.stdout.count("Dummy App"), 1)
+
+    @unittest.skipUnless(sys.platform == "darwin", "macOS Make restore target")
     def test_targeted_make_restore_uses_live_home(self):
         result = subprocess.run(["make", "restore-cursor-cli", "cursor-cli-check"], cwd=ROOT,
                                 env={**os.environ, "HOME": str(self.home), "DOTFILES": str(ROOT)},

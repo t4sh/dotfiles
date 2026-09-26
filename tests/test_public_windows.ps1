@@ -24,7 +24,27 @@ try {
     # Restore Mac-authored Zed sources into this disposable profile before Check.
     if (Test-Path -LiteralPath (Join-Path $root 'apps/windows/zed/settings.json')) { throw 'Windows-authored Zed settings must not ship.' }
     if (Test-Path -LiteralPath (Join-Path $root 'apps/windows/extra/zed/keymap.json')) { throw 'Windows-authored Zed keymap must not ship.' }
-    & (Join-Path $root 'scripts/sync-windows-apps.ps1') -Mode Restore -Only zed -Apply -RoamingRoot $env:APPDATA -SnapshotRoot $snapshot
+    $zedSettings = Join-Path $env:APPDATA 'Zed/settings.json'
+    New-Item -ItemType Directory -Path (Split-Path $zedSettings) -Force | Out-Null
+    [IO.File]::WriteAllText($zedSettings, '{"dummy.unrelated":true,"agent_servers":{"custom":{"type":"custom","command":"dummy.exe"},"cursor":{"type":"custom","default_config_options":{"mode":"ask"}}},"terminal":{"working_directory":"dummy-path","font_fallbacks":["dummy-font"]}}')
+    $zedOptions = @{Only='zed';RoamingRoot=$env:APPDATA;SnapshotRoot=$snapshot;BackupRoot=(Join-Path $fixture 'backups')}
+    & (Join-Path $root 'scripts/sync-windows-apps.ps1') -Mode Restore -Apply @zedOptions
+    $restored = Get-Content -LiteralPath $zedSettings -Raw | ConvertFrom-Json -AsHashtable
+    $shared = Get-Content -LiteralPath (Join-Path $root 'apps/zed/settings.json') -Raw | ConvertFrom-Json -AsHashtable
+    if (-not $restored['dummy.unrelated'] -or $restored.agent_servers.custom.command -ne 'dummy.exe' -or $restored.agent_servers.cursor.default_config_options.mode -ne 'ask' -or $restored.terminal.working_directory -ne 'dummy-path') { throw 'Zed restore removed unmanaged preferences.' }
+    if ($restored.agent_servers.cursor.type -ne 'registry') { throw 'Zed managed leaf was not restored.' }
+    if (($restored.terminal.font_fallbacks | ConvertTo-Json -Compress) -cne ($shared.terminal.font_fallbacks | ConvertTo-Json -Compress)) { throw 'Zed managed array was not replaced.' }
+    & (Join-Path $root 'scripts/sync-windows-apps.ps1') -Mode Check @zedOptions
+    $zedBefore = TreeHash (Split-Path $zedSettings)
+    & (Join-Path $root 'scripts/sync-windows-apps.ps1') -Mode Restore -Apply @zedOptions
+    if ((TreeHash (Split-Path $zedSettings)) -cne $zedBefore) { throw 'Zed repeated restore changed preferences.' }
+    $restored.agent_servers.cursor.type = 'dummy-drift'
+    [IO.File]::WriteAllText($zedSettings, (ConvertTo-Json -InputObject $restored -Depth 50))
+    $driftDetected = $false
+    try { & (Join-Path $root 'scripts/sync-windows-apps.ps1') -Mode Check @zedOptions -WarningAction SilentlyContinue }
+    catch { if ($_.Exception.Message -notmatch 'Windows preferences have drift') { throw }; $driftDetected = $true }
+    if (-not $driftDetected) { throw 'Zed managed leaf drift was not detected.' }
+    & (Join-Path $root 'scripts/sync-windows-apps.ps1') -Mode Restore -Apply @zedOptions
     & (Join-Path $root 'scripts/sync-windows-extra-apps.ps1') -Mode Restore -Only zed -Apply -RoamingRoot $env:APPDATA -LocalRoot $env:LOCALAPPDATA -UserRoot $fixture -RegistryRoot 'HKCU:\Software\DotfilesPublicFixtureAbsent' -SnapshotRoot (Join-Path $snapshot 'extra')
     foreach ($file in @('settings.json','keymap.json')) {
         if (-not (Test-Path -LiteralPath (Join-Path $env:APPDATA "Zed/$file"))) { throw "Shared Zed $file was not restored." }

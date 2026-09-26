@@ -1,16 +1,20 @@
 import importlib.util
 from pathlib import Path
 import plistlib
-import sqlite3
+import sys
 import tempfile
 import unittest
 
-spec = importlib.util.spec_from_file_location(
-    'capture', Path(__file__).resolve().parents[1] / 'scripts/backup-text-replacements.py')
-module = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(module)
+if sys.platform == 'darwin':
+    import sqlite3
+
+    spec = importlib.util.spec_from_file_location(
+        'capture', Path(__file__).resolve().parents[1] / 'scripts/backup-text-replacements.py')
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
 
 
+@unittest.skipUnless(sys.platform == 'darwin', 'Tests macOS Text Replacements and POSIX file permissions')
 class TextReplacementBackupTests(unittest.TestCase):
     def test_live_wal_export_and_failure_preserves_backup(self):
         with tempfile.TemporaryDirectory() as directory:

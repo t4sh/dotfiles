@@ -42,10 +42,11 @@ com.alienator88.Pearcleaner	Pearcleaner	apps/pearcleaner/pearcleaner.plist
 com.apple.symbolichotkeys	Keyboard Shortcuts	macos/symbolichotkeys.plist	-
 # Includes AppleFnUsageType (Globe key: Change Input Source).
 com.apple.HIToolbox	Input Sources	macos/hitoolbox.plist	-
-# Services checkboxes/shortcuts and Finder Quick Action preferences. Captured
-# automatically (no per-setting prompt); log out/in after restoring to refresh menus.
+# Services checkboxes/shortcuts and Finder Quick Action preferences.
+# Manifest only: public backup skips this domain pending snapshot privacy review.
 pbs	Services and Quick Actions	macos/services.plist	-
-# Keep device domains separate: gesture and secondary-click choices can differ.
+# Device domains are also manifest-only; public backup skips them pending review.
+# Keep them separate: gesture and secondary-click choices can differ.
 com.apple.AppleMultitouchTrackpad	Built-in Trackpad	macos/trackpad.plist	-
 com.apple.driver.AppleBluetoothMultitouch.trackpad	Bluetooth Trackpad	macos/bluetooth-trackpad.plist	-
 com.apple.AppleMultitouchMouse	Multitouch Mouse	macos/mouse.plist	-

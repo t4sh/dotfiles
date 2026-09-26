@@ -8,6 +8,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 
 
+@unittest.skipIf(os.name == 'nt', 'Requires POSIX zsh and executable shell fixtures')
 class PublicPorts(unittest.TestCase):
     def shell(self, topic, body, **env):
         return subprocess.run(

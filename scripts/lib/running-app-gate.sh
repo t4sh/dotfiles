@@ -34,7 +34,7 @@ RESTORE_HOST_EDITOR_CACHED=0
 
 append_reopen_unique() {
   local value="$1" existing
-  for existing in "${RESTORE_APPS_TO_REOPEN[@]}"; do
+  for existing in ${RESTORE_APPS_TO_REOPEN[@]+"${RESTORE_APPS_TO_REOPEN[@]}"}; do
     [[ "$existing" == "$value" ]] && return 0
   done
   RESTORE_APPS_TO_REOPEN+=("$value")
@@ -42,7 +42,7 @@ append_reopen_unique() {
 
 append_deferred_unique() {
   local value="$1" existing
-  for existing in "${RESTORE_APPS_DEFERRED[@]}"; do
+  for existing in ${RESTORE_APPS_DEFERRED[@]+"${RESTORE_APPS_DEFERRED[@]}"}; do
     [[ "$existing" == "$value" ]] && return 0
   done
   RESTORE_APPS_DEFERRED+=("$value")
@@ -155,7 +155,7 @@ app_request_quit() {
 
 restore_app_is_deferred() {
   local app_name="$1" deferred
-  for deferred in "${RESTORE_APPS_DEFERRED[@]}"; do
+  for deferred in ${RESTORE_APPS_DEFERRED[@]+"${RESTORE_APPS_DEFERRED[@]}"}; do
     [[ "$deferred" == "$app_name" ]] && return 0
   done
   return 1
@@ -163,7 +163,8 @@ restore_app_is_deferred() {
 
 restore_reopen_apps() {
   local app_name
-  for app_name in "${RESTORE_APPS_TO_REOPEN[@]}"; do
+  # Bash 3.2 treats empty arrays as unset under nounset.
+  for app_name in ${RESTORE_APPS_TO_REOPEN[@]+"${RESTORE_APPS_TO_REOPEN[@]}"}; do
     if "$RESTORE_OPEN_BIN" -g -a "$app_name" >/dev/null 2>&1; then
       printf '  ✓ reopened %s\n' "$app_name"
     else

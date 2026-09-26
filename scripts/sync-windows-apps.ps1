@@ -32,6 +32,10 @@ foreach ($mapping in (Get-DotfilesAppMappings $RoamingRoot)) {
         try { $existing=Get-Content -LiteralPath $target -Raw | ConvertFrom-Json -AsHashtable }
         catch { throw "Destination preferences cannot be parsed for $($mapping.Editor); preserved." }
     }
+    if ($mapping.Editor -eq 'zed') {
+        # Compare/restore the overlay so personal agents and nested options survive.
+        $safe = Merge-DotfilesPreferenceLeaves $existing $safe
+    }
     if ($Mode -eq 'Check') {
         foreach($key in $safe.Keys) {
             if (-not $existing.Contains($key) -or (ConvertTo-Json -InputObject $existing[$key] -Depth 50 -Compress) -cne (ConvertTo-Json -InputObject $safe[$key] -Depth 50 -Compress)) { $pending += "$($mapping.Editor): preference differs: $key" }

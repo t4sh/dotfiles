@@ -8,6 +8,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 
 
+@unittest.skipIf(os.name == 'nt', 'Tests the macOS Brew workflow with POSIX shell fixtures')
 class CorepackBootstrapTests(unittest.TestCase):
     def test_enable_after_install_repeat_and_failure_propagation(self):
         with tempfile.TemporaryDirectory() as temporary:

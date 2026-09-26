@@ -2,45 +2,40 @@
 
 ## macOS 27 readiness
 
-Preference capture accepts macOS 15, 26, and provisionally 27. Version 27 uses
-the existing 26+ Control Center key mapping; this is a compatibility assumption,
-covered by fixtures rather than a claim of native macOS 27 verification.
-Unknown major versions remain blocked. Missing required preferences, invalid
-values, failed security checks, and declined drift still stop capture.
+The public policy reader uses the existing 26+ Control Center key mapping for
+macOS 27. This is a compatibility assumption covered by fixtures rather than
+a claim of native macOS 27 verification. Public backup keeps the policy check
+strict and offers no personal preference capture or interactive drift adoption.
 
 After upgrading, run `make macos-check SKIP_FINDER_VIEWS=1` for read-back first.
-Inspect any failures before adopting drift. Verify keyboard/input settings,
+Inspect any failures before changing settings. Verify keyboard/input settings,
 Services, screenshot shortcuts, and mouse/trackpad gestures in System Settings.
-Check Text Replacements export against the visible entries. Live macOS 27
-capture and restore remain pending; avoid a blanket restore to validate them.
+Check Text Replacements export against the visible entries. Native macOS 27
+verification remains pending; avoid a blanket restore to validate these settings.
 
 ## Settings
 
 | Setting | Backup and restore |
 | --- | --- |
-| Key repeat rate | `NSGlobalDomain/KeyRepeat` in the reviewed macOS preference snapshot; current value 2 (Fast) |
-| Delay until repeat | `NSGlobalDomain/InitialKeyRepeat`; current value 15 (Short) |
-| Keyboard navigation | `NSGlobalDomain/AppleKeyboardUIMode`; current value 3 (On) |
+| Key repeat rate | Managed policy: `NSGlobalDomain/KeyRepeat`, value 2 (Fast) |
+| Delay until repeat | Managed policy: `NSGlobalDomain/InitialKeyRepeat`, value 15 (Short) |
+| Keyboard navigation | Managed policy: `NSGlobalDomain/AppleKeyboardUIMode`, value 3 (On) |
 | Globe key action | `AppleFnUsageType` in the existing `com.apple.HIToolbox` snapshot; current value 1 (Change Input Source) |
 | Screenshot shortcuts | Existing `com.apple.symbolichotkeys` snapshot |
-| Services and Quick Actions | `pbs` snapshot |
+| Services and Quick Actions | Manifest only; no published snapshot or public capture |
 | Text Replacements | Private export; see [Text Replacements](TEXT-REPLACEMENTS.md) |
-| Trackpad tapping, dragging, secondary click, and gestures | Separate `macos/trackpad.plist` and `macos/bluetooth-trackpad.plist` snapshots |
-| Multitouch mouse buttons, scrolling, and gestures | Separate `macos/mouse.plist` and `macos/bluetooth-mouse.plist` snapshots |
+| Trackpad tapping, dragging, secondary click, and gestures | Manifest only; no published snapshots or public capture |
+| Multitouch mouse buttons, scrolling, and gestures | Manifest only; no published snapshots or public capture |
 
-`make backup` checks repeat rate, delay, and keyboard navigation and prompts
-to adopt changed values through the existing macOS preference review.
-`make macos` applies the saved values after the setup defaults.
-Input Sources and the other whole-domain snapshots capture automatically.
+`make backup` checks repeat rate, delay, and keyboard navigation against the
+managed policy and stops on drift. `make macos` applies the setup defaults.
+Input Sources and screenshot shortcuts retain their existing snapshot capture.
 
-Mouse/trackpad snapshots capture the keys present in each device preference
-domain, without per-setting prompts. They do not capture separate global or
-ByHost preferences such as tracking speed, natural scrolling, or tapBehavior.
-`make restore-apps` imports available snapshots; log out/in and verify each
-device's gestures in System Settings afterward. `make macos` still applies its
-hard-coded mouse/trackpad defaults, so restore these snapshots after that step
-when recovering personal device settings. Hardware behavior after import has
-not been verified on a replacement Mac or macOS 27.
+Services and mouse/trackpad domains require separate privacy review before
+snapshots can be published. Public backup skips them. `make restore-apps`
+imports available snapshots only; restore personal device choices manually
+in System Settings after `make macos` applies its mouse/trackpad defaults.
+Hardware behavior has not been verified on a replacement Mac or macOS 27.
 
 ## Manual backlight restore
 
