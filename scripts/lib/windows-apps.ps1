@@ -87,20 +87,6 @@ function Select-DotfilesPreferences {
     }
     return $safe
 }
-function Merge-DotfilesPreferenceLeaves($Existing, $Patch) {
-    # Shared Zed objects own only shipped leaves; arrays remain managed units.
-    if ($Patch -is [Collections.IDictionary]) {
-        $merged = [ordered]@{}
-        if ($Existing -is [Collections.IDictionary]) {
-            foreach ($key in $Existing.Keys) { $merged[$key] = $Existing[$key] }
-        }
-        foreach ($key in $Patch.Keys) {
-            $merged[$key] = Merge-DotfilesPreferenceLeaves $merged[$key] $Patch[$key]
-        }
-        return $merged
-    }
-    return ,$Patch
-}
 function Convert-DotfilesPreferencePaths($Value, [switch]$Restore) {
     if ($Value -is [Collections.IDictionary]) {
         $result=[ordered]@{}
