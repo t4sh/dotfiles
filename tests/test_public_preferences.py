@@ -13,6 +13,34 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class PublicPreferences(unittest.TestCase):
+    @unittest.skipUnless(sys.platform == 'darwin', 'macOS preference tools required')
+    def test_betterzip_snapshot_omits_registration_and_archive_password(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'apps/betterzip').mkdir(parents=True)
+            (root / '.node-version').write_text((ROOT / '.node-version').read_text())
+            saved = root / 'apps/betterzip/betterzip.plist'
+            saved.write_bytes(plistlib.dumps({'MIBRegCode': 'fixture-registration-code',
+                                              'MIBSavePresets': [{'name': 'Fixture', 'password': 'fixture-password'}],
+                                              'MIBShowAdditionalFinderActions': True}))
+            env = dict(os.environ, DOTFILES=str(root))
+            audit = subprocess.run(['bash', str(ROOT / 'scripts/audit-app-prefs.sh')],
+                                   env=env, capture_output=True, text=True)
+            self.assertNotEqual(audit.returncode, 0)
+            self.assertIn('BetterZip registration or archive password', audit.stdout)
+            subprocess.run(['bash', str(ROOT / 'scripts/sanitize-app-prefs.sh')],
+                           env=env, check=True, capture_output=True)
+            prefs = plistlib.loads(saved.read_bytes())
+            self.assertNotIn('MIBRegCode', prefs)
+            self.assertNotIn('password', prefs['MIBSavePresets'][0])
+            self.assertTrue(prefs['MIBShowAdditionalFinderActions'])
+            sanitized_bytes = saved.read_bytes()
+            subprocess.run(['bash', str(ROOT / 'scripts/sanitize-app-prefs.sh')],
+                           env=env, check=True, capture_output=True)
+            self.assertEqual(saved.read_bytes(), sanitized_bytes)
+            subprocess.run(['bash', str(ROOT / 'scripts/audit-app-prefs.sh')],
+                           env=env, check=True, capture_output=True)
+
     def test_hermes_reactions_roundtrip_preserves_unmanaged_settings(self):
         with tempfile.TemporaryDirectory() as directory:
             live, saved = [Path(directory) / name for name in ('live.json', 'saved.json')]

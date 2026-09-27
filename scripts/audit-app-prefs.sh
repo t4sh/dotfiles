@@ -71,6 +71,21 @@ scan_file() {
       ;;
   esac
 
+  if [[ "$rel" == "apps/betterzip/betterzip.plist" ]] &&
+    ! python3 - "$f" <<'PY'
+import plistlib
+import sys
+
+with open(sys.argv[1], "rb") as stream:
+    prefs = plistlib.load(stream)
+presets = prefs.get("MIBSavePresets", [])
+has_password = any(isinstance(item, dict) and "password" in item for item in presets)
+sys.exit(1 if "MIBRegCode" in prefs or has_password else 0)
+PY
+  then
+    report "BetterZip registration or archive password in snapshot: $rel"
+  fi
+
   if [[ "$rel" == "apps/zed/settings.json" ]] &&
     rg -q '"mode"[[:space:]]*:[[:space:]]*"bypassPermissions"' "$scan" 2>/dev/null; then
     report "unsafe external-agent authorization mode: $rel"

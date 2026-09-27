@@ -368,6 +368,26 @@ sanitize_editor_settings "$APPS/zed/keymap.json"
 # runtime history, not portable preference policy, and must never enter backups.
 plist_delete "$APPS/betterzip/betterzip.plist" "MIBLogs"
 plist_delete "$APPS/betterzip/betterzip.plist" "MIBTempFolders"
+if [[ -f "$APPS/betterzip/betterzip.plist" ]]; then
+  "${PYTHON_BIN:-python3}" - "$APPS/betterzip/betterzip.plist" <<'PY'
+import plistlib
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+original = path.read_bytes()
+prefs = plistlib.loads(original)
+changed = prefs.pop("MIBRegCode", None) is not None
+for preset in prefs.get("MIBSavePresets", []):
+    if isinstance(preset, dict) and "password" in preset:
+        del preset["password"]
+        changed = True
+if changed:
+    fmt = plistlib.FMT_BINARY if original.startswith(b"bplist00") else plistlib.FMT_XML
+    with path.open("wb") as stream:
+        plistlib.dump(prefs, stream, fmt=fmt, sort_keys=False)
+PY
+fi
 
 # Tower stores license state, App Center device/session identity, repository-ID
 # migration caches, and home-directory quick-open state. Remove those values,
