@@ -44,6 +44,20 @@ def read_config(path):
         value = json.loads(text)
     except json.JSONDecodeError:
         # Use Hermes's existing YAML dependency; don't install a second runtime.
+        try:
+            import hermes_yaml
+        except ModuleNotFoundError as error:
+            if error.name != "hermes_yaml":
+                raise
+        else:
+            try:
+                value = hermes_yaml.safe_load(text)
+            except hermes_yaml.YAMLError:
+                # Parser diagnostics can include credential-bearing source lines.
+                raise ValueError("Hermes YAML could not be parsed; config retained") from None
+            if not isinstance(value, dict) or not value:
+                raise ValueError("Hermes config must be a nonempty object")
+            return value
         python = Path(sys.executable)
         try:
             import yaml
