@@ -9,6 +9,20 @@ $ErrorActionPreference='Stop'
 . (Join-Path $PSScriptRoot 'lib\windows-apps.ps1')
 . (Join-Path $PSScriptRoot 'lib\windows-common.ps1')
 Assert-DotfilesWindows
+function Merge-DotfilesPreferenceLeaves($Existing, $Patch) {
+    # Shared Zed objects own only shipped leaves; arrays remain managed units.
+    if ($Patch -is [Collections.IDictionary]) {
+        $merged = [ordered]@{}
+        if ($Existing -is [Collections.IDictionary]) {
+            foreach ($key in $Existing.Keys) { $merged[$key] = $Existing[$key] }
+        }
+        foreach ($key in $Patch.Keys) {
+            $merged[$key] = Merge-DotfilesPreferenceLeaves $merged[$key] $Patch[$key]
+        }
+        return $merged
+    }
+    return ,$Patch
+}
 # Public snapshots are curated; never replace them with this machine's settings.
 if ($Mode -eq 'Backup' -or ($Mode -eq 'Check' -and $Only -and $Only -ne 'zed')) { Write-Output "Public templates retained; live preference $Mode is intentionally skipped."; return }
 $prepared=@(); $pending=@()
