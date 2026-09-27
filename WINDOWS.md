@@ -8,15 +8,15 @@ named failing step instead of repeating all maintenance.
 Codex's desktop-bundled CLI is maintained with the desktop app; Topgrade's
 standalone Codex updater is disabled.
 
-Hermes is excluded from Windows `update-all`, including Topgrade, as of
-September 12, 2026: Application Control blocks its managed Python
-([upstream issue #99590](https://github.com/NousResearch/hermes-agent/issues/99590)).
-Other updates and Mac maintenance remain independent. Re-enable only after a
-supported runtime passes launch and update verification. The installation,
-settings, source launcher and taskbar repairs remain available.
+Hermes is excluded from Windows `update-all`, including Topgrade. Keep its runtime
+updates deliberate and verify them separately; a successful runtime check does
+not enable automatic updates. Other updates and Mac maintenance remain
+independent. Installation, settings, source launch and taskbar repair remain
+available.
 
 For deliberate standalone testing, use `scripts/update-windows-hermes.ps1`.
-It honors `HERMES_HOME`, probes the interpreter before updating, and logs startup
+It honors `HERMES_HOME`, resolves the official managed runtime or a legacy venv,
+verifies the runtime before and after updating, and logs startup
 failures with the OS error and exact executable path in
 `%TEMP%/dotfiles-hermes-update-*.log`. After a successful update it repairs the
 source shortcut and checks shared skills. See

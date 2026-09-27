@@ -123,6 +123,7 @@ try {
     foreach ($name in @('start-windows-hermes.ps1','update-windows-hermes.ps1')) {
         Copy-Item -LiteralPath (Join-Path $root "scripts/$name") -Destination (Join-Path $scripts $name)
     }
+    Copy-Item -LiteralPath (Join-Path $root 'scripts/lib/windows-hermes.ps1') -Destination (Join-Path $scripts 'lib/windows-hermes.ps1')
     $common = @'
 function Assert-DotfilesWindows {}
 function Assert-DotfilesPythonRuntime([string]$Path,[string]$Label) {
@@ -132,6 +133,7 @@ function Assert-DotfilesPythonRuntime([string]$Path,[string]$Label) {
 }
 function Assert-DotfilesPreferenceFile([string]$Path) { if (-not (Test-Path -LiteralPath $Path)) { throw 'Fixture runtime missing' } }
 function Invoke-DotfilesNativeUtf8([string]$File,[string[]]$Arguments) {
+    if ($global:PublicHermesFixtureState.checkSelectedPython -and $File -cne $global:PublicHermesFixtureState.selectedPython) { throw 'Settings setup lost selected Python' }
     $global:PublicHermesFixtureState.nativeCalls++
     $global:PublicHermesFixtureState.observedArguments = $Arguments
     $global:PublicHermesFixtureState.observedPython = $File
@@ -155,6 +157,7 @@ function Test-Path {
     [IO.File]::WriteAllText((Join-Path $scripts 'lib/windows-common.ps1'), $realCommon + [Environment]::NewLine + $common)
     [IO.File]::WriteAllText((Join-Path $scripts 'setup-windows-hermes-launcher.ps1'), 'param([switch]$Apply,[string]$HermesHome,[string]$HermesRoot,[string]$Python); if ($global:PublicHermesFixtureState.checkSelectedPython -and $Python -cne $global:PublicHermesFixtureState.selectedPython) { throw "Settings setup omitted launcher Python" }; $global:PublicHermesFixtureState.repairCalls++')
     [IO.File]::WriteAllText((Join-Path $scripts 'setup-windows-hermes.ps1'), 'param([switch]$Check,[string]$HermesHome); $global:PublicHermesFixtureState.checkCalls++')
+    [IO.File]::WriteAllText((Join-Path $scripts 'repair-windows-hermes-runtime.ps1'), 'param([switch]$Apply,[string]$HermesHome); if (!$Apply -or $HermesHome -cne $env:HERMES_HOME) { throw "Unexpected runtime repair arguments" }; $global:PublicHermesFixtureState.runtimeRepairs++')
     [IO.Directory]::CreateDirectory((Join-Path $runtime 'hermes_cli')) | Out-Null
     [IO.File]::WriteAllText((Join-Path $runtime 'hermes_cli/main.py'), '# fixture')
     # Run actual settings orchestration with dummy native/config/launcher boundaries.
@@ -178,18 +181,22 @@ function Test-Path {
     $global:PublicHermesFixtureState.nativeCalls=0
     $updater = Join-Path $scripts 'update-windows-hermes.ps1'
     & $updater -DryRun | Out-Null
+    if ($global:PublicHermesFixtureState.runtimeRepairs) { throw 'Dry run repaired a runtime' }
     if ($global:PublicHermesFixtureState.nativeCalls -or $global:PublicHermesFixtureState.repairCalls -or $global:PublicHermesFixtureState.checkCalls) { throw 'Dry run performed work' }
     $global:PublicHermesFixtureState.failRuntime=$true
     $failed=$false
     try { & $updater | Out-Null } catch { $failed=$_.Exception.Message -match 'fixture Application Control block.*Log:' }
     if (!$failed -or $global:PublicHermesFixtureState.nativeCalls -or $global:PublicHermesFixtureState.repairCalls -or $global:PublicHermesFixtureState.checkCalls) { throw 'Blocked runtime ran update/follow-up actions or lost its diagnostic' }
     $global:PublicHermesFixtureState.failRuntime=$false
+    $global:PublicHermesFixtureState.runtimeRepairs=0
     & $updater | Out-Null
+    if ($global:PublicHermesFixtureState.runtimeRepairs -ne 2) { throw 'Runtime verification did not bracket update' }
     if ($global:PublicHermesFixtureState.nativeCalls -ne 1 -or $global:PublicHermesFixtureState.repairCalls -ne 1 -or $global:PublicHermesFixtureState.checkCalls -ne 1) { throw 'Update did not run once and verify both follow-ups' }
     if (($global:PublicHermesFixtureState.observedArguments -join ' ') -cne '-u -m hermes_cli.main update --yes') { throw 'Native update arguments changed' }
     $global:PublicHermesFixtureState.failNative=$true
     $failed=$false
     try { & $updater | Out-Null } catch { $failed=$_.Exception.Message -match 'exit 2.*Log:' }
+    if ($global:PublicHermesFixtureState.runtimeRepairs -ne 3) { throw 'Failed update ran post-update runtime repair' }
     if (-not $failed -or $global:PublicHermesFixtureState.repairCalls -ne 1 -or $global:PublicHermesFixtureState.checkCalls -ne 1) { throw 'Failed update hid status or ran success stages' }
     $env:HERMES_HOME=Join-Path $fixture 'absent'
     & $updater | Out-Null
