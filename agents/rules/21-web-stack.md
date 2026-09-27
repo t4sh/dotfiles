@@ -18,3 +18,7 @@ Activate when the project uses browser-rendered UI: Tailwind, shadcn/ui, Next.js
 - **Respect the IPC boundary.** The frontend (React/HTML) communicates with Rust via Tauri commands — never reach for `window.__TAURI__` directly; use `@tauri-apps/api` wrappers. Don't call browser APIs (`fetch`, `localStorage`, DOM globals) for anything that needs filesystem, process, or OS access — route it through a Tauri command instead.
 - **No DOM APIs in Rust command handlers.** Tauri commands run in the Rust backend; they have no DOM. If a handler needs to update UI state, emit an event the frontend listens to.
 - **Plugin imports are load-bearing.** Each `@tauri-apps/plugin-*` package maps to a registered Rust plugin. Adding or removing a frontend import without the corresponding Rust-side change will silently fail at runtime.
+
+## Local preview URLs
+
+"Run on localhost" and "show localhost preview" both request a browser preview. Unless the user supplies an exact URL, use installed Portless for the browser URL. Treat a repo's documented `http://localhost:<port>` as an upstream, not the final preview. Start new servers through Portless from the repo root, or alias each running server's observed port after checking `portless list`. Pass the assigned port if a runner ignores `PORT`. Open and verify the actual URL Portless reports (`portless get <name>` for aliases, including any port); a raw HTTP check is insufficient. If Safari cannot resolve `.localhost`, run `portless hosts sync`. If Portless is unavailable, use the repo URL.

@@ -8,15 +8,15 @@ named failing step instead of repeating all maintenance.
 Codex's desktop-bundled CLI is maintained with the desktop app; Topgrade's
 standalone Codex updater is disabled.
 
-Hermes is excluded from Windows `update-all`, including Topgrade, as of
-September 12, 2026: Application Control blocks its managed Python
-([upstream issue #99590](https://github.com/NousResearch/hermes-agent/issues/99590)).
-Other updates and Mac maintenance remain independent. Re-enable only after a
-supported runtime passes launch and update verification. The installation,
-settings, source launcher and taskbar repairs remain available.
+Hermes is excluded from Windows `update-all`, including Topgrade. Keep its runtime
+updates deliberate and verify them separately; a successful runtime check does
+not enable automatic updates. Other updates and Mac maintenance remain
+independent. Installation, settings, source launch and taskbar repair remain
+available.
 
 For deliberate standalone testing, use `scripts/update-windows-hermes.ps1`.
-It honors `HERMES_HOME`, probes the interpreter before updating, and logs startup
+It honors `HERMES_HOME`, resolves the official managed runtime or a legacy venv,
+verifies the runtime before and after updating, and logs startup
 failures with the OS error and exact executable path in
 `%TEMP%/dotfiles-hermes-update-*.log`. After a successful update it repairs the
 source shortcut and checks shared skills. See
@@ -87,11 +87,20 @@ Skill checks and refresh output use UTF-8 even in a legacy-code-page console;
 the caller's encoding is restored afterward. Native failures remain failures.
 
 Windows public preference files are **curated onboarding templates**. Backup and
-preference Check entry points intentionally skip live capture/comparison, even
-when called directly. They report this explicitly. This is not a claim that live
-preferences match the templates. Restore applies only shipped settings; unshipped
+preference Backup entry points intentionally skip live capture, even when called
+directly. Check compares the two Mac-authored Zed surfaces only; other template
+comparisons remain skipped. This is not a claim that every live preference matches
+the templates. Restore applies only shipped settings; unshipped
 extra-app surfaces are skipped. Personal dictionaries, extension inventories,
 accounts, device names and host layouts should stay outside this checkout.
+
+Zed settings and keymap come from `apps/zed/` on the Mac side. Windows restores
+them and never writes them back into the repository; the obsolete Windows-authored
+Zed snapshots are removed. The shared keymap uses `secondary-` for Cmd on macOS
+and Ctrl on Windows.
+
+`-Only tower` scopes the extended-app restore to shipped Tower templates. Public
+backup still retains templates and never captures live Tower preferences.
 
 Private app exports can be placed in `~/.secrets/apps/` and encrypted separately;
 see [SECRETS-WINDOWS.md](SECRETS-WINDOWS.md). Mac `make backup` likewise retains its

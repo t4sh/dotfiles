@@ -27,6 +27,7 @@
 #       ├── shottr/                     # cc.ffitch.shottr.plist — make backup-shottr / restore-shottr
 #       ├── dato/                       # full primary prefs — make backup-dato / restore-dato
 #       ├── deskflow/                   # Mac configuration + TLS archive — make backup-deskflow
+#       ├── text-replacements/          # importable Mac plist from make backup-text-replacements
 #       ├── thaw/                       # manual profile export/import
 #       ├── raycast/                    # manual .rayconfig / export bundles
 #       ├── vscode/                     # token-bearing MCP/profile data — manual restore

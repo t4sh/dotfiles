@@ -46,8 +46,11 @@ preferences while those links are present.
 Use `dot hermes-launcher -Apply` to repair just the shortcut, or `-Check` to inspect
 it. Both launcher commands honor `HERMES_HOME`; explicit `-HermesHome`,
 `-HermesRoot` and `-Python` select a profile and runtime. `dot hermes -Apply`
-passes the selected Python through to the shortcut. The shortcut invokes that
-Python with `desktop --source --skip-build`.
+passes an explicit Python override through to the shortcut. Otherwise, PM-managed
+installs resolve their interpreter through the published installation launcher
+and let Hermes bootstrap select the dependency generation. Legacy installs retain
+the `venv/Scripts/python.exe` path. The shortcut runs
+`desktop --source --skip-build` through the selected runtime.
 Launching does not install, update, package or rebuild anything. Source dependencies
 and compiled frontend assets must already be present in the installed checkout.
 The first replaced shortcut is retained as `Hermes.lnk.before-dotfiles`.
@@ -66,7 +69,8 @@ need no packaged executable for the icon. Missing icon assets fail clearly.
 Missing identity on an owned pin is repaired; conflicting identities stop before
 writes. Unreadable unrelated shortcuts are reported and skipped.
 
-The dedicated update stage runs the native Hermes updater once, repairs the source
+The dedicated update stage verifies the runtime before and after running the
+native Hermes updater once, repairs the source
 shortcut after success, then checks shared skills. The native updater controls
 checkout/dependency changes and can rebuild Desktop; this wrapper does not alter
 that upstream behavior. Keeping the source shortcut avoids selecting a newly
@@ -74,6 +78,12 @@ packaged executable that Windows may block. If open Hermes processes lock runtim
 files, the updater may fail: its exit status and log are retained. Resolve the
 reported busy process before retrying that stage. There is no automatic process
 termination or retry loop.
+
+For PM-managed installs, runtime verification imports SSL and SQLite without
+rewriting the managed interpreter or dependency store. Legacy installs retain the
+guarded launcher repair using their declared base interpreter. A blocked native
+module such as `_ssl` requires a working official runtime; replacing a launcher
+alone cannot fix that failure. Windows Application Control remains enabled.
 
 Personal models, aliases, appearance and credentials remain outside this checkout.
 The generic helper now includes `display.resume_last_session`. For an explicit
@@ -104,18 +114,19 @@ python3 scripts/hermes-settings.py isolate-skills
 python3 scripts/hermes-settings.py check-skills
 ```
 
-On Windows, select the initialized profile and its Python explicitly:
+On Windows, select the initialized profile and let its installation select Python:
 
 ```powershell
-$hermesProfile = if ($env:HERMES_HOME) { $env:HERMES_HOME } else { Join-Path $env:LOCALAPPDATA 'hermes' }
-$hermesPython = Join-Path $hermesProfile 'hermes-agent/venv/Scripts/python.exe'
-& $hermesPython -B scripts/hermes-settings.py isolate-skills --live (Join-Path $hermesProfile 'config.yaml')
-if ($LASTEXITCODE -ne 0) { throw 'Skill isolation failed; inspect the reported condition.' }
-& $hermesPython -B scripts/hermes-settings.py check-skills --live (Join-Path $hermesProfile 'config.yaml')
-if ($LASTEXITCODE -ne 0) { throw 'Skill boundary check failed.' }
+. ./scripts/lib/windows-common.ps1
+. ./scripts/lib/windows-hermes.ps1
+$hermesProfile = Resolve-DotfilesHermesHome
+$runtimeOptions = @{HermesHome=$hermesProfile; HermesRoot=(Join-Path $hermesProfile 'hermes-agent')}
+Invoke-DotfilesHermesPython @runtimeOptions -Arguments @('-B','scripts/hermes-settings.py','isolate-skills','--live',(Join-Path $hermesProfile 'config.yaml'))
+Invoke-DotfilesHermesPython @runtimeOptions -Arguments @('-B','scripts/hermes-settings.py','check-skills','--live',(Join-Path $hermesProfile 'config.yaml'))
 ```
 
-For a custom runtime, substitute its Python path. For another Mac profile, pass
+For a custom runtime, add its Python path as `Python` in `$runtimeOptions`.
+For another Mac profile, pass
 its config with `--live`; the Mac default intentionally ignores `HERMES_HOME`.
 
 Isolation moves only matching alias objects into the profile's

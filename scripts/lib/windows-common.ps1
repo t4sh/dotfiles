@@ -3,6 +3,15 @@ function Assert-DotfilesWindows {
     if ([Environment]::OSVersion.Platform -ne 'Win32NT') { throw 'This entry point requires Windows.' }
     if ($PSHOME -match '[\\/]WindowsApps[\\/]') { throw 'Run this workflow in standard MSI PowerShell, not Store PowerShell: packaged AppData redirection can target different user files.' }
 }
+function Get-DotfilesRepoRoot {
+    # This file lives in <repo>/scripts/lib, so the repository root is two levels up.
+    return (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent)
+}
+function Get-DotfilesSharedPreferencePath([string]$Relative) {
+    # Mac-authored surfaces Windows consumes but never captures, resolved from the
+    # repository so a shared file is located independently of the snapshot root.
+    return (Join-Path (Get-DotfilesRepoRoot) $Relative)
+}
 function Resolve-DotfilesPwsh {
     # 32-bit Make/Windows PowerShell sees ProgramFiles as Program Files (x86).
     $candidates = @()

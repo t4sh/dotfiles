@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # Skillsfile — declarative global skill manifest (Brewfile pattern).
 #
-# GENERATED 2026-09-13T07:25:38+05:30 from agents/.skill-lock.json by
+# GENERATED 2026-09-26T19:57:56+05:30 from agents/.skill-lock.json by
 # scripts/gen-skillsfile.py — DO NOT EDIT BY HAND. To change skills:
 #   ~/.local/bin/npx-stable skills add ... --agent codex   then   make skills-manifest
 #   (regenerates Skillsfile + agents/skills/README.md)
 #
 # Explicit upstream refresh: make skills-update   (or: bash Skillsfile)
-# 115 skills — 31 refreshable github sources + 2 local + 0 held.
-# Curated skills are held by config/skills-refresh-holds.json; review upstream changes manually.
+# 116 skills — 32 refreshable github sources + 2 local + 0 held.
+# Exceptional refresh holds, if any, live in config/skills-refresh-holds.json.
 #
 # Prereqs (fresh Mac): node + git + GitHub auth (SSH/gh) must be set
 # up first if a configured upstream source requires authentication.
@@ -131,6 +131,9 @@ update_skill_source "$NPX" skills add shadcn/improve --skill improve -g -y --age
 
 echo "Checking skills from source: t4sh/skills4sh"
 update_skill_source "$NPX" skills add t4sh/skills4sh --skill agent-memory code-to-figma discord-harvest eleventy-nunjucks figma-to-code localhost-screenshots skill-architect -g -y --agent codex
+
+echo "Checking skills from source: typesafe-ai/skills"
+update_skill_source "$NPX" skills add typesafe-ai/skills --skill typesafe-ai -g -y --agent codex
 
 echo "Checking skills from source: vercel-labs/agent-browser"
 update_skill_source "$NPX" skills add vercel-labs/agent-browser --skill agent-browser -g -y --agent codex

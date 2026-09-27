@@ -79,6 +79,8 @@ make all
 
 `make brew` runs `brew-base` → `node` → `brew-npm`, then optional/interactive MAS. Fresh re-apply prefers `brew-without-mas`.
 
+The npm phase enables pnpm/Yarn shims after installing Corepack. Re-run it after changing the dotfiles Node pin. Other project-specific NVM installations need their own `corepack enable`; projects still select package-manager versions through `packageManager`.
+
 `ssh-setup` is deliberately manual and restore-first: it validates and registers an existing vault-backed key. Creating a new canonical identity requires the explicit `scripts/ssh-setup.sh --generate` option.
 
 Manual targets (not in `all`): `post-vault`, `ssh-setup`, `terminal`, `default-apps`, `doctor`, `verify-bootstrap`, `docs-audit`, `skills` / `skills-update`.
@@ -113,7 +115,7 @@ Add a new symlink: one row in [`symlinks.tsv`](symlinks.tsv). No Stow/dotbot con
 | `make brew-core` / `make brew-apps` | Bootstrap formulae, then resumable casks/fonts/extensions |
 | `make brew-base` | Aggregate of `brew-core` → `brew-apps` |
 | `make node` | Install/activate the exact runtime from `.node-version` |
-| `make brew-npm` | Install Brewfile npm globals under that pinned Node |
+| `make brew-npm` | Install pinned-Node npm globals and enable Corepack shims |
 | `make brew-mas` | Install App Store apps after signing in |
 | `make brew-check` | Quick install-state check (`scripts/brewfile.sh check`) |
 | `make shims` | Create or repair the pinned `node-stable` / `npx-stable` shims |
@@ -138,7 +140,7 @@ Add a new symlink: one row in [`symlinks.tsv`](symlinks.tsv). No Stow/dotbot con
 | `make doctor` | Read-only bootstrap preflight (Touch ID, duti receipt, managed Automator workflows, vault note) |
 | `make docs-audit` | Typo check docs/scripts (`typos` from Brewfile) |
 | `make brewfile-audit` | Strict Brewfile ↔ system drift check |
-| `make rules-audit` | Agent rule includes in sync |
+| `make rules-audit` | Agent rule loading, routing and inventory in sync |
 | `make skills-audit` | Skill redistribution/license gate |
 | `make audit-apps` | Scan app snapshots for secrets |
 
@@ -146,22 +148,29 @@ Add a new symlink: one row in [`symlinks.tsv`](symlinks.tsv). No Stow/dotbot con
 
 | Target | Purpose |
 |--------|---------|
-| `make backup` | Refresh repo-tracked app prefs, Dock, services, Brewfile |
+| `make backup` | Refresh portable snapshots and reviewed Brewfile changes; back up Text Replacements into `~/.secrets/` |
+| `make backup-text-replacements` | Export Mac Text Replacements into the secrets tree |
 | `make backup-canary` / `make restore-canary` | Canary Mail vault workflow (restore quits/reopens Canary) |
 | `make backup-shottr` / `make restore-shottr` | Shottr license prefs vault workflow (restore quits/reopens Shottr) |
-| `make secrets-backup` | Update an encrypted DMG with five verified snapshots of `~/.secrets/` |
+| `make secrets-backup` | Update the encrypted DMG with capacity-based retention and verified snapshots of `~/.secrets/` |
 | `make secrets-backup-portable` | Create a separate immutable recovery DMG |
 | `make secrets-mount` / `make secrets-pass` | Vault mount / local password-copy helper |
 | `make secrets-restore` / `secrets-restore-apply` | Validate / transactionally restore only `~/.secrets` |
 | `make secrets-health` | Mounted-vault snapshot freshness check |
 | `make secrets-pass-import` | Import a recovered vault password into the local Keychain |
 
+`make backup` keeps the public macOS policy check strict. It does not capture a
+personal policy JSON. Brewfile additions and removals need interactive review;
+`make backup OVERRIDE=1` keeps the generated Brewfile after validation. The
+Services and device-domain rows in `apps.tsv` have no published snapshots yet,
+so public backup leaves them uncaptured pending separate privacy review.
+
 ### Agents
 
 | Target | Purpose |
 |--------|---------|
 | `make skills-manifest` | Regenerate `Skillsfile` from skill lockfile |
-| `make skills` | Install global skills from manifest (needs Node + auth for some sources) |
+| `make skills` | Verify vendored skills and manifest without a network install |
 
 ## `dot` and `bin/j`
 
@@ -221,7 +230,11 @@ Preference coverage is selective: capture portable, non-secret settings; keep cr
 - **App snapshots:** `make restore-apps` restores `apps.tsv` and documented irregular settings; `make apps-drift` checks only faithful snapshots this public projection ships.
 - **macOS policy:** `make macos` applies automatic appearance, hot corners, battery percentage, and visibility for Bluetooth, Clock, Focus, Sound, and Wi-Fi; `make macos-check` verifies the managed values.
 - **Dock:** `make dock` imports a full-domain, public-safe snapshot; where the snapshot overlaps `macos/defaults.sh`, scripted policy is authoritative.
-- **Keyboard and input sources:** restore restarts the current user's `cfprefsd`, verifies portable managed values, and reports an explicit logout fallback if either step cannot be confirmed.
+- **Keyboard and input sources:** the managed policy includes key repeat, keyboard navigation and Globe-key action; the input-source plist is captured separately. Services preferences have no published snapshot and public backup skips them. Restore restarts the current user's `cfprefsd`, verifies portable managed values, and reports an explicit logout fallback if either step cannot be confirmed.
+- **Text Replacements:** `make backup-text-replacements` writes an importable plist to `~/.secrets/`; see [restore steps](macos/TEXT-REPLACEMENTS.md).
+- **Cursor CLI:** the two attribution flags are restored selectively from [`apps/cursor/cli-config.json`](apps/cursor/cli-config.json) without replacing other CLI settings. Use `make restore-cursor-cli` and `make cursor-cli-check`.
+- **Zed:** one Mac-authored settings/keymap pair is also restore-only on Windows; Windows backup does not capture it.
+- **Tower:** when installed, app restore imports GitHub’s public GPG verification key for web merge signatures.
 - **Manual or vendor-managed:** wallpaper and custom images, display layout, network profiles, volume, Screen Time, notification schedules, and unlisted Control Center modules remain outside the tracked policy.
 
 ## Agents & skills
@@ -232,12 +245,13 @@ The [`agents/`](agents/) directory symlinks to `~/.agents`, wires into Claude Co
 - A large **vendored skills** tree with upstream attribution in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md)
 - `Skillsfile` / `.skill-lock.json` for reproducible global skill installs
 
-Non-redistributable or private skills must **not** be committed — `make skills-audit` enforces the license gate (also in `make all`). Third-party skills without a local `LICENSE` file must appear in `THIRD_PARTY_NOTICES.md`.
+Non-redistributable or private skills must **not** be published — `make skills-audit` enforces the license gate (also in `make all`). Third-party skills without a local `LICENSE` file must appear in `THIRD_PARTY_NOTICES.md`.
 
 Install global skills after bootstrap:
 
 ```bash
-make skills    # needs gh auth for GitHub-authenticated skill sources
+make skills           # verify checked-in skills
+make skills-update    # explicit upstream refresh; may need GitHub auth
 ```
 
 ## Secrets
@@ -266,7 +280,7 @@ make secrets-pass     # copy the local Keychain password without printing it
 make secrets-pass-import  # import a recovered password on a replacement Mac
 ```
 
-The CLI-created Keychain item is local and is not assumed to synchronize through iCloud Keychain. Store and verify a separate recovery copy in an independently synchronized password manager. Before attach, vault scripts detect the selected image at any mountpoint, reuse only the verified expected mount, and never claim an operator-owned alternate attachment. Backups stage through a working copy, retain the published vault on failure, and prune to five verified snapshots. Portable and legacy backup commands remain available; see [SECRETS.md](SECRETS.md).
+The CLI-created Keychain item is local and is not assumed to synchronize through iCloud Keychain. Store and verify a separate recovery copy in an independently synchronized password manager. Before attach, vault scripts detect the selected image at any mountpoint, reuse only the verified expected mount, and never claim an operator-owned alternate attachment. Backups stage through a working copy, retain the published vault on failure, and retain verified snapshots while reserving space for two more and preserving baselines. Portable and legacy backup commands remain available; see [SECRETS.md](SECRETS.md).
 
 ## Safety gates
 
@@ -383,7 +397,7 @@ Checkout-safe regression fixtures: `make test-public` on macOS; `pwsh -NoProfile
 | `colima-up` / `colima-down` / `colima-status` | Manage Colima |
 | `dot-link` / `dot-backup` | Link configuration / capture managed snapshots |
 | `pr-digest <org>` / `pr-merged` | PR summaries / local tips matching merged PRs |
-| `port-info` / `port-reset [--force] <port> ...` | Inspect listeners / free one or several ports |
+| `port-info [port ...]` / `port-reset [--force] <port> ...` | Group TCP listeners by preview, macOS and other processes / free ports |
 
 Historical names remain compatibility aliases except `free-port`, which is removed.
 `logs-clean` does not restart services; the script's explicit `--reset-services` option does.
@@ -412,6 +426,12 @@ cloud storage for a long time. Run `view-reset` afterward to reapply preferences
 exceptions through Finder in a GUI session. Backup preflight skips daily view-policy drift.
 Native Open/Save Columns/Date Modified defaults are fallbacks; apps may override them,
 and native panels do not support Finder-style grouping. Reopen existing dialogs.
+
+On an existing Mac, run `make macos` and `make default-apps` to reapply the saved
+Finder/Open–Save and handler policies, then run `make macos-check`,
+`view-reset --check-folders`, and `make default-apps-check` to read them back.
+If this public checkout uses a personal screenshot folder, set `DOTFILES_CAPTURE_DIR`
+for `make macos-check`; the unset policy uses the portable Desktop fallback.
 
 Privacy reviewers and fork users: read the [intentional public identity baseline](PRIVACY.md).
 The documented noreply Git identity and public verification key are deliberately published.

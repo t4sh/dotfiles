@@ -9,6 +9,7 @@ import sys
 import tempfile
 import unittest
 from unittest.mock import patch
+from types import SimpleNamespace
 
 ROOT = Path(__file__).resolve().parents[1]
 HELPER = ROOT / "scripts/hermes-settings.py"
@@ -18,6 +19,27 @@ helper = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(helper)
 
 class HermesSkillBoundary(unittest.TestCase):
+    def test_managed_yaml_uses_existing_hermes_dependency(self):
+        with tempfile.TemporaryDirectory() as directory:
+            config = Path(directory) / "config.yaml"
+            config.write_text("display:\n  message_reactions: off\n", encoding="utf-8")
+            expected = {"display": {"message_reactions": False}}
+            parser = SimpleNamespace(safe_load=lambda text: expected, YAMLError=ValueError)
+            with patch.dict(sys.modules, {"hermes_yaml": parser}), patch.object(helper.subprocess, "run") as child:
+                self.assertEqual(helper.read_config(config), expected)
+                child.assert_not_called()
+
+    def test_managed_yaml_errors_do_not_expose_config_lines(self):
+        with tempfile.TemporaryDirectory() as directory:
+            config = Path(directory) / "config.yaml"
+            config.write_text("malformed: [", encoding="utf-8")
+            def reject(text):
+                raise ValueError("parser diagnostic containing private fixture value")
+            parser = SimpleNamespace(safe_load=reject, YAMLError=ValueError)
+            with patch.dict(sys.modules, {"hermes_yaml": parser}):
+                with self.assertRaisesRegex(ValueError, "^Hermes YAML could not be parsed; config retained$"):
+                    helper.read_config(config)
+
     def test_skill_boundary_reports_scan_errors_instead_of_clean(self):
         with tempfile.TemporaryDirectory() as directory:
             home = Path(directory)

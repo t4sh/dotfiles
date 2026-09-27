@@ -102,10 +102,9 @@ port-reset() {
 alias free-ports='port-reset'
 alias list-ports='port-info'
 
-# List listening ports.
+# Group listeners by owning process; port numbers alone do not identify previews.
 port-info() {
-  echo "Listening ports:"
-  sudo lsof -iTCP -sTCP:LISTEN -P -n
+  python3 "${DOTFILES:-$HOME/.dotfiles}/scripts/port-info.py" "$@"
 }
 
 # Auto-switch Node from the nearest parent .nvmrc and restore the dotfiles pin

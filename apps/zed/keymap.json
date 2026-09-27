@@ -1,19 +1,22 @@
 [
   {
     // Workspace fallbacks keep agent surfaces reachable outside code editors.
+    // `secondary-` is Zed's platform modifier: cmd on macOS, ctrl on Windows and
+    // Linux. One Mac-authored keymap therefore drives both platforms correctly;
+    // `cmd-` would bind the Windows key on Windows instead of ctrl.
     "context": "Workspace",
     "bindings": {
-      "cmd-i": "agent::ToggleFocus",
-      "cmd-shift-a": "agent::ToggleFocus",
-      "cmd-alt-j": "multi_workspace::ToggleWorkspaceSidebar"
+      "secondary-i": "agent::ToggleFocus",
+      "secondary-shift-a": "agent::ToggleFocus",
+      "secondary-alt-j": "multi_workspace::ToggleWorkspaceSidebar"
     }
   },
   {
     // Lower editor contexts outrank Workspace in Zed's VS Code base keymap.
     "context": "Editor && mode == full",
     "bindings": {
-      "cmd-i": "agent::ToggleFocus",
-      "cmd-enter": "assistant::InlineAssist"
+      "secondary-i": "agent::ToggleFocus",
+      "secondary-enter": "assistant::InlineAssist"
     }
   }
 ]

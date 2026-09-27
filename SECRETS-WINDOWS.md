@@ -1,7 +1,7 @@
 # Windows encrypted recovery
 
-Windows uses authenticated `.tar.age` archives. macOS uses its existing encrypted
-APFS DMG workflow. These are separate containers; validate platform compatibility
+Windows uses authenticated `.tar.age` archives. macOS uses an encrypted APFS DMG with capacity-based retention: verified baselines
+remain, and rolling snapshots use available space while reserving room for two more. These are separate containers; validate platform compatibility
 before restoring application data across operating systems.
 
 The public Windows backup manifest captures `~/.secrets` only. Put private exports

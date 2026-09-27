@@ -58,6 +58,11 @@ captured=0
 skipped=0
 while IFS=$'\t' read -r domain label plist _; do
   case "${domain:-}" in ''|'#'*) continue ;; esac
+  # These device and Services domains are manifest-only until their snapshots
+  # receive a separate public privacy review.
+  case "$domain" in
+    pbs|com.apple.AppleMultitouchTrackpad|com.apple.driver.AppleBluetoothMultitouch.trackpad|com.apple.AppleMultitouchMouse|com.apple.driver.AppleBluetoothMultitouch.mouse) continue ;;
+  esac
   mkdir -p "$(dirname "$STAGE/$plist")"
   # A never-configured domain may export successfully as an empty dictionary.
   # Keep its prior snapshot instead of replacing it with an empty plist.
@@ -107,6 +112,9 @@ ok "sanitized portable app prefs"
 DOTFILES="$SOURCE_DOTFILES" BREWFILE="$SOURCE_DOTFILES/Brewfile" \
   DOTFILES_BREWFILE_PRESERVE_EMPTY_KINDS=1 \
   bash "$SOURCE_DOTFILES/scripts/brewfile.sh" dump "$STAGE/Brewfile"
+OVERRIDE="${OVERRIDE:-0}" python3 "$SOURCE_DOTFILES/scripts/brewfile-review.py" \
+  --saved "$SOURCE_DOTFILES/Brewfile" \
+  --candidate "$STAGE/Brewfile"
 ok "Brewfile"
 DOTFILES="$STAGE" bash "$SOURCE_DOTFILES/scripts/audit-app-prefs.sh"
 

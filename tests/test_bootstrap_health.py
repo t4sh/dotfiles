@@ -36,10 +36,20 @@ class PublicBootstrap(unittest.TestCase):
             self.assertNotIn('no issues', result.stdout)
 
     def test_manifest_snapshots_exist(self):
+        manifest_only = {
+            'macos/services.plist', 'macos/trackpad.plist',
+            'macos/bluetooth-trackpad.plist', 'macos/mouse.plist',
+            'macos/bluetooth-mouse.plist',
+        }
         for line in (ROOT / 'apps.tsv').read_text().splitlines():
             if line and not line.startswith('#'):
-                self.assertTrue((ROOT / line.split('\t')[2]).is_file(), line.split('\t')[1])
+                label, snapshot = line.split('\t')[1:3]
+                if snapshot in manifest_only:
+                    self.assertFalse((ROOT / snapshot).exists(), label)
+                else:
+                    self.assertTrue((ROOT / snapshot).is_file(), label)
 
+    @unittest.skipUnless(sys.platform == 'darwin', 'Requires macOS preference tools')
     def test_mac_capture_retains_templates_and_omits_dato(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory) / 'checkout'
@@ -67,6 +77,7 @@ class PublicBootstrap(unittest.TestCase):
             for p, data in before.items():
                 self.assertEqual(p.read_bytes(), data, str(p.relative_to(root)))
 
+    @unittest.skipUnless(sys.platform == 'darwin', 'Requires macOS plutil')
     def test_public_app_sanitization_and_audit(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

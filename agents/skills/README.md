@@ -1,6 +1,6 @@
 ---
-generated: 2026-09-13T07:25:38+05:30
-skills_count: 122
+generated: 2026-09-26T19:57:56+05:30
+skills_count: 123
 gated_count: 0
 lock_file: ../.skill-lock.json
 lock_version: 4
@@ -17,7 +17,7 @@ When this file is asked to be updated. Update the following
 
 # Skills Inventory
 
-> **122 skills** installed — 113 remote + 9 local
+> **123 managed skills** — 114 remote + 9 local
 
 | # | Skill Name | Source | Disk Location | Remark |
 |---|-----------|--------|---------------|--------|
@@ -129,27 +129,31 @@ When this file is asked to be updated. Update the following
 | 106 | top-design | wondelai/skills | `~/.agents/skills/top-design/` | — |
 | 107 | transitions-dev | Jakubantalik/transitions.dev | `~/.agents/skills/transitions-dev/` | — |
 | 108 | triage | mattpocock/skills | `~/.agents/skills/triage/` | — |
-| 109 | ui-animation | mblode/agent-skills | `~/.agents/skills/ui-animation/` | — |
-| 110 | ui-ux-pro-max | nextlevelbuilder/ui-ux-pro-max-skill | `~/.agents/skills/ui-ux-pro-max/` | — |
-| 111 | user-research | anthropics/knowledge-work-plugins | `~/.agents/skills/user-research/` | — |
-| 112 | variant | jakubkrehel/skills | `~/.agents/skills/variant/` | — |
-| 113 | vocabulary | index-how/vocabulary | `~/.agents/skills/vocabulary/` | — |
-| 114 | wait-what | mattpocock/skills | `~/.agents/skills/wait-what/` | — |
-| 115 | wayfinder | mattpocock/skills | `~/.agents/skills/wayfinder/` | — |
-| 116 | web-design-guidelines | vercel-labs/agent-skills | `~/.agents/skills/web-design-guidelines/` | — |
-| 117 | web-typography | wondelai/skills | `~/.agents/skills/web-typography/` | — |
-| 118 | wizard | mattpocock/skills | `~/.agents/skills/wizard/` | — |
-| 119 | writing-beats | mattpocock/skills | `~/.agents/skills/writing-beats/` | — |
-| 120 | writing-for-agents | mattpocock/skills | `~/.agents/skills/writing-for-agents/` | — |
-| 121 | writing-fragments | mattpocock/skills | `~/.agents/skills/writing-fragments/` | — |
-| 122 | writing-shape | mattpocock/skills | `~/.agents/skills/writing-shape/` | — |
+| 109 | typesafe-ai | typesafe-ai/skills | `~/.agents/skills/typesafe-ai/` | — |
+| 110 | ui-animation | mblode/agent-skills | `~/.agents/skills/ui-animation/` | — |
+| 111 | ui-ux-pro-max | nextlevelbuilder/ui-ux-pro-max-skill | `~/.agents/skills/ui-ux-pro-max/` | — |
+| 112 | user-research | anthropics/knowledge-work-plugins | `~/.agents/skills/user-research/` | — |
+| 113 | variant | jakubkrehel/skills | `~/.agents/skills/variant/` | — |
+| 114 | vocabulary | index-how/vocabulary | `~/.agents/skills/vocabulary/` | — |
+| 115 | wait-what | mattpocock/skills | `~/.agents/skills/wait-what/` | — |
+| 116 | wayfinder | mattpocock/skills | `~/.agents/skills/wayfinder/` | — |
+| 117 | web-design-guidelines | vercel-labs/agent-skills | `~/.agents/skills/web-design-guidelines/` | — |
+| 118 | web-typography | wondelai/skills | `~/.agents/skills/web-typography/` | — |
+| 119 | wizard | mattpocock/skills | `~/.agents/skills/wizard/` | — |
+| 120 | writing-beats | mattpocock/skills | `~/.agents/skills/writing-beats/` | — |
+| 121 | writing-for-agents | mattpocock/skills | `~/.agents/skills/writing-for-agents/` | — |
+| 122 | writing-fragments | mattpocock/skills | `~/.agents/skills/writing-fragments/` | — |
+| 123 | writing-shape | mattpocock/skills | `~/.agents/skills/writing-shape/` | — |
 
 ---
 
-### Lock File vs Disk
+### Inventory ownership
 
-- **In lock file but missing from disk:** none
-- **On disk but not in lock file:** paseo, paseo-advisor, paseo-committee, paseo-handoff, paseo-help, paseo-loop, paseo-plugin
+This inventory contains lock-declared skills and Git-tracked local skills.
+Machine-local additions do not change it. Run `python3 agents/compareskills.py --check`
+for live disk differences and missing managed skills; generation requires a Git checkout.
+
+- **Tracked local skills not in lock file:** paseo, paseo-advisor, paseo-committee, paseo-handoff, paseo-help, paseo-loop, paseo-plugin
 
 ---
 
@@ -184,6 +188,7 @@ When this file is asked to be updated. Update the following
 - **owl-listener/designer-skills** (1): design-token-audit
 - **pbakaus/impeccable** (1): impeccable
 - **shadcn/improve** (1): improve
+- **typesafe-ai/skills** (1): typesafe-ai
 - **vercel-labs/agent-browser** (1): agent-browser
 - **vercel-labs/agent-skills** (1): web-design-guidelines
 - **vercel-labs/skills** (1): find-skills

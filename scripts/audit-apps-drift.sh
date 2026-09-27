@@ -84,6 +84,10 @@ while IFS=$'\t' read -r domain label plist _rest || [[ -n "${domain:-}" ]]; do
   case "$domain" in ''|'#'*) continue ;; esac
   [[ -n "$plist" ]] || continue
   label="${label:-$domain}"
+  # These manifest-only domains have no reviewed public snapshots yet.
+  case "$plist" in
+    macos/services.plist|macos/trackpad.plist|macos/bluetooth-trackpad.plist|macos/mouse.plist|macos/bluetooth-mouse.plist) continue ;;
+  esac
 
   if [[ ! -f "$DOTFILES/$plist" ]]; then
     printf '  ✗ %s — repo snapshot missing: %s\n' "$label" "$plist" >> "$report"
@@ -146,6 +150,22 @@ else
 fi
 stage_defaults "com.apple.Terminal" "Terminal" "apps/terminal/terminal.plist"
 # Editor and Dock snapshots are curated public templates.
+
+# Cursor CLI attribution is a portable, selective snapshot rather than a template.
+if [[ ! -f "$DOTFILES/apps/cursor/cli-config.json" ]]; then
+  printf '  ✗ Cursor CLI attribution — repo snapshot missing\n' >> "$report"
+  missing=$((missing + 1))
+elif [[ -f "$HOME/.cursor/cli-config.json" ]]; then
+  if python3 "$SCRIPT_DIR/cursor-cli-settings.py" check --snapshot "$DOTFILES/apps/cursor/cli-config.json" >"$workdir/cursor-cli.log" 2>&1; then
+    compared=$((compared + 1))
+  else
+    printf '  ✗ Cursor CLI attribution — differs from saved snapshot\n' >> "$report"
+    drifted=$((drifted + 1))
+  fi
+else
+  printf '  ⚠ Cursor CLI attribution — live config unavailable\n' >> "$report"
+  unconfigured=$((unconfigured + 1))
+fi
 
 # Pass 2 — apply the real sanitizer to the staged copies, never to the repo.
 if [[ -f "$SANITIZER" ]]; then

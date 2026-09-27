@@ -224,6 +224,22 @@ exit "${FIXTURE_EXIT:-0}"
         self.assertEqual(self.refresh().returncode, 0)
         self.assertFalse((self.root / "calls").exists())
 
+    def test_releasing_holds_requires_regeneration_then_refreshes_all_selectors(self):
+        self.holds.write_text("{}\n", encoding="utf-8")
+        self.assertNotEqual(self.refresh().returncode, 0)
+        self.assertFalse((self.root / "calls").exists())
+        (self.root / "installer").write_text(
+            '#!/usr/bin/env bash\nprintf "%s\\n" "$*" >> "$FIXTURE_ROOT/calls"\n',
+            encoding="utf-8")
+        self.assertEqual(self.generate().returncode, 0)
+        result = self.refresh()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertNotIn("HOLD:", result.stdout)
+        self.assertEqual((self.root / "calls").read_text().splitlines(), [
+            "skills add fixture/held --skill held-only -g -y --agent codex",
+            "skills add fixture/shared --skill Curated Skill ordinary -g -y --agent codex",
+        ])
+
     def test_missing_or_invalid_policy_fails_before_install(self):
         for content in ('{"typo": "unknown skill"}', '{"ordinary": ""}', '[]'):
             self.holds.write_text(content, encoding="utf-8")

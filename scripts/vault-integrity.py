@@ -103,11 +103,32 @@ def check_image(image):
         raise ValueError("vault sidecars do not match the image; preserve it for recovery")
 
 
+def prune_space(root, reserve_bytes, min_keep=2, keep=None):
+    """Prune oldest verified rolling snapshots; never touch baselines.
+
+    Call only on the disposable working image. The published image remains the
+    rollback point if available space or any later verification is insufficient.
+    """
+    if reserve_bytes < 1 or min_keep < 1 or (keep is not None and keep < min_keep):
+        raise ValueError("invalid space retention policy")
+    items = verified_snapshots(root)
+    original_count = len(items)
+    floor = min(min_keep, len(items))
+    while (shutil.disk_usage(root).free < reserve_bytes
+           or (keep is not None and len(items) > keep)):
+        if len(items) <= floor:
+            raise ValueError("vault cannot preserve the required snapshots and free-space reserve; increase capacity")
+        shutil.rmtree(items.pop())
+    print(f"retained {len(items)} rolling snapshot(s), pruned {original_count - len(items)}; free-space reserve satisfied")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=["record", "check", "check-all", "prune", "sidecars", "check-image"])
+    parser.add_argument("command", choices=["record", "check", "check-all", "prune", "sidecars", "check-image", "prune-space"])
     parser.add_argument("path", type=Path)
-    parser.add_argument("--keep", type=int, default=5)
+    parser.add_argument("--keep", type=int)
+    parser.add_argument("--reserve-bytes", type=int)
+    parser.add_argument("--min-keep", type=int, default=2)
     parser.add_argument("--snapshots", nargs="*", default=[])
     parser.add_argument("--baselines", nargs="*", default=[])
     args = parser.parse_args()
@@ -118,13 +139,18 @@ def main():
         check(args.path)
     elif args.command == "check":
         check(args.path)
-    elif args.command in ("check-all", "prune"):
+    elif args.command == "prune-space":
+        if args.reserve_bytes is None:
+            raise ValueError("prune-space requires --reserve-bytes")
+        prune_space(args.path, args.reserve_bytes, args.min_keep, args.keep)
+    elif args.command == "check-all":
+        verified_snapshots(args.path)
+    elif args.command == "prune":
+        if args.keep is None or args.keep < 1:
+            raise ValueError("prune requires --keep")
         items = verified_snapshots(args.path)
-        if args.command == "prune":
-            if args.keep < 1:
-                raise ValueError("retention must be positive")
-            for path in items[args.keep:]:
-                shutil.rmtree(path)
+        for path in items[args.keep:]:
+            shutil.rmtree(path)
     elif args.command == "sidecars":
         sidecars(args.path, args.snapshots, args.baselines)
     else:

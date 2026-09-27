@@ -5,19 +5,19 @@ param([switch]$Apply, [switch]$Check, [string]$HermesHome, [string]$HermesRoot, 
     [string]$TaskbarDirectory = (Join-Path $env:APPDATA 'Microsoft/Internet Explorer/Quick Launch/User Pinned/TaskBar'))
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'lib/windows-common.ps1')
+. (Join-Path $PSScriptRoot 'lib/windows-hermes.ps1')
 Assert-DotfilesWindows
 if ($Apply -and $Check) { throw 'Choose -Apply or -Check.' }
 $HermesHome = Resolve-DotfilesHermesHome $HermesHome
 if (-not $HermesRoot) { $HermesRoot = Join-Path $HermesHome 'hermes-agent' }
-if (-not $Python) { $Python = Join-Path $HermesRoot 'venv/Scripts/python.exe' }
-if (-not (Test-Path -LiteralPath $python -PathType Leaf)) { throw 'Initialize Hermes before configuring its launcher.' }
-Assert-DotfilesPreferenceFile $python
+$null = Resolve-DotfilesHermesPythonCommand -HermesRoot $HermesRoot -Python $Python
 $target = Resolve-DotfilesPwsh
 $launcher = Join-Path $PSScriptRoot 'start-windows-hermes.ps1'
 foreach ($path in @($launcher,$HermesHome,$HermesRoot,$Python)) {
-    if ($path.Contains('"')) { throw 'Hermes launcher paths must not contain double quotes.' }
+    if ($path -and $path.Contains('"')) { throw 'Hermes launcher paths must not contain double quotes.' }
 }
-$arguments = '-NoLogo -NoProfile -WindowStyle Hidden -File "' + $launcher + '" -HermesHome "' + $HermesHome + '" -HermesRoot "' + $HermesRoot + '" -Python "' + $Python + '"'
+$arguments = '-NoLogo -NoProfile -WindowStyle Hidden -File "' + $launcher + '" -HermesHome "' + $HermesHome + '" -HermesRoot "' + $HermesRoot + '"'
+if ($Python) { $arguments += ' -Python "' + $Python + '"' }
 $path = Join-Path $ProgramsDirectory 'Hermes.lnk'
 if (-not $Apply -and -not $Check) { Write-Output "Preview: $path will own Hermes's app identity and launch source mode; conflicting shortcuts owned by this install will be backed up."; return }
 . (Join-Path $PSScriptRoot 'lib/windows-shortcuts.ps1')
