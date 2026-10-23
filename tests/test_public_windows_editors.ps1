@@ -66,6 +66,9 @@ Assert ((Get-FileHash $cursor).Hash -eq $cursorBefore) 'Targeted VS Code restore
 $failed=$false
 try{& (Join-Path $root scripts/install-windows-extensions.ps1) -UserDataDir $roaming -Apply}catch{$failed=$_.Exception.Message -like '*requires both*'}
 Assert $failed 'Partial extension isolation was accepted'
+# The doctor uses normal package discovery, without the fixture-only bundled path.
+# Restore the unpacked dummy package before exercising that independent entry point.
+Move-Item -LiteralPath (Join-Path $fixture saved-markdown) -Destination $markdown
 # Execute the doctor's actual Sublime check block against this disposable profile.
 # This proves dispatch, not the unrelated whole-machine doctor requirements.
 $tokens=$null;$parseErrors=$null

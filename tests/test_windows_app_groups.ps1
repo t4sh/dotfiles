@@ -98,13 +98,13 @@ function Get-DotfilesWindowsInventory { param([switch]$ReadOnly); if (-not $Read
     try { & (Join-Path $statusScripts 'setup-status-windows.ps1') -AppGroups media | ForEach-Object { $script:statusOutput += $_ } }
     catch { $statusError = $_.Exception.Message }
     Assert-Group ($statusError -like '*native packages*' -and $statusError -like '*links*' -and $statusOutput -like '*MISSING cask:beta*') 'status aggregates package and link failures'
-    Assert-Group ($statusOutput -like '*App Store mappings: 2 deferred (all-only)*') 'partial status reports native and manual App Store mappings deferred'
+    Assert-Group (@($statusOutput -like '*App Store mappings: 2 deferred (all-only)*').Count -gt 0) 'partial status reports native and manual App Store mappings deferred'
     Assert-Group ($statusOutput -contains 'OK hooks' -and $statusOutput -contains 'OK skills' -and $statusOutput -contains 'OK skill engine') 'status continues read-only checks after failures'
     [IO.File]::WriteAllText((Join-Path $statusScripts 'install-windows-extensions.ps1'), 'param($Editor,[switch]$Check); if (-not $Check) { throw "unsafe extension apply" }')
     [IO.File]::WriteAllText((Join-Path $statusScripts 'restore-apps-windows.ps1'), 'param([switch]$Check); if (-not $Check) { throw "unsafe preference restore" }')
     $statusOutput = @()
     try { & (Join-Path $statusScripts 'setup-status-windows.ps1') -AppGroups all | ForEach-Object { $script:statusOutput += $_ } } catch {}
-    Assert-Group ($statusOutput -like '*Manual app installs: mas:789*') 'full status lists manual App Store mapping'
+    Assert-Group (@($statusOutput -like '*Manual app installs: mas:789*').Count -gt 0) 'full status lists manual App Store mapping'
     Write-Output "Windows app-group fixtures passed: $passed checks."
 } finally {
     $resolved = [IO.Path]::GetFullPath($fixture)
