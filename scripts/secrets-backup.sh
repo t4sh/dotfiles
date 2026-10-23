@@ -389,7 +389,7 @@ resolve_selected_vault_attachment() {
   vault_real="$(cd "$(dirname "$VAULT")" && pwd -P)/$(basename "$VAULT")"
   image_index=0
   while :; do
-    image_path="$(/usr/bin/plutil -extract "images.$image_index.image-path" raw -o - "$info_plist" 2>/dev/null || true)"
+    image_path="$(/usr/bin/plutil -extract "images.$image_index.image-path" raw -o - "$info_plist" 2>/dev/null)" || image_path=""
     [[ -n "$image_path" ]] || break
     if [[ -e "$image_path" ]]; then
       image_real="$(cd "$(dirname "$image_path")" && pwd -P)/$(basename "$image_path")"
@@ -401,8 +401,8 @@ resolve_selected_vault_attachment() {
       first_mount=""
       entity_index=0
       while :; do
-        entity_device="$(/usr/bin/plutil -extract "images.$image_index.system-entities.$entity_index.dev-entry" raw -o - "$info_plist" 2>/dev/null || true)"
-        entity_mount="$(/usr/bin/plutil -extract "images.$image_index.system-entities.$entity_index.mount-point" raw -o - "$info_plist" 2>/dev/null || true)"
+        entity_device="$(/usr/bin/plutil -extract "images.$image_index.system-entities.$entity_index.dev-entry" raw -o - "$info_plist" 2>/dev/null)" || entity_device=""
+        entity_mount="$(/usr/bin/plutil -extract "images.$image_index.system-entities.$entity_index.mount-point" raw -o - "$info_plist" 2>/dev/null)" || entity_mount=""
         [[ -n "$entity_device" || -n "$entity_mount" ]] || break
         if [[ "$entity_mount" == "$MOUNT" && "$entity_device" == /dev/disk* ]]; then
           printf '%s\t%s' "$entity_device" "$entity_mount"
@@ -524,8 +524,8 @@ else
   # diskutil omits /dev/ from dev-entry; hdiutil includes it.
   entity_index=0
   while :; do
-    entity_device="$(/usr/bin/plutil -extract "system-entities.$entity_index.dev-entry" raw -o - "$ATTACH_PLIST" 2>/dev/null || true)"
-    entity_mount="$(/usr/bin/plutil -extract "system-entities.$entity_index.mount-point" raw -o - "$ATTACH_PLIST" 2>/dev/null || true)"
+    entity_device="$(/usr/bin/plutil -extract "system-entities.$entity_index.dev-entry" raw -o - "$ATTACH_PLIST" 2>/dev/null)" || entity_device=""
+    entity_mount="$(/usr/bin/plutil -extract "system-entities.$entity_index.mount-point" raw -o - "$ATTACH_PLIST" 2>/dev/null)" || entity_mount=""
     [[ -n "$entity_device" || -n "$entity_mount" ]] || break
     [[ "$entity_device" == disk[0-9]* ]] && entity_device="/dev/$entity_device"
     if [[ -z "$ATTACH_CLEANUP_DEVICE" && "$entity_device" == /dev/disk* ]]; then
