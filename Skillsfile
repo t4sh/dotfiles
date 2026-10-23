@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Skillsfile — declarative global skill manifest (Brewfile pattern).
 #
-# GENERATED 2026-10-20T17:34:08+05:30 from agents/.skill-lock.json by
+# GENERATED 2026-10-23T09:12:31+05:30 from agents/.skill-lock.json by
 # scripts/gen-skillsfile.py — DO NOT EDIT BY HAND. To change skills:
 #   ~/.local/bin/npx-stable skills add ... --agent codex   then   make skills-manifest
 #   (regenerates Skillsfile + agents/skills/README.md)
 #
 # Explicit upstream refresh: make skills-update   (or: bash Skillsfile)
-# 119 skills — 38 refreshable github sources + 1 local + 4 held.
+# 119 skills — 39 refreshable github sources + 1 local + 1 held.
 # Exceptional refresh holds, if any, live in config/skills-refresh-holds.json.
 #
 # Prereqs (fresh Mac): node + git + GitHub auth (SSH/gh) must be set
@@ -53,10 +53,7 @@ update_skill_source() {
   fi
 }
 
-printf '%s\n' 'HOLD: Leonxlnx/taste-skill / design-taste-frontend: Local safety patch removes unsafe cross-run browser-profile deletion; retain until upstream cleanup is verified safe.'
-printf '%s\n' 'HOLD: t4sh/skills4sh / init-rulebook: Local loader fix recognizes complete native imports only in the current context; retain until the upstream loader includes the same guarded behavior.'
-printf '%s\n' 'HOLD: t4sh/skills4sh / localhost-screenshots: Local installation fix resolves project-owned Playwright from the working directory; retain until the upstream helpers include this fix.'
-printf '%s\n' 'HOLD: vercel-labs/agent-skills / vercel-composition-patterns: Retain the complete pinned skill: the skills installer excludes its required metadata.json on refresh; update this skill manually with its supplemental resource record.'
+printf '%s\n' 'HOLD: vercel-labs/agent-skills / vercel-composition-patterns: Retain the complete pinned source snapshot: the skills installer intentionally excludes build metadata.json on refresh; update this skill manually with its supplemental resource record. Track complete-source installation support: https://github.com/vercel-labs/skills/issues/1241#issuecomment-6297286979'
 
 echo "Checking skills from source: ComposioHQ/awesome-claude-skills"
 update_skill_source "$NPX" skills add ComposioHQ/awesome-claude-skills --skill file-organizer -g -y --agent codex
@@ -66,6 +63,9 @@ update_skill_source "$NPX" skills add DietrichGebert/ponytail --skill ponytail p
 
 echo "Checking skills from source: Leonxlnx/imagegen-skills"
 update_skill_source "$NPX" skills add Leonxlnx/imagegen-skills --skill brandkit imagegen-frontend-mobile imagegen-frontend-web -g -y --agent codex
+
+echo "Checking skills from source: Leonxlnx/taste-skill"
+update_skill_source "$NPX" skills add Leonxlnx/taste-skill --skill design-taste-frontend -g -y --agent codex
 
 echo "Checking skills from source: NVIDIA/SkillSpector"
 update_skill_source "$NPX" skills add NVIDIA/SkillSpector --skill skill-inspector -g -y --agent codex
@@ -152,7 +152,7 @@ echo "Checking skills from source: shadcn/improve"
 update_skill_source "$NPX" skills add shadcn/improve --skill improve -g -y --agent codex
 
 echo "Checking skills from source: t4sh/skills4sh"
-update_skill_source "$NPX" skills add t4sh/skills4sh --skill agent-memory code-to-figma discord-harvest eleventy-nunjucks figma-to-code skill-architect -g -y --agent codex
+update_skill_source "$NPX" skills add t4sh/skills4sh --skill agent-memory code-to-figma discord-harvest eleventy-nunjucks figma-to-code init-rulebook localhost-screenshots skill-architect -g -y --agent codex
 
 echo "Checking skills from source: typesafe-ai/skills"
 update_skill_source "$NPX" skills add typesafe-ai/skills --skill typesafe-ai -g -y --agent codex

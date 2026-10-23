@@ -3,4 +3,5 @@
 # and rejects them if they are reintroduced into Brewfile.
 #
 # Format: <id>\t<label>\t<reason>
+1236045954	Canary Mail	Manual installation only; retain vault preference backup and restore
 6714467650	Perplexity	Unavailable in the current storefront; replaced by Homebrew cask

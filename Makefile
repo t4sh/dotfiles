@@ -44,6 +44,16 @@ claude-mcp-check: ## Check gh token availability and Claude Code Paper/brilliant
 .PHONY: all help link unlink brew brew-without-mas brew-core brew-apps node brew-npm brew-mas brew-check brewfile-audit shims macos macos-user macos-dry-run macos-check touch-id-sudo touch-id-sudo-check dock terminal services services-check restore-apps restore-canary restore-shottr post-vault backup backup-canary backup-shottr audit-apps apps-drift hooks hooks-check ssh-setup skills-audit skills skills-update skills-manifest secrets-backup secrets-backup-legacy secrets-compat-fixtures secrets-mount secrets-mount-legacy secrets-health secrets-manifest secrets-restore secrets-restore-apply secrets-pass secrets-pass-import upgrade rules-audit default-apps default-apps-check capture-default-apps doctor verify-bootstrap docs-audit
 
 export DOTFILES := $(CURDIR)
+APP_GROUPS ?= all
+export APP_GROUPS
+
+.PHONY: app-groups setup-status
+app-groups: ## List optional app groups and the current APP_GROUPS selection
+	@python3 scripts/app_groups.py list
+
+setup-status: ## Read-only setup report with deferred steps and next commands
+	@bash scripts/setup-status.sh
+
 
 .PHONY: restore-codex-rtk codex-rtk-check restore-claude-rtk claude-rtk-check
 restore-codex-rtk: ## Merge the RTK PreToolUse hook into Codex user hooks
@@ -80,6 +90,7 @@ zed-check: ## Check Zed settings, keymap, declared extensions and theme assets
 	@python3 scripts/check-zed.py
 
 all: ## Re-apply the full existing-Mac setup, including node shims, in a fixed order
+	@python3 scripts/app_groups.py list
 	@$(MAKE) --no-print-directory link
 	@$(MAKE) --no-print-directory rules-audit
 	@$(MAKE) --no-print-directory skills-audit
@@ -88,11 +99,13 @@ all: ## Re-apply the full existing-Mac setup, including node shims, in a fixed o
 	@$(MAKE) --no-print-directory restore-codex-rtk
 	@$(MAKE) --no-print-directory restore-claude-rtk
 	@$(MAKE) --no-print-directory services
-	@$(MAKE) --no-print-directory restore-apps
+	@if [ "$(APP_GROUPS)" = all ]; then $(MAKE) --no-print-directory restore-apps; \
+	else echo "App preference restore deferred for partial selection; settings retained. Explicit full restore: make restore-apps"; fi
 	@$(MAKE) --no-print-directory dock
 	@$(MAKE) --no-print-directory hooks
 	@$(MAKE) --no-print-directory macos
-	@echo "Full setup complete."
+	@echo "Setup stages finished; recovery, sign-ins and verification may remain."
+	@echo "Next: make setup-status APP_GROUPS=$(APP_GROUPS)"
 # macos last: defaults.sh has interactive prompts; a Ctrl-C there previously
 # aborted the sequence before dock/hooks could run.
 # post-vault / ssh-setup stay manual: never touch canonical key material
@@ -225,17 +238,18 @@ brew-without-mas: ## Install all non-App-Store Brewfile phases
 	@echo "  - App Store phase deferred; after sign-in run: make brew-mas"
 
 brew-base: ## Install Brewfile except npm and App Store entries
-	@DOTFILES="$(CURDIR)" bash scripts/brewfile.sh base
-	@$(MAKE) --no-print-directory vscode-extensions
-	@$(MAKE) --no-print-directory cursor-extensions
+	@$(MAKE) --no-print-directory brew-core
+	@$(MAKE) --no-print-directory brew-apps
 
 brew-core: ## Install bootstrap taps, formulae, and uv tools
 	@DOTFILES="$(CURDIR)" bash scripts/brewfile.sh core
 
-brew-apps: ## Install casks, fonts, and editor extensions (resumable phase)
+brew-apps: ## Install selected APP_GROUPS; default all (resumable phase)
 	@DOTFILES="$(CURDIR)" bash scripts/brewfile.sh apps
-	@$(MAKE) --no-print-directory vscode-extensions
-	@$(MAKE) --no-print-directory cursor-extensions
+	@if python3 scripts/app_groups.py includes development; then \
+		$(MAKE) --no-print-directory vscode-extensions && \
+		$(MAKE) --no-print-directory cursor-extensions; \
+	fi
 
 node: ## Install and activate the exact Node version from .node-version
 	@DOTFILES="$(CURDIR)" bash scripts/setup-node.sh

@@ -69,9 +69,11 @@ function Get-DotfilesWindowsPackages {
     return $rows
 }
 function Get-DotfilesWindowsInventory {
+    param([switch]$ReadOnly)
     $file = Join-Path ([IO.Path]::GetTempPath()) ('dotfiles-inventory-'+[guid]::NewGuid().ToString('N')+'.json')
     try {
-        & winget.exe export --output $file --include-versions --accept-source-agreements --disable-interactivity *> $null
+        $agreementArgs = if ($ReadOnly) { @() } else { @('--accept-source-agreements') }
+        & winget.exe export --output $file --include-versions @agreementArgs --disable-interactivity *> $null
         if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $file)) { throw "WinGet inventory failed (exit $LASTEXITCODE)" }
         $inventory = Get-Content -LiteralPath $file -Raw | ConvertFrom-Json
         $result = @{}
@@ -83,7 +85,7 @@ function Get-DotfilesWindowsInventory {
         foreach ($package in (Get-DotfilesWindowsPackages | Where-Object { $_.Mode -eq 'native' -and $_.Source -eq 'msstore' } | Sort-Object Id -Unique)) {
             $key='msstore:'+$package.Id
             if ($result.ContainsKey($key)) { continue }
-            & winget.exe list --id $package.Id --exact --source msstore --accept-source-agreements --disable-interactivity *> $null
+            & winget.exe list --id $package.Id --exact --source msstore @agreementArgs --disable-interactivity *> $null
             $code=$LASTEXITCODE
             if ($code -eq 0) { $result[$key]='Installed; version omitted from export' }
             elseif ($code -ne -1978335212) { throw "WinGet Store inventory failed for $($package.Id) (exit $code)" }

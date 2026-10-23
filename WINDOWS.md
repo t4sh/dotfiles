@@ -74,6 +74,33 @@ Link checks and repair reject existing files hidden behind MSIX cache redirectio
 If reported, open standard PowerShell directly from Windows Run or Explorer and
 retry so the workflow reaches the actual configuration files.
 
+App selection defaults to `all`, preserving full bootstrap behavior. Use
+`-AppGroups 'development,utilities'` with `install.ps1` or `dot setup`, or
+`make all APP_GROUPS=development,utilities`, to select optional groups. A named
+selection includes `essentials`. `none` keeps the native CLI/runtime baseline
+but defers app casks, Windows App Store counterparts, fonts and editor
+extensions. `fonts` selects Brewfile fonts; `development` selects Brewfile editor
+extensions. Every non-font cask has exactly one group in
+`config/app-groups.tsv`; invalid, missing or stale mappings stop setup before
+installation. Partial selections skip aggregate preference restore, preserving
+settings for deferred apps. An explicit `dot restore-apps -Apply` still applies
+its full template scope. Windows App Store counterparts are all-only; select
+`all` with `-Only <package-id>` for a specific counterpart.
+
+Bootstrap reports completed, failed and skipped stages with retry commands.
+Run `dot setup-status -AppGroups 'development,utilities'` or
+`make setup-status APP_GROUPS=development,utilities` for selected/deferred app
+counts, package inventory and local link, hook, skill and preference checks.
+The command installs no apps and does not restore preferences or accept WinGet
+source agreements; WinGet may query configured sources during inventory.
+PowerShell, managed Python and pinned Node are checked locally. Individual
+uv/Volta tool versions, fonts, account sign-ins, paid activation, default-app
+choices, secret recovery and GUI behavior remain manual verification.
+
+Arc, Latest, Linear, LobeHub, Maccy, Nimbalyst, Tolaria and Upscayl are retired
+from automatic Mac and Windows installation. Existing app settings are retained;
+setup does not uninstall these apps.
+
 ## Retired Paseo setup
 
 If this machine previously used Paseo, follow the explicit preview/apply steps in
@@ -92,6 +119,7 @@ Run from the checkout, or use `dot` after setup adds its directory to PATH:
 | `bin\dot.cmd doctor -Strict` | Check runtime, policy and configured surfaces |
 | `bin\dot.cmd packages-check` | Compare declared packages |
 | `bin\dot.cmd packages -Apply` | Install declared package counterparts |
+| `bin\dot.cmd setup-status` / `make setup-status` | Report selected and deferred apps with local setup checks |
 | `bin\dot.cmd restore-apps` | Preview template restoration |
 | `bin\dot.cmd restore-apps -Apply` | Merge shipped template settings; close affected apps first |
 | `bin\dot.cmd default-apps -OpenSettings` | Open Settings to choose VLC for supported media types |

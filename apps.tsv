@@ -20,11 +20,8 @@ com.ethanbills.DockDoor	DockDoor	apps/dockdoor/dockdoor.plist
 com.colliderli.iina	IINA	apps/iina/iina.plist
 net.pornel.ImageOptim	ImageOptim	apps/imageoptim/imageoptim.plist
 io.github.keycastr	KeyCastr	apps/keycastr/keycastr.plist
-com.max-langer.Latest	Latest	apps/latest/latest.plist
-org.p0deje.Maccy	Maccy	apps/maccy/maccy.plist
 com.titanium.OnyX	OnyX	apps/onyx/onyx.plist
 com.stonerl.Thaw	Thaw	apps/thaw/thaw.plist
-org.upscayl.Upscayl	Upscayl	apps/upscayl/upscayl.plist
 com.sindresorhus.Velja	Velja	apps/velja/velja.plist
 com.sindresorhus.Color-Picker	Color Picker	apps/color-picker/color-picker.plist
 com.sindresorhus.Gifski	Gifski	apps/gifski/gifski.plist

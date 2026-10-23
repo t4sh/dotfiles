@@ -100,6 +100,7 @@ try {
         New-Item -ItemType Directory -Path $deskflowLib -Force | Out-Null
         Copy-Item -LiteralPath (Join-Path $root 'scripts/install-windows-packages.ps1') -Destination $deskflowScripts
         Copy-Item -LiteralPath (Join-Path $root 'scripts/lib/windows-packages.ps1') -Destination $deskflowLib
+        Copy-Item -LiteralPath (Join-Path $root 'scripts/lib/windows-app-groups.ps1') -Destination $deskflowLib
         Copy-Item -LiteralPath (Join-Path $root 'scripts/lib/windows-tldr.ps1') -Destination $deskflowLib
         [IO.File]::WriteAllText((Join-Path $deskflowLib 'windows-common.ps1'), @'
 function Assert-DotfilesWindows {}
@@ -114,6 +115,7 @@ function Invoke-DotfilesNative {
         New-Item -ItemType Directory -Path $deskflowConfig -Force | Out-Null
         $deskflowManifest = "Key`tMode`tSource`tId`tNote`n" + "cask:deskflow/tap/deskflow`tnative`twinget`tDeskflow.Deskflow`tFixture disposition`n"
         [IO.File]::WriteAllText((Join-Path $deskflowConfig 'windows-packages.tsv'), $deskflowManifest, $encoding)
+        [IO.File]::WriteAllText((Join-Path $deskflowConfig 'app-groups.tsv'), "Key`tGroup`ncask:deskflow/tap/deskflow`tessentials`n", $encoding)
         $global:DeskflowInstaller = Join-Path $deskflowScripts 'install-windows-packages.ps1'
         $global:DeskflowFixtureRoot = $deskflowRoot
 
@@ -169,6 +171,23 @@ function Invoke-DotfilesNative {
         Remove-Item Function:\Invoke-PublicDeskflowInstallFixture -ErrorAction SilentlyContinue
         Remove-Variable DeskflowState,DeskflowExpectedPin,DeskflowInstaller,DeskflowFixtureRoot -Scope Global -ErrorAction SilentlyContinue
     }
+
+    # A failed prerequisite reports progress and a retry without starting any
+    # later install or touching the host. All inputs live under the fixture.
+    $entryRoot = Join-Path $fixture 'bootstrap-entry'
+    $entryLib = Join-Path $entryRoot 'scripts/lib'
+    New-Item -ItemType Directory -Path $entryLib,(Join-Path $entryRoot '.git'),(Join-Path $entryRoot 'config') -Force | Out-Null
+    Copy-Item (Join-Path $root 'install.ps1') (Join-Path $entryRoot 'install.ps1')
+    Copy-Item (Join-Path $root 'scripts/lib/windows-app-groups.ps1') (Join-Path $entryLib 'windows-app-groups.ps1')
+    [IO.File]::WriteAllText((Join-Path $entryRoot 'Brewfile'), "cask `"fixture-app`"`n", $encoding)
+    [IO.File]::WriteAllText((Join-Path $entryRoot 'config/app-groups.tsv'), "Key`tGroup`ncask:fixture-app`tessentials`n", $encoding)
+    [IO.File]::WriteAllText((Join-Path $entryLib 'windows-packages.ps1'), 'function Get-DotfilesWindowsPackages { param($Root); @() }', $encoding)
+    [IO.File]::WriteAllText((Join-Path $entryLib 'windows-common.ps1'), 'function Assert-DotfilesWindows {}; function Assert-DotfilesPersistentScriptPolicy {}; function Get-Command { param($Name,$ErrorAction); $null }; function Resolve-DotfilesPwsh { throw "fixture missing runtime" }; function Invoke-DotfilesNative { throw "fixture dependency failure" }', $encoding)
+    $entryOutput = [Collections.Generic.List[string]]::new()
+    $entryFailure = ''
+    try { & (Join-Path $entryRoot 'install.ps1') -Apply | ForEach-Object { $entryOutput.Add([string]$_) } }
+    catch { $entryFailure = $_.Exception.Message }
+    Assert ($entryFailure -eq 'fixture dependency failure' -and $entryOutput -like 'Completed: persistent script policy*' -and $entryOutput -like 'Failed: dependency Microsoft.PowerShell*' -and $entryOutput -like 'Retry: winget install --id Microsoft.PowerShell*') 'Early bootstrap failure lost its progress report or original error.'
 
     [IO.File]::WriteAllText((Join-Path $packageRoot 'Brewfile'), "brew `"fixture-mapped`"`nbrew `"fixture-unmapped`"`n", $encoding)
     $unmappedRejected = $false
@@ -282,7 +301,8 @@ function Invoke-DotfilesNative($Executable, $Arguments) { $global:PublicMediaArg
     if (-not (Test-Path -LiteralPath $vlcFixture -PathType Leaf)) { throw 'VLC association-resolution fixture is missing.' }
     Invoke-PublicProjectionChild -ScriptPath $vlcFixture
     Invoke-PublicProjectionChild -ScriptPath (Join-Path $root 'tests/test_paseo_retirement.ps1')
-    Write-Output 'PASS: Deskflow policy and installer wiring, package coverage, VLC dispatch/input rejection/resolution, doctor PATH guidance, TLDR failure, and child exit propagation.'
+    Invoke-PublicProjectionChild -ScriptPath (Join-Path $root 'tests/test_windows_app_groups.ps1')
+    Write-Output 'PASS: Deskflow policy and installer wiring, app groups, bootstrap prerequisite reporting, package coverage, VLC dispatch/input rejection/resolution, doctor PATH guidance, TLDR failure, and child exit propagation.'
 } finally {
     $resolvedFixture = [IO.Path]::GetFullPath($fixture)
     $tempRoot = [IO.Path]::GetFullPath([IO.Path]::GetTempPath()).TrimEnd('\')

@@ -23,6 +23,55 @@ Most [awesome-dotfiles](https://github.com/webpro/awesome-dotfiles) examples sto
 
 **Scope:** macOS, plus native Windows setup in [WINDOWS.md](WINDOWS.md). No chezmoi/yadm templating — per-machine overrides go in gitignored `zsh/lib/99-local.zsh`.
 
+## Optional app groups and setup status
+
+The Brewfile remains the package inventory. `config/app-groups.tsv` assigns
+each non-font cask to one group; fonts are derived from `font-*` casks and VS
+Code extensions belong to `development`. Windows uses the same groups through
+its existing package mappings. Missing, duplicate or stale group rows fail
+validation before app installation.
+
+```bash
+make app-groups                              # list groups and declaration counts
+make brew-apps APP_GROUPS=essentials          # primary browser and daily utilities
+make brew-apps APP_GROUPS=design,ai           # essentials plus design and AI apps
+make brew-apps APP_GROUPS=development,fonts   # essentials, editors/extensions and fonts
+APP_GROUPS=essentials bash install.sh         # fresh Mac with a smaller app selection
+make setup-status APP_GROUPS=essentials      # inspect that selection; never apply fixes
+dot setup-status --groups essentials         # same report outside the repo directory
+```
+
+Groups: `essentials`, `development`, `design`, `ai`, `media`, `browsers`
+(additional browsers), `productivity`, `utilities`, and `fonts`. Named selections
+also include essentials. `all` and `none` must be used alone. The default remains
+`all` for compatibility. Selections apply to the current invocation only; pass
+the same selection when checking or retrying. Adding a group never uninstalls
+apps or deletes settings. Formulae, runtime tools and the separate App Store
+phase retain their existing behavior.
+
+For a partial selection, `install.sh` and `make all` defer the aggregate app
+preference restore, keeping existing app settings. `make restore-apps` remains
+an explicit full restore. Other bootstrap stages, including configuration links,
+portable agent hooks and optional macOS/Dock policy, retain their existing scope;
+use `make brew-apps` to install a group without running those stages.
+
+`make setup-status` reads local package inventories and runs existing checks for
+selected packages, links, services, hooks, the skill manifest, macOS policy and
+saved preferences. Missing tools and timeouts are reported as unknown; failures
+do not prevent the remaining checks. The report lists next commands and exits
+nonzero when review is needed. Saved-preference checks cover all snapshots,
+including apps outside a partial selection; drift is reported for review and is
+never repaired. App Store/vendor sign-ins, GUI permissions, activation and vault
+recoverability remain manual checks. The status command performs no installs,
+restores or sign-in or authentication checks. Temporary inspection
+files may be created and removed by the existing checks.
+
+The bootstrap completion report separates finished phases, failed phases with
+retry commands, deferred choices and manual work. It also reports an early
+failure without implying that the rest of setup completed. `make verify-bootstrap`
+remains the strict post-vault gate for the **full** declared inventory; optional
+group selection does not weaken it. Windows equivalents are in [WINDOWS.md](WINDOWS.md).
+
 ## Requirements
 
 - macOS (Apple Silicon or Intel)

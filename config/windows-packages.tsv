@@ -67,7 +67,6 @@ brew:zsh-autosuggestions	macos-only			Apple/Homebrew-specific app or shell integ
 brew:zsh-syntax-highlighting	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
 cask:adobe-creative-cloud	native	winget	Adobe.CreativeCloud	Native Windows counterpart; identity verified against installed WinGet inventory.
 cask:affinity	native	winget	Canva.Affinity	Native Windows counterpart; identity verified against installed WinGet inventory.
-cask:arc	native	winget	TheBrowserCompany.Arc	Native Windows counterpart; identity verified against installed WinGet inventory.
 cask:aside	manual			Official Windows installer: https://aside.com/download; download and install manually.
 cask:asset-catalog-tinkerer	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
 cask:betterdisplay	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
@@ -107,12 +106,8 @@ cask:iina	native	winget	VideoLAN.VLC	Native Windows counterpart; identity verifi
 cask:imageoptim	native	winget	SaeraSoft.CaesiumImageCompressor	Native Windows counterpart; identity verified against installed WinGet inventory.
 cask:kaleidoscope	native	winget	Meld.Meld	Preferred Windows diff and merge tool for Tower and Git; Kaleidoscope remains the Mac choice.
 cask:keycastr	native	winget	Microsoft.PowerToys	Native Windows counterpart; identity verified against installed WinGet inventory.
-cask:latest	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
 cask:libreoffice	native	winget	TheDocumentFoundation.LibreOffice	Native Windows counterpart; identity verified against installed WinGet inventory.
-cask:linear	native	winget	LinearOrbit.Linear	Native Windows counterpart; identity verified against installed WinGet inventory.
-cask:lobehub	native	winget	LobeHub.LobeHub	Native Windows counterpart; identity verified against installed WinGet inventory.
 cask:lunacy	native	winget	Icons8.Lunacy	Native Windows counterpart; identity verified against installed WinGet inventory.
-cask:maccy	native	winget	Microsoft.PowerToys	Native Windows counterpart; identity verified against installed WinGet inventory.
 cask:macpacker	macos-only			MacPacker archive manager for macOS; not applied on Windows.
 cask:mate-translate	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
 cask:microsoft-auto-update	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
@@ -122,7 +117,6 @@ cask:microsoft-powerpoint	excluded			Excluded from automatic Windows setup at us
 cask:microsoft-teams	native	winget	Microsoft.Teams	Native Windows counterpart; identity verified against installed WinGet inventory.
 cask:microsoft-word	excluded			Excluded from automatic Windows setup at user request, alongside other Microsoft Office apps.
 cask:mountain-duck	manual			Windows vendor installer at https://mountainduck.io/; trial/license and remote-storage configuration are manual.
-cask:nimbalyst	native	winget	Nimbalyst.Nimbalyst	Native Windows counterpart; identity verified against installed WinGet inventory.
 cask:notion	native	winget	Notion.Notion	Native Windows counterpart; identity verified against installed WinGet inventory.
 cask:notion-calendar	native	winget	Notion.NotionCalendar	Native Windows counterpart; identity verified against installed WinGet inventory.
 cask:obsidian	native	winget	Obsidian.Obsidian	Native Windows counterpart; identity verified against installed WinGet inventory.
@@ -142,11 +136,9 @@ cask:sublime-text	native	winget	SublimeHQ.SublimeText.4	Native Windows counterpa
 cask:suspicious-package	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
 cask:telegram	native	winget	Telegram.TelegramDesktop	Native Windows counterpart; identity verified against installed WinGet inventory.
 cask:thaw	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
-cask:tolaria	native	winget	Refactoring.Tolaria	Native Windows counterpart; identity verified against installed WinGet inventory.
 cask:tower	native	winget	SaaSGroup.Tower	Native Windows counterpart; identity verified against installed WinGet inventory.
 cask:transmit	native	winget	WinSCP.WinSCP	Native Windows counterpart; identity verified against installed WinGet inventory.
 cask:typeface	native	winget	Levitsky.FontBase	Native Windows counterpart; identity verified against installed WinGet inventory.
-cask:upscayl	native	winget	Upscayl.Upscayl	Native Windows counterpart; identity verified against installed WinGet inventory.
 cask:visual-studio-code	native	winget	Microsoft.VisualStudioCode	Native Windows counterpart; identity verified against installed WinGet inventory.
 cask:whatsapp	manual			Microsoft Store; retain existing Store installation.
 cask:zed	native	winget	ZedIndustries.Zed	Native Windows counterpart; identity verified against installed WinGet inventory.
@@ -155,7 +147,6 @@ cask:zoom	native	winget	Zoom.Zoom	Native Windows counterpart; identity verified 
 mas:6499265972	macos-only			Ahrefs SEO Toolbar: Safari extension; not installed on Windows.
 mas:1522469944	manual			Arattai: browser extension, Store or vendor/account setup; review the official Windows route.
 mas:1206020918	macos-only			Battery Indicator: Apple platform application or system preference.
-mas:1236045954	native	msstore	9MT5MZ5H9WL6	Windows counterpart for Canary Mail
 mas:600067300	macos-only			CDRViewer: Apple platform application or system preference.
 mas:1545870783	native	winget	Microsoft.PowerToys	Windows counterpart for Color Picker
 mas:1470584107	macos-only			Dato: Apple platform application or system preference.

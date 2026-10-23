@@ -163,19 +163,19 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/github/awesome-copilot.git",
       "skillPath": "skills/git-commit/SKILL.md",
-      "skillFolderHash": "883a6a7466f55a9cd9f22cf1cce2d9333fc9b998",
+      "skillFolderHash": "266a4c3fbaa9f5441b5d1a96b786b6aa634c19e6",
       "installedAt": "2026-04-13T02:36:07.129Z",
-      "updatedAt": "2026-09-11T12:15:13.473Z"
+      "updatedAt": "2026-10-22T04:15:20.440Z"
     },
     "design-taste-frontend": {
       "source": "Leonxlnx/taste-skill",
       "sourceType": "github",
       "sourceUrl": "https://github.com/Leonxlnx/taste-skill.git",
       "skillPath": "skills/taste-skill/SKILL.md",
-      "skillFolderHash": "8305962bcc68fb293a2202705ed615513c9535cd",
+      "skillFolderHash": "2a22452297d559ea5ad97c178879d30ee3ec8022",
       "pluginName": "taste-skill",
       "installedAt": "2026-04-13T02:36:16.105Z",
-      "updatedAt": "2026-10-19T07:15:41.644Z"
+      "updatedAt": "2026-10-21T04:40:08.260Z"
     },
     "pdf-harvester": {
       "source": "mindmorass/reflex",
@@ -200,27 +200,27 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/t4sh/skills4sh.git",
       "skillPath": "skills/agent-memory/SKILL.md",
-      "skillFolderHash": "2ca98a9307bd2c1e98009172929d06553bc350ff",
+      "skillFolderHash": "2b390f86c83c32cf24d5f086e3530611ce3d4e1f",
       "installedAt": "2026-04-13T02:37:25.957Z",
-      "updatedAt": "2026-10-08T14:01:39.302Z"
+      "updatedAt": "2026-10-21T14:46:51.237Z"
     },
     "discord-harvest": {
       "source": "t4sh/skills4sh",
       "sourceType": "github",
       "sourceUrl": "https://github.com/t4sh/skills4sh.git",
       "skillPath": "skills/discord-harvest/SKILL.md",
-      "skillFolderHash": "16157673493877399180da31349563375280d4fd",
+      "skillFolderHash": "509903e09a055c2615b9bdb8c56412fb7d215fc0",
       "installedAt": "2026-04-13T02:37:26.389Z",
-      "updatedAt": "2026-10-08T14:01:39.309Z"
+      "updatedAt": "2026-10-21T14:46:51.243Z"
     },
     "localhost-screenshots": {
       "source": "t4sh/skills4sh",
       "sourceType": "github",
       "sourceUrl": "https://github.com/t4sh/skills4sh.git",
       "skillPath": "skills/localhost-screenshots/SKILL.md",
-      "skillFolderHash": "c89652de635aea5be8d8e1172cab73bc29e88478",
+      "skillFolderHash": "8caebc0ab398246fdd41a85bfa8a6af302aeb684",
       "installedAt": "2026-04-13T02:37:26.860Z",
-      "updatedAt": "2026-10-08T14:01:39.315Z"
+      "updatedAt": "2026-10-21T14:46:51.249Z"
     },
     "agent-browser": {
       "source": "vercel-labs/agent-browser",
@@ -280,18 +280,18 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/t4sh/skills4sh.git",
       "skillPath": "skills/figma-to-code/SKILL.md",
-      "skillFolderHash": "0235dceb06ced0df7b2af038ea69eb3fa4a012e2",
+      "skillFolderHash": "fc9ee41eb1188a3fd51c750f58ebe6424d955834",
       "installedAt": "2026-04-13T03:15:00.000Z",
-      "updatedAt": "2026-10-08T14:01:39.313Z"
+      "updatedAt": "2026-10-21T14:46:51.246Z"
     },
     "init-rulebook": {
       "source": "t4sh/skills4sh",
       "sourceType": "github",
       "sourceUrl": "https://github.com/t4sh/skills4sh.git",
       "skillPath": "skills/init-rulebook/SKILL.md",
-      "skillFolderHash": "23e4c9387a06a8cc20e8b3012adedbbb176e6099",
+      "skillFolderHash": "ac86e43ce01a407f552bed395293ae5df102e5bb",
       "installedAt": "2026-04-13T03:15:00.000Z",
-      "updatedAt": "2026-10-08T18:21:27.531Z"
+      "updatedAt": "2026-10-21T14:46:51.247Z"
     },
     "design-token-audit": {
       "source": "owl-listener/designer-skills",
@@ -343,18 +343,18 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/pbakaus/impeccable.git",
       "skillPath": ".agents/skills/impeccable/SKILL.md",
-      "skillFolderHash": "f09f5ad7f7d913f9d4eeecd464c59868b27406ba",
+      "skillFolderHash": "c4581ed99657c6e3c50ceee684eefa598f7f4057",
       "installedAt": "2026-05-03T11:49:23.273Z",
-      "updatedAt": "2026-10-20T06:32:48.134Z"
+      "updatedAt": "2026-10-23T02:50:02.064Z"
     },
     "eleventy-nunjucks": {
       "source": "t4sh/skills4sh",
       "sourceType": "github",
       "sourceUrl": "https://github.com/t4sh/skills4sh.git",
       "skillPath": "skills/eleventy-nunjucks/SKILL.md",
-      "skillFolderHash": "18d06dedc0e2dfdfc28d2d82a0f2d1b0be256242",
+      "skillFolderHash": "e23d3391e3417c81ec8007d2d85775e3c3c7b6b7",
       "installedAt": "2026-05-11T10:22:19.683Z",
-      "updatedAt": "2026-10-08T14:01:39.311Z"
+      "updatedAt": "2026-10-21T14:46:51.244Z"
     },
     "skill-creator": {
       "source": "openai/skills",
@@ -398,9 +398,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/t4sh/skills4sh.git",
       "skillPath": "skills/code-to-figma/SKILL.md",
-      "skillFolderHash": "5aba86016eb02296cd48188a74a4fc24c81cc6b6",
+      "skillFolderHash": "acc4001ea71e2e373b6a872d3564e2a45d73b2ca",
       "installedAt": "2026-05-21T10:20:08.065Z",
-      "updatedAt": "2026-10-08T14:01:39.308Z"
+      "updatedAt": "2026-10-21T14:46:51.241Z"
     },
     "tauri-v2": {
       "source": "nodnarbnitram/claude-code-extensions",
@@ -462,9 +462,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/t4sh/skills4sh.git",
       "skillPath": "skills/skill-architect/SKILL.md",
-      "skillFolderHash": "bdb8e174ab3a2df8e59a89a9f0cc8b000f17e593",
+      "skillFolderHash": "e138d6d0bb3fd4b8d853559aa6ff564327063236",
       "installedAt": "2026-06-15T20:39:22.428Z",
-      "updatedAt": "2026-10-08T18:21:42.809Z"
+      "updatedAt": "2026-10-21T14:46:51.250Z"
     },
     "ask-matt": {
       "source": "mattpocock/skills",
@@ -805,9 +805,10 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/nutlope/hallmark.git",
       "skillPath": "skills/hallmark/SKILL.md",
-      "skillFolderHash": "747c924c4767b4d5fa6f1c59985c87a21c918334",
+      "skillFolderHash": "9bef0978c1448d6e5fbeacfa7302326d6183a06c",
+      "pluginName": "hallmark",
       "installedAt": "2026-07-18T17:00:17.510Z",
-      "updatedAt": "2026-09-11T12:15:50.080Z"
+      "updatedAt": "2026-10-23T02:49:52.355Z"
     },
     "better-accessibility": {
       "source": "jakubkrehel/skills",
@@ -1034,9 +1035,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/mickadesign/fluid-functionalism.git",
       "skillPath": "skills/fluid-functionalism/SKILL.md",
-      "skillFolderHash": "155bf6e12263603fa73f8d0c001378a9d4c0efe5",
+      "skillFolderHash": "c310e87731dea7d03f362b845756ca3d908414f5",
       "installedAt": "2026-10-08T11:59:57.133Z",
-      "updatedAt": "2026-10-13T06:15:22.145Z"
+      "updatedAt": "2026-10-23T02:49:31.161Z"
     },
     "extract-design-system": {
       "source": "arvindrk/extract-design-system",

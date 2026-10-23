@@ -1,13 +1,15 @@
-.PHONY: help all link packages packages-check brew-check fonts restore-apps backup doctor verify-bootstrap hooks hooks-check upgrade shims skills skills-audit skills-manifest skills-update rules-audit brewfile-audit ssh-setup test-public-windows-projection test-remediations
+.PHONY: help all link packages packages-check brew-check fonts restore-apps backup doctor setup-status verify-bootstrap hooks hooks-check upgrade shims skills skills-audit skills-manifest skills-update rules-audit brewfile-audit ssh-setup test-public-windows-projection test-remediations
 DOT := "$(CURDIR)/bin/dot.cmd"
 help:
 	@$(DOT) help
 all:
-	@$(DOT) setup -Apply
+	@$(DOT) setup -Apply $(if $(APP_GROUPS),-AppGroups "$(APP_GROUPS)")
 link:
 	@$(DOT) link
 packages:
-	@$(DOT) packages -Apply
+	@$(DOT) packages -Apply $(if $(APP_GROUPS),-AppGroups "$(APP_GROUPS)")
+setup-status:
+	@$(DOT) setup-status $(if $(APP_GROUPS),-AppGroups "$(APP_GROUPS)")
 packages-check brew-check:
 	@$(DOT) packages-check
 fonts:

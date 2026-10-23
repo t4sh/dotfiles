@@ -1,6 +1,6 @@
 # Canary Mail — vault-only config
 
-Canary is installed via `Brewfile` (`mas "Canary Mail"`). **No prefs live in this repo.**
+Canary installation is manual; Brewfile and Windows package setup do not install it. Preference backup and restore remain available. **No prefs live in this repo.**
 
 Account and UI state sit in the App Store sandbox:
 
@@ -16,14 +16,14 @@ Account and UI state sit in the App Store sandbox:
 
 ```bash
 make backup-canary    # → ~/.secrets/apps/canary-mail/
-make secrets-backup   # encrypt ~/.secrets/ into the sparseimage vault
+make secrets-backup   # publish ~/.secrets/ as an encrypted recovery DMG
 ```
 
 `make backup-canary` fails closed if process state cannot be determined, Canary is still running, or CanaryDB has not initialized. It then accepts basename-only entries from `config/canary-managed-realms.tsv`, creates the snapshot with private permissions, and atomically publishes a complete preferences-plus-realms envelope. `make link` is not required — nothing is symlinked.
 
 ## Restore (new Mac or wipe)
 
-1. Install Canary (`make brew` or MAS).
+1. Install Canary manually from the App Store if needed.
 2. Mount the vault, then run `make secrets-restore` and `make secrets-restore-apply`.
 3. Run `make secrets-pass-import`, then `make post-vault`; it restores Canary automatically when the complete payload is present.
 4. Re-authenticate any account that prompts.

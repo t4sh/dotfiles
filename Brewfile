@@ -142,8 +142,6 @@ uv "nginx-language-server"
 cask "adobe-creative-cloud"
 # Image editing and design software
 cask "affinity"
-# Chromium based browser
-cask "arc"
 # Web browser with built-in AI assistant
 cask "aside"
 # Browse/extract images from .car files
@@ -222,18 +220,10 @@ cask "imageoptim"
 cask "kaleidoscope"
 # Open-source keystroke visualiser
 cask "keycastr"
-# Utility that shows the latest app updates
-cask "latest"
 # Free cross-platform office suite, fresh version
 cask "libreoffice"
-# App to manage software development and track bugs
-cask "linear"
-# AI chat framework
-cask "lobehub"
 # Graphic design software
 cask "lunacy"
-# Clipboard manager
-cask "maccy"
 # Archive manager
 cask "macpacker"
 # Select text in any app and translate it
@@ -252,8 +242,6 @@ cask "microsoft-teams"
 cask "microsoft-word"
 # Mounts servers and cloud storages as a disk on the desktop
 cask "mountain-duck"
-# Visual workspace for building with Codex and Claude Code
-cask "nimbalyst"
 # App to write, plan, collaborate, and get organised
 cask "notion"
 # Calendar for professionals and teams
@@ -292,16 +280,12 @@ cask "suspicious-package"
 cask "telegram"
 # Menu bar manager
 cask "thaw"
-# Markdown knowledgebase manager
-cask "tolaria"
 # Git client focusing on power and productivity
 cask "tower"
 # File transfer application
 cask "transmit"
 # Font manager application
 cask "typeface"
-# AI image upscaler
-cask "upscayl"
 # Open-source code editor
 cask "visual-studio-code"
 # Native desktop client for WhatsApp
@@ -470,7 +454,6 @@ vscode "zignd.html-css-class-completion"
 mas "Ahrefs SEO Toolbar", id: 6499265972
 mas "Arattai", id: 1522469944
 mas "Battery Indicator", id: 1206020918
-mas "Canary Mail", id: 1236045954
 mas "CDRViewer", id: 600067300
 mas "Color Picker", id: 1545870783
 mas "Dato", id: 1470584107

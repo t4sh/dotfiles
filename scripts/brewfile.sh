@@ -18,15 +18,16 @@ warn() { printf '\033[33m  ⚠\033[0m %s\n' "$*"; }
 
 usage() {
   cat <<'EOF'
-usage: scripts/brewfile.sh {core|apps|base|npm|mas|mas-optional|check|dump|inventory} [destination]
+usage: scripts/brewfile.sh {core|apps|base|npm|mas|mas-optional|check|check-selected|dump|inventory} [destination]
 
   core   install taps and formulae required by the bootstrap
-  apps   install casks, fonts, and editor extensions
+  apps   install APP_GROUPS (default all); explicit groups also include essentials
   base   run core, then apps (backward-compatible strict aggregate)
   npm    install npm globals under the pinned .node-version runtime, then enable Corepack
   mas    install current App Store declarations only
   mas-optional  confirm App Store readiness interactively; otherwise defer
   check  check installed Brewfile entries with pinned Node active
+  check-selected  check baseline packages plus APP_GROUPS; deferred apps are excluded
   dump   generate a backup Brewfile, retaining deferred declarations
   inventory  generate installed declarations only, filtering retired MAS receipts
 EOF
@@ -186,7 +187,7 @@ check_installed_entries() {
   # directly. Bootstrap completeness means declared entries are present; day-2
   # upgrades remain topgrade/Homebrew's responsibility.
   awk '!/^[[:space:]]*(vscode|mas)[[:space:]]+/' "$BREWFILE" > "$DOTFILES_CHECK_FILTERED"
-  brew bundle check --no-upgrade --file="$DOTFILES_CHECK_FILTERED"
+  brew bundle check --no-upgrade --verbose --file="$DOTFILES_CHECK_FILTERED"
 
   awk -F '"' '/^[[:space:]]*vscode[[:space:]]+/ { print tolower($2) }' "$BREWFILE" \
     | LC_ALL=C sort -u > "$DOTFILES_CHECK_EXPECTED"
@@ -250,7 +251,15 @@ case "${1:-}" in
     awk '/^[[:space:]]*(tap|brew|uv)[[:space:]]+/' "$BREWFILE" | brew bundle --file=-
     ;;
   apps)
-    awk '/^[[:space:]]*(tap|cask|vscode|cask_args)[[:space:]]+/' "$BREWFILE" | brew bundle --file=-
+    selected="$(mktemp "${TMPDIR:-/tmp}/dotfiles-apps.XXXXXX")"
+    trap 'rm -f -- "$selected"' EXIT HUP INT TERM
+    # Validate completely before Homebrew can consume any declarations.
+    python3 "$SCRIPT_DIR/app_groups.py" project --brewfile "$BREWFILE" > "$selected"
+    if [[ -s "$selected" ]]; then
+      brew bundle --file=- < "$selected"
+    else
+      echo 'App installation deferred (APP_GROUPS=none).'
+    fi
     ;;
   base)
     DOTFILES="$DOTFILES" BREWFILE="$BREWFILE" "$0" core
@@ -272,6 +281,12 @@ case "${1:-}" in
   check)
     activate_pinned_node
     check_installed_entries
+    ;;
+  check-selected)
+    selected="$(mktemp "${TMPDIR:-/tmp}/dotfiles-selected-check.XXXXXX")"
+    trap 'rm -f -- "$selected"' EXIT HUP INT TERM
+    python3 "$SCRIPT_DIR/app_groups.py" check-project --brewfile "$BREWFILE" > "$selected"
+    DOTFILES="$DOTFILES" BREWFILE="$selected" bash "$0" check
     ;;
   dump|inventory)
     [[ -n "${2:-}" ]] || die "$1 requires a destination path"

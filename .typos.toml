@@ -18,9 +18,9 @@ extend-glob = ["*.ps1"]
 iin = "iin"
 ine = "ine"
 
-# Exact vendor/cask names in the Windows package manifest.
+# Exact vendor/cask names in package intent manifests.
 [type.windows-packages]
-extend-glob = ["windows-packages.tsv"]
+extend-glob = ["windows-packages.tsv", "app-groups.tsv"]
 [type.windows-packages.extend-identifiers]
 Canva = "Canva"
 canva = "canva"

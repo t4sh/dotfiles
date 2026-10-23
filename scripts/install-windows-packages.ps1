@@ -1,14 +1,17 @@
 #Requires -Version 7.0
 [CmdletBinding()]
 param([switch]$Apply, [switch]$Upgrade, [switch]$AllInstalled,
-    [string]$LogDirectory = (Join-Path $env:TEMP 'dotfiles-windows-install'), [string[]]$Only)
+    [string]$LogDirectory = (Join-Path $env:TEMP 'dotfiles-windows-install'), [string[]]$Only,
+    [string]$AppGroups = $(if ($env:APP_GROUPS) { $env:APP_GROUPS } else { 'all' }))
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'lib\windows-common.ps1')
 . (Join-Path $PSScriptRoot 'lib\windows-packages.ps1')
+. (Join-Path $PSScriptRoot 'lib\windows-app-groups.ps1')
 . (Join-Path $PSScriptRoot 'lib\windows-tldr.ps1')
 Assert-DotfilesWindows
 $rows = @(Get-DotfilesWindowsPackages)
-$packages = @($rows | Where-Object Mode -In @('native','runtime') | Sort-Object Source,Id -Unique)
+$selection = Get-DotfilesAppGroups -Root (Split-Path $PSScriptRoot) -AppGroups $AppGroups
+$packages = @(Select-DotfilesWindowsPackages -Rows $rows -Selection $selection)
 if ($Only) {
     $unknown = @($Only | Where-Object { $_ -notin $packages.Id })
     if ($unknown.Count) { throw "Unknown package selection: $($unknown -join ', ')" }

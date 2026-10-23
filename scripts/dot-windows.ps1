@@ -10,6 +10,7 @@ $commands = [ordered]@{
     packages='scripts/install-windows-packages.ps1'; 'packages-check'='scripts/check-windows-packages.ps1';
     fonts='scripts/install-windows-fonts.ps1'; 'restore-apps'='scripts/restore-apps-windows.ps1';
     backup='scripts/backup-apps-windows.ps1'; doctor='scripts/doctor-windows.ps1';
+    'setup-status'='scripts/setup-status-windows.ps1';
     'default-apps'='scripts/check-windows-vlc-associations.ps1';
     hooks='scripts/setup-windows-hooks.ps1'; 
     upgrade='scripts/update-windows.ps1'; path='scripts/setup-windows-path.ps1';
