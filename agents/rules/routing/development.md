@@ -78,7 +78,7 @@ Before marking a shared skill ready, check duplicate names, resolve references, 
 
 ## Debugging and software interfaces
 
-Use `diagnosing-bugs` for hypothesis-driven bug and performance diagnosis. `debug` is explicit-invocation-only. Durable root-cause, layered-defense, condition-waiting, and three-failed-fixes guidance lives in `20-code-posture.md` and `23-verification.md`.
+Use `diagnosing-bugs` for hypothesis-driven bug and performance diagnosis. `debug` is explicit-invocation-only. Durable root-cause, layered-defense, condition-waiting, and failure-reassessment guidance lives in `20-code-posture.md` and `23-verification.md`.
 
 Use `system-design` when the requested interface is a module or API boundary. When alternatives are requested, compare distinct signatures and trade-offs before implementation. `better-interface` owns visual UI review, not module/API design.
 

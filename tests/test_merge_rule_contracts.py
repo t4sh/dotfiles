@@ -121,81 +121,11 @@ class MergeRuleContracts(unittest.TestCase):
                     self.assertIn(diagnostic, result.stderr)
 
 
-    def test_rule_audit_requires_pipeline_discovery_and_bounded_merge_checks(self) -> None:
-        # The operator contract is the regression: no inferred suite or retry
-        # loop may replace the required decision when applicable CI is absent.
+    def test_rule_audit_requires_evidence_driven_merge_checks(self) -> None:
+        # Preserve required gates and evidence-based recovery without imposing
+        # task timers, retry quotas, or a renewed approval for routine repairs.
         lifecycle = "agents/rules/lifecycle/integration.md"
         cases = (
-            (
-                lifecycle,
-                "10 minutes total active elapsed time per merge task",
-                "ten-minute cumulative time budget",
-            ),
-            (
-                lifecycle,
-                "one full-suite attempt and no automatic full-suite retries",
-                "limit full-suite attempts and automatic retries",
-            ),
-            (
-                lifecycle,
-                "Share one remaining time allowance and full-suite count across turns, candidates, and authorized subagents",
-                "shared rather than reset by continuation or delegation",
-            ),
-            (
-                lifecycle,
-                "Create a shared budget record before the first budgeted action",
-                "create its budget record before spending",
-            ),
-            (
-                lifecycle,
-                "task identity (repository, target branch, and request scope), time used and remaining with an observation timestamp, full-suite and focused-rerun counts (used and reserved), approved extensions, and reusable evidence",
-                "carry task identity, time and attempt accounting",
-            ),
-            (
-                lifecycle,
-                "The coordinator updates the record and reserves attempts before launch or delegation",
-                "reserved before execution or delegation",
-            ),
-            (
-                lifecycle,
-                "Include the current record in every continuation, resumption or compaction handoff, and subagent prompt",
-                "continuations and subagents must receive the current budget record",
-            ),
-            (
-                lifecycle,
-                "If remaining time or attempt counts cannot be recovered, stop and ask before further budgeted work",
-                "missing merge accounting must require recovery or an explicit ask",
-            ),
-            (
-                lifecycle,
-                "A missing record never grants a fresh allowance",
-                "missing merge budget records must not reset allowances",
-            ),
-            (
-                lifecycle,
-                "Bound each local run or provider wait by the remaining time",
-                "enforce the remaining time allowance",
-            ),
-            (
-                lifecycle,
-                "if expected cost exceeds it or cannot reasonably be bounded, ask before starting",
-                "unbounded or over-budget merge work must require an explicit ask",
-            ),
-            (
-                lifecycle,
-                "Any second full-suite execution requires explicit approval",
-                "require approval even after a passing run",
-            ),
-            (
-                lifecycle,
-                "At exhaustion, stop safely, preserve logs and state, and leave integration or cleanup pending",
-                "stop work without bypassing merge requirements",
-            ),
-            (
-                lifecycle,
-                "Allow at most one focused rerun per merge task, within the remaining budget",
-                "focused merge-check recovery must remain bounded",
-            ),
             (
                 lifecycle,
                 "Inspect the target repository's pipeline configuration at the target ref and candidate merge result",
@@ -213,13 +143,13 @@ class MergeRuleContracts(unittest.TestCase):
             ),
             (
                 lifecycle,
-                "If no applicable pipeline is confirmed, report what was inspected and explicitly ask:",
-                "require an explicit ask and answer",
+                "Report the absence and use documented project validation or the smallest meaningful checks for the changed behavior",
+                "absent CI must use relevant checks",
             ),
             (
                 lifecycle,
-                "wait for the user's answer before running merge-time checks or integrating",
-                "require an explicit ask and answer",
+                "never infer permission to bypass it",
+                "preserving required gates",
             ),
             (
                 lifecycle,
@@ -229,12 +159,12 @@ class MergeRuleContracts(unittest.TestCase):
             (
                 lifecycle,
                 "Every selected check must have valid passing local or hosted evidence before integration",
-                "configured and user-selected checks must pass before integration",
+                "selected checks must pass before integration",
             ),
             (
                 lifecycle,
-                "the applicable configured validation jobs, or the checks explicitly chosen by the user when no applicable CI/CD is confirmed",
-                "configured and user-selected checks must pass before integration",
+                "the applicable configured validation jobs, explicitly requested checks, or the relevant project validation selected above",
+                "selected checks must pass before integration",
             ),
             (
                 lifecycle,
@@ -253,8 +183,18 @@ class MergeRuleContracts(unittest.TestCase):
             ),
             (
                 lifecycle,
-                "After a failed full-suite run, ask before another full-suite attempt",
-                "require an ask before another full attempt",
+                "diagnosis and safe repairs continue under the existing authorization",
+                "failure recovery must preserve authorization",
+            ),
+            (
+                lifecycle,
+                "Stop repeating an unchanged failure",
+                "require new evidence",
+            ),
+            (
+                "agents/rules/23-verification.md",
+                "Only apply time or attempt limits explicitly set by the user, or imposed by the actual tool or service",
+                "limits must come from the user or execution constraints",
             ),
             (
                 "agents/rules/23-verification.md",

@@ -475,34 +475,6 @@ if [ -f "$ATTRIBUTION_RULE" ] && [ -d "$ATTRIBUTION_DIR" ]; then
         || fail_contract "signing failure must stop integration"
 fi
 
-grep -Fq '10 minutes total active elapsed time per merge task' "$LIFECYCLE_INTEGRATION_RULE" \
-    || fail_contract "merge work must have a ten-minute cumulative time budget"
-grep -Fq 'one full-suite attempt and no automatic full-suite retries' "$LIFECYCLE_INTEGRATION_RULE" \
-    || fail_contract "merge work must limit full-suite attempts and automatic retries"
-grep -Fq 'Share one remaining time allowance and full-suite count across turns, candidates, and authorized subagents' "$LIFECYCLE_INTEGRATION_RULE" \
-    || fail_contract "merge budgets must be shared rather than reset by continuation or delegation"
-grep -Fq 'Create a shared budget record before the first budgeted action' "$LIFECYCLE_INTEGRATION_RULE" \
-    || fail_contract "merge work must create its budget record before spending"
-grep -Fq 'task identity (repository, target branch, and request scope), time used and remaining with an observation timestamp, full-suite and focused-rerun counts (used and reserved), approved extensions, and reusable evidence' "$LIFECYCLE_INTEGRATION_RULE" \
-    || fail_contract "merge budget records must carry task identity, time and attempt accounting"
-grep -Fq 'The coordinator updates the record and reserves attempts before launch or delegation' "$LIFECYCLE_INTEGRATION_RULE" \
-    || fail_contract "merge attempts must be reserved before execution or delegation"
-grep -Fq 'Include the current record in every continuation, resumption or compaction handoff, and subagent prompt' "$LIFECYCLE_INTEGRATION_RULE" \
-    || fail_contract "merge continuations and subagents must receive the current budget record"
-grep -Fq 'If remaining time or attempt counts cannot be recovered, stop and ask before further budgeted work' "$LIFECYCLE_INTEGRATION_RULE" \
-    || fail_contract "missing merge accounting must require recovery or an explicit ask"
-grep -Fq 'A missing record never grants a fresh allowance' "$LIFECYCLE_INTEGRATION_RULE" \
-    || fail_contract "missing merge budget records must not reset allowances"
-grep -Fq 'Bound each local run or provider wait by the remaining time' "$LIFECYCLE_INTEGRATION_RULE" \
-    || fail_contract "merge execution must enforce the remaining time allowance"
-grep -Fq 'if expected cost exceeds it or cannot reasonably be bounded, ask before starting' "$LIFECYCLE_INTEGRATION_RULE" \
-    || fail_contract "unbounded or over-budget merge work must require an explicit ask"
-grep -Fq 'Any second full-suite execution requires explicit approval' "$LIFECYCLE_INTEGRATION_RULE" \
-    || fail_contract "second full-suite executions must require approval even after a passing run"
-grep -Fq 'At exhaustion, stop safely, preserve logs and state, and leave integration or cleanup pending' "$LIFECYCLE_INTEGRATION_RULE" \
-    || fail_contract "budget exhaustion must stop work without bypassing merge requirements"
-grep -Fq 'Allow at most one focused rerun per merge task, within the remaining budget' "$LIFECYCLE_INTEGRATION_RULE" \
-    || fail_contract "focused merge-check recovery must remain bounded"
 grep -Fq "Inspect the target repository's pipeline configuration at the target ref and candidate merge result" "$LIFECYCLE_INTEGRATION_RULE" \
     || fail_contract "merge checks must discover CI/CD for the actual target and merge result"
 grep -Fq 'Resolve event, branch, path, and job conditions for this merge' "$LIFECYCLE_INTEGRATION_RULE" \
@@ -511,22 +483,25 @@ grep -Fq 'Resolve event, branch, path, and job conditions for this merge' "$LIFE
 # shellcheck disable=SC2016
 grep -Fq 'A standalone script such as `verify:ci`, a documented `verify` alias, or a broad test target does not establish that CI/CD exists' "$LIFECYCLE_INTEGRATION_RULE" \
     || fail_contract "merge checks must not infer CI/CD from a verification script"
-grep -Fq 'If no applicable pipeline is confirmed, report what was inspected and explicitly ask:' "$LIFECYCLE_INTEGRATION_RULE" \
-    && grep -Fq "wait for the user's answer before running merge-time checks or integrating" "$LIFECYCLE_INTEGRATION_RULE" \
-    || fail_contract "absent or unknown CI/CD must require an explicit ask and answer"
+grep -Fq 'Report the absence and use documented project validation or the smallest meaningful checks for the changed behavior' "$LIFECYCLE_INTEGRATION_RULE" \
+    && grep -Fq 'never infer permission to bypass it' "$LIFECYCLE_INTEGRATION_RULE" \
+    || fail_contract "absent CI must use relevant checks while preserving required gates"
 grep -Fq 'Local CI/CD emulation is permitted only for an applicable pipeline confirmed above' "$LIFECYCLE_INTEGRATION_RULE" \
     || fail_contract "local CI/CD emulation must require a confirmed applicable pipeline"
 grep -Fq 'Every selected check must have valid passing local or hosted evidence before integration' "$LIFECYCLE_INTEGRATION_RULE" \
-    && grep -Fq 'the applicable configured validation jobs, or the checks explicitly chosen by the user when no applicable CI/CD is confirmed' "$LIFECYCLE_INTEGRATION_RULE" \
-    || fail_contract "configured and user-selected checks must pass before integration"
+    && grep -Fq 'the applicable configured validation jobs, explicitly requested checks, or the relevant project validation selected above' "$LIFECYCLE_INTEGRATION_RULE" \
+    || fail_contract "selected checks must pass before integration"
 grep -Fq 'Run selected checks that lack valid reusable evidence' "$LIFECYCLE_INTEGRATION_RULE" \
     || fail_contract "selected checks without reusable evidence must execute before integration"
 grep -Fq 'Failed, pending, skipped, or unavailable selected checks block integration' "$LIFECYCLE_INTEGRATION_RULE" \
     || fail_contract "unresolved selected checks must block integration"
 grep -Fq 'A local merge alone does not require another full run' "$LIFECYCLE_INTEGRATION_RULE" \
     || fail_contract "merge checks must reuse valid evidence instead of unconditional reruns"
-grep -Fq 'After a failed full-suite run, ask before another full-suite attempt' "$LIFECYCLE_INTEGRATION_RULE" \
-    || fail_contract "failed full suites must require an ask before another full attempt"
+grep -Fq 'diagnosis and safe repairs continue under the existing authorization' "$LIFECYCLE_INTEGRATION_RULE" \
+    && grep -Fq 'Stop repeating an unchanged failure' "$LIFECYCLE_INTEGRATION_RULE" \
+    || fail_contract "failure recovery must preserve authorization and require new evidence"
+grep -Fq 'Only apply time or attempt limits explicitly set by the user, or imposed by the actual tool or service' "$RULES_DIR/23-verification.md" \
+    || fail_contract "verification limits must come from the user or execution constraints"
 grep -Fq 'Ordinary change verification does not authorize a full integration suite' "$RULES_DIR/23-verification.md" \
     || fail_contract "ordinary verification must defer merge check selection to lifecycle policy"
 if grep -Fq 'run the repository-defined integration or CI-equivalent gate' "$LIFECYCLE_INTEGRATION_RULE" \
@@ -540,7 +515,7 @@ grep -Fq 'Before handing work back after branch, worktree, integration, PR, merg
 grep -Fq 'A title-only edit loads PR/MR title' "$LIFECYCLE_RULE" \
     || fail_contract "lifecycle dispatcher must isolate title-only edits"
 if grep -Eq '10 minutes total|git branch -d|git reset --hard' "$LIFECYCLE_TITLE_RULE"; then
-    fail_contract "PR title contract must defer merge budgets and cleanup"
+    fail_contract "PR title contract must defer integration checks and cleanup"
 fi
 
 word_count() {

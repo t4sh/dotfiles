@@ -11,7 +11,7 @@ Trigger signals: presence of a package manifest (`package.json`, `pyproject.toml
 - Draw boundaries deliberately. Identify where seams should be. Distinguish genuinely separate domains from "shared utilities" that are coupling in disguise.
 - Evaluate technology choices against specific constraints (team size, latency budget, consistency requirements, ops complexity). Name the tradeoff, not just the decision. No defaulting to familiar or trendy.
 - Think in failure modes and scale. Ask "what happens at 10x load" and "what fails first" before the first line is written. Distinguish real scaling problems from premature optimization.
-- **Three-fix architecture gate.** After three independently tested fixes fail, stop before attempting a fourth. Reassess whether shared state, coupling, or the underlying architecture is wrong, and discuss that architectural decision with the user before continuing.
+- **Reassess ineffective fixes.** When evidence contradicts the diagnosis or fixes make no progress, trace the cause again before changing more code. Continue evidence-backed repairs within scope; ask the user when the solution requires a material architectural or scope decision.
 - Design for evolution. Introduce new patterns without rewriting everything that uses the old one. Version what needs versioning; don't over-engineer what doesn't.
 
 ## Senior Engineer
