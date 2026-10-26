@@ -128,7 +128,7 @@ cd ~/.dotfiles
 make all
 ```
 
-`make all` runs serially (including under `make -j all`): `link` → `rules-audit` → `skills-audit` → `brew-without-mas` → `shims` → `services` → `restore-apps` → `dock` → `hooks` → `macos` (interactive + Touch ID sudo, last). App Store apps stay explicit via `make brew-mas`.
+`make all` runs serially (including under `make -j all`): `link` → `rules-audit` → `skills-audit` → `brew-without-mas` → `shims` → `skills-engine` → `skills-browser` → `services` → `restore-apps` → `dock` → `hooks` → `macos` (interactive + Touch ID sudo, last). App Store apps stay explicit via `make brew-mas`.
 
 `make brew` runs `brew-base` → `node` → `brew-npm`, then optional/interactive MAS. Fresh re-apply prefers `brew-without-mas`.
 
@@ -332,7 +332,20 @@ Install global skills after bootstrap:
 ```bash
 make skills           # verify checked-in skills
 make skills-update    # explicit upstream refresh; may need GitHub auth
+make skills-engine  # Install/verify Impeccable's pinned engine; downloads if missing
+make skills-engine-check # Read-only Impeccable engine readiness check
+make skills-browser # Install Fluid Functionalism audit dependencies without lifecycle scripts
+make skills-browser-check # Read-only browser dependency loading check
 ```
+
+On Mac, `make skills-update`, `make all`, and full bootstrap also install and
+verify Impeccable's pinned engine through its checksum-verifying launcher.
+Doctor checks it offline; repair a missing engine with `make skills-engine`.
+`make skills` remains an offline inventory check, not proof of runtime readiness.
+The same Mac setup and refresh commands install Fluid Functionalism's audit
+dependencies with lifecycle scripts disabled. Doctor checks that Playwright can
+load; repair it with `make skills-browser`. Actual audits also need Chrome or a
+compatible Chromium, and a running page to measure.
 
 ## Secrets
 

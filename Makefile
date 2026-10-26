@@ -5,7 +5,7 @@ ifeq ($(OS),Windows_NT)
 include windows.mk
 else
 
-.PHONY: skills-runtime brew-base agent-clients-check
+.PHONY: skills-runtime skills-engine skills-engine-check skills-browser skills-browser-check brew-base agent-clients-check
 agent-clients-check: ## Check instruction bridges; runtime evidence is in agents/CLIENTS.md
 	@bash scripts/check-agent-clients.sh
 
@@ -96,6 +96,8 @@ all: ## Re-apply the full existing-Mac setup, including node shims, in a fixed o
 	@$(MAKE) --no-print-directory skills-audit
 	@$(MAKE) --no-print-directory brew-without-mas
 	@$(MAKE) --no-print-directory shims
+	@$(MAKE) --no-print-directory skills-engine
+	@$(MAKE) --no-print-directory skills-browser
 	@$(MAKE) --no-print-directory restore-codex-rtk
 	@$(MAKE) --no-print-directory restore-claude-rtk
 	@$(MAKE) --no-print-directory services
@@ -202,10 +204,24 @@ skills: skills-audit ## Verify the vendored global skills restored by make link
 	@echo "  ✓ vendored skills are repo-managed at $(CURDIR)/agents/skills"
 	@echo "  → upstream refresh is explicit: make skills-update"
 
+skills-engine: ## Install or repair the pinned Impeccable engine (network if missing)
+	@python3 scripts/check-skill-installation.py --install-engine
+
+skills-engine-check: ## Check the pinned Impeccable engine without downloading
+	@python3 scripts/check-skill-installation.py --engine-only
+
+skills-browser: ## Install Fluid Functionalism audit dependencies without lifecycle scripts
+	@python3 scripts/check-skill-installation.py --install-browser
+
+skills-browser-check: ## Check Fluid Functionalism audit dependency loading offline
+	@python3 scripts/check-skill-installation.py --browser-only
+
 skills-update: ## Explicitly refresh vendored skills from current upstream sources
 	@bash Skillsfile
 	@$(MAKE) --no-print-directory skills-manifest
 	@$(MAKE) --no-print-directory skills-audit
+	@$(MAKE) --no-print-directory skills-engine
+	@$(MAKE) --no-print-directory skills-browser
 	@git status --short -- Skillsfile agents/.skill-lock.json agents/skills agents/skills/README.md
 
 hooks: ## Install local git hooks and diff drivers

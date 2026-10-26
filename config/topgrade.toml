@@ -16,7 +16,8 @@ notify_end = "on_failure"
 # pi: installed as the Homebrew pi-coding-agent formula; avoid its redundant
 # self-updater (`pi update --self`), which cannot reliably resolve Brew installs.
 # skills: use the repository workflow so local curation holds are honored.
-disable = ["system", "emacs", "git_repos", "yarn", "pnpm", "pi", "skills"]
+# github_cli_skills: the same curated workflow owns skill updates, not gh skill.
+disable = ["system", "emacs", "git_repos", "yarn", "pnpm", "pi", "skills", "github_cli_skills"]
 
 # Non-fatal when the engine is down or the vendor check is slow/no-op.
 ignore_failures = ["containers", "microsoft_office"]

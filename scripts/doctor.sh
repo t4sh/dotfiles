@@ -227,6 +227,17 @@ fi
 
 check_docker_helper
 
+if have python3 && python3 "$DOTFILES/scripts/check-skill-installation.py" --engine-only; then
+  ok "Impeccable engine ready"
+else
+  warn "Impeccable engine missing or incompatible; run: make skills-engine"
+fi
+if have python3 && python3 "$DOTFILES/scripts/check-skill-installation.py" --browser-only; then
+  ok "Fluid Functionalism browser dependency ready"
+else
+  warn "Fluid Functionalism browser dependency missing or broken; run: make skills-browser"
+fi
+
 if [ -f "$DOTFILES/.node-version" ]; then
   ok ".node-version present ($(tr -d '[:space:]' < "$DOTFILES/.node-version"))"
 else

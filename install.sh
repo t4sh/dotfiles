@@ -224,6 +224,13 @@ if [[ "$BOOTSTRAP_SMOKE" == "1" ]]; then
     exit 0
 fi
 
+CURRENT_STAGE='Impeccable engine'; CURRENT_RETRY='make skills-engine'
+make -C "$DOTFILES" skills-engine
+COMPLETED_STAGES+=('Impeccable engine')
+CURRENT_STAGE='Fluid Functionalism audit dependencies'; CURRENT_RETRY='make skills-browser'
+make -C "$DOTFILES" skills-browser
+COMPLETED_STAGES+=('Fluid Functionalism audit dependencies')
+
 # 7. Restore portable agent hooks after RTK is installed, then services.
 CURRENT_STAGE='Codex RTK hook'; CURRENT_RETRY='make restore-codex-rtk'
 make -C "$DOTFILES" restore-codex-rtk

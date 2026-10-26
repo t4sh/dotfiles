@@ -11,19 +11,30 @@ package. It is offline and never installs or downloads anything.
 
 ## Impeccable engine
 
-The engine is a per-machine cache, not a committed binary. After reviewing the
-launcher, run `agents/skills/impeccable/scripts/impeccable engine-probe` from a
-network-enabled terminal. The launcher downloads the versioned platform asset,
-verifies its SHA-256 sidecar and caches it under `~/.impeccable/bin/<version>/`.
-Then run `make skills-runtime`. Windows uses the existing `dot skill-engine -Apply`
+The engine is a per-machine cache, not a committed binary. On Mac, run
+`make skills-engine` to install it and verify the exact version; repeat runs reuse
+a working engine. The upstream launcher downloads the versioned platform asset,
+verifies its SHA-256 checksum before execution, and caches it under
+`~/.impeccable/bin/<version>/`. A failed setup returns nonzero with repair guidance.
+`make skills-update`, `make all`, and full Mac bootstrap run this setup step.
+`make skills-engine-check` and Mac doctor check readiness without downloading;
+`make skills-runtime` additionally checks the other runtime dependencies.
+Windows uses the existing `dot skill-engine -Apply`
 and verification-only `dot skill-engine` workflow. Engine installation is separate
 from refreshing SKILL.md and the lock record.
 
 ## Browser helpers
 
-Fluid Functionalism's audit requires the dependencies declared in its
-`scripts/package.json`, installed locally with lifecycle scripts disabled. Its
-`node_modules` stays ignored and is not part of the public projection.
+On Mac, `make skills-browser` installs Fluid Functionalism's declared
+`scripts/package.json` dependencies locally through stable Node/npm, with lifecycle
+scripts disabled and without generating a tracked lockfile. Mac full setup and
+curated refresh run this command so a replaced skill folder is repaired.
+`make skills-browser-check`, doctor and `make skills-runtime` verify that the
+installed package actually loads its Chromium launcher, without launching a
+browser or downloading anything. Its `node_modules` stays ignored and is not
+part of the public projection. Actual audits additionally need installed Chrome
+or a compatible Chromium (or `CHROME_PATH`), and a page URL; dependency readiness
+alone does not prove a browser can launch. This installer does not download browsers.
 
 Localhost Screenshots uses the target project's Playwright installation. Run its
 helpers with cwd at that project and the stable Node executable; follow its pinned
