@@ -172,10 +172,10 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/Leonxlnx/taste-skill.git",
       "skillPath": "skills/taste-skill/SKILL.md",
-      "skillFolderHash": "2a22452297d559ea5ad97c178879d30ee3ec8022",
+      "skillFolderHash": "844f3cf223d25a29e75f7965d095a093938282df",
       "pluginName": "taste-skill",
       "installedAt": "2026-04-13T02:36:16.105Z",
-      "updatedAt": "2026-10-21T04:40:08.260Z"
+      "updatedAt": "2026-10-26T07:15:39.435Z"
     },
     "pdf-harvester": {
       "source": "mindmorass/reflex",
@@ -191,9 +191,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill.git",
       "skillPath": ".claude/skills/ui-ux-pro-max/SKILL.md",
-      "skillFolderHash": "0b6619c11598d7ce32041044cb2e6fc6adea1efc",
+      "skillFolderHash": "829c4dab53f10cde51f0ff58b0bb13fe870f7e94",
       "installedAt": "2026-04-13T02:36:50.857Z",
-      "updatedAt": "2026-10-04T04:24:21.430Z"
+      "updatedAt": "2026-10-26T12:05:32.309Z"
     },
     "agent-memory": {
       "source": "t4sh/skills4sh",
@@ -343,9 +343,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/pbakaus/impeccable.git",
       "skillPath": ".agents/skills/impeccable/SKILL.md",
-      "skillFolderHash": "c4581ed99657c6e3c50ceee684eefa598f7f4057",
+      "skillFolderHash": "0caef6d9fa3be28270b57fe04ef712cba083e0a8",
       "installedAt": "2026-05-03T11:49:23.273Z",
-      "updatedAt": "2026-10-23T02:50:02.064Z"
+      "updatedAt": "2026-10-26T12:05:53.242Z"
     },
     "eleventy-nunjucks": {
       "source": "t4sh/skills4sh",
@@ -815,63 +815,63 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/jakubkrehel/skills.git",
       "skillPath": "skills/better-accessibility/SKILL.md",
-      "skillFolderHash": "8fdb2f25f822c2ffaca438e2d325eed9ac6e9b9b",
+      "skillFolderHash": "fab04847b6c09bf54e981098cfb03faca0e1a752",
       "installedAt": "2026-08-01T19:07:45.239Z",
-      "updatedAt": "2026-10-06T05:02:20.962Z"
+      "updatedAt": "2026-10-24T14:45:03.251Z"
     },
     "better-colors": {
       "source": "jakubkrehel/skills",
       "sourceType": "github",
       "sourceUrl": "https://github.com/jakubkrehel/skills.git",
       "skillPath": "skills/better-colors/SKILL.md",
-      "skillFolderHash": "1f96b150ca7f25fd63ba6079a2ceaf75849186f5",
+      "skillFolderHash": "5851236fb32cabcb93e2a6aa424305fe38a1894b",
       "installedAt": "2026-08-01T19:07:45.243Z",
-      "updatedAt": "2026-10-06T05:02:23.082Z"
+      "updatedAt": "2026-10-24T14:45:03.258Z"
     },
     "better-interface": {
       "source": "jakubkrehel/skills",
       "sourceType": "github",
       "sourceUrl": "https://github.com/jakubkrehel/skills.git",
       "skillPath": "skills/better-interface/SKILL.md",
-      "skillFolderHash": "c2aa3269f78969b8f51e721f5f873401916ace9a",
+      "skillFolderHash": "3c70c802b8085c1f600d00421c6cc55af2eb5d44",
       "installedAt": "2026-08-01T19:07:45.245Z",
-      "updatedAt": "2026-10-06T05:02:25.134Z"
+      "updatedAt": "2026-10-24T14:45:03.260Z"
     },
     "better-layout": {
       "source": "jakubkrehel/skills",
       "sourceType": "github",
       "sourceUrl": "https://github.com/jakubkrehel/skills.git",
       "skillPath": "skills/better-layout/SKILL.md",
-      "skillFolderHash": "7ffa8ef65b63bd160eef9d32d1a4493d98260d0f",
+      "skillFolderHash": "4c3a6e2e53026e171e79b17b0d86c8d4d8639f49",
       "installedAt": "2026-08-01T19:07:45.246Z",
-      "updatedAt": "2026-10-06T05:02:27.407Z"
+      "updatedAt": "2026-10-24T14:45:03.262Z"
     },
     "better-typography": {
       "source": "jakubkrehel/skills",
       "sourceType": "github",
       "sourceUrl": "https://github.com/jakubkrehel/skills.git",
       "skillPath": "skills/better-typography/SKILL.md",
-      "skillFolderHash": "25751e782efef061becc8922bb31e378d57fc7b8",
+      "skillFolderHash": "aead1cd1526b13690c48513115030728cfbd4c2f",
       "installedAt": "2026-08-01T19:07:45.247Z",
-      "updatedAt": "2026-10-06T05:02:29.550Z"
+      "updatedAt": "2026-10-24T14:45:03.264Z"
     },
     "better-ui": {
       "source": "jakubkrehel/skills",
       "sourceType": "github",
       "sourceUrl": "https://github.com/jakubkrehel/skills.git",
       "skillPath": "skills/better-ui/SKILL.md",
-      "skillFolderHash": "b938dbf6c6a50895f092211012546a31fc5e887e",
+      "skillFolderHash": "6067ef3ae11c7f467cf32016741dd2591a6325f5",
       "installedAt": "2026-08-01T19:07:45.248Z",
-      "updatedAt": "2026-10-06T05:02:31.258Z"
+      "updatedAt": "2026-10-24T14:45:03.265Z"
     },
     "better-writing": {
       "source": "jakubkrehel/skills",
       "sourceType": "github",
       "sourceUrl": "https://github.com/jakubkrehel/skills.git",
       "skillPath": "skills/better-writing/SKILL.md",
-      "skillFolderHash": "4589785678cb20ee3f2dec9cbbb1149bc408fbc1",
+      "skillFolderHash": "91039f39cc4cc2b7c0dd16174076a09e2e222a29",
       "installedAt": "2026-08-01T19:07:45.249Z",
-      "updatedAt": "2026-10-06T05:02:33.406Z"
+      "updatedAt": "2026-10-24T14:45:03.267Z"
     },
     "find-animation-opportunities": {
       "source": "emilkowalski/skills",
@@ -981,27 +981,27 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/jakubkrehel/skills.git",
       "skillPath": "skills/interface-review/SKILL.md",
-      "skillFolderHash": "b12ef009667dcb25cc816e0a71e8b5ce5156afa6",
+      "skillFolderHash": "4e372ebcf72ac94e42e63549deed5cb2d82806a2",
       "installedAt": "2026-09-13T01:38:22.188Z",
-      "updatedAt": "2026-10-06T05:02:36.192Z"
+      "updatedAt": "2026-10-24T14:45:03.268Z"
     },
     "variant": {
       "source": "jakubkrehel/skills",
       "sourceType": "github",
       "sourceUrl": "https://github.com/jakubkrehel/skills.git",
       "skillPath": "skills/variant/SKILL.md",
-      "skillFolderHash": "9714e4e95df9cd76f6235abbe801a277dcbac16a",
+      "skillFolderHash": "bfc2e0e14176809a1c67dae696986a3bd36de74d",
       "installedAt": "2026-09-13T01:38:22.193Z",
-      "updatedAt": "2026-10-11T08:39:54.311Z"
+      "updatedAt": "2026-10-24T14:45:03.270Z"
     },
     "typesafe-ai": {
       "source": "typesafe-ai/skills",
       "sourceType": "github",
       "sourceUrl": "https://github.com/typesafe-ai/skills.git",
       "skillPath": "skills/typesafe-ai/SKILL.md",
-      "skillFolderHash": "678c375b883794bf4292715a43acbba5c84681aa",
+      "skillFolderHash": "1d7aa7574f194619b5189d96c6f79bdd4cc452f2",
       "installedAt": "2026-09-19T18:07:26.822Z",
-      "updatedAt": "2026-09-19T18:07:26.822Z"
+      "updatedAt": "2026-10-24T14:46:08.641Z"
     },
     "skill-inspector": {
       "source": "NVIDIA/SkillSpector",
@@ -1035,9 +1035,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/mickadesign/fluid-functionalism.git",
       "skillPath": "skills/fluid-functionalism/SKILL.md",
-      "skillFolderHash": "c310e87731dea7d03f362b845756ca3d908414f5",
+      "skillFolderHash": "06ea23fdc956f6444a24007d0273733ba999b19f",
       "installedAt": "2026-10-08T11:59:57.133Z",
-      "updatedAt": "2026-10-23T02:49:31.161Z"
+      "updatedAt": "2026-10-26T07:16:53.331Z"
     },
     "extract-design-system": {
       "source": "arvindrk/extract-design-system",
