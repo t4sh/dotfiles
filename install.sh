@@ -238,6 +238,9 @@ COMPLETED_STAGES+=('Codex RTK hook')
 CURRENT_STAGE='Claude RTK hook'; CURRENT_RETRY='make restore-claude-rtk'
 make -C "$DOTFILES" restore-claude-rtk
 COMPLETED_STAGES+=('Claude RTK hook')
+CURRENT_STAGE='Claude attribution settings'; CURRENT_RETRY='make restore-claude-settings'
+make -C "$DOTFILES" restore-claude-settings
+COMPLETED_STAGES+=('Claude attribution settings')
 echo ""
 echo "→ Installing Automator services..."
 CURRENT_STAGE='Automator services'; CURRENT_RETRY='make services'

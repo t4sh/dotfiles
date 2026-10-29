@@ -257,6 +257,12 @@ the definitions and runs in `make verify-bootstrap`. Re-run restore after moving
 Reload Codex and review/trust **RTK command compression** in Hooks (CLI `/hooks`).
 Trust remains local to each machine. Claude Code loads its hook after restarting.
 The previous dotfiles-owned Codex hooks symlink migrates to a local file.
+
+`make restore-claude-settings` merges the saved Claude Code attribution keys from
+[`config/claude/settings.json`](config/claude/settings.json) (empty commit/PR
+attribution, `includeCoAuthoredBy: false`) into `~/.claude/settings.json`, leaving
+every other key to Claude Code. It runs in `install.sh` and `make all`;
+`make claude-settings-check` runs in `make verify-bootstrap`.
 No personal configuration, command history, credentials, or RTK statistics are
 captured by these targets. The portable implementation is [scripts/rtk-hook.py](scripts/rtk-hook.py).
 

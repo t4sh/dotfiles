@@ -55,7 +55,7 @@ setup-status: ## Read-only setup report with deferred steps and next commands
 	@bash scripts/setup-status.sh
 
 
-.PHONY: restore-codex-rtk codex-rtk-check restore-claude-rtk claude-rtk-check
+.PHONY: restore-codex-rtk codex-rtk-check restore-claude-rtk claude-rtk-check restore-claude-settings claude-settings-check
 restore-codex-rtk: ## Merge the RTK PreToolUse hook into Codex user hooks
 	@python3 scripts/rtk-hook.py restore --client codex
 	@python3 scripts/rtk-hook.py check --client codex
@@ -69,6 +69,13 @@ restore-claude-rtk: ## Merge the RTK PreToolUse hook into Claude Code user setti
 
 claude-rtk-check: ## Check Claude Code has exactly one current RTK hook
 	@python3 scripts/rtk-hook.py check
+
+restore-claude-settings: ## Merge saved Claude Code attribution settings
+	@python3 scripts/claude-settings.py restore
+	@python3 scripts/claude-settings.py check
+
+claude-settings-check: ## Check Claude Code attribution against the saved snapshot
+	@python3 scripts/claude-settings.py check
 
 .PHONY: cursor-extensions vscode-extensions restore-zed zed-check restore-cursor-cli cursor-cli-check backup-text-replacements
 restore-cursor-cli: ## Merge saved Cursor CLI attribution preferences
@@ -100,6 +107,7 @@ all: ## Re-apply the full existing-Mac setup, including node shims, in a fixed o
 	@$(MAKE) --no-print-directory skills-browser
 	@$(MAKE) --no-print-directory restore-codex-rtk
 	@$(MAKE) --no-print-directory restore-claude-rtk
+	@$(MAKE) --no-print-directory restore-claude-settings
 	@$(MAKE) --no-print-directory services
 	@if [ "$(APP_GROUPS)" = all ]; then $(MAKE) --no-print-directory restore-apps; \
 	else echo "App preference restore deferred for partial selection; settings retained. Explicit full restore: make restore-apps"; fi
@@ -379,6 +387,7 @@ verify-bootstrap: ## Fail unless the post-vault Mac bootstrap is complete
 	@$(MAKE) --no-print-directory audit-apps
 	@$(MAKE) --no-print-directory codex-rtk-check
 	@$(MAKE) --no-print-directory claude-rtk-check
+	@$(MAKE) --no-print-directory claude-settings-check
 	@bash scripts/link.sh --check
 	@$(MAKE) --no-print-directory services-check
 	@$(MAKE) --no-print-directory hooks-check
