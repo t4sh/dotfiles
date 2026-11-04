@@ -263,6 +263,16 @@ The previous dotfiles-owned Codex hooks symlink migrates to a local file.
 attribution, `includeCoAuthoredBy: false`) into `~/.claude/settings.json`, leaving
 every other key to Claude Code. It runs in `install.sh` and `make all`;
 `make claude-settings-check` runs in `make verify-bootstrap`.
+
+`make restore-claude-rulebook` installs the Mac Claude Code startup checkpoint
+without replacing RTK, attribution, permissions or unrelated hooks. It requires
+Claude Code 2.1.295+ and defers when the CLI is absent. New sessions must load the
+canonical rulebook and finish the hook's checkpoint command before project tools
+can run. The hook verifies complete reads of the selected rules/references;
+conditional selection and action gates still belong to the canonical index.
+`make claude-rulebook-check` checks the installed definitions. See
+[the adapter contract](agents/CLIENTS.md#claude-code-startup-checkpoint) for recovery,
+state, verification and platform limits. Restart Claude Code after hook changes.
 No personal configuration, command history, credentials, or RTK statistics are
 captured by these targets. The portable implementation is [scripts/rtk-hook.py](scripts/rtk-hook.py).
 

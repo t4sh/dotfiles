@@ -77,6 +77,16 @@ restore-claude-settings: ## Merge saved Claude Code attribution settings
 claude-settings-check: ## Check Claude Code attribution against the saved snapshot
 	@python3 scripts/claude-settings.py check
 
+.PHONY: restore-claude-rulebook claude-rulebook-check
+restore-claude-rulebook: ## Merge Claude Code startup load enforcement hooks (Mac)
+	@if command -v claude >/dev/null 2>&1; then \
+		python3 scripts/claude-rulebook.py restore && python3 scripts/claude-rulebook.py check; \
+	else echo "Claude startup hooks deferred: install Claude Code, then run make restore-claude-rulebook"; fi
+
+claude-rulebook-check: ## Check Claude Code startup load enforcement hooks
+	@if command -v claude >/dev/null 2>&1; then python3 scripts/claude-rulebook.py check; \
+	else echo "Claude startup hook check deferred: install Claude Code, then run make restore-claude-rulebook"; fi
+
 .PHONY: cursor-extensions vscode-extensions restore-zed zed-check restore-cursor-cli cursor-cli-check backup-text-replacements
 restore-cursor-cli: ## Merge saved Cursor CLI attribution preferences
 	@bash scripts/restore-apps.sh --only cursor-cli
@@ -108,6 +118,7 @@ all: ## Re-apply the full existing-Mac setup, including node shims, in a fixed o
 	@$(MAKE) --no-print-directory restore-codex-rtk
 	@$(MAKE) --no-print-directory restore-claude-rtk
 	@$(MAKE) --no-print-directory restore-claude-settings
+	@$(MAKE) --no-print-directory restore-claude-rulebook
 	@$(MAKE) --no-print-directory services
 	@if [ "$(APP_GROUPS)" = all ]; then $(MAKE) --no-print-directory restore-apps; \
 	else echo "App preference restore deferred for partial selection; settings retained. Explicit full restore: make restore-apps"; fi
@@ -388,6 +399,7 @@ verify-bootstrap: ## Fail unless the post-vault Mac bootstrap is complete
 	@$(MAKE) --no-print-directory codex-rtk-check
 	@$(MAKE) --no-print-directory claude-rtk-check
 	@$(MAKE) --no-print-directory claude-settings-check
+	@$(MAKE) --no-print-directory claude-rulebook-check
 	@bash scripts/link.sh --check
 	@$(MAKE) --no-print-directory services-check
 	@$(MAKE) --no-print-directory hooks-check

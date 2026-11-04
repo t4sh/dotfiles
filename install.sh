@@ -241,6 +241,14 @@ COMPLETED_STAGES+=('Claude RTK hook')
 CURRENT_STAGE='Claude attribution settings'; CURRENT_RETRY='make restore-claude-settings'
 make -C "$DOTFILES" restore-claude-settings
 COMPLETED_STAGES+=('Claude attribution settings')
+
+CURRENT_STAGE='Claude rulebook checkpoint'; CURRENT_RETRY='make restore-claude-rulebook'
+make -C "$DOTFILES" restore-claude-rulebook
+if command -v claude >/dev/null 2>&1; then
+    COMPLETED_STAGES+=('Claude rulebook checkpoint setup')
+else
+    DEFERRED_STAGES+=('Claude rulebook checkpoint → install Claude Code, then make restore-claude-rulebook')
+fi
 echo ""
 echo "→ Installing Automator services..."
 CURRENT_STAGE='Automator services'; CURRENT_RETRY='make services'

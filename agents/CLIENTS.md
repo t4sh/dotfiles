@@ -51,3 +51,67 @@ Mac bootstrap and `make all` merge the automatic RTK hooks through
 `make restore-codex-rtk` and `make restore-claude-rtk`. Check them with
 `make codex-rtk-check` and `make claude-rtk-check`. Reload the client and review
 and trust its exact hook locally. Windows retains instruction-based RTK guidance.
+
+### Claude Code startup checkpoint
+
+On Mac, `make restore-claude-rulebook` merges the repository-owned hook adapter
+into local Claude settings; `make claude-rulebook-check` checks its definitions.
+Claude Code 2.1.295+ is required for `onFailure: block` when the gate cannot start
+or times out. Other settings, permissions and the RTK hook are retained. Setup
+and verification defer when Claude Code is absent; bootstrap records the stage
+as deferred. Run the restore target after installing it. Version probes time out.
+The public Claude canonical-index link stays unchanged; no native imports are added.
+
+SessionStart validates the index/inventory using metadata for deferred rules.
+InstructionsLoaded records actual native delivery of the index and always-on
+rules; successful Read results count only when their complete returned content
+matches the file. Successful loading of `init-rulebook` alone does not open the
+gate. After choosing applicable rules and necessary references from the index,
+the agent runs the printed `claude-rulebook.py ... complete --rules ...` command.
+It verifies all selected read evidence before sealing the checkpoint. No keyword
+classifier or second routing table chooses those files. Semantic selection is
+still model judgment; a deliberately incomplete selection cannot be inferred
+from file-read evidence alone.
+
+Before sealing, only canonical bootstrap Read/Glob, `init-rulebook`, and the
+literal checkpoint control command are admitted. Project reads, shell commands,
+other skills and connector tools remain blocked. Action-gated rules are excluded
+from startup; once ready, their existing just-in-time policy applies. Missing
+inventory, partial/failed/stale reads and corrupt session state keep the gate
+closed. An inventory error permits only Read/Edit/Write of the canonical index
+for repair; prompts remain usable. A missed SessionStart recovers on the next
+main-session event, requiring fresh explicit reads. Hook errors/timeouts block
+project tools. Stop requests completion once; if the continuation still cannot
+complete, it stops with a repair diagnostic while project tools remain closed.
+
+Each human prompt requires a fresh selection/checkpoint, reusing complete reads
+already delivered in the current context. System peer/task reports preserve the
+current checkpoint, identified by host transcript provenance and prompt ID;
+when the transcript is appended after submission, resolution waits until the
+next main-agent tool or Stop. Missing provenance requires fresh selection.
+Child events identified by `agent_id` bypass this main-session adapter without
+reading or changing parent proof; its completion command is denied to children.
+This isolates accidental parent-state changes, not an agent deliberately
+rewriting local state. Read callbacks are bound to their prompt/context, so delayed old callbacks cannot repopulate a reset. SessionStart
+on resume/clear/compaction invalidates prior read evidence and requires explicit
+Read of the index/always-on files: asynchronous native-import events cannot be
+reliably assigned to the new context. Native imports count without duplicate
+reads at first startup. State under `~/.claude/state/rulebook/` is per-session and lock-protected;
+it stores paths/hashes and prompt IDs, not prompts or tool contents. A fresh session repairs
+stale state; malformed inventory can be corrected through the index repair path. Hook setup
+errors are checked with the restore/check targets rather than bypassed.
+
+`tests/test_claude_rulebook.py` covers the actual hook boundary and the trace
+grader. `scripts/check-rulebook-startup.py` checks successful complete reads and
+a successful checkpoint **before** task tools, and separately checks required
+and forbidden files. It requires completed read deliveries before the checkpoint
+request and a bound successful receipt; stream-json may emit the next tool request
+before logging the previous command result. Earlier valid reads survive later
+rereads; batched Read results count only when their numbered text matches the
+whole file. Receipts bind the control command's Python independently of the
+interpreter running the checker. The runtime gate checks sealed state
+before that tool executes. Restricted harnesses must offer Bash for the literal
+checkpoint command. Eventual invocation alone cannot pass. This public adapter
+has fixture coverage, not a live-client acceptance claim.
+It targets main Claude Code sessions on Mac; it adds no Codex/Windows hook or
+subagent runtime claim.
