@@ -219,7 +219,9 @@ def hook(args, event):
     if event.get("agent_id"):
         if kind == "PreToolUse" and event.get("tool_name") == "Bash":
             command = event.get("tool_input", {}).get("command", "")
-            if isinstance(command, str) and str(SCRIPT) in command and "complete" in command:
+            # Match the adapter by file name, so relative, aliased or symlinked
+            # invocations are refused as well as the absolute path.
+            if isinstance(command, str) and SCRIPT.name in command and "complete" in command:
                 return {"hookSpecificOutput": {"hookEventName": kind, "permissionDecision": "deny",
                     "permissionDecisionReason": "The main-agent checkpoint cannot be completed by a subagent."}}
         return {}
@@ -237,6 +239,13 @@ def hook(args, event):
             submitted = data.pop("submitted_prompt")
             if not system_prompt(event, submitted["id"]):
                 data.update(selected=None, sealed=False, generation=submitted["generation"], inflight={})
+            else:
+                # The submit hook already announced this token. Adopt it without
+                # reopening selection, so a reseal with it is not refused as stale.
+                old = data.get("generation")
+                data["inflight"] = {tool_id: submitted["generation"]
+                                    for tool_id, owner in data.get("inflight", {}).items() if owner == old}
+                data["generation"] = submitted["generation"]
         if kind == "UserPromptSubmit":
             prompt_id = event.get("prompt_id")
             if system_prompt(event, prompt_id):

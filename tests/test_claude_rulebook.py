@@ -272,6 +272,9 @@ class StartupCheckpointTests(unittest.TestCase):
         denied = self.event("PreToolUse", agent_id="child", tool_name="Bash", tool_input={"command": command})
         self.assertTrue(self.denied(denied))
         self.assertNotIn("--generation", json.dumps(denied))
+        relative = command.replace(str(gate.SCRIPT), "scripts/" + gate.SCRIPT.name)
+        self.assertNotIn(str(gate.SCRIPT), relative)
+        self.assertTrue(self.denied(self.event("PreToolUse", agent_id="child", tool_name="Bash", tool_input={"command": relative})))
         result = self.event("PreToolUse", agent_id="child", tool_name="Read", tool_input={"file_path": str(self.source)})
         self.assertFalse(self.denied(result))
         self.assertNotIn("--generation", json.dumps(result))
@@ -292,9 +295,15 @@ class StartupCheckpointTests(unittest.TestCase):
         self.bootstrap()
         self.complete()
         transcript = self.book.parent / "later-transcript.jsonl"
-        self.event("UserPromptSubmit", prompt_id="peer-id", transcript_path=str(transcript))
+        notice = self.event("UserPromptSubmit", prompt_id="peer-id", transcript_path=str(transcript))
+        announced = notice["hookSpecificOutput"]["additionalContext"].split("--generation ", 1)[1].split()[0]
         transcript.write_text(json.dumps({"type": "user", "promptId": "peer-id", "promptSource": "system", "turnOrigin": "peer"}) + "\n")
         self.assertFalse(self.denied(self.event("PreToolUse", transcript_path=str(transcript), tool_name="Read", tool_input={"file_path": str(self.source)})))
+        # The token announced at submit stays valid, so resealing is not refused.
+        result = subprocess.run([*gate.prefix(self.args), "complete", "--session", self.sid,
+                                 "--generation", announced, "--rules"], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertFalse(self.denied(self.before()))
         self.event("UserPromptSubmit", prompt_id="human-id", transcript_path=str(transcript))
         self.assertTrue(self.denied(self.event("PreToolUse", transcript_path=str(transcript), tool_name="Read", tool_input={"file_path": str(self.source)})))
 
