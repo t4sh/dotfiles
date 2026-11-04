@@ -247,10 +247,10 @@
     },
     {
       "source": "cloudflare/skills",
-      "commit": "86505e44f87d801aa1864a3c4109e9a8ae5c409f",
+      "commit": "0e09df4cdbd66350c9d4d3b07e888fc58b3d229b",
       "sourcePath": "skills/web-perf/SKILL.md",
       "path": "agents/skills/web-perf/SKILL.md",
-      "sha256": "79c531e95ca4d96a7de920c28c127c2c09ec55cd452a92222267d2954580be23"
+      "sha256": "0160c9e7f1b73eb80347efd899a6082219d43bb9de30424667c8017628a48469"
     },
     {
       "source": "vercel-labs/agent-skills",

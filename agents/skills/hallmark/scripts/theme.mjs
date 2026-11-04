@@ -36,7 +36,7 @@ function usage() {
 }
 
 function parseHeader(src, file) {
-  const m = /^---\n([\s\S]*?)\n---/.exec(src);
+  const m = /^---\r?\n([\s\S]*?)\r?\n---/.exec(src);
   if (!m) throw new Error(`${file}: no header block`);
   const h = {};
   for (const line of m[1].split('\n')) {
@@ -69,7 +69,7 @@ function buildIndex() {
     if (slugs.has(e.slug)) throw new Error(`duplicate slug ${e.slug}`);
     slugs.add(e.slug);
   }
-  writeFileSync(INDEX, JSON.stringify({ built: new Date().toISOString().slice(0, 10), themes: entries }, null, 1) + '\n');
+  writeFileSync(INDEX, JSON.stringify({ themes: entries }, null, 1) + '\n');
   return entries;
 }
 
@@ -245,7 +245,11 @@ function deal() {
   });
   const pool = scored.filter((s) => !s.blocked).sort((a, b) => b.fit - a.fit || a.r - b.r);
   const previously = new Set();
-  for (let r = 0; r < reroll; r++) for (const p of pickFrom(pool, n, previously)) previously.add(p.t.slug);
+  for (let r = 0; r < reroll; r++) {
+    const hand = pickFrom(pool, n, previously);
+    if (!hand.length) break;
+    for (const p of hand) previously.add(p.t.slug);
+  }
   const picked = pickFrom(pool, n, previously);
   if (!picked.length) { console.error(`nothing left to deal at reroll ${reroll}; use a lower --reroll`); process.exit(1); }
 

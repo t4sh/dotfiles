@@ -15,10 +15,10 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/mattpocock/skills.git",
       "skillPath": "skills/engineering/code-review/SKILL.md",
-      "skillFolderHash": "fee7bb5fdddc069d58cbea09b2c36b5a859eac05",
+      "skillFolderHash": "a8ef561571acbb611de8ff19ba6da75b197c63a8",
       "pluginName": "mattpocock-skills",
       "installedAt": "2026-04-13T02:34:18.080Z",
-      "updatedAt": "2026-10-07T10:26:23.981Z"
+      "updatedAt": "2026-10-30T17:55:19.749Z"
     },
     "debug": {
       "source": "anthropics/knowledge-work-plugins",
@@ -154,9 +154,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/coreyhaines31/marketingskills.git",
       "skillPath": "skills/copywriting/SKILL.md",
-      "skillFolderHash": "5de411655b1692373f8950f56d50991bd5294a8e",
+      "skillFolderHash": "ce3f78a285cf452d48813d3482b293da8b62e7cd",
       "installedAt": "2026-04-13T02:35:56.686Z",
-      "updatedAt": "2026-10-15T18:58:27.247Z"
+      "updatedAt": "2026-10-28T05:41:44.382Z"
     },
     "git-commit": {
       "source": "github/awesome-copilot",
@@ -191,9 +191,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill.git",
       "skillPath": ".claude/skills/ui-ux-pro-max/SKILL.md",
-      "skillFolderHash": "829c4dab53f10cde51f0ff58b0bb13fe870f7e94",
+      "skillFolderHash": "e421a9fda8e43f1a8dd7f42cbc655e5bca93ee8c",
       "installedAt": "2026-04-13T02:36:50.857Z",
-      "updatedAt": "2026-10-26T12:05:32.309Z"
+      "updatedAt": "2026-11-03T10:18:33.073Z"
     },
     "agent-memory": {
       "source": "t4sh/skills4sh",
@@ -227,9 +227,10 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/vercel-labs/agent-browser.git",
       "skillPath": "skills/agent-browser/SKILL.md",
-      "skillFolderHash": "82def67855a0d2aad7794207951820fa5422fdb0",
+      "skillFolderHash": "29ba9c12789b1c54ab76ad40e2472e646d141b85",
+      "pluginName": "agent-browser",
       "installedAt": "2026-04-13T02:37:29.244Z",
-      "updatedAt": "2026-09-11T12:16:14.220Z"
+      "updatedAt": "2026-11-03T10:19:10.803Z"
     },
     "web-design-guidelines": {
       "source": "vercel-labs/agent-skills",
@@ -334,18 +335,18 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/emilkowalski/skills.git",
       "skillPath": "skills/emil-design-eng/SKILL.md",
-      "skillFolderHash": "db7a20dc1d8ad26a0307dcb45ebc79fc372f5c69",
+      "skillFolderHash": "e79b9cc03e06efe8d40349bc39df0ed4a9d5deff",
       "installedAt": "2026-04-21T17:58:26.527Z",
-      "updatedAt": "2026-09-15T17:40:40.628Z"
+      "updatedAt": "2026-11-02T15:22:43.020Z"
     },
     "impeccable": {
       "source": "pbakaus/impeccable",
       "sourceType": "github",
       "sourceUrl": "https://github.com/pbakaus/impeccable.git",
       "skillPath": ".agents/skills/impeccable/SKILL.md",
-      "skillFolderHash": "0caef6d9fa3be28270b57fe04ef712cba083e0a8",
+      "skillFolderHash": "c08b2590d2be1bef41ca44be540584a1324a09d3",
       "installedAt": "2026-05-03T11:49:23.273Z",
-      "updatedAt": "2026-10-26T12:05:53.242Z"
+      "updatedAt": "2026-11-03T10:18:52.911Z"
     },
     "eleventy-nunjucks": {
       "source": "t4sh/skills4sh",
@@ -481,10 +482,10 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/mattpocock/skills.git",
       "skillPath": "skills/engineering/codebase-design/SKILL.md",
-      "skillFolderHash": "07ba1cd60efc12d0d3a083005c1d9651cf15e39a",
+      "skillFolderHash": "4cbe1c131e1ea54109cb1e4e5f3c505810db6606",
       "pluginName": "mattpocock-skills",
       "installedAt": "2026-06-28T11:15:39.810Z",
-      "updatedAt": "2026-09-29T14:13:12.208Z"
+      "updatedAt": "2026-10-30T17:55:19.750Z"
     },
     "diagnosing-bugs": {
       "source": "mattpocock/skills",
@@ -531,10 +532,10 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/mattpocock/skills.git",
       "skillPath": "skills/engineering/improve-codebase-architecture/SKILL.md",
-      "skillFolderHash": "39bd9cc130f7dfcc4e3ea0b3613f6ebed0d0ad2b",
+      "skillFolderHash": "587147dd230da299cc5e84971cb0a33f6676f8a6",
       "pluginName": "mattpocock-skills",
       "installedAt": "2026-06-28T11:15:39.844Z",
-      "updatedAt": "2026-09-29T14:13:12.216Z"
+      "updatedAt": "2026-10-30T17:55:19.758Z"
     },
     "prototype": {
       "source": "mattpocock/skills",
@@ -551,10 +552,10 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/mattpocock/skills.git",
       "skillPath": "skills/engineering/setup-matt-pocock-skills/SKILL.md",
-      "skillFolderHash": "aafaabf96fa3945d8a4069317a7a6d36b7169670",
+      "skillFolderHash": "b644b684781fd5baae57f6be000a180a4d4448d7",
       "pluginName": "mattpocock-skills",
       "installedAt": "2026-06-28T11:15:39.868Z",
-      "updatedAt": "2026-10-07T10:26:23.995Z"
+      "updatedAt": "2026-10-27T10:11:57.536Z"
     },
     "tdd": {
       "source": "mattpocock/skills",
@@ -663,10 +664,10 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/mattpocock/skills.git",
       "skillPath": "skills/productivity/grilling/SKILL.md",
-      "skillFolderHash": "28aceb4c9567b985cb47f7db88cf23c9f33af8b8",
+      "skillFolderHash": "f551b6e0d219fdda0b6abf277f8f915b3127d1e9",
       "pluginName": "mattpocock-skills",
       "installedAt": "2026-06-28T11:15:40.069Z",
-      "updatedAt": "2026-10-07T10:26:24.016Z"
+      "updatedAt": "2026-10-30T17:55:19.773Z"
     },
     "handoff": {
       "source": "mattpocock/skills",
@@ -702,19 +703,19 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/emilkowalski/skills.git",
       "skillPath": "skills/review-animations/SKILL.md",
-      "skillFolderHash": "0e0d3cb3e07ca307fe946ccaf57f6c82eb75124a",
+      "skillFolderHash": "bede4e1924423cea207f67ffe7a742b8d6ad753e",
       "installedAt": "2026-07-02T17:51:20.865Z",
-      "updatedAt": "2026-09-15T17:40:40.635Z"
+      "updatedAt": "2026-11-02T15:22:43.029Z"
     },
     "research": {
       "source": "mattpocock/skills",
       "sourceType": "github",
       "sourceUrl": "https://github.com/mattpocock/skills.git",
       "skillPath": "skills/engineering/research/SKILL.md",
-      "skillFolderHash": "0a6796c5667e95ed2301ba7381c123b4acb2ae1a",
+      "skillFolderHash": "2f8f36af48796faed5c687c75bb650071631a984",
       "pluginName": "mattpocock-skills",
       "installedAt": "2026-07-09T15:22:45.610Z",
-      "updatedAt": "2026-09-11T12:15:27.784Z"
+      "updatedAt": "2026-10-30T17:55:19.761Z"
     },
     "to-spec": {
       "source": "mattpocock/skills",
@@ -741,10 +742,10 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/mattpocock/skills.git",
       "skillPath": "skills/engineering/wayfinder/SKILL.md",
-      "skillFolderHash": "32b0ce970b1394ede47116e1d3e07f9ccc87591f",
+      "skillFolderHash": "25da74eadc3e388b2f2a2cc716f3d44b2fb9dfe0",
       "pluginName": "mattpocock-skills",
       "installedAt": "2026-07-09T15:22:45.623Z",
-      "updatedAt": "2026-10-07T10:26:24.002Z"
+      "updatedAt": "2026-10-30T17:55:19.765Z"
     },
     "claude-handoff": {
       "source": "mattpocock/skills",
@@ -769,9 +770,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/emilkowalski/skills.git",
       "skillPath": "skills/improve-animations/SKILL.md",
-      "skillFolderHash": "cf1f7aabac34c08f2cf833f039fa99af2f415183",
+      "skillFolderHash": "d3ce6f348009d830b89e7a830cc958245aea2ad6",
       "installedAt": "2026-07-14T09:21:17.972Z",
-      "updatedAt": "2026-09-15T17:40:40.631Z"
+      "updatedAt": "2026-11-02T15:22:43.025Z"
     },
     "git-flow-branch-creator": {
       "source": "github/awesome-copilot",
@@ -805,10 +806,10 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/nutlope/hallmark.git",
       "skillPath": "skills/hallmark/SKILL.md",
-      "skillFolderHash": "9bef0978c1448d6e5fbeacfa7302326d6183a06c",
+      "skillFolderHash": "2c738c424541e98bb4a29e2eeaac029908e4ad4f",
       "pluginName": "hallmark",
       "installedAt": "2026-07-18T17:00:17.510Z",
-      "updatedAt": "2026-10-23T02:49:52.355Z"
+      "updatedAt": "2026-11-03T10:18:43.842Z"
     },
     "better-accessibility": {
       "source": "jakubkrehel/skills",
@@ -1035,9 +1036,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/mickadesign/fluid-functionalism.git",
       "skillPath": "skills/fluid-functionalism/SKILL.md",
-      "skillFolderHash": "06ea23fdc956f6444a24007d0273733ba999b19f",
+      "skillFolderHash": "b46ef265e6cc9e216f99311bb320285b27c41fa7",
       "installedAt": "2026-10-08T11:59:57.133Z",
-      "updatedAt": "2026-10-26T07:16:53.331Z"
+      "updatedAt": "2026-11-04T03:22:18.905Z"
     },
     "extract-design-system": {
       "source": "arvindrk/extract-design-system",
@@ -1062,9 +1063,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/cloudflare/skills.git",
       "skillPath": "skills/web-perf/SKILL.md",
-      "skillFolderHash": "c4c15a909ae86c00d4fbf841238bbf56eb505ac8",
+      "skillFolderHash": "f50f5e7f34021937059dbda12e8f990006ab0fd1",
       "installedAt": "2026-10-20T05:03:47.368Z",
-      "updatedAt": "2026-10-20T05:03:47.368Z"
+      "updatedAt": "2026-10-29T06:22:43.140Z"
     },
     "vercel-composition-patterns": {
       "source": "vercel-labs/agent-skills",
@@ -1101,6 +1102,15 @@
       "skillFolderHash": "9901fcde67e9506a706912107825fdfb72e01f30",
       "installedAt": "2026-10-20T05:41:32.295Z",
       "updatedAt": "2026-10-20T05:41:32.295Z"
+    },
+    "stageshow": {
+      "source": "benjitaylor/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/benjitaylor/skills.git",
+      "skillPath": "stageshow/SKILL.md",
+      "skillFolderHash": "5f24a58c1b28ba9d208e576e3c6267ccd1fc1769",
+      "installedAt": "2026-11-04T02:54:44.261Z",
+      "updatedAt": "2026-11-04T03:04:58.291Z"
     }
   },
   "dismissed": {
