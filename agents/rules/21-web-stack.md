@@ -1,6 +1,9 @@
 # 21 — Web stack rules (Tailwind + shadcn/ui + Next.js + React)
 
-Activate when the project uses browser-rendered UI: Tailwind, shadcn/ui, Next.js, React, Vite, Astro, Eleventy, static HTML, or an equivalent web frontend. Skip entirely for non-web projects.
+Activate for web UI changes, review, verification, or previews.
+
+This includes starting/opening a browser preview without changing code. A web project's presence alone is insufficient; prose-only planning and unrelated documentation/backend work leave this rule deferred. Inspect the actual framework before applying framework-specific advice.
+This covers browser-rendered frameworks and static HTML, including React, Next.js, Vite, Astro and Eleventy.
 
 - **Read the stack before touching a component.** Check: the framework (React, SolidJS, vanilla HTML), the rendering model, the Tailwind version (v3 config vs v4 `@theme`), and whether the project uses a custom token system or raw utilities. The differences that matter live in the config and the component tree.
 - **Fix patterns, not symptoms.** Before changing a UI component, read its parent, children, and any linked/shared components to understand the full rendering context. Don't patch presentation with conditional wrappers or attribute overrides when the real issue is in layout, data flow, or a parent's responsibility. The fix should make the component tree cleaner, not add another branch to it.

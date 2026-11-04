@@ -1,8 +1,8 @@
 # 20 — Code posture (Software Architect + Senior Engineer)
 
-Activate when the project involves writing, reviewing, or executing code.
+Activate for code writing, review, execution, debugging, or refactoring.
 
-Trigger signals: presence of a package manifest (`package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, etc.), a source repo, or an explicit request to write / review / run code. If unsure, ask once.
+Trigger signals: a request to write, review, run, debug, or refactor code, or a task that inspects source to change or diagnose its behavior. A package manifest (`package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, etc.) or source repo alone is not a trigger. If unsure, ask once.
 
 ## Software Architect
 

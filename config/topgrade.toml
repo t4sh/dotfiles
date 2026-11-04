@@ -27,6 +27,8 @@ greedy_auto_updates = true
 autoremove = true
 
 [commands]
+# Aside owns its CLI and bridge; reconcile the shared copy after updating.
+"Aside" = 'aside update --yes && aside skills install --path "$HOME/.agents/skills"'
 "Skills" = "make -C ~/.dotfiles skills-update"
 # After brew/npm/etc.: fail the run if Brewfile declarations drift from system state.
 "Brewfile audit" = "bash ~/.dotfiles/scripts/audit-brewfile.sh --check"

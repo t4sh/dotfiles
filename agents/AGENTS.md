@@ -15,7 +15,7 @@ Canonical agent configuration. Edit rules in `./rules/`; this index controls loa
 
 ---
 
-The headings below declare applicability and index every rule. Rule membership is the exact match between these links and the top-level Markdown files on disk. Links are deliberately not automatic `@` includes: clients load the applicable files through `init-rulebook` instead of eagerly expanding the complete rulebook.
+Headings declare applicability; links must match the top-level rule inventory. They are not automatic `@` imports: `init-rulebook` loads only the selected rules.
 
 ## Always on
 
@@ -39,7 +39,7 @@ Action signals: creating a git worktree; creating a branch for isolation; finish
 
 ## Activate for selections starting from rule 12, overlapping skill choices, named skill requests, or cross-skill references
 
-A selection starts from rule 12's discovery defaults, two skills could own the same deliverable, the user names a skill, or a skill references another skill. Narrow specialists can use their descriptions directly.
+Use the owner list for discovery; narrow specialists can use their descriptions directly.
 
 - [Skill routing](./rules/11-skill-routing.md)
 
@@ -49,12 +49,15 @@ Trigger signals: GitHub CLI or API work, browser verification, localhost preview
 
 - [Host tooling](./rules/04-host-tooling.md)
 
-## Activate when code is involved
-
-Trigger signals: a package manifest (`package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, etc.), a source repo, or an explicit request to write, review, or run code.
+## Activate for code writing, review, execution, debugging, or refactoring
 
 - [Code posture](./rules/20-code-posture.md)
+
+## Activate for package, runtime, dependency, or setup work
+
 - [Environment and package managers](./rules/22-environment.md)
+
+Repository presence alone activates neither section.
 
 ## Activate when code, configuration, automation, data transforms, or generated artifacts are changed
 
@@ -64,12 +67,15 @@ Trigger signals: a package manifest (`package.json`, `pyproject.toml`, `Cargo.to
 
 - [Design posture](./rules/10-design-posture.md)
 
-## Activate when the project uses browser-rendered UI
+## Activate for web UI changes, review, verification, or previews
 
 - [Web stack rules](./rules/21-web-stack.md)
+
+## Activate for web UI changes, review, or verification
+
 - [Frontend verification](./rules/24-frontend-verification.md)
 
-## Activate when the task touches a repo with multiple runtimes, native code, generated outputs, CLI/desktop UI, bindings, or service boundaries
+## Activate for technical work involving runtime, native, generated, CLI/desktop, binding, or service boundaries
 
 - [Tech stack discovery](./rules/25-tech-stack-discovery.md)
 

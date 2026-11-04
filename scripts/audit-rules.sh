@@ -182,6 +182,17 @@ while IFS= read -r rule; do
     fi
 done <<< "$on_disk"
 
+# Task gates are owned by the index; keep these rule declarations identical.
+for rule in 20-code-posture.md 21-web-stack.md 22-environment.md 24-frontend-verification.md 25-tech-stack-discovery.md; do
+    heading="$(awk -v target="(./rules/$rule)" '
+        /^## / { heading = substr($0, 4) }
+        index($0, target) { print heading }
+    ' "$AGENTS_MD")"
+    declaration="$(grep -m 1 '^Activate ' "$RULES_DIR/$rule" || true)"
+    [ "$declaration" = "$heading." ] \
+        || fail_contract "$rule task trigger differs from its index heading"
+done
+
 [ -f "$ROUTING_RULE" ] || fail_contract "missing canonical skill router: $ROUTING_RULE"
 [ -f "$SKILL_OWNERS_RULE" ] || fail_contract "missing skill discovery defaults: $SKILL_OWNERS_RULE"
 [ -d "$ROUTING_DIR" ] || fail_contract "missing routing reference directory: $ROUTING_DIR"
