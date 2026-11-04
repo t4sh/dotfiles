@@ -344,9 +344,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/pbakaus/impeccable.git",
       "skillPath": ".agents/skills/impeccable/SKILL.md",
-      "skillFolderHash": "c08b2590d2be1bef41ca44be540584a1324a09d3",
+      "skillFolderHash": "c528c01ad1a8dbbcaa91d03bfb9d529068873005",
       "installedAt": "2026-05-03T11:49:23.273Z",
-      "updatedAt": "2026-11-03T10:18:52.911Z"
+      "updatedAt": "2026-11-04T19:44:14.490Z"
     },
     "eleventy-nunjucks": {
       "source": "t4sh/skills4sh",
@@ -806,10 +806,10 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/nutlope/hallmark.git",
       "skillPath": "skills/hallmark/SKILL.md",
-      "skillFolderHash": "2c738c424541e98bb4a29e2eeaac029908e4ad4f",
+      "skillFolderHash": "b7a0dd1c2cba6d37fe21927384dbe0ac13967492",
       "pluginName": "hallmark",
       "installedAt": "2026-07-18T17:00:17.510Z",
-      "updatedAt": "2026-11-03T10:18:43.842Z"
+      "updatedAt": "2026-11-04T19:44:05.186Z"
     },
     "better-accessibility": {
       "source": "jakubkrehel/skills",
@@ -1036,9 +1036,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/mickadesign/fluid-functionalism.git",
       "skillPath": "skills/fluid-functionalism/SKILL.md",
-      "skillFolderHash": "b46ef265e6cc9e216f99311bb320285b27c41fa7",
+      "skillFolderHash": "71d9f4dad7195f8a5556714410aef86455397207",
       "installedAt": "2026-10-08T11:59:57.133Z",
-      "updatedAt": "2026-11-04T03:22:18.905Z"
+      "updatedAt": "2026-11-04T19:43:45.506Z"
     },
     "extract-design-system": {
       "source": "arvindrk/extract-design-system",
@@ -1108,9 +1108,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/benjitaylor/skills.git",
       "skillPath": "stageshow/SKILL.md",
-      "skillFolderHash": "5f24a58c1b28ba9d208e576e3c6267ccd1fc1769",
+      "skillFolderHash": "92730b700cf5ae3fdaf924ae1228d42f3e0e550b",
       "installedAt": "2026-11-04T02:54:44.261Z",
-      "updatedAt": "2026-11-04T03:04:58.291Z"
+      "updatedAt": "2026-11-04T19:42:37.971Z"
     }
   },
   "dismissed": {
