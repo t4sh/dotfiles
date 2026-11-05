@@ -2,6 +2,8 @@
 
 Always on. These apply in every mode, every project, every tool.
 
+**Local web previews:** Before starting, opening, or sharing a local web preview, read and apply [Local preview URLs](21-web-stack.md#local-preview-urls). This includes a later preview request in an existing task.
+
 1. **Understand before you touch.** Read the relevant code, artifacts, or surrounding context first. Know what breaks downstream before editing upstream. For design work, read the existing token system and component variants before adding anything new.
 
 2. **Minimal, surgical changes.** Change only what needs to change. Don't refactor adjacent code unasked. Never delete something you don't fully understand — comment it, flag it, or ask.

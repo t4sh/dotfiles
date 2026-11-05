@@ -1,3 +1,4 @@
 {
-  "vercel-composition-patterns": "Retain the complete pinned source snapshot: the skills installer intentionally excludes build metadata.json on refresh; update this skill manually with its supplemental resource record. Track complete-source installation support: https://github.com/vercel-labs/skills/issues/1241#issuecomment-6297286979"
+  "vercel-composition-patterns": "Retain the complete pinned source snapshot: the skills installer intentionally excludes build metadata.json on refresh; update this skill manually with its supplemental resource record. Track complete-source installation support: https://github.com/vercel-labs/skills/issues/1241#issuecomment-6297286979",
+  "design-taste-frontend": "Retain the last safe upstream snapshot: Taste 2.5 perf.mjs deletes every sibling run-N browser profile before launch, including active runs. Reproduced with a disposable profile fixture on 2026-11-05. Refresh only after upstream limits cleanup to the current run and the profile-isolation regression passes."
 }
