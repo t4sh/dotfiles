@@ -16,6 +16,14 @@ $oldRoot = $env:HERMES_DESKTOP_HERMES_ROOT
 try {
     $runtimeHome = Join-Path $fixture 'profile with spaces'
     $runtime = Join-Path $runtimeHome 'hermes-agent'
+    $dispatcherHome = Join-Path $fixture 'dispatcher profile'
+    New-Item -ItemType Directory -Path $dispatcherHome | Out-Null
+    $env:HERMES_HOME = $dispatcherHome
+    $dot = Join-Path $root 'bin/dot.cmd'
+    & $dot hermes-update -DryRun | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw 'dot hermes-update -DryRun did not reach the standalone updater' }
+    & $dot hermes-runtime -Check | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw 'dot hermes-runtime -Check did not reach the runtime checker' }
     $programs = Join-Path $fixture 'Programs'
     $taskbar = Join-Path $fixture 'TaskBar'
     [IO.Directory]::CreateDirectory($taskbar) | Out-Null
