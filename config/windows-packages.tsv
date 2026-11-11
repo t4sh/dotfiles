@@ -41,7 +41,7 @@ brew:mas	macos-only			Apple/Homebrew-specific app or shell integration; not appl
 brew:mole	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
 brew:moreutils	manual			Optional POSIX toolkit; not a Windows bootstrap dependency.
 brew:nvm	native	winget	Volta.Volta	Native Windows counterpart; identity verified against installed WinGet inventory.
-brew:opencode	native	winget	SST.opencode	OpenCode CLI; separate from the desktop app.
+brew:opencode	native	winget	Anomaly.OpenCode	OpenCode CLI; separate from the desktop app.
 brew:pi-coding-agent	runtime	volta	@earendil-works/pi-coding-agent	Explicit runtime-manager package; not a Homebrew dependency on Windows.
 brew:poppler	native	winget	oschwartz10612.Poppler	Native Windows counterpart; identity verified against installed WinGet inventory.
 brew:portless	manual			Windows local HTTPS setup is deferred; Mac uses the Homebrew formula.
@@ -82,7 +82,7 @@ cask:codex	manual			Codex desktop via official OpenAI download; not installed as
 cask:comet	native	winget	Perplexity.Comet	Native Windows counterpart; identity verified against installed WinGet inventory.
 cask:conductor	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
 cask:craft	native	winget	LukiLabs.Craft	Native Windows counterpart; identity verified against installed WinGet inventory.
-cask:craft-agents	native	winget	CraftDocs.CraftAgents	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:craft-agents	manual			Use the vendor Windows installer at https://thecraftagents.com/docs/getting-started/installation/; no WinGet mapping.
 cask:cursor	native	winget	Anysphere.Cursor	Native Windows counterpart; identity verified against installed WinGet inventory.
 cask:cyberduck	manual			Mac inventory addition; Windows file transfers use the existing WinSCP counterpart.
 cask:daisydisk	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
@@ -122,7 +122,7 @@ cask:notion-calendar	native	winget	Notion.NotionCalendar	Native Windows counterp
 cask:obsidian	native	winget	Obsidian.Obsidian	Native Windows counterpart; identity verified against installed WinGet inventory.
 cask:onyx	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
 cask:open-video-downloader	native	winget	jely2002.youtube-dl-gui	Native Windows counterpart; identity verified against installed WinGet inventory.
-cask:opencode-desktop	native	winget	SST.OpenCodeDesktop	Native Windows counterpart; identity verified against installed WinGet inventory.
+cask:opencode-desktop	native	winget	Anomaly.OpenCode.Desktop	Native Windows counterpart; identity verified against installed WinGet inventory.
 cask:paper-design	manual			https://paper.design/downloads/ (vendor installer)
 cask:pearcleaner	macos-only			Apple/Homebrew-specific app or shell integration; not applied on Windows.
 cask:perplexity	native	msstore	9P9XG917PWCJ	Preserve Store edition; do not install the older desktop package.

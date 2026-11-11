@@ -17,7 +17,7 @@ notify_end = "on_failure"
 # wsl/wsl_update: do not maintain a separate Linux environment implicitly.
 # tldr: outer runner checks Python client update output as well as its exit code.
 # codex: desktop-bundled CLI is maintained by the Codex desktop updater.
-# opencode: the outer WinGet stage owns SST.opencode; Topgrade 17.13 rejects its version output.
+# opencode: the outer WinGet stage owns Anomaly.OpenCode; Topgrade 17.13 rejects its version output.
 # hermes_agent: automatic Windows updates paused; managed Python is blocked (#99590).
 disable = [
   "codex",

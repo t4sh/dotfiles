@@ -130,7 +130,7 @@ Run from the checkout, or use `dot` after setup adds its directory to PATH:
 | `bin\dot.cmd hermes-launcher -Check` | Verify Start → Hermes selects source launch |
 | `make skills` | Verify checked-in skill metadata |
 
-OpenCode CLI updates belong to the outer WinGet stage through `SST.opencode`.
+OpenCode CLI updates belong to the outer WinGet stage through `Anomaly.OpenCode`.
 Its duplicate Topgrade step is disabled: Topgrade 17.13 rejects the CLI's bare
 version output before attempting an update. This does not disable WinGet updates
 for the CLI or the separately declared OpenCode Desktop package.

@@ -9,7 +9,7 @@ if ($ast.Extent.Text -match 'update-windows-hermes\.ps1') { throw 'Automatic mai
 $topgradeConfig = Get-Content (Join-Path $Repository 'config/topgrade-windows.toml') -Raw
 if ($topgradeConfig -notmatch '(?s)disable\s*=\s*\[[^\]]*"opencode"') { throw 'Topgrade must leave the WinGet-managed OpenCode CLI to the package stage' }
 $opencodePackage = @(Import-Csv (Join-Path $Repository 'config/windows-packages.tsv') -Delimiter "`t" | Where-Object Key -EQ 'brew:opencode')
-if ($opencodePackage.Count -ne 1 -or $opencodePackage[0].Mode -ne 'native' -or $opencodePackage[0].Source -ne 'winget' -or $opencodePackage[0].Id -ne 'SST.opencode') { throw 'OpenCode updates require the native SST.opencode WinGet mapping' }
+if ($opencodePackage.Count -ne 1 -or $opencodePackage[0].Mode -ne 'native' -or $opencodePackage[0].Source -ne 'winget' -or $opencodePackage[0].Id -ne 'Anomaly.OpenCode') { throw 'OpenCode updates require the native Anomaly.OpenCode WinGet mapping' }
 if ($topgradeConfig -notmatch '(?s)disable\s*=\s*\[[^\]]*"hermes_agent"') { throw 'Topgrade would reintroduce automatic Hermes updates' }
 foreach ($name in @('WinGet applications','Topgrade apps and developer tools','TLDR pages','Repo-managed agent skills','Windows command paths')) {
     if (!$ast.Extent.Text.Contains("-Name '$name'")) { throw "Non-Hermes maintenance stage missing: $name" }
