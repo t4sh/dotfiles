@@ -88,7 +88,12 @@ meta_for() {
 source_license_for() {
   local source="$1"
   [[ -n "$source" && -f "$SOURCE_LICENSES" ]] || return 1
-  awk -F '\t' -v s="$source" '$1 == s {print $2; found=1; exit} END {exit found ? 0 : 1}' "$SOURCE_LICENSES"
+  # GitHub may return the same owner/repository with different casing on refresh.
+  LC_ALL=C awk -F '\t' -v s="$source" '
+    BEGIN {s = tolower(s)}
+    tolower($1) == s {print $2; found=1; exit}
+    END {exit found ? 0 : 1}
+  ' "$SOURCE_LICENSES"
 }
 
 # Classify a reviewed source-level license identifier from source-licenses.tsv.

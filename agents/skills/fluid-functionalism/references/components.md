@@ -15,8 +15,9 @@ behavior they extend.
 |---|---|---|---|
 | [Accordion](https://www.fluidfunctionalism.com/docs/accordion) | `accordion` · `base/accordion` | Collapsible sections with animated expand/collapse and fluid hover in grouped mode | [Accordion](craft.md#accordion) |
 | [AskUserQuestions](https://www.fluidfunctionalism.com/docs/ask-user-questions) | `ask-user-questions` · `base/ask-user-questions` | Stepped question flow with single/multi-select, an inline "other" input, skip, and multi-question navigation | [AskUserQuestions](craft.md#ask-user-questions) |
-| [Badge](https://www.fluidfunctionalism.com/docs/badge) | `badge` | Compact label with solid and dot variants, the Tailwind color palette, and 2 sizes | [Badge](craft.md#badge) |
+| [Badge](https://www.fluidfunctionalism.com/docs/badge) | `badge` | Compact label with solid, dot, and ghost variants, the Tailwind color palette, and 2 sizes | [Badge](craft.md#badge) |
 | [Banner](https://www.fluidfunctionalism.com/docs/banner) | `banner` | Status message in 5 statuses and 2 contrasts (`contrast` low or high): status icon, title, optional description, up to 3 actions (primary, secondary, ghost), a dismiss that collapses its height, and a fixed full-bleed variant | [Banner](craft.md#banner) |
+| [Breadcrumb](https://www.fluidfunctionalism.com/docs/breadcrumb) | `breadcrumb` | Trail of links to the current page with one fluid hover across every crumb (chevron trailing each crumb, no gaps), icons, a Dropdown on a step (optionally on hover), a collapsed middle with a hidden-step count, and a long page name that truncates in place | [Breadcrumb](craft.md#breadcrumb) |
 | [Button](https://www.fluidfunctionalism.com/docs/button) | `button` · `base/button` | Variants (primary, secondary, tertiary, ghost, destructive), sizes, loading state, icon slots, and a weight shift on hover | [Button](craft.md#button) |
 | [Calendar](https://www.fluidfunctionalism.com/docs/calendar) | `calendar` · `base/calendar` | Month grid on DayPicker v10 for a day or a range (`mode`): one fluid hover across 1 or 2 months (`numberOfMonths`, `orientation` auto/horizontal/vertical), a range band that previews the end, `booked` / `available` / `disabled` matchers, `cellSize`, `fill`, ISO week numbers | [Calendar](craft.md#calendar) |
 | [Card](https://www.fluidfunctionalism.com/docs/card) | `card` | shadcn's compositional card with stacked, inline, and grid layouts, borderless dividers, media/logo/feature slots, and 2-D fluid hover | [Card](craft.md#card) |
@@ -27,6 +28,7 @@ behavior they extend.
 | [ColorPicker](https://www.fluidfunctionalism.com/docs/color-picker) | `color-picker` · `base/color-picker` | HEX, RGB, HSL, and OKLCH formats with alpha, swatches, and eyedropper, inline or in a popover | [ColorPicker](craft.md#color-picker) |
 | [Combobox](https://www.fluidfunctionalism.com/docs/combobox) | `combobox` · `base/combobox` | Type-to-filter field with keyboard highlight, fluid hover, chips for multiple selection, and a create-from-query row | [Combobox](craft.md#combobox) |
 | [CommandMenu](https://www.fluidfunctionalism.com/docs/command-menu) | `command-menu` · `base/command-menu` | Type to filter a list of actions, arrow through them, press Enter: groups, shortcut caps, suggestions, and a dialog shell on ⌘K | [CommandMenu](craft.md#command-menu) |
+| [DataTable](https://www.fluidfunctionalism.com/docs/data-table) | `data-table` · `base/data-table` | TanStack Table on the fluid hover Table: resizable, draggable columns, sort headers with a gliding hover, a ghost search field, a Columns menu, a selection column with spreadsheet keys, a row menu, pagination, editable cells (text, link, number, date, tags, select), sub-rows, and a floating selection bar with ⌘K actions | [DataTable](craft.md#data-table) |
 | [DatePicker](https://www.fluidfunctionalism.com/docs/date-picker) | `date-picker` · `base/date-picker` | Field or ghost trigger (`variant`) for a date or a range, with optional `presets`, and editable `time` / `timeRange` fields whose slot lists show each duration; each segment opens its own popover | [DatePicker](craft.md#date-picker) |
 | [Dialog](https://www.fluidfunctionalism.com/docs/dialog) | `dialog` · `base/dialog` | Modal with spring enter/exit and overlay in 3 widths, the largest a canvas for a sidebar | [Dialog](craft.md#dialog) |
 | [Dropdown](https://www.fluidfunctionalism.com/docs/dropdown) | `dropdown` · `base/dropdown` | Menu-style dropdown with fluid hover, animated selection, and an optional search field in the popup | [Dropdown](craft.md#dropdown) |
@@ -77,13 +79,13 @@ by dashes, or is `default`. An existing app takes the same components and a
 
 | Piece | Registry name | What it does |
 |---|---|---|
-| Fluid Provider | `fluid-provider` | One wrapper for the system: reduced motion that follows the OS, the radius (rounded or pill), the size step, and the icon set. Render it from a `"use client"` file near the root, since an icon map can't cross from a server layout |
+| Fluid Provider | `fluid-provider` | One wrapper for the system: reduced motion that follows the OS, the radius (rounded, pill or sharp), the size step, and the icon set. Render it from a `"use client"` file near the root, since an icon map can't cross from a server layout |
 | Icon sets | `icons-tabler` · `icons-phosphor` · `icons-hugeicons` · `icons-untitledui` | Every icon slot filled from one library. Pass the map to `FluidProvider`'s `icons` prop (or `IconProvider`) |
 
 Other installable libs and hooks (usually arrive as dependencies):
 `font-weight` (variable weight tokens for the ghost-span pattern),
 `icon-context` (named icon slots, Lucide defaults, `IconProvider` override),
-`shape-context` (pill or rounded), `surface-context` / `surface-classes` /
+`shape-context` (rounded, pill or sharp), `surface-context` / `surface-classes` /
 `tokens` (elevation plumbing and `bg-hover`/`bg-active` state tokens),
 `popup` (shared popup chrome), `omit` (drops props before a spread),
 `use-touch-primary`, `use-keyboard-nav-gate`, `use-merge-split` (the merged

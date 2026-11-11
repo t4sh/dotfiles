@@ -8,6 +8,8 @@ Review and verification include existing UI without code changes. A preview-only
 - **Open the UI when feasible.** Use the available browser/tooling path to inspect the affected route or component in a real render, not just source code.
 - **Check responsive states.** Verify at least one desktop and one mobile/narrow viewport for meaningful layout changes. Add tablet/wide checks when the layout has breakpoints there.
 - **Check interaction states.** Exercise the primary hover, focus, active, loading, empty, error, and disabled states that the change affects.
+- **Stress-test on request.** Render the real component with fixtures through its existing props or data boundary. Choose reachable cases such as unbroken or localized text, missing fields, empty or dense lists, and extreme counts. Reuse an existing story or test harness when available. Report observed failures by case.
+- **Check mobile browser behavior when affected.** Exercise touch feedback, safe areas, browser chrome and keyboard resizing, or input zoom as applicable. Record which checks ran on real hardware and which relied on emulation.
 - **Guard against visual regressions.** Look for text overflow, clipped controls, incoherent overlap, layout shift, missing assets, blank canvases, and contrast that appears marginal.
 - **Accessibility is part of done.** Confirm semantic controls, labels, keyboard reachability, visible focus, and motion/animation behavior for the changed surface.
 - **Keep motion purposeful.** Motion should provide feedback, orientation, continuity, or deliberate delight without delaying frequent tasks.

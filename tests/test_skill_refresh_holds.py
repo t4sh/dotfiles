@@ -87,6 +87,54 @@ exit "${FIXTURE_EXIT:-0}"
         self.assertEqual((self.root / "agents/skills/ordinary/SKILL.md").read_text(),
                          "new upstream content\n")
 
+    def test_license_audit_accepts_github_source_casing_changes(self):
+        lock = self.root / "agents/.skill-lock.json"
+        data = json.loads(lock.read_text(encoding="utf-8"))
+        data["skills"]["ordinary"]["source"] = "Fixture/Shared"
+        data["skills"]["held-only"]["source"] = "Fixture/Held"
+        lock.write_text(json.dumps(data), encoding="utf-8")
+        (self.root / "agents/skills/source-licenses.tsv").write_text(
+            "fixture/shared\tMIT\ttest license\nfixture/held\trestricted\ttest license\n",
+            encoding="utf-8",
+        )
+        ignore = self.root / ".gitignore"
+        ignore.write_text("agents/skills/held-only/\n", encoding="utf-8")
+        command = [BASH, str(ROOT / "scripts/audit-skill-licenses.sh"), "--check"]
+        env = dict(self.env, DOTFILES=self.root.as_posix())
+
+        result = subprocess.run(command, env=env, capture_output=True, text=True, encoding="utf-8")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("license-gated in .gitignore: held-only", result.stdout)
+
+        ignore.write_text("", encoding="utf-8")
+        result = subprocess.run(command, env=env, capture_output=True, text=True, encoding="utf-8")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("restricted skill(s) not gitignored", result.stderr)
+
+    def test_github_folder_hash_fallback_keeps_refresh_usable(self):
+        lock = self.root / "agents/.skill-lock.json"
+        data = json.loads(lock.read_text(encoding="utf-8"))
+        entry = data["skills"]["ordinary"]
+        entry["skillFolderHash"] = "a" * 64
+        lock.write_text(json.dumps(data), encoding="utf-8")
+
+        result = self.generate()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        result = self.refresh()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assert_curated_unchanged()
+        self.assertEqual(json.loads(lock.read_text(encoding="utf-8")), data)
+
+        calls = (self.root / "calls").read_bytes()
+        for invalid in ("", "a" * 41, "g" * 64, None):
+            with self.subTest(folder_hash=invalid):
+                entry["skillFolderHash"] = invalid
+                lock.write_text(json.dumps(data), encoding="utf-8")
+                result = self.refresh()
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("github skill 'ordinary'", result.stderr)
+                self.assertEqual((self.root / "calls").read_bytes(), calls)
+
     def test_installer_noise_is_hidden_but_failure_diagnostics_survive(self):
         self.env["TMPDIR"] = self.root.as_posix()
         installer = self.root / "installer"

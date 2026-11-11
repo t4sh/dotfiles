@@ -22,6 +22,7 @@ echris6/motion-video-kit	MIT	https://github.com/echris6/motion-video-kit/blob/ma
 emilkowalski/skills	MIT	GitHub repo root LICENSE; fetched 2026-07-03
 firebenders/sync-figma-token-skill	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
 github/awesome-copilot	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+gustavo-fior/craft	MIT	https://github.com/gustavo-fior/craft/blob/586e23b34b9c27e48b2ad8be660c67db587f26ad/README.md#license; inspected 2026-11-08
 index-how/vocabulary	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
 jakubkrehel/skills	MIT	GitHub repo root LICENSE; fetched 2026-08-02
 josiahsiegel/claude-plugin-marketplace	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
@@ -36,7 +37,7 @@ notedit/happy-skills	reviewed	pre-existing tracked source before 2026-07-03 audi
 mickadesign/fluid-functionalism	MIT	GitHub repo root LICENSE; verified 2026-10-08 via repos/mickadesign/fluid-functionalism/license
 nutlope/hallmark	MIT	GitHub repo root LICENSE; fetched 2026-07-19
 obra/superpowers	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
-owl-listener/designer-skills	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+owl-listener/designer-skills	MIT	https://github.com/Owl-Listener/designer-skills/blob/main/LICENSE; inspected 2026-11-11
 owl-listener/designpowers	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
 pbakaus/impeccable	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
 shadcn/improve	reviewed	pre-existing tracked source before 2026-07-03 audit hardening

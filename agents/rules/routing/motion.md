@@ -2,19 +2,20 @@
 
 Load this reference when animation or motion is the requested deliverable.
 
-Motion Video Kit (`business-motion-film`) is available only when the user names the skill or kit. Generic video, commercial, explainer, motion, and interface requests do not activate it; other skills must not automatically chain to it. It owns explicitly requested film production, not ordinary interface motion.
+Motion Video Kit (`business-motion-film`) owns film production when the user names the skill or kit.
 
 | Request | Primary owner |
 | --- | --- |
 | Polish motion in one component as part of broader UI detail work | `better-ui` |
-| Design, implement, or debug production UI motion, gestures, drag, or springs | `ui-animation` |
-| Reverse-engineer motion from a recording, fit curves, or name a described effect | `ui-animation` |
+| Design, implement, or debug web motion, including gestures, springs, and coordinated entrances and exits | `ui-animation` |
+| Critique existing web motion | `ui-animation` review reference |
+| Diagnose dropped frames or stutter in a web interaction | `ui-animation` performance reference. Broader site audits use `web-perf`. |
+| Identify or remove unnecessary motion | `ui-animation` decision framework. Preserve task feedback. Edit when removal is requested. |
+| Name a described motion effect | `animation-vocabulary` |
+| Reverse-engineer motion from a recording or fit curves | `ui-animation` |
+| Implement or debug React Native or Expo motion | Project-native animation stack and version-matched docs |
 | Apply explicitly Apple/WWDC-style physical gestures, momentum, springs, or materials | `apple-design` |
-| Discover where motion should exist and propose recipes without implementing | `find-animation-opportunities` |
+| Discover where to add motion and propose recipes without implementing | `find-animation-opportunities` |
 | Review an existing motion diff or animation code against a strict bar | `review-animations` — explicit invocation only |
 | Audit repository-wide motion and produce implementation plans | `improve-animations` |
 | Create cinematic, scroll-driven, immersive motion | `top-design` |
-
-Use `better-ui` for small polish within broader interface work and `ui-animation` when motion itself is the implementation task. Use `apple-design` only for explicit Apple-style physical interaction.
-
-`find-animation-opportunities` is read-only discovery. Do not use it to review or fix existing animations. Do not use a repository-wide auditor for one component, or cinematic direction for routine product interaction.

@@ -49,6 +49,14 @@ For local UI verification, visual inspection, and localhost preview checks:
 - If browser tooling needs writable state or host access, request the narrow escalation instead of declaring the browser unavailable.
 - For known localhost targets, start with the host/browser path. Use a sandboxed probe only when the target's locality is genuinely unknown.
 
+## Playwright browser channel
+
+Playwright's downloaded Chromium and Chrome for Testing builds lag Chrome security releases; system Google Chrome updates itself.
+
+- Agent-launched Playwright uses the system Chrome channel: `channel: 'chrome'` for library launches and `--browser chrome` for Playwright MCP or CLI (their current default). Keep the Chromium sandbox enabled.
+- This overrides installed-skill defaults that prescribe the bundled Chromium. When a skill script hard-codes the bundled browser, run an equivalent task-local launch with `channel: 'chrome'` instead; do not run `playwright install chromium` for agent work.
+- Project-owned tests, scripts and CI keep their configured browser, such as visual baselines pinned to the bundled Chromium. Installing the browser a project requires is part of running that project's workflow.
+
 ## Browser session lifecycle
 
 - Reuse one task-owned browser session for the full verification pass. Change routes and viewport sizes within that session instead of launching a new browser for each check.

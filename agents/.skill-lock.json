@@ -154,18 +154,18 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/coreyhaines31/marketingskills.git",
       "skillPath": "skills/copywriting/SKILL.md",
-      "skillFolderHash": "ce3f78a285cf452d48813d3482b293da8b62e7cd",
+      "skillFolderHash": "94ed1edf4f53c20cbc40f2ecc6f2228bcd66382f",
       "installedAt": "2026-04-13T02:35:56.686Z",
-      "updatedAt": "2026-10-28T05:41:44.382Z"
+      "updatedAt": "2026-11-10T07:52:53.233Z"
     },
     "git-commit": {
       "source": "github/awesome-copilot",
       "sourceType": "github",
       "sourceUrl": "https://github.com/github/awesome-copilot.git",
       "skillPath": "skills/git-commit/SKILL.md",
-      "skillFolderHash": "266a4c3fbaa9f5441b5d1a96b786b6aa634c19e6",
+      "skillFolderHash": "34b3e1ac8c5cbdc3a24dfc053cad930aaddf41f6",
       "installedAt": "2026-04-13T02:36:07.129Z",
-      "updatedAt": "2026-10-22T04:15:20.440Z"
+      "updatedAt": "2026-11-06T04:53:28.494Z"
     },
     "design-taste-frontend": {
       "source": "Leonxlnx/taste-skill",
@@ -191,9 +191,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill.git",
       "skillPath": ".claude/skills/ui-ux-pro-max/SKILL.md",
-      "skillFolderHash": "039881fb83556dfeb60b3cce276392ed47eb491b",
+      "skillFolderHash": "d69b734e576aa6b430bc11a435aa11d29bc92c8e",
       "installedAt": "2026-04-13T02:36:50.857Z",
-      "updatedAt": "2026-11-05T08:08:24.785Z"
+      "updatedAt": "2026-11-07T19:13:55.775Z"
     },
     "agent-memory": {
       "source": "t4sh/skills4sh",
@@ -295,13 +295,13 @@
       "updatedAt": "2026-10-21T14:46:51.247Z"
     },
     "design-token-audit": {
-      "source": "owl-listener/designer-skills",
+      "source": "Owl-Listener/designer-skills",
       "sourceType": "github",
-      "sourceUrl": "https://github.com/owl-listener/designer-skills.git",
+      "sourceUrl": "https://github.com/Owl-Listener/designer-skills.git",
       "skillPath": "designer-toolkit/skills/design-token-audit/SKILL.md",
       "skillFolderHash": "2d868c38e7b7f86bf8684dbf6d4d5ebb257bfff9",
       "installedAt": "2026-04-13T03:24:08.928Z",
-      "updatedAt": "2026-09-11T12:15:57.802Z"
+      "updatedAt": "2026-11-11T10:08:55.130Z"
     },
     "monorepo-management": {
       "source": "wshobson/agents",
@@ -344,9 +344,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/pbakaus/impeccable.git",
       "skillPath": ".agents/skills/impeccable/SKILL.md",
-      "skillFolderHash": "222d025e21448db16e207fd82ea1331cd15b93e1",
+      "skillFolderHash": "e92e2e77c815097cd5fa05c8eaee2a5399d92757",
       "installedAt": "2026-05-03T11:49:23.273Z",
-      "updatedAt": "2026-11-05T08:08:45.285Z"
+      "updatedAt": "2026-11-11T09:44:13.497Z"
     },
     "eleventy-nunjucks": {
       "source": "t4sh/skills4sh",
@@ -417,9 +417,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/mblode/agent-skills.git",
       "skillPath": "skills/ui-animation/SKILL.md",
-      "skillFolderHash": "16c6ff36f4ecea2f82b83ebcdddea6dbead8ca94",
+      "skillFolderHash": "aff56af1e00f7ec8e6eb57123ffc5dd945904ccf",
       "installedAt": "2026-05-29T10:31:36.298Z",
-      "updatedAt": "2026-10-04T04:24:15.412Z"
+      "updatedAt": "2026-11-10T07:54:15.152Z"
     },
     "brandkit": {
       "source": "Leonxlnx/imagegen-skills",
@@ -788,28 +788,28 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/coreyhaines31/marketingskills.git",
       "skillPath": "skills/seo-audit/SKILL.md",
-      "skillFolderHash": "dedc690c587c376951526c087a567f207c070595",
+      "skillFolderHash": "e3ae4d458922e9d675491e2ba9fd665a10b4a54c",
       "installedAt": "2026-07-16T19:18:05.226Z",
-      "updatedAt": "2026-10-20T00:53:52.056Z"
+      "updatedAt": "2026-11-10T07:52:53.240Z"
     },
     "marketing-psychology": {
       "source": "coreyhaines31/marketingskills",
       "sourceType": "github",
       "sourceUrl": "https://github.com/coreyhaines31/marketingskills.git",
       "skillPath": "skills/marketing-psychology/SKILL.md",
-      "skillFolderHash": "0a527bd6cff5ab2fe2b5a60b97d86013a385326a",
+      "skillFolderHash": "d3c5aeebbb07e6cf3a03a228b58b6da8d18612bf",
       "installedAt": "2026-07-16T19:18:42.456Z",
-      "updatedAt": "2026-09-11T12:14:52.944Z"
+      "updatedAt": "2026-11-10T07:52:53.238Z"
     },
     "hallmark": {
-      "source": "nutlope/hallmark",
+      "source": "Nutlope/hallmark",
       "sourceType": "github",
-      "sourceUrl": "https://github.com/nutlope/hallmark.git",
+      "sourceUrl": "https://github.com/Nutlope/hallmark.git",
       "skillPath": "skills/hallmark/SKILL.md",
-      "skillFolderHash": "b7a0dd1c2cba6d37fe21927384dbe0ac13967492",
+      "skillFolderHash": "ac6d58803694c4b4c31567b6e1e47dd75fce8819",
       "pluginName": "hallmark",
       "installedAt": "2026-07-18T17:00:17.510Z",
-      "updatedAt": "2026-11-04T19:44:05.186Z"
+      "updatedAt": "2026-11-11T10:08:48.943Z"
     },
     "better-accessibility": {
       "source": "jakubkrehel/skills",
@@ -1036,9 +1036,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/mickadesign/fluid-functionalism.git",
       "skillPath": "skills/fluid-functionalism/SKILL.md",
-      "skillFolderHash": "74712d7a1c23bab99d49f204493589db85bab2b1",
+      "skillFolderHash": "fd1e153208f6331a32c67b75593cb7e46701738f",
       "installedAt": "2026-10-08T11:59:57.133Z",
-      "updatedAt": "2026-11-05T08:08:18.696Z"
+      "updatedAt": "2026-11-10T07:54:19.679Z"
     },
     "extract-design-system": {
       "source": "arvindrk/extract-design-system",
@@ -1111,6 +1111,42 @@
       "skillFolderHash": "92857a8f6dbc0c3f5157c11a7afc4e55d488b8d6",
       "installedAt": "2026-11-04T02:54:44.261Z",
       "updatedAt": "2026-11-05T08:07:17.615Z"
+    },
+    "afk": {
+      "source": "jakubkrehel/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/jakubkrehel/skills.git",
+      "skillPath": "skills/afk/SKILL.md",
+      "skillFolderHash": "637ec04344431e0301b1d167fb52931000013fd0",
+      "installedAt": "2026-11-11T09:53:53.000Z",
+      "updatedAt": "2026-11-11T09:53:53.000Z"
+    },
+    "craft-design-engineering": {
+      "source": "gustavo-fior/craft",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/gustavo-fior/craft.git",
+      "skillPath": "skills/craft-design-engineering/SKILL.md",
+      "skillFolderHash": "88b8905b93a344b6562369d9fc4b15b2de397e3b",
+      "installedAt": "2026-11-08T05:18:54.000Z",
+      "updatedAt": "2026-11-08T05:18:54.000Z"
+    },
+    "explain-interface": {
+      "source": "jakubkrehel/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/jakubkrehel/skills.git",
+      "skillPath": "skills/explain-interface/SKILL.md",
+      "skillFolderHash": "23885e8a5cf9e1a3b9b4959afaecc88f3e2b385e",
+      "installedAt": "2026-11-11T09:24:10.000Z",
+      "updatedAt": "2026-11-11T09:24:10.000Z"
+    },
+    "state-machine": {
+      "source": "jakubkrehel/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/jakubkrehel/skills.git",
+      "skillPath": "skills/state-machine/SKILL.md",
+      "skillFolderHash": "1c8188521cc48138f426e84f2598ecdfae2aead5",
+      "installedAt": "2026-11-11T09:53:53.000Z",
+      "updatedAt": "2026-11-11T09:53:53.000Z"
     }
   },
   "dismissed": {

@@ -116,6 +116,7 @@ class RecoveryTests(unittest.TestCase):
         pairs=[('config/codex/AGENTS.md','.codex/AGENTS.md'),
                ('agents/AGENTS.md','.claude/CLAUDE.md'),
                ('config/zed/AGENTS.md','.config/zed/AGENTS.md'),
+               ('config/opencode/AGENTS.md','.config/opencode/AGENTS.md'),
                ('config/cursor/rulebook.mdc','.cursor/rules/rulebook.mdc'),
                ('config/copilot/copilot-instructions.md','.copilot/copilot-instructions.md'),
                ('config/antigravity/GEMINI.md','.gemini/GEMINI.md')]
@@ -140,6 +141,7 @@ class RecoveryTests(unittest.TestCase):
     def test_client_bridges_are_manifest_owned(self):
         manifest = (ROOT / 'symlinks.tsv').read_text()
         for source, destination in (
+            ('config/opencode/AGENTS.md', '.config/opencode/AGENTS.md'),
             ('config/cursor/rulebook.mdc', '.cursor/rules/rulebook.mdc'),
             ('config/copilot/copilot-instructions.md', '.copilot/copilot-instructions.md'),
             ('config/antigravity/GEMINI.md', '.gemini/GEMINI.md'),
@@ -150,6 +152,7 @@ class RecoveryTests(unittest.TestCase):
             self.assertIn('~/.agents/AGENTS.md', content)
             self.assertIn('context compaction', content)
             self.assertNotIn('rules/*.md', content)
+        self.assertIn('$DOTFILES/config/opencode/opencode.jsonc\t$HOME/.config/opencode/opencode.jsonc', manifest)
         self.assertIn('alwaysApply: true', (ROOT / 'config/cursor/rulebook.mdc').read_text())
         self.assertIn('$DOTFILES/agents/AGENTS.md\t$HOME/.claude/CLAUDE.md', manifest)
 

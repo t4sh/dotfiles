@@ -38,9 +38,11 @@ Prefer these only when explicitly named or their method is unmistakably requeste
 
 `skill-inspector` `debug` `ponytail` `ponytail-help` `implement` `skill-creator` `to-spec` `to-tickets` `wayfinder` `interface-review` `variant` `pick-ui-library` `review-animations` `emil-design-eng` `ui-ux-pro-max` `creative-design` `hallmark`
 
-`business-motion-film`: named invocation only.
+`business-motion-film`: named only.
 
-`imagegen-frontend-web` and `imagegen-frontend-mobile`: named invocation only.
+`imagegen-frontend-web` and `imagegen-frontend-mobile`: named only.
+
+`afk`, `craft-design-engineering`, `explain-interface`, `state-machine`: named only.
 
 ## Conditional routing references
 
@@ -50,7 +52,7 @@ Load the smallest matching reference; load multiple only for independent artifac
 | --- | --- |
 | Non-interface planning, typed-semantic AI or explicitly requested test-first work, source review, minimalism, debugging, architecture, or skill authoring | [Development routing](routing/development.md) |
 | UX architecture, research, synthesis, prototyping, or handoff | [UX routing](routing/design-ux.md) |
-| Rendered interface direction, implementation, review, applied screen copy or typography, or creative work | [Interface routing](routing/design-interface.md) |
+| UI direction, implementation, review, mobile-browser verification, applied screen copy or typography, creative work | [Interface routing](routing/design-interface.md) |
 | Website performance measurement, React component composition, or shadcn components/registries | [Frontend specialists](routing/frontend-specialists.md) |
 | Design systems, tokens, reusable type/copy authorities, font research, or conversion copy | [System/content routing](routing/design-system.md) |
 | Animation and motion | [Motion routing](routing/motion.md) |

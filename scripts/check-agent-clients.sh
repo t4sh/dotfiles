@@ -15,6 +15,7 @@ check_bridge() {
 check_bridge Codex "$HOME/.codex/AGENTS.md" "$root/config/codex/AGENTS.md"
 check_bridge 'Claude Code' "$HOME/.claude/CLAUDE.md" "$root/agents/AGENTS.md"
 check_bridge 'Zed native agent' "$HOME/.config/zed/AGENTS.md" "$root/config/zed/AGENTS.md"
+check_bridge OpenCode "$HOME/.config/opencode/AGENTS.md" "$root/config/opencode/AGENTS.md"
 check_bridge Cursor "$HOME/.cursor/rules/rulebook.mdc" "$root/config/cursor/rulebook.mdc"
 check_bridge 'VS Code Copilot harness' "$HOME/.copilot/copilot-instructions.md" "$root/config/copilot/copilot-instructions.md"
 check_bridge Antigravity "$HOME/.gemini/GEMINI.md" "$root/config/antigravity/GEMINI.md"

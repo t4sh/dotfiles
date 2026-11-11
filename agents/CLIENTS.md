@@ -9,6 +9,7 @@
 | Codex | Manifest-managed bootstrap bridge | `make link` installs `config/codex/AGENTS.md` at `~/.codex/AGENTS.md`; the bridge invokes `init-rulebook` and retains optional local `RTK.md` guidance | `bash scripts/link.sh --check`; confirm a new task loads the canonical rulebook |
 | Zed Agent (native) | Manifest-managed bootstrap bridge | `make link` installs `config/zed/AGENTS.md` at `~/.config/zed/AGENTS.md`; the bridge invokes `init-rulebook` at session start and after compaction and applies optional RTK guidance to terminal commands | `bash scripts/link.sh --check`; confirm a new native Zed Agent thread loads the canonical rulebook |
 | Zed External Agents (ACP) | Agent-owned native configuration | Zed hosts the thread, but each external agent owns its instruction loader; Codex continues to use the Codex bridge and native config rather than Zed's personal `AGENTS.md` | Confirm the selected external agent loads its own native instructions |
+| OpenCode | Manifest-managed user bridge and native skill discovery | `make link` installs `config/opencode/AGENTS.md` and `config/opencode/opencode.jsonc` under `~/.config/opencode/`. OpenCode discovers `~/.agents/skills` automatically. The bridge invokes `init-rulebook` at startup and after context compaction. | `make agent-clients-check`; inspect the skill catalog after discovery completes, then confirm rulebook loading in a fresh session outside this repo |
 | Cursor skills | Manifest-managed compatibility link | `make link` installs `~/.cursor/skills` from the canonical skills tree | `bash scripts/link.sh --check` |
 | Cursor rules | Manifest-managed file plus account startup pointer | `make link` installs `config/cursor/rulebook.mdc` at `~/.cursor/rules/rulebook.mdc`. In Customize → Rules, set the startup User Rule to `config/cursor/user-rule.txt`; account rules are vendor-synced, not restored by the linker. | `make agent-clients-check`; inspect the account pointer and a fresh session outside this repo |
 | VS Code Copilot | Manifest-managed user bridge | `make link` installs `config/copilot/copilot-instructions.md` at `~/.copilot/copilot-instructions.md`, the personal always-on entrypoint for the Copilot harness. Other harnesses retain their own instruction discovery. | `make agent-clients-check`; Agent Customizations → Instructions and a fresh Copilot session |
@@ -21,7 +22,7 @@ unrelated account rules. Do not link the entire canonical rules directory into a
 always-on rules folder. Windows consumer paths are unchanged.
 
 `make agent-clients-check` verifies managed symlinks and matching contents for
-Codex, Claude Code, Zed, Cursor, Copilot and Antigravity. Claude Code retains the
+Codex, Claude Code, Zed, OpenCode, Cursor, Copilot and Antigravity. Claude Code retains the
 public canonical-index link. Skills and MCP connectivity do not prove instruction
 loading. Antigravity's `~/.gemini/GEMINI.md` can also affect other Gemini clients.
 
