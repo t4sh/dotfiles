@@ -1,4 +1,6 @@
 Source	Target
+${DOTFILES}/config/opencode/opencode.jsonc	${HOME}/.config/opencode/opencode.jsonc
+${DOTFILES}/config/opencode/AGENTS.md	${HOME}/.config/opencode/AGENTS.md
 ${DOTFILES}/agents	${HOME}/.agents
 ${DOTFILES}/agents/skills	${HOME}/.cursor/skills
 ${DOTFILES}/agents/skills	${HOME}/.claude/skills

@@ -17,6 +17,7 @@ Check-Dotfiles 'Stable Node shims' { foreach($name in @('node-stable','npx-stabl
 Check-Dotfiles 'Package coverage' { & (Join-Path $PSScriptRoot 'check-windows-packages.ps1') -CoverageOnly }
 if(-not $Offline){Check-Dotfiles 'Native package inventory' { & (Join-Path $PSScriptRoot 'check-windows-packages.ps1') -Strict | Where-Object Status -EQ 'Missing' | Format-Table Key,Package }}
 Check-Dotfiles 'Configuration links' { & (Join-Path $PSScriptRoot 'setup-windows-tool-config.ps1') -Check }
+Check-Dotfiles 'Claude Code attribution settings' { & (Join-Path $PSScriptRoot 'setup-windows-claude-settings.ps1') -Check }
 Check-Dotfiles 'Windows Git overlay' {
     $helper = & git.exe config --global --includes --get credential.helper
     if ($LASTEXITCODE -ne 0 -or $helper -ne 'manager') { throw 'Windows GCM overlay is not selected.' }

@@ -12,7 +12,7 @@ $null = Get-DotfilesWindowsPackages -Root $PSScriptRoot
 if (-not $Apply -or $WhatIfPreference) {
     $preferences = if ('all' -in $selection.Groups -and -not $SkipApps) { 'restore non-secret app preferences' } else { 'preserve app preferences (aggregate restore skipped)' }
     $packages = if ($SkipPackages) { 'skip declared packages, fonts and editor extensions' } else { 'install selected declared packages and any selected font/editor-extension groups' }
-    Write-Output "Preview: app groups $($selection.Groups -join ', '); install independent PowerShell 7, Git, uv, Volta and Make; $packages; configure links and hooks; $preferences. Secrets and updates are separate explicit actions."
+    Write-Output "Preview: app groups $($selection.Groups -join ', '); install independent PowerShell 7, Git, uv, Volta and Make; $packages; configure links and hooks, merge Claude attribution; $preferences. Secrets and updates are separate explicit actions."
     return
 }
 $failed = [Collections.Generic.List[string]]::new()
@@ -71,6 +71,7 @@ else { $skipped.Add('editor extensions (-SkipPackages)') }
 if (-not $SkipPackages -and -not $SkipFonts -and ('all' -in $selection.Groups -or 'fonts' -in $selection.Groups)) { Invoke-SetupStage 'fonts' { & (Join-Path $PSScriptRoot 'scripts\install-windows-fonts.ps1') -Apply } }
 else { $skipped.Add('fonts (-SkipPackages, -SkipFonts, or fonts not selected)') }
 Invoke-SetupStage 'links' { & (Join-Path $PSScriptRoot 'scripts\setup-windows-tool-config.ps1') }
+Invoke-SetupStage 'Claude settings' { & (Join-Path $PSScriptRoot 'scripts\setup-windows-claude-settings.ps1') -Apply }
 Invoke-SetupStage 'hooks' { & (Join-Path $PSScriptRoot 'scripts\setup-windows-hooks.ps1') }
 Invoke-SetupStage 'skills' { & (Join-Path $PSScriptRoot 'scripts\check-windows-skills.ps1') }
 Invoke-SetupStage 'skill engine' { & (Join-Path $PSScriptRoot 'scripts\setup-windows-skill-engine.ps1') -Apply }
@@ -94,6 +95,7 @@ $retry = @{
     'cursor extensions' = 'dot extensions -Editor cursor -Apply'
     fonts = 'dot fonts -Apply'
     links = 'dot link'
+    'Claude settings' = 'dot claude-settings -Apply'
     'PATH refresh' = 'dot path'
     hooks = 'dot hooks'
     skills = 'dot skills'

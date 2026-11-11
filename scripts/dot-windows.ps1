@@ -7,6 +7,7 @@ $root = Split-Path $PSScriptRoot -Parent
 Assert-DotfilesWindows
 $commands = [ordered]@{
     setup='install.ps1'; link='scripts/setup-windows-tool-config.ps1';
+    'claude-settings'='scripts/setup-windows-claude-settings.ps1';
     packages='scripts/install-windows-packages.ps1'; 'packages-check'='scripts/check-windows-packages.ps1';
     fonts='scripts/install-windows-fonts.ps1'; 'restore-apps'='scripts/restore-apps-windows.ps1';
     backup='scripts/backup-apps-windows.ps1'; doctor='scripts/doctor-windows.ps1';

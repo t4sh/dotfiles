@@ -50,6 +50,7 @@ Test-SetupStatus 'pinned Node runtime' 'volta install node@<version>; dot path' 
     $null = Get-Command npx-stable -ErrorAction Stop
 }
 Test-SetupStatus 'links' 'dot link' { & (Join-Path $PSScriptRoot 'setup-windows-tool-config.ps1') -Check }
+Test-SetupStatus 'Claude Code attribution' 'dot claude-settings -Apply' { & (Join-Path $PSScriptRoot 'setup-windows-claude-settings.ps1') -Check }
 Test-SetupStatus 'hooks' 'dot hooks' { & (Join-Path $PSScriptRoot 'setup-windows-hooks.ps1') -Check }
 Test-SetupStatus 'skills' 'dot skills' { & (Join-Path $PSScriptRoot 'check-windows-skills.ps1') }
 Test-SetupStatus 'skill engine' 'dot skill-engine -Apply' { & (Join-Path $PSScriptRoot 'setup-windows-skill-engine.ps1') }

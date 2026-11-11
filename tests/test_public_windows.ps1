@@ -3,6 +3,8 @@
 $ErrorActionPreference = 'Stop'
 if (-not $IsWindows) { throw 'Run this fixture on native Windows.' }
 $root = Split-Path $PSScriptRoot -Parent
+& (Join-Path $root 'tests/test_windows_claude_settings.ps1')
+if (-not $?) { throw 'Windows Claude settings fixture failed' }
 $fixture = Join-Path ([IO.Path]::GetTempPath()) ('dotfiles-public-'+[guid]::NewGuid().ToString('N'))
 $savedRoaming = $env:APPDATA
 $savedLocal = $env:LOCALAPPDATA

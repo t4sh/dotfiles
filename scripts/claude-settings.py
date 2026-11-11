@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Merge or check the saved Claude Code attribution settings on macOS."""
+"""Merge or check the saved Claude Code attribution settings."""
 import argparse
 import json
 import os
@@ -61,7 +61,7 @@ def main():
         # Claude Code owns the rest of this file; replace only the managed keys.
         write(args.settings, {**live, **saved})
     elif any(live.get(key) != saved[key] for key in KEYS):
-        raise ValueError("live attribution differs from snapshot; run make restore-claude-settings")
+        raise ValueError("live attribution differs from snapshot; run the platform restore command")
     print("Claude attribution: " + args.action + " OK")
 
 

@@ -238,3 +238,20 @@ pwsh -NoProfile -File tests/test_public_windows_hermes.ps1
 
 The PowerShell `port-info <port>` helper inspects connections. The misleading former
 `free-port` name is removed when the profile reloads; it never terminated listeners.
+
+## Agent settings and Hermes commands
+
+Windows bootstrap merges the saved Claude attribution settings while preserving
+other user settings. Run `dot claude-settings -Apply` to restore them or
+`dot claude-settings -Check` to verify them. `CLAUDE_CONFIG_DIR` overrides the
+default `%USERPROFILE%\.claude` directory. The equivalent Make targets are
+`claude-settings` and `claude-settings-check`.
+
+`dot link` links OpenCode's global `opencode.jsonc` and `AGENTS.md` under
+`%USERPROFILE%\.config\opencode`.
+
+`dot hermes-runtime -Check` checks the Hermes interpreter.
+`dot hermes-update -DryRun` previews the standalone updater; close Hermes
+before applying `dot hermes-update`. Personal model choices and credentials
+remain local. Live update and GUI acceptance require an initialized test
+installation; fixture success alone does not establish those results.

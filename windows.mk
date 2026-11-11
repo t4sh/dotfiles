@@ -6,6 +6,11 @@ all:
 	@$(DOT) setup -Apply $(if $(APP_GROUPS),-AppGroups "$(APP_GROUPS)")
 link:
 	@$(DOT) link
+.PHONY: claude-settings claude-settings-check
+claude-settings:
+	@$(DOT) claude-settings -Apply
+claude-settings-check:
+	@$(DOT) claude-settings -Check
 packages:
 	@$(DOT) packages -Apply $(if $(APP_GROUPS),-AppGroups "$(APP_GROUPS)")
 setup-status:

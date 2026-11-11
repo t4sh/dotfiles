@@ -261,8 +261,11 @@ The previous dotfiles-owned Codex hooks symlink migrates to a local file.
 `make restore-claude-settings` merges the saved Claude Code attribution keys from
 [`config/claude/settings.json`](config/claude/settings.json) (empty commit/PR
 attribution, `includeCoAuthoredBy: false`) into `~/.claude/settings.json`, leaving
-every other key to Claude Code. It runs in `install.sh` and `make all`;
-`make claude-settings-check` runs in `make verify-bootstrap`.
+every other key to Claude Code. The same merge helper is supported on Windows:
+`dot claude-settings -Apply` (or `make claude-settings`) uses
+`%USERPROFILE%\.claude`, honoring `CLAUDE_CONFIG_DIR`; `dot claude-settings -Check`
+and `make claude-settings-check` verify it. Windows bootstrap and setup status
+also apply and check the managed keys without replacing Claude's other settings.
 
 `make restore-claude-rulebook` installs the Mac Claude Code startup checkpoint
 without replacing RTK, attribution, permissions or unrelated hooks. It requires

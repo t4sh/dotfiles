@@ -72,7 +72,8 @@ function Get-DotfilesWindowsInventory {
     param([switch]$ReadOnly)
     $file = Join-Path ([IO.Path]::GetTempPath()) ('dotfiles-inventory-'+[guid]::NewGuid().ToString('N')+'.json')
     try {
-        $agreementArgs = if ($ReadOnly) { @() } else { @('--accept-source-agreements') }
+        [string[]]$agreementArgs = @()
+        if (-not $ReadOnly) { $agreementArgs = @('--accept-source-agreements') }
         & winget.exe export --output $file --include-versions @agreementArgs --disable-interactivity *> $null
         if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $file)) { throw "WinGet inventory failed (exit $LASTEXITCODE)" }
         $inventory = Get-Content -LiteralPath $file -Raw | ConvertFrom-Json
