@@ -267,7 +267,8 @@ system:
 - **Page reveals are 1 class.** Install `@fluid/reveal`, then put 1 class
   on the page's container: `reveal-landing` for a page read once,
   `reveal-product` for the app, `-subtle` for less. Slow data in the app
-  shows shadcn's Skeleton in a `reveal-swap`, which crossfades it into the
+  shows shadcn's Skeleton (in the loading fill, `bg-hover`) in a
+  `reveal-swap`, which crossfades it into the
   real block; `reveal-items` on both hands rows over one by one. Never
   hand-roll a `whileInView` fade on every element, and keep the hero image
   and headline out of any reveal. Rules and recipe:
@@ -304,7 +305,9 @@ system:
   24px, with asymmetric gaps, or when the inner surface does not reach the
   corner, treat the layers independently and tune by eye.
 - **Icon-only controls name themselves.** Every icon-only button gets an
-  `aria-label` and a tooltip with the same words. A tooltip on a menu's
+  `aria-label` and a tooltip with the same words. Two or more of them side
+  by side go in one `TooltipGroup`, so a single bubble glides along the row
+  instead of closing and reopening at every button. A tooltip on a menu's
   trigger is forced closed while the menu is open: React carries the
   portalled menu's pointer events up to the trigger's ancestors, so it would
   reopen over the menu. A tooltip whose trigger is a component must reach a

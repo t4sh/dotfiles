@@ -1036,9 +1036,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/mickadesign/fluid-functionalism.git",
       "skillPath": "skills/fluid-functionalism/SKILL.md",
-      "skillFolderHash": "fd1e153208f6331a32c67b75593cb7e46701738f",
+      "skillFolderHash": "3da179c4a38ff85fe2d4638572906a1d0699dda8",
       "installedAt": "2026-10-08T11:59:57.133Z",
-      "updatedAt": "2026-11-10T07:54:19.679Z"
+      "updatedAt": "2026-11-11T20:55:32.732Z"
     },
     "extract-design-system": {
       "source": "arvindrk/extract-design-system",
