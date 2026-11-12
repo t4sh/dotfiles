@@ -181,7 +181,7 @@ function Invoke-DotfilesNative {
     Copy-Item (Join-Path $root 'scripts/lib/windows-app-groups.ps1') (Join-Path $entryLib 'windows-app-groups.ps1')
     [IO.File]::WriteAllText((Join-Path $entryRoot 'Brewfile'), "cask `"fixture-app`"`n", $encoding)
     [IO.File]::WriteAllText((Join-Path $entryRoot 'config/app-groups.tsv'), "Key`tGroup`ncask:fixture-app`tessentials`n", $encoding)
-    [IO.File]::WriteAllText((Join-Path $entryLib 'windows-packages.ps1'), 'function Get-DotfilesWindowsPackages { param($Root); @() }', $encoding)
+    [IO.File]::WriteAllText((Join-Path $entryLib 'windows-packages.ps1'), 'function Get-DotfilesWindowsPackages { param($Root); @() }; function Get-DotfilesPowerShellMsiVersion { ''7.6.10.0'' }', $encoding)
     [IO.File]::WriteAllText((Join-Path $entryLib 'windows-common.ps1'), 'function Assert-DotfilesWindows {}; function Assert-DotfilesPersistentScriptPolicy {}; function Get-Command { param($Name,$ErrorAction); $null }; function Resolve-DotfilesPwsh { throw "fixture missing runtime" }; function Invoke-DotfilesNative { throw "fixture dependency failure" }', $encoding)
     $entryOutput = [Collections.Generic.List[string]]::new()
     $entryFailure = ''

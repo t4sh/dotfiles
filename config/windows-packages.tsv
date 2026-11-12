@@ -53,7 +53,7 @@ brew:ripgrep	native	winget	BurntSushi.ripgrep.MSVC	Native Windows counterpart; i
 brew:rtk	native	winget	rtk-ai.rtk	Native Windows counterpart; identity verified against installed WinGet inventory.
 brew:starship	native	winget	Starship.Starship	Native Windows counterpart; identity verified against installed WinGet inventory.
 brew:tlrc	runtime	uv	tldr	Official Python client; Windows application control blocks the unsigned Rust release. Mac retains tlrc.
-brew:topgrade	native	winget	topgrade-rs.topgrade	Native Windows counterpart; identity verified against installed WinGet inventory.
+brew:topgrade	native	winget	topgrade-rs.topgrade	WinGet pins 17.15.0; Application Control blocked 17.16.0 on the reference Windows host.
 brew:tree	manual			Windows tree.exe is built in.
 brew:trivy	native	winget	AquaSecurity.Trivy	Native Windows counterpart; identity verified against installed WinGet inventory.
 brew:typos-cli	native	winget	Crate-CI.Typos	Native Windows counterpart; identity verified against installed WinGet inventory.

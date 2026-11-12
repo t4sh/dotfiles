@@ -8,6 +8,12 @@ Use `update-all -SkipSkills` for apps only, or `update-all -SkipApps` for skills
 Each stage reports elapsed seconds. Topgrade output is retained in
 `%TEMP%/dotfiles-topgrade-*.log`; failures point to that run's log. Retry only the
 named failing step instead of repeating all maintenance.
+A second maintenance invocation for the same Windows user exits before its first stage.
+Windows package maintenance pins Topgrade to 17.15.0, the upstream build that
+ran under Application Control on the reference Windows host. Code Integrity
+blocked 17.16.0. The stage log records Win32 error 4551 if a launch is denied.
+TLDR can rebuild its uv tool with an installed Python that passes socket
+and TLS imports if Application Control blocks a runtime dependency.
 Feedback uses blue for progress, green for success, yellow for warnings or reboot
 requests, and red for failures. Topgrade logs retain UTF-8 text without ANSI colors;
 the caller's encoding and color environment are restored after the stage.
@@ -53,6 +59,8 @@ not required; links fall back to hardlinks and junctions. Store-packaged
 PowerShell is excluded because its filesystem redirection can reach different
 preference files. Windows PowerShell 5.1 is supported only as the bootstrap
 bridge.
+Bootstrap and manifest maintenance select the latest PowerShell 7.6 LTS MSI from
+WinGet. PowerShell 7.7 ships only as MSIX in WinGet.
 
 The scripts require a persistent RemoteSigned policy (existing Unrestricted or
 Bypass also works). Set it explicitly before setup, then open a fresh console:

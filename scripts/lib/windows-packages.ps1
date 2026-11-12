@@ -15,6 +15,15 @@ function Test-DotfilesStableWinGetVersion([string]$Version) {
     # Continuous Deskflow builds add a fourth component, such as 1.27.0.10.
     return $Version -cmatch '^\d+\.\d+\.\d+$'
 }
+function Get-DotfilesPowerShellMsiVersion {
+    # PowerShell 7.7 moved to MSIX. Keep the independent machine MSI on 7.6 LTS.
+    $listed = & winget.exe show --id Microsoft.PowerShell --exact --source winget --versions --accept-source-agreements --disable-interactivity
+    if ($LASTEXITCODE -ne 0) { throw "WinGet could not list PowerShell versions (exit $LASTEXITCODE)" }
+    $lts = @(Get-DotfilesListedWinGetVersions $listed | Where-Object { $_ -match '^7\.6\.' } |
+        Sort-Object @{Expression={[version]$_}} -Descending)
+    if (-not $lts.Count) { throw 'WinGet did not list a PowerShell 7.6 LTS MSI version.' }
+    return $lts[0]
+}
 function Get-DotfilesLatestStableWinGetVersion([string[]]$Versions) {
     $stable=@($Versions | Where-Object { Test-DotfilesStableWinGetVersion $_ })
     if(-not $stable.Count){ return '' }

@@ -38,7 +38,9 @@ foreach ($entry in @(@('pwsh.exe','Microsoft.PowerShell'),@('git.exe','Git.Git')
         if ($entry[0] -eq 'pwsh.exe') { try { $null = Resolve-DotfilesPwsh; $present = $true } catch { $present = $false } }
         if (-not $present -and $bootstrapCmdlet.ShouldProcess($dependency, 'Install bootstrap dependency')) {
             $installArguments = @('install','--id',$dependency,'--exact','--source','winget','--accept-source-agreements','--accept-package-agreements','--disable-interactivity')
-            if ($entry[0] -eq 'pwsh.exe') { $installArguments += @('--scope','machine','--installer-type','wix','--force') }
+            if ($entry[0] -eq 'pwsh.exe') {
+                $installArguments += @('--scope','machine','--installer-type','wix','--version',(Get-DotfilesPowerShellMsiVersion),'--force')
+            }
             Invoke-DotfilesNative winget.exe $installArguments
             $env:Path = Merge-DotfilesPath @([Environment]::GetEnvironmentVariable('Path','User'),[Environment]::GetEnvironmentVariable('Path','Machine'),$env:Path)
         }

@@ -71,22 +71,47 @@ function Resolve-DotfilesBash {
     throw 'Cannot locate Git for Windows Bash beside git.exe. Install Git for Windows and repair PATH; WSL bash is not supported.'
 }
 function Resolve-DotfilesPython {
+    param([switch]$RequireNetwork)
     $uv = (Get-Command uv.exe -ErrorAction Stop).Source
     $candidate = @(& $uv python find --managed-python 2>$null)
     if ($LASTEXITCODE -ne 0 -or $candidate.Count -ne 1 -or -not (Test-Path -LiteralPath $candidate[0] -PathType Leaf)) { throw 'Managed Python is missing. Run: uv python install' }
     # Existence is not readiness: Application Control can reject a new uv build.
     # Check the physical file and avoid PowerShell's misleading shell fallback.
+    if ($RequireNetwork) {
+        try {
+            Assert-DotfilesPythonRuntime -Path $candidate[0] -Label 'Managed Python' -RequireNetwork
+            return $candidate[0]
+        } catch { $preferredFailure = $_.Exception.Message }
+        $listed = & $uv python list --only-installed --managed-python --output-format json 2>$null
+        if ($LASTEXITCODE -ne 0) { throw $preferredFailure }
+        $installed = @(($listed -join "`n" | ConvertFrom-Json) |
+            Where-Object { $_.path -and $_.version -match '^3\.\d+\.\d+$' } |
+            Sort-Object @{Expression={[version]$_.version}} -Descending)
+        foreach ($entry in $installed) {
+            if ($entry.path -ieq $candidate[0] -or -not (Test-Path -LiteralPath $entry.path -PathType Leaf)) { continue }
+            try {
+                Assert-DotfilesPythonRuntime -Path $entry.path -Label 'Managed Python' -RequireNetwork
+                Write-Warning "Preferred managed Python failed its socket/TLS probe. Using $($entry.version) at $($entry.path)."
+                return $entry.path
+            } catch { continue }
+        }
+        throw "No installed uv-managed Python passed socket/TLS imports. $preferredFailure"
+    }
     Assert-DotfilesPythonRuntime -Path $candidate[0] -Label 'Managed Python'
     return $candidate[0]
 }
 function Assert-DotfilesPythonRuntime {
-    param([Parameter(Mandatory)][string]$Path, [string]$Label = 'Python')
+    param([Parameter(Mandatory)][string]$Path, [string]$Label = 'Python', [switch]$RequireNetwork)
     Assert-DotfilesPreferenceFile $Path
     $start = [Diagnostics.ProcessStartInfo]::new($Path)
     $start.UseShellExecute = $false
     $start.RedirectStandardOutput = $true
     $start.RedirectStandardError = $true
-    $start.ArgumentList.Add('--version')
+    if ($RequireNetwork) {
+        foreach ($argument in @('-I','-c','import socket, ssl, sys; print("Python " + sys.version.split()[0])')) {
+            $start.ArgumentList.Add($argument)
+        }
+    } else { $start.ArgumentList.Add('--version') }
     $process = [Diagnostics.Process]::new()
     $process.StartInfo = $start
     try {
@@ -101,7 +126,8 @@ function Assert-DotfilesPythonRuntime {
         }
         $version = $stdout.GetAwaiter().GetResult().Trim()
         if ($process.ExitCode -ne 0 -or $version -notmatch '^Python 3\.') {
-            throw "version check failed (exit $($process.ExitCode)): $($stderr.GetAwaiter().GetResult().Trim())"
+            $probe = if ($RequireNetwork) { 'socket/TLS' } else { 'version' }
+            throw "$probe check failed (exit $($process.ExitCode)): $($stderr.GetAwaiter().GetResult().Trim())"
         }
     } catch { throw "$Label cannot run at ${Path}: $($_.Exception.GetBaseException().Message)" }
     finally { $process.Dispose() }

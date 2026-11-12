@@ -18,6 +18,7 @@ function Set-DotfilesTldrLauncher {
 }
 
 function Install-DotfilesTldr {
+    $runtime = Resolve-DotfilesPython -RequireNetwork
     $toolsRoot = & uv.exe tool dir
     if ($LASTEXITCODE -ne 0 -or -not $toolsRoot) { throw 'Cannot resolve uv tool directory.' }
     $previousBin = $env:UV_TOOL_BIN_DIR
@@ -25,7 +26,7 @@ function Install-DotfilesTldr {
         # uv owns its generated executable, but it must not shadow tldr.cmd.
         # The receipt retains this destination across uv tool upgrades.
         $env:UV_TOOL_BIN_DIR = "$toolsRoot.tldr-bin"
-        Invoke-DotfilesNative uv.exe @('tool','install','--force','tldr')
+        Invoke-DotfilesNative uv.exe @('tool','install','--force','--python',$runtime,'tldr')
     } finally { $env:UV_TOOL_BIN_DIR = $previousBin }
     Set-DotfilesTldrLauncher
     Invoke-DotfilesNative (Resolve-DotfilesTldrPython) @('-I','-m','tldr','--version')
@@ -73,6 +74,11 @@ function Update-DotfilesTldr {
     param([switch]$DryRun)
     if ($DryRun) { Write-Host 'Preview: Python TLDR cache update (tldr --update)' -ForegroundColor Blue; return }
     $version = Invoke-DotfilesTldrProcess --version
+    if ($LASTEXITCODE -ne 0 -and ($version -join "`n") -match 'Application Control policy has blocked') {
+        Write-Warning 'Windows blocked a TLDR runtime dependency. Rebuilding the uv tool with a Python that passes socket and TLS imports.'
+        Install-DotfilesTldr
+        $version = Invoke-DotfilesTldrProcess --version
+    }
     if ($LASTEXITCODE -ne 0 -or "$version" -notmatch 'Client Specification') {
         throw 'Expected uv-managed Python TLDR. Repair it with dot packages -Apply -Only tldr.'
     }

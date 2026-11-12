@@ -26,6 +26,12 @@ if (-not $Apply) {
 [IO.Directory]::CreateDirectory($LogDirectory) | Out-Null
 $failures = @()
 $results = @()
+# Code Integrity rejects 17.16.0 on the reference Windows host. This upstream
+# build was tested with Application Control still enabled.
+$topgradeVersion = '17.15.0'
+function Set-DotfilesTopgradePin {
+    Invoke-DotfilesNative winget.exe @('pin','add','--id','topgrade-rs.topgrade','--exact','--source','winget','--version',$topgradeVersion,'--force','--accept-source-agreements','--disable-interactivity') | Out-Null
+}
 function Get-DotfilesPackageFeedbackColor {
     param([Parameter(Mandatory)][string]$Status, [switch]$Failed)
     if ($Failed) { return [ConsoleColor]::Red }
@@ -67,6 +73,7 @@ function Sync-DotfilesBlockedDeskflow {
 if ($AllInstalled) {
     $deskflowStable=Get-DotfilesDeskflowStableVersion
     Set-DotfilesDeskflowStablePin $deskflowStable
+    if ((Get-DotfilesWindowsInventory).ContainsKey('winget:topgrade-rs.topgrade')) { Set-DotfilesTopgradePin }
     Invoke-DotfilesNative winget.exe @('upgrade','--all','--accept-source-agreements','--accept-package-agreements','--disable-interactivity') @(0,-1978335189)
     $inventory=Get-DotfilesWindowsInventory
     $installed=Convert-DotfilesInstalledWinGetVersion ([string]$inventory['winget:Deskflow.Deskflow'])
@@ -100,7 +107,7 @@ foreach ($package in $packages) {
             elseif ($package.Source -eq 'uv' -and $package.Id -eq 'tldr') { Install-DotfilesTldr }
             elseif ($package.Source -eq 'uv') { Invoke-DotfilesNative uv.exe @('tool','install',$package.Id) }
             else { Invoke-DotfilesNative volta.exe @('install',$package.Id) }
-        } elseif ($inventory.ContainsKey($key) -and -not $Upgrade) { $status='Already installed' }
+        } elseif ($inventory.ContainsKey($key) -and -not $Upgrade -and $package.Id -ne 'topgrade-rs.topgrade') { $status='Already installed' }
         elseif (-not $inventory.ContainsKey($key) -and $Upgrade) { $status='Missing; run dot packages to install'; $failures += $key; $packageFailed=$true }
         else {
             $arguments = @($(if ($Upgrade) {'upgrade'} else {'install'}),'--id',$package.Id,'--exact','--source',$package.Source,'--accept-source-agreements','--accept-package-agreements','--disable-interactivity')
@@ -109,7 +116,32 @@ foreach ($package in $packages) {
                 else { $arguments += @('--version',$stable) }
             }
             if (-not $Upgrade) { $arguments += '--no-upgrade' }
-            if ($package.Id -eq 'Microsoft.PowerShell') { $arguments += @('--scope','machine','--installer-type','wix') }
+            if ($package.Id -eq 'topgrade-rs.topgrade') {
+                $installedTopgrade = Convert-DotfilesInstalledWinGetVersion ([string]$inventory[$key])
+                if ($installedTopgrade -ceq $topgradeVersion) {
+                    Set-DotfilesTopgradePin
+                    $status = 'No applicable upgrade'
+                } else {
+                    $arguments = @($arguments | Where-Object { $_ -ne '--no-upgrade' })
+                    $arguments[0] = 'install'
+                    $arguments += @('--version',$topgradeVersion,'--force')
+                }
+            }
+            if ($package.Id -eq 'Microsoft.PowerShell') {
+                $msiVersion = Get-DotfilesPowerShellMsiVersion
+                $arguments += @('--scope','machine','--installer-type','wix','--version',$msiVersion)
+                $installedMsi = Convert-DotfilesInstalledWinGetVersion ([string]$inventory[$key])
+                $targetMsi = Convert-DotfilesInstalledWinGetVersion $msiVersion
+                $parsedMsi = $null
+                if ($Upgrade -and [version]::TryParse($installedMsi,[ref]$parsedMsi) -and $parsedMsi -ge [version]$targetMsi) {
+                    $status = 'No applicable upgrade'
+                } elseif ($Upgrade) {
+                    # WinGet upgrade cannot match the installed product under the MSI
+                    # filter once the unqualified package points to MSIX.
+                    $arguments[0] = 'install'
+                    $arguments += '--force'
+                }
+            }
             if (-not $replaced -and $status -ne 'No applicable upgrade') {
             & winget.exe @arguments *> $log
             $code = $LASTEXITCODE
@@ -119,6 +151,11 @@ foreach ($package in $packages) {
             else {
                 $verified = Get-DotfilesWindowsInventory
                 if (-not $verified.ContainsKey($key)) { throw "Installer returned success but package identity not found: $key" }
+                if ($package.Id -eq 'topgrade-rs.topgrade') {
+                    $actual = Convert-DotfilesInstalledWinGetVersion ([string]$verified[$key])
+                    if ($actual -cne $topgradeVersion) { throw "Topgrade installed version '$actual', expected $topgradeVersion" }
+                    Set-DotfilesTopgradePin
+                }
             }
             }
         }
