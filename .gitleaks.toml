@@ -30,3 +30,14 @@ condition = "AND"
 regexTarget = "secret"
 regexes = ['''^EAAAhCAAAQgAIGJCZS1I2zk3WKXtUtsZL8hnbjrOVD0MPnj$''']
 paths = ['''services/Open in Tower\.workflow/Contents/document\.wflow$''']
+
+[[allowlists]]
+description = "WebCrypto algorithm identifiers in the modern-web-guidance encryption example"
+targetRules = ["generic-api-key"]
+condition = "AND"
+regexTarget = "line"
+regexes = [
+  '''SubtleCrypto\.supports\('encapsulateKey', 'MLKEM768-X25519', 'ChaCha20-Poly1305'\)''',
+  '''SubtleCrypto\?\.supports\?\.\('encapsulateKey', 'MLKEM768-X25519', 'ChaCha20-Poly1305'\)''',
+]
+paths = ['''agents/skills/modern-web-guidance/guides/security/client-side-encryption\.md$''']

@@ -12,6 +12,7 @@ Here, **named** means the user explicitly invokes the skill.
 - ADRs: `architecture`, in the repository's existing format.
 - Plan stress-test: `grilling`.
 - Interface build: `impeccable`; specialized direction follows [creative routing](routing/interface/creative.md).
+- Web platform: `modern-web-guidance` on the [frontend route](routing/frontend-specialists.md).
 - Interface review: `better-interface` or one `better-*` domain; `interface-review` named.
 - Motion: [motion routing](routing/motion.md). Systems and tokens: [system/content routing](routing/design-system.md).
 - Commits and PR titles: `02-attribution.md`; `git-commit` named.

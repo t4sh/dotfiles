@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Skillsfile — declarative global skill manifest (Brewfile pattern).
 #
-# GENERATED 2026-11-11T16:08:08+05:30 from agents/.skill-lock.json by
+# GENERATED 2026-11-12T18:24:38+05:30 from agents/.skill-lock.json by
 # scripts/gen-skillsfile.py — DO NOT EDIT BY HAND. To change skills:
 #   ~/.local/bin/npx-stable skills add ... --agent codex   then   make skills-manifest
 #   (regenerates Skillsfile + agents/skills/README.md)
 #
 # Explicit upstream refresh: make skills-update   (or: bash Skillsfile)
-# 124 skills — 40 refreshable github sources + 1 local + 2 held.
+# 125 skills — 41 refreshable github sources + 1 local + 2 held.
 # Exceptional refresh holds, if any, live in config/skills-refresh-holds.json.
 #
 # Prereqs (fresh Mac): node + git + GitHub auth (SSH/gh) must be set
@@ -61,6 +61,9 @@ update_skill_source "$NPX" skills add ComposioHQ/awesome-claude-skills --skill f
 
 echo "Checking skills from source: DietrichGebert/ponytail"
 update_skill_source "$NPX" skills add DietrichGebert/ponytail --skill ponytail ponytail-audit ponytail-help ponytail-review -g -y --agent codex
+
+echo "Checking skills from source: GoogleChrome/modern-web-guidance"
+update_skill_source "$NPX" skills add GoogleChrome/modern-web-guidance --skill modern-web-guidance -g -y --agent codex
 
 echo "Checking skills from source: Leonxlnx/imagegen-skills"
 update_skill_source "$NPX" skills add Leonxlnx/imagegen-skills --skill brandkit imagegen-frontend-mobile imagegen-frontend-web -g -y --agent codex

@@ -1147,6 +1147,15 @@
       "skillFolderHash": "1c8188521cc48138f426e84f2598ecdfae2aead5",
       "installedAt": "2026-11-11T09:53:53.000Z",
       "updatedAt": "2026-11-11T09:53:53.000Z"
+    },
+    "modern-web-guidance": {
+      "source": "GoogleChrome/modern-web-guidance",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/GoogleChrome/modern-web-guidance.git",
+      "skillPath": "skills/modern-web-guidance/SKILL.md",
+      "skillFolderHash": "2bafd62db079eae1a4b6c34d0af4f9c3490266a2",
+      "installedAt": "2026-11-12T04:37:25.554Z",
+      "updatedAt": "2026-11-12T04:37:25.554Z"
     }
   },
   "dismissed": {
