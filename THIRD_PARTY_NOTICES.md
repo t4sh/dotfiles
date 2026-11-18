@@ -5,9 +5,21 @@ See each skill directory for a `LICENSE*` file when present, or the upstream
 repository listed below. First-party skills (`local`, `t4sh/skills4sh`) are
 authored for this dotfiles repo.
 
+License texts for the following upstream repositories are included with their skill snapshots.
+
+- [coreyhaines31/marketingskills](agents/skill-licenses/coreyhaines31/marketingskills/LICENSE)
+- [emilkowalski/skills](agents/skill-licenses/emilkowalski/skills/LICENSE)
+- [GoogleChrome/modern-web-guidance](agents/skill-licenses/GoogleChrome/modern-web-guidance/LICENSE)
+- [jakubkrehel/skills](agents/skill-licenses/jakubkrehel/skills/LICENSE)
+- [mickadesign/fluid-functionalism](agents/skill-licenses/mickadesign/fluid-functionalism/LICENSE)
+- [nextlevelbuilder/ui-ux-pro-max-skill](agents/skill-licenses/nextlevelbuilder/ui-ux-pro-max-skill/LICENSE)
+- [pbakaus/impeccable](agents/skill-licenses/pbakaus/impeccable/LICENSE) · [Third-party notice](agents/skill-licenses/pbakaus/impeccable/NOTICE.md)
+- [vercel-labs/agent-browser](agents/skill-licenses/vercel-labs/agent-browser/LICENSE)
+
 | Skill | Upstream | Repository |
 |-------|----------|------------|
 | `Skill Development` | anthropics/claude-code | https://github.com/anthropics/claude-code |
+| `afk` | jakubkrehel/skills | https://github.com/jakubkrehel/skills |
 | `agent-browser` | vercel-labs/agent-browser | https://github.com/vercel-labs/agent-browser |
 | `agent-memory` | t4sh/skills4sh | https://github.com/t4sh/skills4sh |
 | `agentation` | benjitaylor/agentation | https://github.com/benjitaylor/agentation |
@@ -44,10 +56,12 @@ authored for this dotfiles repo.
 | `domain-modeling` | mattpocock/skills | https://github.com/mattpocock/skills |
 | `eleventy-nunjucks` | t4sh/skills4sh | https://github.com/t4sh/skills4sh |
 | `emil-design-eng` | emilkowalski/skills | https://github.com/emilkowalski/skills |
+| `explain-interface` | jakubkrehel/skills | https://github.com/jakubkrehel/skills |
 | `figma-to-code` | t4sh/skills4sh | https://github.com/t4sh/skills4sh |
 | `file-organizer` | ComposioHQ/awesome-claude-skills | https://github.com/ComposioHQ/awesome-claude-skills |
 | `find-animation-opportunities` | emilkowalski/skills | https://github.com/emilkowalski/skills |
 | `find-skills` | vercel-labs/skills | https://github.com/vercel-labs/skills |
+| `fluid-functionalism` | mickadesign/fluid-functionalism | https://github.com/mickadesign/fluid-functionalism |
 | `frontend-design` | anthropics/skills | https://github.com/anthropics/skills |
 | `full-output-enforcement` | Leonxlnx/taste-skill | https://github.com/Leonxlnx/taste-skill |
 | `git-commit` | github/awesome-copilot | https://github.com/github/awesome-copilot |
@@ -65,11 +79,13 @@ authored for this dotfiles repo.
 | `improve-animations` | emilkowalski/skills | https://github.com/emilkowalski/skills |
 | `improve-codebase-architecture` | mattpocock/skills | https://github.com/mattpocock/skills |
 | `industrial-brutalist-ui` | Leonxlnx/taste-skill | https://github.com/Leonxlnx/taste-skill |
+| `interface-review` | jakubkrehel/skills | https://github.com/jakubkrehel/skills |
 | `localhost-screenshots` | t4sh/skills4sh | https://github.com/t4sh/skills4sh |
 | `loop-me` | mattpocock/skills | https://github.com/mattpocock/skills |
 | `marketing-psychology` | coreyhaines31/marketingskills | https://github.com/coreyhaines31/marketingskills |
 | `migrate-to-shoehorn` | mattpocock/skills | https://github.com/mattpocock/skills |
 | `minimalist-ui` | Leonxlnx/taste-skill | https://github.com/Leonxlnx/taste-skill |
+| `modern-web-guidance` | GoogleChrome/modern-web-guidance | https://github.com/GoogleChrome/modern-web-guidance |
 | `monorepo-management` | wshobson/agents | https://github.com/wshobson/agents |
 | `pdf-harvester` | mindmorass/reflex | https://github.com/mindmorass/reflex |
 | `pick-ui-library` | emilkowalski/skills | https://github.com/emilkowalski/skills |
@@ -87,6 +103,7 @@ authored for this dotfiles repo.
 | `setup-ts-deep-modules` | mattpocock/skills | https://github.com/mattpocock/skills |
 | `skill-architect` | t4sh/skills4sh | https://github.com/t4sh/skills4sh |
 | `skill-creator` | openai/skills | https://github.com/openai/skills |
+| `state-machine` | jakubkrehel/skills | https://github.com/jakubkrehel/skills |
 | `stitch-design-taste` | Leonxlnx/taste-skill | https://github.com/Leonxlnx/taste-skill |
 | `sync-figma-token` | firebenders/sync-figma-token-skill | https://github.com/firebenders/sync-figma-token-skill |
 | `system-design` | anthropics/knowledge-work-plugins | https://github.com/anthropics/knowledge-work-plugins |
@@ -105,6 +122,7 @@ authored for this dotfiles repo.
 | `ui-animation` | mblode/agent-skills | https://github.com/mblode/agent-skills |
 | `ui-ux-pro-max` | nextlevelbuilder/ui-ux-pro-max-skill | https://github.com/nextlevelbuilder/ui-ux-pro-max-skill |
 | `user-research` | anthropics/knowledge-work-plugins | https://github.com/anthropics/knowledge-work-plugins |
+| `variant` | jakubkrehel/skills | https://github.com/jakubkrehel/skills |
 | `vocabulary` | index-how/vocabulary | https://github.com/index-how/vocabulary |
 | `wait-what` | mattpocock/skills | https://github.com/mattpocock/skills |
 | `wayfinder` | mattpocock/skills | https://github.com/mattpocock/skills |
