@@ -140,6 +140,7 @@ listed_in_gitignore() {
 RESTRICTED=()
 REVIEW=()
 MANUAL=()
+skill_count=0
 permissible_n=0
 firstparty_n=0
 source_reviewed_n=0
@@ -147,6 +148,8 @@ source_reviewed_n=0
 for dir in "$SKILLS_DIR"/*/; do
   [[ -d "$dir" ]] || continue
   name="$(basename "$dir")"
+  [[ "$name" == synced ]] && continue  # Claude account cache
+  skill_count=$((skill_count + 1))
   lic="$(/usr/bin/find "$dir" -maxdepth 1 -type f \( -iname 'LICENSE*' -o -iname 'COPYING*' \) 2>/dev/null | head -1)"
   meta_line="$(meta_for "$name")"
   source_type="$(printf '%s' "$meta_line" | awk -F '\t' '{print $2}')"
@@ -186,7 +189,6 @@ for dir in "$SKILLS_DIR"/*/; do
   esac
 done
 
-skill_count="$(/usr/bin/find "$SKILLS_DIR" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')"
 info "skill license audit ($skill_count skills)"
 ok   "permissible local licenses (kept public): $permissible_n"
 ok   "reviewed source-level licenses (kept public): $source_reviewed_n"

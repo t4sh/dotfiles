@@ -36,6 +36,18 @@ class ClaudeSettingsTests(unittest.TestCase):
         self.assertEqual(self.live.stat().st_mtime_ns, stamp)
         self.run_helper("check")
 
+    def test_skill_overrides_merge_per_skill_and_local_choices_win(self):
+        saved = SAVED.get("skillOverrides", {})
+        self.assertTrue(saved, "snapshot should carry skillOverrides")
+        kept = next(iter(saved))
+        local = {kept: "on", "local-only": "off"}
+        self.live.write_text(json.dumps({**SAVED, "skillOverrides": local}))
+        self.run_helper("check", success=False)
+        self.run_helper("restore")
+        overrides = json.loads(self.live.read_text())["skillOverrides"]
+        self.assertEqual(overrides, {**saved, **local})
+        self.run_helper("check")
+
     def test_restore_creates_missing_settings(self):
         self.run_helper("restore")
         self.assertEqual(json.loads(self.live.read_text()), SAVED)

@@ -9,6 +9,7 @@ Usage:  python3 agents/compareskills.py
 
 import json
 import argparse
+import os
 import re
 import subprocess
 import sys
@@ -28,14 +29,19 @@ IST = timezone(timedelta(hours=5, minutes=30))
 
 
 def get_disk_skills():
-    """Sorted list of discoverable skills on disk."""
-    return sorted(
-        f.parent.relative_to(SKILLS_DIR).as_posix() for f in SKILLS_DIR.rglob("SKILL.md")
-        if f.is_file() and not any(
-            part.startswith(".") or part == "node_modules"
-            for part in f.relative_to(SKILLS_DIR).parts[:-1]
-        )
-    )
+    """Discover skill folders without descending into caches or dependencies."""
+    skills = []
+    claude_cache = SKILLS_DIR / "synced"
+    for current, directories, _ in os.walk(SKILLS_DIR):
+        directory = Path(current)
+        directories[:] = [
+            name for name in directories
+            if not name.startswith(".") and name != "node_modules"
+            and directory / name != claude_cache
+        ]
+        if (directory / "SKILL.md").is_file():
+            skills.append(directory.relative_to(SKILLS_DIR).as_posix())
+    return sorted(skills)
 
 
 def get_gitignored_skills():
@@ -245,6 +251,9 @@ def main():
     gated = get_gitignored_skills()
 
     on_disk_only = sorted(s for s in disk_skills if s not in lock_skills)
+    # Tracked and gated skills are expected outside the lock; only unknown folders warn.
+    local_unlocked = sorted(s for s in on_disk_only if s in tracked_skills)
+    unexpected = sorted(s for s in on_disk_only if s not in tracked_skills and s not in gated)
     in_lock_only = sorted(s for s in lock_skills if s not in set(disk_skills))
     expected_gated_absent = sorted(set(in_lock_only) & gated)
     missing_required = required_lock_misses(in_lock_only, gated)
@@ -259,8 +268,10 @@ def main():
     print(f"  Lock:    {len(lock_skills)} entries")
     print(f"  Matched: {matched}")
 
-    if on_disk_only:
-        print(f"  On disk but NOT in lock: {', '.join(on_disk_only)}")
+    if local_unlocked:
+        print(f"  Local (tracked, not locked): {', '.join(local_unlocked)}")
+    if unexpected:
+        print(f"  On disk but NOT in lock or Git: {', '.join(unexpected)}")
     if in_lock_only:
         print(f"  In lock but NOT on disk: {', '.join(in_lock_only)}")
     if expected_gated_absent:
@@ -268,8 +279,8 @@ def main():
             "  Expected gated skills absent from tracked checkout: "
             f"{', '.join(expected_gated_absent)}"
         )
-    if not on_disk_only and not in_lock_only:
-        print("  Lock file and disk are in perfect sync")
+    if not unexpected and not in_lock_only:
+        print("  Lock, Git, and disk agree")
 
     gated_on_disk = sorted(s for s in disk_skills if s in gated)
     if gated_on_disk:

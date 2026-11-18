@@ -219,16 +219,27 @@ def write_atomic(path, data):
             os.unlink(name)
 
 
-def merge(base, saved):
+# Required for the shared skill boundary, so --keep-local never yields it.
+ENFORCED = {("skills", "create_dir")}
+
+
+def merge(base, saved, keep_local=False, path=()):
+    """Merge saved preferences; with keep_local, existing live values win."""
     for key, value in saved.items():
-        if isinstance(value, dict) and key != "aliases":
+        where = (*path, key)
+        if key == "aliases":
+            local = base.get(key, {})
+            if keep_local and not isinstance(local, dict):
+                raise ValueError("Cannot merge Hermes model aliases")
+            base[key] = {**value, **local} if keep_local else value
+        elif isinstance(value, dict):
             if key in base and not isinstance(base[key], dict):
                 raise ValueError("Cannot merge Hermes section: " + key)
-            merge(base.setdefault(key, {}), value)
+            merge(base.setdefault(key, {}), value, keep_local, where)
         elif key == "external_dirs":
             entries = list(external_dirs(base.get(key)))
             base[key] = entries + [entry for entry in value if entry not in entries]
-        else:
+        elif not keep_local or where in ENFORCED or key not in base:
             base[key] = value
     return base
 
@@ -310,10 +321,14 @@ def main():
     parser.add_argument("--skills-only", action="store_true", help="Manage portable skill creation and additive shared discovery")
     parser.add_argument("--preserve-model-selection", action="store_true",
                         help="Restore/check shared preferences and aliases without changing the live model/provider/endpoint")
+    parser.add_argument("--keep-local", action="store_true",
+                        help="Restore only adds saved preferences missing from the live config; local values win")
     parser.add_argument("--snapshot", type=Path, default=Path(os.environ.get("DOTFILES", Path(__file__).resolve().parents[1])) / "apps/hermes/config.json")
     args = parser.parse_args()
     if args.preserve_model_selection and (args.skills_only or args.mode not in ("restore", "check")):
         parser.error("--preserve-model-selection requires a full restore or check")
+    if args.keep_local and args.mode != "restore":
+        parser.error("--keep-local applies only to restore")
     try:
         if args.mode == "isolate-skills":
             isolate_shared_skills(args.live)
@@ -337,7 +352,10 @@ def main():
                 raise ValueError("Hermes preferences differ; use this helper with capture or restore and the same --live, --snapshot and --skills-only options. See docs/hermes-preferences.md.")
             if args.mode == "restore":
                 base = read_config(args.live) if args.live.exists() else {}
-                write_atomic(args.live, merge(base, saved))
+                merged = merge(json.loads(json.dumps(base)), saved, args.keep_local)
+                # An unchanged merge leaves the live YAML's own layout alone.
+                if merged != base or not args.live.exists():
+                    write_atomic(args.live, merged)
         print("Hermes preferences: " + args.mode + " passed")
         return 0
     except (OSError, ValueError) as error:

@@ -77,3 +77,20 @@ Aside's entry point is vendor-CLI-managed; its live guide comes from that CLI.
 owned by Codex/plugin updates and must not be overwritten with shared-tree copies.
 The nested `creative/typographic-poster-design` skill is also locally authored;
 inventory discovery includes nested tracked skills and excludes dependency trees.
+
+## Claude account skill cache
+
+Claude Code downloads account skills to `~/.claude/skills/synced/`. The dotfiles
+link puts that cache under `agents/skills/synced/`, where Git and the dotfiles
+skill checks skip it. Keep the shared skills link in place and let Claude manage
+the cached files.
+
+Manage enabled skills in Claude under **Plugins** using the Skills filter,
+or under **Customize → Skills** in the earlier layout. To check sync, start
+Claude Code signed in to the same account and run `/skills`. Look under
+**claude.ai sync**. Claude checks for account changes at startup and periodically
+during the session. Local edits can be overwritten on the next sync. To disable
+account skill sync for this machine, set `"syncClaudeAiSkills": false` in
+`~/.claude/settings.json` and restart Claude Code.
+[Claude skill settings](https://support.claude.com/en/articles/17740565-manage-plugins-skills-and-connectors-from-one-plugins-page) ·
+[Claude Code sync](https://code.claude.com/docs/en/skills#skills-synced-from-claudeai)

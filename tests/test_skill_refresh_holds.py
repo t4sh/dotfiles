@@ -111,6 +111,21 @@ exit "${FIXTURE_EXIT:-0}"
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("restricted skill(s) not gitignored", result.stderr)
 
+    def test_license_audit_skips_claude_cache(self):
+        skills = self.root / "agents/skills"
+        (skills / "source-licenses.tsv").write_text(
+            "fixture/shared\tMIT\tfixture\nfixture/held\tMIT\tfixture\n", encoding="utf-8")
+        (self.root / ".gitignore").write_text("/agents/skills/synced/\n", encoding="utf-8")
+        (skills / "synced").mkdir()
+        (skills / "synced/LICENSE").write_text("All rights reserved.\n", encoding="utf-8")
+
+        command = [BASH, str(ROOT / "scripts/audit-skill-licenses.sh"), "--check"]
+        result = subprocess.run(command, env=dict(self.env, DOTFILES=self.root.as_posix()),
+                                capture_output=True, text=True, encoding="utf-8")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("skill license audit (3 skills)", result.stdout)
+        self.assertNotIn("synced", result.stdout)
+
     def test_github_folder_hash_fallback_keeps_refresh_usable(self):
         lock = self.root / "agents/.skill-lock.json"
         data = json.loads(lock.read_text(encoding="utf-8"))

@@ -260,7 +260,8 @@ The previous dotfiles-owned Codex hooks symlink migrates to a local file.
 
 `make restore-claude-settings` merges the saved Claude Code attribution keys from
 [`config/claude/settings.json`](config/claude/settings.json) (empty commit/PR
-attribution, `includeCoAuthoredBy: false`) into `~/.claude/settings.json`, leaving
+attribution, `includeCoAuthoredBy: false`) into `~/.claude/settings.json`, and adds
+its saved `skillOverrides` per skill (a local choice for the same skill wins), leaving
 every other key to Claude Code. The same merge helper is supported on Windows:
 `dot claude-settings -Apply` (or `make claude-settings`) uses
 `%USERPROFILE%\.claude`, honoring `CLAUDE_CONFIG_DIR`; `dot claude-settings -Check`

@@ -22,6 +22,8 @@ python3 scripts/hermes-settings.py capture --live "$HOME/.hermes/config.yaml" --
 python3 scripts/hermes-settings.py restore --live "$HOME/.hermes/config.yaml" --snapshot "$HOME/.dotfiles-local/hermes-preferences.json"
 ```
 
+Add `--keep-local` to restore missing preferences while keeping local values and model aliases. Shared skill directories merge, and the saved shared skill creation path still applies. An unchanged restore preserves the live file’s formatting.
+
 On Windows, pass the active profile's config path explicitly; the default is under
 `HERMES_HOME` when set, otherwise `%LOCALAPPDATA%/hermes`. Shared-skill preferences
 can be managed separately with `--skills-only`; restoration adds shared discovery

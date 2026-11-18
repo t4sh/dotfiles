@@ -18,9 +18,10 @@ import sys
 
 def check_resources(root):
     errors = []
+    skills_dir = root / "agents/skills"
     lock = json.loads((root / "agents/.skill-lock.json").read_text())
     for name in lock["skills"]:
-        if not (root / "agents/skills" / name / "SKILL.md").is_file():
+        if not (skills_dir / name / "SKILL.md").is_file():
             errors.append(f"{name}: SKILL.md is missing")
     manifest = json.loads((root / "config/skill-install-resources.json").read_text())
     for entry in manifest["resources"]:
@@ -29,9 +30,14 @@ def check_resources(root):
             errors.append(f"{entry['path']}: required external skill resource is missing")
         elif hashlib.sha256(target.read_bytes()).hexdigest() != entry["sha256"]:
             errors.append(f"{entry['path']}: resource checksum differs from its source record")
-    for target in (root / "agents/skills").rglob("*"):
-        if target.is_symlink() and not target.exists():
-            errors.append(f"{target.relative_to(root)}: broken symlink")
+    claude_cache = skills_dir / "synced"
+    for current, directories, files in os.walk(skills_dir):
+        directory = Path(current)
+        directories[:] = [name for name in directories if directory / name != claude_cache]
+        for name in directories + files:
+            target = directory / name
+            if target != claude_cache and target.is_symlink() and not target.exists():
+                errors.append(f"{target.relative_to(root)}: broken symlink")
     return errors
 
 

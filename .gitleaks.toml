@@ -41,3 +41,11 @@ regexes = [
   '''SubtleCrypto\?\.supports\?\.\('encapsulateKey', 'MLKEM768-X25519', 'ChaCha20-Poly1305'\)''',
 ]
 paths = ['''agents/skills/modern-web-guidance/guides/security/client-side-encryption\.md$''']
+
+[[allowlists]]
+description = "Cloudflare Workers best-practices anti-pattern placeholder, not a credential"
+targetRules = ["generic-api-key"]
+condition = "AND"
+regexTarget = "line"
+regexes = ['''"API_KEY": "sk-live-abc123\.\.\."  // Secret in version control''']
+paths = ['''agents/skills/workers-best-practices/references/configuration\.md$''']

@@ -58,5 +58,8 @@ git/hooks/
 # Hermes bundled category metadata belongs in its profile, not shared skills.
 /agents/skills/research/DESCRIPTION.md
 
+# Claude account-skill cache written via the ~/.claude/skills link.
+/agents/skills/synced/
+
 # Local isolated checkouts, never configuration payload.
 .worktrees/

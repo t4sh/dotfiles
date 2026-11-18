@@ -31,7 +31,8 @@ class GeneratorPortabilityTests(unittest.TestCase):
                 },
             }), encoding="utf-8")
             (repo / ".gitignore").write_text(
-                "agents/skills/gated/\nagents/skills/ignored-local/\n", encoding="utf-8")
+                "agents/skills/gated/\nagents/skills/ignored-local/\n/agents/skills/synced/\n",
+                encoding="utf-8")
             for name in ("locked", "tracked-local", "creative/nested"):
                 skill = repo / "agents/skills" / name
                 skill.mkdir(parents=True)
@@ -50,6 +51,9 @@ class GeneratorPortabilityTests(unittest.TestCase):
             baseline = readme.read_bytes()
             self.assertIn(b"4 managed skills", baseline)
             self.assertIn(b"creative/nested", baseline)
+            cached = repo / "agents/skills/synced/account/cached-skill"
+            cached.mkdir(parents=True)
+            (cached / "SKILL.md").write_text("# downloaded\n", encoding="utf-8")
             for name in ("untracked-local", "ignored-local"):
                 skill = repo / "agents/skills" / name
                 skill.mkdir()
@@ -60,6 +64,10 @@ class GeneratorPortabilityTests(unittest.TestCase):
                 self.assertEqual(result.returncode, 0, result.stderr)
                 self.assertIn("untracked-local", result.stdout)
                 self.assertIn("ignored-local", result.stdout)
+                self.assertIn("Local (tracked, not locked): creative/nested, tracked-local\n",
+                              result.stdout)
+                self.assertIn("On disk but NOT in lock or Git: untracked-local\n", result.stdout)
+                self.assertNotIn("synced/account", result.stdout)
                 self.assertNotIn("scratch", result.stdout)
                 self.assertEqual(readme.read_bytes(), baseline)
 

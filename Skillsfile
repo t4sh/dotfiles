@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Skillsfile — declarative global skill manifest (Brewfile pattern).
 #
-# GENERATED 2026-11-12T18:24:38+05:30 from agents/.skill-lock.json by
+# GENERATED 2026-11-19T01:01:47+05:30 from agents/.skill-lock.json by
 # scripts/gen-skillsfile.py — DO NOT EDIT BY HAND. To change skills:
 #   ~/.local/bin/npx-stable skills add ... --agent codex   then   make skills-manifest
 #   (regenerates Skillsfile + agents/skills/README.md)
 #
 # Explicit upstream refresh: make skills-update   (or: bash Skillsfile)
-# 125 skills — 41 refreshable github sources + 1 local + 2 held.
+# 146 skills — 41 refreshable github sources + 1 local + 2 held.
 # Exceptional refresh holds, if any, live in config/skills-refresh-holds.json.
 #
 # Prereqs (fresh Mac): node + git + GitHub auth (SSH/gh) must be set
@@ -96,7 +96,7 @@ echo "Checking skills from source: cerico/macfair"
 update_skill_source "$NPX" skills add cerico/macfair --skill creative-design -g -y --agent codex
 
 echo "Checking skills from source: cloudflare/skills"
-update_skill_source "$NPX" skills add cloudflare/skills --skill web-perf -g -y --agent codex
+update_skill_source "$NPX" skills add cloudflare/skills --skill agents-sdk basin cf-cli cloudflare cloudflare-app-bootstrap cloudflare-email-service cloudflare-one cloudflare-one-migrations durable-objects frameworks-on-cloudflare gateway-workers k2 nextjs-on-cloudflare sandbox-migrate-to-next sandbox-next sandbox-stable turnstile-spin web-perf workers-best-practices workers-development workers-profiling wrangler -g -y --agent codex
 
 echo "Checking skills from source: coreyhaines31/marketingskills"
 update_skill_source "$NPX" skills add coreyhaines31/marketingskills --skill copywriting marketing-psychology seo-audit -g -y --agent codex

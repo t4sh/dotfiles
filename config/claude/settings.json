@@ -3,5 +3,28 @@
     "commit": "",
     "pr": ""
   },
-  "includeCoAuthoredBy": false
+  "includeCoAuthoredBy": false,
+  "skillOverrides": {
+    "aside-browser": "name-only",
+    "basin": "name-only",
+    "business-motion-film": "name-only",
+    "cloudflare-one-migrations": "name-only",
+    "craft-design-engineering": "name-only",
+    "creative-design": "name-only",
+    "debug": "name-only",
+    "emil-design-eng": "name-only",
+    "gateway-workers": "name-only",
+    "hallmark": "name-only",
+    "imagegen-frontend-mobile": "name-only",
+    "imagegen-frontend-web": "name-only",
+    "k2": "name-only",
+    "ponytail": "name-only",
+    "ponytail-help": "name-only",
+    "sandbox-migrate-to-next": "name-only",
+    "sandbox-next": "name-only",
+    "sandbox-stable": "name-only",
+    "skill-creator": "name-only",
+    "skill-inspector": "name-only",
+    "ui-ux-pro-max": "name-only"
+  }
 }

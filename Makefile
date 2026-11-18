@@ -70,7 +70,7 @@ restore-claude-rtk: ## Merge the RTK PreToolUse hook into Claude Code user setti
 claude-rtk-check: ## Check Claude Code has exactly one current RTK hook
 	@python3 scripts/rtk-hook.py check
 
-restore-claude-settings: ## Merge saved Claude Code attribution settings
+restore-claude-settings: ## Merge saved Claude Code attribution and skill listing overrides
 	@python3 scripts/claude-settings.py restore
 	@python3 scripts/claude-settings.py check
 

@@ -103,6 +103,21 @@ echo impeccable-engine 1.2.3
             resource.write_text("expected")
             self.assertEqual([], CHECK.check_resources(root))
 
+    @unittest.skipIf(os.name == "nt", "Windows symlink creation may require elevated privileges")
+    def test_broken_symlink_check_skips_claude_cache(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            skills = root / "agents/skills"
+            cache = skills / "synced/account/skill"
+            cache.mkdir(parents=True)
+            (cache / "broken").symlink_to("missing")
+            (skills / "broken").symlink_to("missing")
+            (root / "agents/.skill-lock.json").write_text('{"skills": {}}')
+            (root / "config").mkdir()
+            (root / "config/skill-install-resources.json").write_text('{"resources": []}')
+
+            self.assertEqual(CHECK.check_resources(root), ["agents/skills/broken: broken symlink"])
+
     @unittest.skipIf(os.name == "nt", "shell fixture exercises the Mac/Linux binary cache")
     def test_engine_missing_wrong_version_and_ready(self):
         with tempfile.TemporaryDirectory() as tmp, patch.dict(os.environ, {}, clear=True):

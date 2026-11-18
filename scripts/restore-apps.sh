@@ -79,7 +79,7 @@ if [[ "$*" == '--only hermes' ]]; then
         echo "Hermes is the restore host; run make restore-hermes from another terminal." >&2
         exit 1
     fi
-    python3 "$SCRIPT_DIR/hermes-settings.py" restore
+    python3 "$SCRIPT_DIR/hermes-settings.py" restore --keep-local
     echo "  ✓ Hermes backend preferences restored; Desktop UI restoration is not verified."
     echo "    In Hermes Desktop, select the default/local backend, then open Settings → Appearance → Message Reactions."
     echo "    Match your saved display.message_reactions value: false = Off, true = On."
