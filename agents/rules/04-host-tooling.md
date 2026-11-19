@@ -65,6 +65,10 @@ Playwright's downloaded Chromium and Chrome for Testing builds lag Chrome securi
 - Never close the user's existing browser windows or sessions owned by another task.
 - Use the Chrome control integration when verification requires the user's existing Chrome profile, cookies, extensions, or authenticated state. Playwright may use a separate isolated profile and must not be assumed capable of attaching to an ordinary running Chrome instance.
 
+## Background processes
+
+When you start a server, watcher, or other background process, keep its process or session handle. Use that handle to stop it when the task finishes or is interrupted. If the user still needs it for a preview, monitoring, or handoff, leave it running and tell them how to stop it. Only stop processes you can identify as started by this task.
+
 ## Generated report locations
 
 For Codex-generated reports, audits, screenshots indexes, HTML summaries, and similar temporary review artifacts:
