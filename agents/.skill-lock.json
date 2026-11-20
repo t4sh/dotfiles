@@ -851,6 +851,16 @@
       "installedAt": "2026-08-01T19:07:45.245Z",
       "updatedAt": "2026-11-19T12:10:30.885Z"
     },
+    "better-motion": {
+      "source": "jakubkrehel/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/jakubkrehel/skills.git",
+      "commit": "672ae44ace6aaed65b86cbb1e2fd6fbea0e79578",
+      "skillPath": "skills/better-motion/SKILL.md",
+      "skillFolderHash": "fbcd0de994deb95d50db3b952dcfad7bce875b09",
+      "installedAt": "2026-11-20T19:36:39.992Z",
+      "updatedAt": "2026-11-20T19:36:39.992Z"
+    },
     "better-layout": {
       "source": "jakubkrehel/skills",
       "sourceType": "github",

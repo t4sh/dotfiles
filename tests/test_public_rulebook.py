@@ -69,6 +69,16 @@ class PublicRulebookAudit(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn('skill router names unavailable, non-retired skill: missing-owner', result.stderr)
 
+    def test_motion_routing_distinguishes_full_reviews_and_standalone_work(self):
+        routing = self.root / 'agents/rules/routing'
+        interface_review = (routing / 'interface/review.md').read_text(encoding='utf-8')
+        motion = (routing / 'motion.md').read_text(encoding='utf-8')
+        self.assertIn(
+            '| Motion pass within a `better-interface` review | `better-motion` |',
+            interface_review,
+        )
+        self.assertIn('Use `ui-animation` by default for standalone web motion', motion)
+
     def test_task_trigger_groups_keep_setup_preview_and_review_distinct(self):
         index = (self.root / 'agents/AGENTS.md').read_text(encoding='utf-8')
         groups = {}

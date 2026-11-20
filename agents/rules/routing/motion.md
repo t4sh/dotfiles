@@ -1,6 +1,6 @@
 # Motion skill routing
 
-Load this reference when animation or motion is the requested deliverable.
+Load this reference when animation or motion is the requested deliverable. Use `ui-animation` by default for standalone web motion. Within a holistic `better-interface` review, `better-motion` owns the motion pass.
 
 Motion Video Kit (`business-motion-film`) owns film production when the user names the skill or kit.
 

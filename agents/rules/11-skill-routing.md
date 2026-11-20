@@ -8,7 +8,7 @@ Activate for selections starting from rule 12, overlapping skill choices, named 
 2. **One primary owner by default.** Select the smallest sufficient skill. Do not stack skills merely because their descriptions share keywords.
 3. **Route by deliverable and mode.** Select inspection, planning, implementation, verification, or release from the request; inspection and planning authorize no product edits. Skill invocation never overrides host permissions or mode. Use existing owners; ordinary small work needs no ceremony.
 4. **Sequence distinct phases.** When more than one skill is justified, assign each a non-overlapping phase such as specification → implementation → verification. Do not let multiple skills independently redesign the same solution.
-5. **Orchestration must be intentional.** `better-interface` may coordinate its six owning `better-*` domains for an explicitly holistic review. Otherwise add a secondary skill only when it supplies a distinct requested artifact or verification pass.
+5. **Orchestration must be intentional.** `better-interface` coordinates its `better-*` domains for a holistic review, including `better-motion` for the motion pass. Otherwise add a secondary skill only when it supplies a distinct requested artifact or verification pass.
 6. **Project authority still wins.** Follow project instructions, existing tokens, components, conventions, and user scope over any skill default.
 7. **Design work stays design-led.** For a user-facing interface, the design posture and selected design reference define the mode, artifact, and quality bar. Repository and Git workflows support the work but do not become its owner or dominate the response.
 

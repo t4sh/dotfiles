@@ -13,6 +13,7 @@ Inspect the rendered surface using [Frontend verification](../../24-frontend-ver
 | Font choice, rendering, hierarchy, wrapping, truncation, bidi | `better-typography` |
 | OKLCH, palettes, contrast, gamut, semantic color | `better-colors` |
 | Surfaces, radius, shadows, icons, micro-interactions, touch feedback, and UI finish | `better-ui` |
+| Motion pass within a `better-interface` review | `better-motion` |
 
 Use `better-interface` for holistic coverage, including Git-fixed-point UI reviews. Use one domain owner for narrow work. Explicitly named `interface-review` may resolve the diff and hand visual findings back. General correctness, tests, and security belong to `code-review`.
 
