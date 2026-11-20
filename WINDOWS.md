@@ -34,6 +34,17 @@ failures with the OS error and exact executable path in
 source shortcut and checks shared skills. See
 [Hermes Windows setup](docs/hermes-preferences.md#windows-source-launcher-and-shared-skills).
 
+Managed Hermes calls use a compact process-local PATH. Windows cmd.exe can
+drop inherited PATH values over 8,191 characters, and pnpm adds directories
+for nested lifecycle scripts. The managed runtime starts with the host tools it
+needs, then Hermes supplies its pinned tools to child processes. The caller's
+PATH and profile environment are restored after success or failure.
+
+After launching an editor with Settings Sync enabled, rerun its targeted
+extension check. Sync can replace a restored extension pin. For example, use
+`dot extensions -Editor code -Check` to confirm Shell Format still reports
+the declared version.
+
 Maintenance prepares gcloud's copied update Python only for Topgrade and restores
 the caller's `CLOUDSDK_PYTHON` afterward. After Topgrade, VS Code and Cursor
 extensions are reconciled with the declared versions. Skill refresh shows one

@@ -87,15 +87,18 @@ claude-rulebook-check: ## Check Claude Code startup load enforcement hooks
 	@if command -v claude >/dev/null 2>&1; then python3 scripts/claude-rulebook.py check; \
 	else echo "Claude startup hook check deferred: install Claude Code, then run make restore-claude-rulebook"; fi
 
-.PHONY: cursor-extensions vscode-extensions restore-zed zed-check restore-cursor-cli cursor-cli-check backup-text-replacements
+.PHONY: cursor-extensions cursor-shell-format vscode-extensions restore-zed zed-check restore-cursor-cli cursor-cli-check backup-text-replacements
 restore-cursor-cli: ## Merge saved Cursor CLI attribution preferences
 	@bash scripts/restore-apps.sh --only cursor-cli
 
 cursor-cli-check: ## Check Cursor CLI attribution against the saved snapshot
 	@python3 scripts/cursor-cli-settings.py check
 
-cursor-extensions: ## Install the minimal reviewed Cursor extension set
+cursor-extensions: cursor-shell-format ## Install the minimal reviewed Cursor extension set
 	@cursor --install-extension esbenp.prettier-vscode
+
+cursor-shell-format: ## Install the pinned Shell Format VSIX in Cursor on macOS
+	@bash scripts/install-cursor-shell-format.sh
 
 vscode-extensions: ## Apply the verified formatter version; upstream 7.2.8 is broken
 	@code --install-extension foxundermoon.shell-format@7.2.5 --force

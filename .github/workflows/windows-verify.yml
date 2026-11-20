@@ -59,7 +59,8 @@ jobs:
             'test_windows_skills_prompt.ps1',
             'test_windows_python_discovery.ps1',
             'test_windows_update_reporting.ps1',
-            'test_public_windows_hermes.ps1'
+            'test_public_windows_hermes.ps1',
+            'test_public_windows_hermes_runtime.ps1'
           )
           foreach ($fixture in $fixtures) {
             & pwsh -NoProfile -File (Join-Path 'tests' $fixture)
