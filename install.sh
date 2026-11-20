@@ -44,6 +44,7 @@ bootstrap_report() {
         echo '  MANUAL   make keychain-list → recover tool items separately → make keychain-check'
         echo '  MANUAL   gh auth login -h github.com → make post-vault; follow its GUI checklist'
         echo '  MANUAL   Default-app choices remain separate → make default-apps-check'
+        echo '  MANUAL   OpenCode Browse: install the Chrome/Edge extension, pair with ~/.local/bin/browse pair, then run make browse-check'
         echo "  CHECK    make setup-status APP_GROUPS=$APP_GROUPS (read-only; does not certify sign-ins)"
         echo '  CHECK    make verify-bootstrap after recovery (strict full-inventory acceptance)'
     fi
@@ -230,6 +231,9 @@ COMPLETED_STAGES+=('Impeccable engine')
 CURRENT_STAGE='Fluid Functionalism audit dependencies'; CURRENT_RETRY='make skills-browser'
 make -C "$DOTFILES" skills-browser
 COMPLETED_STAGES+=('Fluid Functionalism audit dependencies')
+CURRENT_STAGE='OpenCode Browse'; CURRENT_RETRY='make browse-install'
+make -C "$DOTFILES" browse-install
+COMPLETED_STAGES+=('OpenCode Browse binary')
 
 # 7. Restore portable agent hooks after RTK is installed, then services.
 CURRENT_STAGE='Codex RTK hook'; CURRENT_RETRY='make restore-codex-rtk'

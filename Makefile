@@ -118,6 +118,7 @@ all: ## Re-apply the full existing-Mac setup, including node shims, in a fixed o
 	@$(MAKE) --no-print-directory shims
 	@$(MAKE) --no-print-directory skills-engine
 	@$(MAKE) --no-print-directory skills-browser
+	@$(MAKE) --no-print-directory browse-install
 	@$(MAKE) --no-print-directory restore-codex-rtk
 	@$(MAKE) --no-print-directory restore-claude-rtk
 	@$(MAKE) --no-print-directory restore-claude-settings
@@ -304,6 +305,13 @@ shims: ## Create/repair node-stable + npx-stable shims from .node-version
 
 brew-check: ## Check whether Brewfile entries are installed
 	@DOTFILES="$(CURDIR)" bash scripts/brewfile.sh check
+
+.PHONY: browse-install browse-check
+browse-install: ## Install OpenCode's Mac Browse binary; browser pairing is manual
+	@bash scripts/opencode-browse.sh install
+
+browse-check: ## Verify the managed Mac config, executable and live Browse MCP connection
+	@bash scripts/opencode-browse.sh check
 
 macos: ## Apply interactive macOS defaults
 	@bash macos/defaults.sh

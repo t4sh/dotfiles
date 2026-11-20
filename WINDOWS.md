@@ -267,7 +267,8 @@ default `%USERPROFILE%\.claude` directory. The equivalent Make targets are
 `claude-settings` and `claude-settings-check`.
 
 `dot link` links OpenCode's global `opencode.jsonc` and `AGENTS.md` under
-`%USERPROFILE%\.config\opencode`.
+`%USERPROFILE%\.config\opencode`. Windows uses the shared skill permissions in
+`config/opencode/opencode.jsonc`. Browse lives in the Mac configuration.
 
 `dot hermes-runtime -Check` checks the Hermes interpreter.
 `dot hermes-update -DryRun` previews the standalone updater; close Hermes

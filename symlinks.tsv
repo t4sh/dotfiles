@@ -48,7 +48,7 @@ $DOTFILES/config/lldb/lldbinit	$HOME/.lldbinit
 $DOTFILES/config/gdb/gdbinit	$HOME/.gdbinit
 $DOTFILES/config/ccache/ccache.conf	$HOME/.ccache/ccache.conf
 $DOTFILES/config/valgrindrc	$HOME/.valgrindrc
-$DOTFILES/config/opencode/opencode.jsonc	$HOME/.config/opencode/opencode.jsonc
+$DOTFILES/config/opencode/macos.jsonc	$HOME/.config/opencode/opencode.jsonc
 
 # Hammerspoon
 $DOTFILES/hammerspoon	$HOME/.hammerspoon

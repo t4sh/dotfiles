@@ -128,7 +128,7 @@ cd ~/.dotfiles
 make all
 ```
 
-`make all` runs serially (including under `make -j all`): `link` → `rules-audit` → `skills-audit` → `brew-without-mas` → `shims` → `skills-engine` → `skills-browser` → `services` → `restore-apps` → `dock` → `hooks` → `macos` (interactive + Touch ID sudo, last). App Store apps stay explicit via `make brew-mas`.
+`make all` runs serially (including under `make -j all`): `link` → `rules-audit` → `skills-audit` → `brew-without-mas` → `shims` → `skills-engine` → `skills-browser` → `browse-install` → `services` → `restore-apps` → `dock` → `hooks` → `macos` (interactive + Touch ID sudo, last). App Store apps stay explicit via `make brew-mas`.
 
 `make brew` runs `brew-base` → `node` → `brew-npm`, then optional/interactive MAS. Fresh re-apply prefers `brew-without-mas`.
 
@@ -366,6 +366,13 @@ The same Mac setup and refresh commands install Fluid Functionalism's audit
 dependencies with lifecycle scripts disabled. Doctor checks that Playwright can
 load; repair it with `make skills-browser`. Actual audits also need Chrome or a
 compatible Chromium, and a running page to measure.
+
+**OpenCode Browse on Mac.** `make link` installs the Mac MCP configuration.
+`make browse-install` installs just the executable at `~/.local/bin/browse`.
+For a new browser profile, install the [Browse extension](https://opencode.ai/product/browse),
+run `~/.local/bin/browse pair`, and redeem the code in Chrome or Edge. Run
+`make browse-check` from the dotfiles checkout to verify OpenCode can connect.
+Browser pairing is a separate step from the MCP connection check.
 
 ## Secrets
 

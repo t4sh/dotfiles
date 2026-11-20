@@ -152,7 +152,7 @@ class RecoveryTests(unittest.TestCase):
             self.assertIn('~/.agents/AGENTS.md', content)
             self.assertIn('context compaction', content)
             self.assertNotIn('rules/*.md', content)
-        self.assertIn('$DOTFILES/config/opencode/opencode.jsonc\t$HOME/.config/opencode/opencode.jsonc', manifest)
+        self.assertIn('$DOTFILES/config/opencode/macos.jsonc\t$HOME/.config/opencode/opencode.jsonc', manifest)
         self.assertIn('alwaysApply: true', (ROOT / 'config/cursor/rulebook.mdc').read_text())
         self.assertIn('$DOTFILES/agents/AGENTS.md\t$HOME/.claude/CLAUDE.md', manifest)
 
