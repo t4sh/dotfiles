@@ -13,6 +13,7 @@ License texts for the following upstream repositories are included with their sk
 - [jakubkrehel/skills](agents/skill-licenses/jakubkrehel/skills/LICENSE)
 - [mickadesign/fluid-functionalism](agents/skill-licenses/mickadesign/fluid-functionalism/LICENSE)
 - [nextlevelbuilder/ui-ux-pro-max-skill](agents/skill-licenses/nextlevelbuilder/ui-ux-pro-max-skill/LICENSE)
+- [NVIDIA/SkillSpector](agents/skill-licenses/NVIDIA/SkillSpector/LICENSE) · [Upstream dependency notices](https://github.com/NVIDIA/SkillSpector/blob/48e0f942ea1f5fdb7aa096a6f65a0adeda2ecc4e/THIRD_PARTY_NOTICES.md)
 - [pbakaus/impeccable](agents/skill-licenses/pbakaus/impeccable/LICENSE) · [Third-party notice](agents/skill-licenses/pbakaus/impeccable/NOTICE.md)
 - [vercel-labs/agent-browser](agents/skill-licenses/vercel-labs/agent-browser/LICENSE)
 
@@ -103,6 +104,7 @@ License texts for the following upstream repositories are included with their sk
 | `setup-ts-deep-modules` | mattpocock/skills | https://github.com/mattpocock/skills |
 | `skill-architect` | t4sh/skills4sh | https://github.com/t4sh/skills4sh |
 | `skill-creator` | openai/skills | https://github.com/openai/skills |
+| `skill-inspector` | NVIDIA/SkillSpector | https://github.com/NVIDIA/SkillSpector |
 | `state-machine` | jakubkrehel/skills | https://github.com/jakubkrehel/skills |
 | `stitch-design-taste` | Leonxlnx/taste-skill | https://github.com/Leonxlnx/taste-skill |
 | `sync-figma-token` | firebenders/sync-figma-token-skill | https://github.com/firebenders/sync-figma-token-skill |

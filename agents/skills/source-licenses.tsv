@@ -11,7 +11,7 @@ ComposioHQ/awesome-claude-skills	reviewed	pre-existing tracked source before 202
 DietrichGebert/ponytail	MIT	GitHub repo root LICENSE; fetched 2026-08-24
 Leonxlnx/imagegen-skills	MIT	https://github.com/Leonxlnx/imagegen-skills/blob/main/LICENSE; inspected 2026-10-19
 Leonxlnx/taste-skill	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
-NVIDIA/SkillSpector	Apache-2.0	https://github.com/NVIDIA/SkillSpector/blob/main/LICENSE; inspected 2026-10-01
+NVIDIA/SkillSpector	Apache-2.0	agents/skill-licenses/NVIDIA/SkillSpector/LICENSE; verified at upstream 48e0f942ea1f5fdb7aa096a6f65a0adeda2ecc4e
 anthropics/knowledge-work-plugins	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
 arvindrk/extract-design-system	MIT	https://github.com/arvindrk/extract-design-system/blob/main/LICENSE; inspected 2026-10-15
 benjitaylor/agentation	reviewed	pre-existing tracked source before 2026-07-03 audit hardening

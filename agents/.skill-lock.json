@@ -796,10 +796,11 @@
       "source": "coreyhaines31/marketingskills",
       "sourceType": "github",
       "sourceUrl": "https://github.com/coreyhaines31/marketingskills.git",
+      "commit": "5b2b400eec1e7e1cec76245a715d0b0d4fd2a9c1",
       "skillPath": "skills/seo-audit/SKILL.md",
-      "skillFolderHash": "e3ae4d458922e9d675491e2ba9fd665a10b4a54c",
+      "skillFolderHash": "929fcd7b4f881aa5cd96ad26a3b4f4ed2351c954",
       "installedAt": "2026-07-16T19:18:05.226Z",
-      "updatedAt": "2026-11-10T07:52:53.240Z"
+      "updatedAt": "2026-11-20T05:58:28.570Z"
     },
     "marketing-psychology": {
       "source": "coreyhaines31/marketingskills",
@@ -1028,10 +1029,11 @@
       "source": "NVIDIA/SkillSpector",
       "sourceType": "github",
       "sourceUrl": "https://github.com/NVIDIA/SkillSpector.git",
+      "commit": "48e0f942ea1f5fdb7aa096a6f65a0adeda2ecc4e",
       "skillPath": "skills/skill-inspector/SKILL.md",
-      "skillFolderHash": "a131ecd48393a8c74fe51f6221495c89b98de5ef",
+      "skillFolderHash": "790149e25468d262c24d92b649d83aa03f38e3f2",
       "installedAt": "2026-10-01T02:51:17.047Z",
-      "updatedAt": "2026-10-16T05:48:27.352Z"
+      "updatedAt": "2026-11-19T16:28:01.963Z"
     },
     "business-motion-film": {
       "source": "echris6/motion-video-kit",
