@@ -1,0 +1,12 @@
+<snippet>
+  <content><![CDATA[## ${1:Change}
+
+- Expected: ${2:Observable behavior}
+- Checked: ${3:Command or manual check}
+- Result: ${4:Observed result}
+- Unrun: ${5:Checks still needed}
+$0]]></content>
+  <tabTrigger>verification-note</tabTrigger>
+  <scope>text.html.markdown</scope>
+  <description>Portable verification note</description>
+</snippet>

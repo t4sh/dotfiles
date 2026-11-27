@@ -1,4 +1,8 @@
 {
   "editor.fontSize": 14,
+  "security.workspace.trust.enabled": true,
+  "security.workspace.trust.untrustedFiles": "prompt",
+  "security.promptForLocalFileProtocolHandling": true,
+  "git.allowNoVerifyCommit": false,
   "workbench.colorTheme": "Default Dark Modern"
 }

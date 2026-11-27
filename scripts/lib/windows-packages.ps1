@@ -1,3 +1,57 @@
+function Set-DotfilesDeskflowStablePin([string]$Version) {
+    # WinGet compares the pin itself; its display table also includes the installed version.
+    & winget.exe pin add --id Deskflow.Deskflow --exact --source winget --version $Version --force --accept-source-agreements --disable-interactivity
+    if ($LASTEXITCODE -ne 0) { throw "WinGet could not pin Deskflow to stable $Version (exit $LASTEXITCODE)" }
+}
+function Get-DotfilesListedWinGetVersions([string[]]$Lines) {
+    $found=[Collections.Generic.List[string]]::new()
+    foreach($line in $Lines){
+        $entry=$line.Trim()
+        if($entry -cmatch '^\d+\.\d+\.\d+(?:\.\d+)?$'){ $found.Add($entry) }
+    }
+    return $found
+}
+function Test-DotfilesStableWinGetVersion([string]$Version) {
+    # Continuous Deskflow builds add a fourth component, such as 1.27.0.10.
+    return $Version -cmatch '^\d+\.\d+\.\d+$'
+}
+function Get-DotfilesPowerShellMsiVersion {
+    # PowerShell 7.7 moved to MSIX. Keep the independent machine MSI on 7.6 LTS.
+    $listed = & winget.exe show --id Microsoft.PowerShell --exact --source winget --versions --accept-source-agreements --disable-interactivity
+    if ($LASTEXITCODE -ne 0) { throw "WinGet could not list PowerShell versions (exit $LASTEXITCODE)" }
+    $lts = @(Get-DotfilesListedWinGetVersions $listed | Where-Object { $_ -match '^7\.6\.' } |
+        Sort-Object @{Expression={[version]$_}} -Descending)
+    if (-not $lts.Count) { throw 'WinGet did not list a PowerShell 7.6 LTS MSI version.' }
+    return $lts[0]
+}
+function Get-DotfilesLatestStableWinGetVersion([string[]]$Versions) {
+    $stable=@($Versions | Where-Object { Test-DotfilesStableWinGetVersion $_ })
+    if(-not $stable.Count){ return '' }
+    return [string]@($stable | Sort-Object @{Expression={[version]$_}} -Descending)[0]
+}
+function Get-DotfilesDeskflowBlockedVersions {
+    # Smart App Control blocks unsigned Deskflow 1.27.0: the binaries have no
+    # reputation, and Code Integrity events 3033/3077 deny deskflow.exe.
+    # 1.26.0 is the newest stable build that launches with protection left on.
+    return @('1.27.0')
+}
+function Get-DotfilesInstallableDeskflowVersion([string[]]$Versions) {
+    $blocked=@(Get-DotfilesDeskflowBlockedVersions)
+    $allowed=@($Versions | Where-Object { $_ -notin $blocked })
+    return Get-DotfilesLatestStableWinGetVersion $allowed
+}
+function Test-DotfilesDeskflowRequiresReplacement([string]$Installed,[string]$Target) {
+    if(-not $Installed -or $Installed -ceq $Target){ return $false }
+    if(Test-DotfilesStableWinGetVersion $Installed){
+        return [version]$Installed -gt [version]$Target
+    }
+    return $true
+}
+function Convert-DotfilesInstalledWinGetVersion([string]$Version) {
+    # The stable MSI reports 1.27.0 as 1.27.0.0. A non-zero fourth component stays continuous.
+    if($Version -cmatch '^(\d+\.\d+\.\d+)\.0$'){ return $Matches[1] }
+    return $Version
+}
 function Get-DotfilesWindowsPackages {
     param([string]$Root = (Split-Path (Split-Path $PSScriptRoot)))
     $rows = @(Import-Csv -LiteralPath (Join-Path $Root 'config\windows-packages.tsv') -Delimiter "`t")
@@ -24,9 +78,12 @@ function Get-DotfilesWindowsPackages {
     return $rows
 }
 function Get-DotfilesWindowsInventory {
+    param([switch]$ReadOnly)
     $file = Join-Path ([IO.Path]::GetTempPath()) ('dotfiles-inventory-'+[guid]::NewGuid().ToString('N')+'.json')
     try {
-        & winget.exe export --output $file --include-versions --accept-source-agreements --disable-interactivity *> $null
+        [string[]]$agreementArgs = @()
+        if (-not $ReadOnly) { $agreementArgs = @('--accept-source-agreements') }
+        & winget.exe export --output $file --include-versions @agreementArgs --disable-interactivity *> $null
         if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $file)) { throw "WinGet inventory failed (exit $LASTEXITCODE)" }
         $inventory = Get-Content -LiteralPath $file -Raw | ConvertFrom-Json
         $result = @{}
@@ -38,7 +95,7 @@ function Get-DotfilesWindowsInventory {
         foreach ($package in (Get-DotfilesWindowsPackages | Where-Object { $_.Mode -eq 'native' -and $_.Source -eq 'msstore' } | Sort-Object Id -Unique)) {
             $key='msstore:'+$package.Id
             if ($result.ContainsKey($key)) { continue }
-            & winget.exe list --id $package.Id --exact --source msstore --accept-source-agreements --disable-interactivity *> $null
+            & winget.exe list --id $package.Id --exact --source msstore @agreementArgs --disable-interactivity *> $null
             $code=$LASTEXITCODE
             if ($code -eq 0) { $result[$key]='Installed; version omitted from export' }
             elseif ($code -ne -1978335212) { throw "WinGet Store inventory failed for $($package.Id) (exit $code)" }

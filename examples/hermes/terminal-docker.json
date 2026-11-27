@@ -1,0 +1,9 @@
+{
+  "terminal": {
+    "backend": "docker",
+    "cwd": ".",
+    "timeout": 180,
+    "env_passthrough": [],
+    "docker_forward_env": []
+  }
+}

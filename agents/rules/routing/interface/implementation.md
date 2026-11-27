@@ -5,7 +5,7 @@ For visual direction or implementation, also load [shared quality](quality.md).
 | Design request | Primary owner | Required artifact |
 | --- | --- | --- |
 | Establish a brief-specific visual direction before implementation | `frontend-design` | Visual thesis, composition, type, color, spacing, and motion direction |
-| Implement, redesign, polish, or iterate a product interface | `impeccable` | Rendered interface plus state coverage and verification evidence |
+| Implement, redesign, polish, or iterate a product interface | `impeccable` | Rendered interface plus state coverage and verification evidence ([Codex finish review](../../../SKILL-INSTALLATION.md#impeccable-finish-review)) |
 
 ## Interface operating sequence
 
@@ -17,17 +17,18 @@ For visual direction or implementation, also load [shared quality](quality.md).
 
 ## Frontend art direction
 
-For a new or materially redesigned frontend, establish this compact internal brief before code. It is a working constraint, not mandatory user-facing prose.
+Before coding a new or materially redesigned frontend, establish this internal brief.
 
 | Decision | Required specificity |
 | --- | --- |
-| Product anchor | The audience, primary task, content character, brand truth, and emotional register the interface must express |
-| Thesis | One sentence describing the intended visual and interaction character without generic adjectives alone |
+| Product anchor | Audience, primary task, content character, brand truth, and emotional register |
+| References | When a reference informs the direction, name the specific choice worth borrowing, why it serves this product, and what should stay specific to the source. |
+| Thesis | One specific sentence describing visual and interaction character |
 | Signature move | One memorable compositional, typographic, material, imagery, or motion decision tied to the product—not decoration applied everywhere |
 | System translation | The grid, type hierarchy, spacing rhythm, palette roles, surface geometry, imagery, and motion behavior that make the thesis repeatable |
-| Rejection criteria | The template habits or inherited implementation choices that would weaken this particular direction |
+| Rejection criteria | Template habits or inherited implementation choices that weaken this direction |
 
-If the user supplies a direction, sharpen and implement it rather than replacing it. Preserve brand meaning and valid system constraints, not accidental spacing, weak hierarchy, or low-quality component defaults. Run the specificity test before implementation: hide the logo and product copy; if the composition could belong to almost any product, revise the thesis or signature move.
+Sharpen and implement the user's direction. Preserve brand meaning and valid system constraints while correcting accidental spacing, weak hierarchy, and poor component defaults. Before implementation, hide the logo and product copy. If the composition feels interchangeable, revise the thesis or signature move.
 
 Reject generic AI defaults: indiscriminate card grids, excessive pills, gratuitous gradients or glow, interchangeable centered heroes, arbitrary glass effects, and rhythm-free uniform spacing.
 

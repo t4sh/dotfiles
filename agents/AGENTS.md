@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Canonical agent configuration. This file is an index — edit rules in `./rules/` and they'll be composed at load time. Client projection ownership, bootstrap steps, and verification boundaries are documented in [`CLIENTS.md`](./CLIENTS.md); that document is not a rule inventory or loader input.
+Canonical agent configuration. Edit rules in `./rules/`; this index controls loading. [`CLIENTS.md`](./CLIENTS.md) documents client ownership and verification; it is not a rule inventory or loader input.
 
 ## First Steps
 
@@ -11,65 +11,79 @@ Canonical agent configuration. This file is an index — edit rules in `./rules/
 5. Re-evaluate task-conditional sections before later requests and action gates before later operations when scope changes.
 6. Loading is not applying: honor each loaded rule only according to the applicability declared in the rule file and the section headings below.
 7. Read `.agent-memory/index.yaml` to discover available project context. If `.agent-memory/` is absent, proceed without it — don't create it.
-8. Load relevant memory files based on the current task.
+8. For memory recall, capture, correction, maintenance or recovery of missing prior context, read [memory procedures](./rules/memory/lifecycle.md). Otherwise load relevant project memory.
 
 ---
 
-The headings below declare applicability and index every rule. Rule membership is the exact match between these links and the top-level Markdown files on disk. Links are deliberately not automatic `@` includes: clients load the applicable files through `init-rulebook` instead of eagerly expanding the complete rulebook.
+Headings declare applicability; links must match the top-level rule inventory. They are not automatic `@` imports: `init-rulebook` loads only the selected rules.
 
 ## Always on
 
 - [Core principles](./rules/00-core.md)
 - [Action vs proposal authorization](./rules/01-authorization.md)
 - [Worktree hygiene](./rules/03-worktree-hygiene.md)
-- [Design posture](./rules/10-design-posture.md)
-- [Skill routing](./rules/11-skill-routing.md)
+- [Skill owners](./rules/12-skill-owners.md)
 - [Anti-patterns](./rules/99-anti-patterns.md)
 
-## Action-gated: load immediately before commit-producing, attribution, or integration work
+## Action-gated: load immediately before commit-producing, PR/MR title, attribution, or integration work
 
-Action signals: beginning the commit/integration workflow; preparing or finalizing a commit message; running a commit-producing command; cherry-picking, reverting, merging, or rebasing; publishing a commit; or verifying Git author/committer identity or signing. A request that merely schedules one of these after earlier implementation work does not open the gate yet.
+Action signals: commit/integration workflow; drafting/finalizing commit messages or PR/MR titles; creating a PR/MR or editing its title; commit-producing commands; cherry-picking, reverting, merging, rebasing, or publishing commits; verifying Git author/committer identity or signing. Later plans leave gates closed.
 
 - [Commit attribution](./rules/02-attribution.md)
 
-## Action-gated: load immediately before worktree creation, branch creation, finishing, merge, or cleanup
+## Action-gated: load immediately before worktree creation, branch creation, finishing, PR/MR creation or title edits, merge, or cleanup
 
-Action signals: creating a git worktree; creating a branch for isolation; finishing development work; merging a pull request; post-merge or stale-branch cleanup; or producing a handoff after branch/PR/merge/cleanup work. Daily checkout safety stays in the always-on worktree hygiene rule.
+Action signals: creating a git worktree; creating a branch for isolation; finishing development work; creating a PR/MR or editing its title; merging a pull request; post-merge or stale-branch cleanup; or producing a handoff after branch/PR/merge/cleanup work. Daily checkout safety stays in always-on worktree hygiene.
 
 - [Worktree lifecycle](./rules/07-worktree-lifecycle.md)
+
+## Activate for selections starting from rule 12, overlapping skill choices, named skill requests, or cross-skill references
+
+Use the owner list for discovery; narrow specialists can use their descriptions directly.
+
+- [Skill routing](./rules/11-skill-routing.md)
 
 ## Activate for host-authenticated, browser, localhost, or sandbox-sensitive tooling
 
 Trigger signals: GitHub CLI or API work, browser verification, localhost previews, Playwright or browser processes, host authentication, network access, or an unexpected sandbox/permission false-negative.
 
-- [Codex host tooling](./rules/04-codex-host-tooling.md)
+- [Host tooling](./rules/04-host-tooling.md)
 
-## Activate when code is involved
-
-Trigger signals: a package manifest (`package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, etc.), a source repo, or an explicit request to write, review, or run code.
+## Activate for code writing, review, execution, debugging, or refactoring
 
 - [Code posture](./rules/20-code-posture.md)
+
+## Activate for package, runtime, dependency, or setup work
+
 - [Environment and package managers](./rules/22-environment.md)
+
+Repository presence alone activates neither section.
+
+## Activate when code, configuration, automation, data transforms, or generated artifacts are changed
+
 - [Verification before completion](./rules/23-verification.md)
 
-## Activate when the project uses browser-rendered UI
+## Activate for interface, UX, or visual-artifact work
+
+- [Design posture](./rules/10-design-posture.md)
+
+## Activate for web UI changes, review, verification, or previews
 
 - [Web stack rules](./rules/21-web-stack.md)
+
+## Activate for web UI changes, review, or verification
+
 - [Frontend verification](./rules/24-frontend-verification.md)
 
-## Activate when the task touches a repo with multiple runtimes, native code, generated outputs, CLI/desktop UI, bindings, or service boundaries
+## Activate for technical work involving runtime, native, generated, CLI/desktop, binding, or service boundaries
 
 - [Tech stack discovery](./rules/25-tech-stack-discovery.md)
 
-## Activate when using Paseo agents, worktrees, loops, schedules, or daemon tooling
-
-- [Paseo orchestration](./rules/05-paseo-orchestration.md)
-
-## Activate when Hermes captures learning or performs skill maintenance
+## Activate for Hermes memory, learning or skill maintenance
 
 - [Hermes learning](./rules/06-hermes-learning.md)
 
-## Activate for research validation projects
+## Activate for research or empirical validation projects
 
 - [Research mode](./rules/30-research-mode.md)
 
@@ -85,7 +99,5 @@ Trigger signals: a package manifest (`package.json`, `pyproject.toml`, `Cargo.to
 - Skip preamble. No "Great question!" or "Sure, happy to help!" — just do the work.
 - When flagging a problem, be direct: what's wrong, where, and what the fix is.
 - If you're unsure, say so in one line. Don't hedge for three paragraphs.
-- For design work, lead with the selected mode's required artifact. Use a token map or component contract when that artifact calls for one; do not reduce UX architecture or research work to styling prose.
-- For interface work, lead with the design outcome and rendered quality. Keep repository and Git housekeeping out of the response unless it blocks the work or the user asks for it.
 - **Present findings as structured output, not prose.** Use tables (severity, effort, file:line), bullet lists, or fenced code blocks — not paragraphs. Output should be copy-pasteable as markdown so the user can annotate, comment, and expand directly.
 - **Don't pad.** Length is not weight: no restated context, no filler sections, no scope recap to make a short answer feel substantial. A clean result stated in one line is complete — once the probes behind it are actually finished, and it says which ones they were.

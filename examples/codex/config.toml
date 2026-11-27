@@ -1,0 +1,28 @@
+# Optional user preference fragment; merge into ~/.codex/config.toml.
+# Provider authentication, model selection and project trust stay in local setup.
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+web_search = "disabled"
+model_reasoning_summary = "auto"
+hide_agent_reasoning = false
+show_raw_agent_reasoning = false
+file_opener = "none"
+
+[sandbox_workspace_write]
+network_access = false
+
+# Reduces inherited environment exposure; some local tools may need explicit setup.
+[shell_environment_policy]
+inherit = "core"
+ignore_default_excludes = false
+
+# This controls history.jsonl, not all session databases, logs or server retention.
+[history]
+persistence = "none"
+
+[tui]
+notifications = true
+notification_condition = "unfocused"
+show_tooltips = false
+raw_output_mode = false
+vim_mode_default = false

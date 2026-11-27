@@ -7,15 +7,20 @@ $root = Split-Path $PSScriptRoot -Parent
 Assert-DotfilesWindows
 $commands = [ordered]@{
     setup='install.ps1'; link='scripts/setup-windows-tool-config.ps1';
+    'claude-settings'='scripts/setup-windows-claude-settings.ps1';
     packages='scripts/install-windows-packages.ps1'; 'packages-check'='scripts/check-windows-packages.ps1';
     fonts='scripts/install-windows-fonts.ps1'; 'restore-apps'='scripts/restore-apps-windows.ps1';
     backup='scripts/backup-apps-windows.ps1'; doctor='scripts/doctor-windows.ps1';
+    'setup-status'='scripts/setup-status-windows.ps1';
+    'default-apps'='scripts/check-windows-vlc-associations.ps1';
     hooks='scripts/setup-windows-hooks.ps1'; 
     upgrade='scripts/update-windows.ps1'; path='scripts/setup-windows-path.ps1';
     skills='scripts/check-windows-skills.ps1'; 'ssh-setup'='scripts/check-windows-ssh.ps1'
     'skill-engine'='scripts/setup-windows-skill-engine.ps1'
     hermes='scripts/setup-windows-hermes.ps1'
     'hermes-launcher'='scripts/setup-windows-hermes-launcher.ps1'
+    'hermes-runtime'='scripts/repair-windows-hermes-runtime.ps1'
+    'hermes-update'='scripts/update-windows-hermes.ps1'
     extensions='scripts/install-windows-extensions.ps1'
     'private-snapshot'='scripts/snapshot-private-windows.ps1'
     'secrets-backup'='scripts/secrets-backup-windows.ps1'

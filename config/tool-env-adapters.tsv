@@ -1,0 +1,5 @@
+# Local mappings: name<TAB>env-file override<TAB>profile suffix<TAB>loader (repo-relative or absolute)<TAB>required variables (comma-separated)
+# Profiles: explicit override, then ${XDG_CONFIG_HOME:-$HOME/.config}/env/USER.SUFFIX.env, then *.SUFFIX.env.
+# The loader must parse literal assignments as data; never source the temporary profile as shell code.
+# Fork-owned examples only. Uncomment after supplying your own literal-data loader.
+# sample-consumer	CONSUMER_ENV	consumer	path/to/consumer/load-env.sh	CONSUMER_HOST,CONSUMER_TOKEN

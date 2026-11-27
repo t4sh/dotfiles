@@ -63,9 +63,14 @@ def build_skillsfile(timestamp):
         name = installed_name(key, SKILLS_DIR)
         if meta.get("sourceType") == "github":
             folder_hash = meta.get("skillFolderHash", "")
-            if not re.fullmatch(r"[0-9a-f]{40}", folder_hash):
+            # The skills CLI falls back to a SHA-256 content hash when it
+            # installs from a clone without a GitHub tree response.
+            if not isinstance(folder_hash, str) or not re.fullmatch(
+                r"(?:[0-9a-f]{40}|[0-9a-f]{64})", folder_hash
+            ):
                 raise ValueError(
-                    f"github skill {key!r} lacks an exact 40-character upstream tree hash"
+                    f"github skill {key!r} needs a 40-character Git tree hash "
+                    "or a 64-character SHA-256 folder hash"
                 )
             if not meta.get("source") or not meta.get("skillPath"):
                 raise ValueError(f"github skill {key!r} lacks source or skillPath metadata")

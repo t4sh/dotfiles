@@ -1,0 +1,40 @@
+{
+  "session": {
+    "trust_all_worktrees": false,
+    "restore_unsaved_buffers": false
+  },
+  "base_keymap": "VSCode",
+  "ui_font_size": 16,
+  "buffer_font_size": 14,
+  "theme": {
+    "mode": "system",
+    "light": "One Light",
+    "dark": "One Dark"
+  },
+  "autosave": "off",
+  "tab_size": 2,
+  "hard_tabs": false,
+  "soft_wrap": "none",
+  "preferred_line_length": 100,
+  "ensure_final_newline_on_save": true,
+  "line_ending": "prefer_lf",
+  "remove_trailing_whitespace_on_save": true,
+  "format_on_save": "off",
+  "auto_indent_on_paste": true,
+  "colorize_brackets": true,
+  "linked_edits": true,
+  "current_line_highlight": "all",
+  "show_edit_predictions": false,
+  "terminal": {
+    "font_size": 13
+  },
+  "languages": {
+    "Markdown": {
+      "soft_wrap": "editor_width",
+      "remove_trailing_whitespace_on_save": false
+    },
+    "Make": {
+      "hard_tabs": true
+    }
+  }
+}

@@ -4,3 +4,8 @@
 if [[ -o interactive && -f "$HOME/.secrets/env.sh" ]]; then
   source "$HOME/.secrets/env.sh"
 fi
+
+# Prefer gh stored credentials over stale tokens inherited by interactive shells.
+if [[ -o interactive ]]; then
+  unset GITHUB_TOKEN GH_TOKEN
+fi

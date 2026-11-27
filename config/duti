@@ -7,20 +7,20 @@ com.sublimetext.4 .c all
 com.sublimetext.4 .cc all
 com.sublimetext.4 .cpp all
 com.microsoft.VSCode .css all
-com.todesktop.230313mzl4w4u92 .go all
+dev.zed.Zed .go all
 com.sublimetext.4 .h all
 com.sindresorhus.Velja .html all
 com.sublimetext.4 .js all
 com.sublimetext.4 .json all
-com.todesktop.230313mzl4w4u92 .jsx all
-com.todesktop.230313mzl4w4u92 .lua all
+dev.zed.Zed .jsx all
+com.microsoft.VSCode .lua all
 com.sublimetext.4 .mjs all
 com.sublimetext.4 .py all
 com.sublimetext.4 .rb all
-com.todesktop.230313mzl4w4u92 .rs all
+dev.zed.Zed .rs all
 com.sublimetext.4 .sh all
-com.todesktop.230313mzl4w4u92 .sql all
-com.todesktop.230313mzl4w4u92 .toml all
+com.microsoft.VSCode .sql all
+dev.zed.Zed .toml all
 com.todesktop.230313mzl4w4u92 .ts all
 com.todesktop.230313mzl4w4u92 .tsx all
 com.sublimetext.4 .txt all
@@ -38,6 +38,34 @@ com.apple.Preview .webp all
 com.sublimetext.4 net.daringfireball.markdown all
 # .env: use macOS's resolved UTI; duti's extension setter constructs a different UTI and fails with -50.
 com.sublimetext.4 dyn.ah62d4rv4ge80n5x0 all
+
+# IINA media handlers captured from this Mac's explicit Launch Services choices.
+# PostScript and AAC are not in the current explicit IINA set.
+com.colliderli.iina com.apple.m4a-audio all
+com.colliderli.iina com.apple.m4v-video all
+com.colliderli.iina com.apple.music.mp2 all
+com.colliderli.iina com.apple.quicktime-movie all
+com.colliderli.iina com.microsoft.waveform-audio all
+com.colliderli.iina io.iina.dff all
+com.colliderli.iina io.iina.dsf all
+com.colliderli.iina io.iina.mpeg-audio all
+com.colliderli.iina io.iina.ogg-audio all
+com.colliderli.iina io.iina.webm all
+com.colliderli.iina io.iina.wtv all
+com.colliderli.iina io.iina.xm all
+com.colliderli.iina org.webmproject.webm all
+com.colliderli.iina org.xiph.ogg-audio all
+com.colliderli.iina public.3gpp all
+com.colliderli.iina public.3gpp2 all
+com.colliderli.iina public.aiff-audio all
+com.colliderli.iina public.avi all
+com.colliderli.iina public.dv-movie all
+com.colliderli.iina public.mp2 all
+com.colliderli.iina public.mp3 all
+com.colliderli.iina public.mpeg all
+com.colliderli.iina public.mpeg-2-video all
+com.colliderli.iina public.mpeg-4 all
+com.colliderli.iina public.mpeg-4-audio all
 
 # URL schemes
 com.sindresorhus.Velja http

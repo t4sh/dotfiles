@@ -15,3 +15,8 @@
 [mergetool "Kaleidoscope"]
 	cmd = ksdiff --merge --output \"$MERGED\" --base \"$BASE\" -- \"$LOCAL\" --snapshot \"$REMOTE\" --snapshot
 	trustExitCode = true
+# Git 2.54+: additive hook; leaves repository hooks and core.hooksPath intact.
+# Older Git ignores this registration and keeps its normal hook behavior.
+[hook "strip-cursor-trailers"]
+	event = commit-msg
+	command = ~/.config/git/hooks/commit-msg

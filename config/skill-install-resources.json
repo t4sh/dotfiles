@@ -1,0 +1,515 @@
+{
+  "version": 1,
+  "resources": [
+    {
+      "source": "anthropics/knowledge-work-plugins",
+      "commit": "a266ab8c3c754a3ccf7a634044fc1595fc06e50e",
+      "sourcePaths": [
+        "engineering/CONNECTORS.md",
+        "design/CONNECTORS.md"
+      ],
+      "path": "agents/CONNECTORS.md",
+      "sha256": "5f8670244b3a9009cc6fa478b4d5753bba556c56e2f2e13e445e6741a0b71a05",
+      "assembly": "Two upstream connector references with a routing introduction; no integration configuration."
+    },
+    {
+      "source": "nutlope/hallmark",
+      "commit": "13ac0ec7e148655948100b6396439e481361d690",
+      "sourcePath": "docs/recipes.md",
+      "path": "agents/docs/recipes.md",
+      "sha256": "fea07c1d0fe6b4463ba8d1c44370cdc5fdc3238e67f74d17009f598034ad5b96",
+      "assembly": "Resolve upstream recipe links relative to installed agents/docs and agents/site."
+    },
+    {
+      "source": "nutlope/hallmark",
+      "commit": "13ac0ec7e148655948100b6396439e481361d690",
+      "sourcePath": "docs/study-examples.md",
+      "path": "agents/docs/study-examples.md",
+      "sha256": "a40abb954d5c8134b75be95ba8f30ac00c966cd0c68efde1656d9b8b22836734",
+      "assembly": "Preserve the source examples and link their retired study protocol to its immutable upstream revision; current skill behavior is authoritative."
+    },
+    {
+      "source": "nutlope/hallmark",
+      "commit": "13ac0ec7e148655948100b6396439e481361d690",
+      "sourcePath": "site/css/tokens.css",
+      "path": "agents/site/css/tokens.css",
+      "sha256": "5418e4ee538f456af5112aaa59baa662f6c4209c5ff82161443683f0f848e0c7"
+    },
+    {
+      "source": "nutlope/hallmark",
+      "commit": "13ac0ec7e148655948100b6396439e481361d690",
+      "sourcePath": "site/_tests/03-maple-bakery/index.html",
+      "path": "agents/site/_tests/03-maple-bakery/index.html",
+      "sha256": "8217a9261f82152eb66a4b928c210e3c6c9cc024a3011d2d14fc6087a5b8048a"
+    },
+    {
+      "source": "nutlope/hallmark",
+      "commit": "13ac0ec7e148655948100b6396439e481361d690",
+      "sourcePath": "site/_tests/03-maple-bakery/style.css",
+      "path": "agents/site/_tests/03-maple-bakery/style.css",
+      "sha256": "c199958f4da082c98537e69982f463b100a249780a3be16831f90785903a6c1a"
+    },
+    {
+      "source": "nutlope/hallmark",
+      "commit": "13ac0ec7e148655948100b6396439e481361d690",
+      "sourcePath": "site/_tests/03-maple-bakery/brief.md",
+      "path": "agents/site/_tests/03-maple-bakery/brief.md",
+      "sha256": "bc7419a83a03f43a034becf8a00fa713d557ed128d1822ff117f9fd24aaf4359"
+    },
+    {
+      "source": "nutlope/hallmark",
+      "commit": "13ac0ec7e148655948100b6396439e481361d690",
+      "sourcePath": "site/_tests/05-tracejam-saas/index.html",
+      "path": "agents/site/_tests/05-tracejam-saas/index.html",
+      "sha256": "80780dd4c99e9f1edf46d74ba6a2a42fe663ccf267d9875d2ab2f1d077ba4ffa"
+    },
+    {
+      "source": "nutlope/hallmark",
+      "commit": "13ac0ec7e148655948100b6396439e481361d690",
+      "sourcePath": "site/_tests/05-tracejam-saas/style.css",
+      "path": "agents/site/_tests/05-tracejam-saas/style.css",
+      "sha256": "74a0afe80b022cb4499eb76aac1f00401b822cba02ecaee43c444a4d9b4ebcb3"
+    },
+    {
+      "source": "nutlope/hallmark",
+      "commit": "13ac0ec7e148655948100b6396439e481361d690",
+      "sourcePath": "site/_tests/05-tracejam-saas/brief.md",
+      "path": "agents/site/_tests/05-tracejam-saas/brief.md",
+      "sha256": "bf0f654597d56be4e9a7d0b58b5d448a598b1c35bd65ae7462f9b7a51111a2d7"
+    },
+    {
+      "source": "nutlope/hallmark",
+      "commit": "13ac0ec7e148655948100b6396439e481361d690",
+      "sourcePath": "site/examples/cobalt-01/index.html",
+      "path": "agents/site/examples/cobalt-01/index.html",
+      "sha256": "af706ef5367a88fc88965551aa82c7a6c0ed849eb03294b827a57a02c8c2422f"
+    },
+    {
+      "source": "nutlope/hallmark",
+      "commit": "13ac0ec7e148655948100b6396439e481361d690",
+      "sourcePath": "site/examples/cobalt-01/styles.css",
+      "path": "agents/site/examples/cobalt-01/styles.css",
+      "sha256": "2a4d262f234839ca9799831ca2fee999f3df4cdf23304cddbddbb7f1a2c2e582"
+    },
+    {
+      "source": "nutlope/hallmark",
+      "commit": "13ac0ec7e148655948100b6396439e481361d690",
+      "sourcePath": "site/examples/cobalt-01/tokens.css",
+      "path": "agents/site/examples/cobalt-01/tokens.css",
+      "sha256": "81ac69a84d5d9975e4651648bbc014e087f3f63c7ccec9b0f7d4e01012b6645a"
+    },
+    {
+      "source": "nutlope/hallmark",
+      "commit": "13ac0ec7e148655948100b6396439e481361d690",
+      "sourcePath": "site/examples/cobalt-01/script.js",
+      "path": "agents/site/examples/cobalt-01/script.js",
+      "sha256": "0c94ec7d54d41ff8fd680d5d6404956e74703d4e2f9fe21e2e97a273ca6e7432"
+    },
+    {
+      "source": "nutlope/hallmark",
+      "commit": "13ac0ec7e148655948100b6396439e481361d690",
+      "sourcePath": "LICENSE",
+      "path": "agents/site/LICENSE",
+      "sha256": "06088a8b94598626f27612dea42300154bf7be967c85d9d3eee4490cb056af7d"
+    },
+    {
+      "source": "anthropics/knowledge-work-plugins",
+      "commit": "a266ab8c3c754a3ccf7a634044fc1595fc06e50e",
+      "sourcePath": "LICENSE",
+      "path": "agents/CONNECTORS-LICENSE",
+      "sha256": "a6946284993aeec75c7d75906064b66210c46051e562077efb30eb6dcfe72e26"
+    },
+    {
+      "source": "nutlope/hallmark",
+      "commit": "13ac0ec7e148655948100b6396439e481361d690",
+      "sourcePath": "site/_tests/07-foundry-compliance/index.html",
+      "path": "agents/site/_tests/07-foundry-compliance/index.html",
+      "sha256": "70d255db6ab12246e10aeb27e297d05110b6af5b4dfe03df15eb03c5baf62ca4"
+    },
+    {
+      "source": "nutlope/hallmark",
+      "commit": "13ac0ec7e148655948100b6396439e481361d690",
+      "sourcePath": "site/_tests/07-foundry-compliance/style.css",
+      "path": "agents/site/_tests/07-foundry-compliance/style.css",
+      "sha256": "a2a0fd94ba11cef5c3806b8eab2a8c2c160710783bb1877ce14c9eadfa377fe4"
+    },
+    {
+      "source": "nutlope/hallmark",
+      "commit": "13ac0ec7e148655948100b6396439e481361d690",
+      "sourcePath": "site/_tests/07-foundry-compliance/brief.md",
+      "path": "agents/site/_tests/07-foundry-compliance/brief.md",
+      "sha256": "5b0d52c7063177d3d679517aecf963f6559f94efeb80034c28fe42adee214ff1"
+    },
+    {
+      "source": "nutlope/hallmark",
+      "commit": "13ac0ec7e148655948100b6396439e481361d690",
+      "sourcePath": "site/_tests/06-anya-portfolio/index.html",
+      "path": "agents/site/_tests/06-anya-portfolio/index.html",
+      "sha256": "d042e3abd187f4a4d85d6c69f9e1e2547c50ab1a01e9ce301075763149e0b663"
+    },
+    {
+      "source": "nutlope/hallmark",
+      "commit": "13ac0ec7e148655948100b6396439e481361d690",
+      "sourcePath": "site/_tests/06-anya-portfolio/style.css",
+      "path": "agents/site/_tests/06-anya-portfolio/style.css",
+      "sha256": "56c6ee3d4420772a4d08562072c72cbae42b2ad5e028e22a6d97b519d7cf3bd5"
+    },
+    {
+      "source": "nutlope/hallmark",
+      "commit": "13ac0ec7e148655948100b6396439e481361d690",
+      "sourcePath": "site/_tests/06-anya-portfolio/brief.md",
+      "path": "agents/site/_tests/06-anya-portfolio/brief.md",
+      "sha256": "f3d91f48cc8ccd3f347e013095b3f6d3a9a8a13a0fe2860e890d7dc114e71c1d"
+    },
+    {
+      "source": "nutlope/hallmark",
+      "commit": "13ac0ec7e148655948100b6396439e481361d690",
+      "sourcePath": "site/_tests/04-meridian-manifesto/index.html",
+      "path": "agents/site/_tests/04-meridian-manifesto/index.html",
+      "sha256": "9c7aed08ac55445ed609e7b017c5ed5d54cb8e0da67d6e4cea893f158c91caea"
+    },
+    {
+      "source": "nutlope/hallmark",
+      "commit": "13ac0ec7e148655948100b6396439e481361d690",
+      "sourcePath": "site/_tests/04-meridian-manifesto/style.css",
+      "path": "agents/site/_tests/04-meridian-manifesto/style.css",
+      "sha256": "e118f93d79adbf1f64f133e9c7107c67f1fa24d595abb1ce4c6bb3f9f726a7c3"
+    },
+    {
+      "source": "nutlope/hallmark",
+      "commit": "13ac0ec7e148655948100b6396439e481361d690",
+      "sourcePath": "site/_tests/04-meridian-manifesto/brief.md",
+      "path": "agents/site/_tests/04-meridian-manifesto/brief.md",
+      "sha256": "2e64d726b368d18608e9a2dc680e2a6b59f78af23fe8db20747b0cbec82a48d1"
+    },
+    {
+      "source": "nutlope/hallmark",
+      "commit": "13ac0ec7e148655948100b6396439e481361d690",
+      "sourcePath": "site/_tests/08-cohort-courses/index.html",
+      "path": "agents/site/_tests/08-cohort-courses/index.html",
+      "sha256": "55975799190745c1c2aeef7e561dc3663ff0e4714ed1aec9154bf0a3388896a8"
+    },
+    {
+      "source": "nutlope/hallmark",
+      "commit": "13ac0ec7e148655948100b6396439e481361d690",
+      "sourcePath": "site/_tests/08-cohort-courses/style.css",
+      "path": "agents/site/_tests/08-cohort-courses/style.css",
+      "sha256": "9d9271f8f3950c40ec1c9bcf885f55ad174d46dd1957a98a5ddae28721bb8c13"
+    },
+    {
+      "source": "nutlope/hallmark",
+      "commit": "13ac0ec7e148655948100b6396439e481361d690",
+      "sourcePath": "site/_tests/08-cohort-courses/brief.md",
+      "path": "agents/site/_tests/08-cohort-courses/brief.md",
+      "sha256": "c5a8aa9b2f8ae28917855c031bfcd9ddd140b624fb671da49356ab6714f47ed6"
+    },
+    {
+      "source": "nutlope/hallmark",
+      "commit": "13ac0ec7e148655948100b6396439e481361d690",
+      "sourcePath": "site/_tests/02-streampipe-cli/index.html",
+      "path": "agents/site/_tests/02-streampipe-cli/index.html",
+      "sha256": "c486e0aa1f5d10505c57a0e710a90a2e60f0f962169423777996646598466dfe"
+    },
+    {
+      "source": "nutlope/hallmark",
+      "commit": "13ac0ec7e148655948100b6396439e481361d690",
+      "sourcePath": "site/_tests/02-streampipe-cli/style.css",
+      "path": "agents/site/_tests/02-streampipe-cli/style.css",
+      "sha256": "d4e756160942b92807e158b32780327d9ff5557eadc644d89c0a3ba86ef14c46"
+    },
+    {
+      "source": "nutlope/hallmark",
+      "commit": "13ac0ec7e148655948100b6396439e481361d690",
+      "sourcePath": "site/_tests/02-streampipe-cli/brief.md",
+      "path": "agents/site/_tests/02-streampipe-cli/brief.md",
+      "sha256": "1feb8cb9ab17e53cdc75564bcd75c4071a431b064017177abc9b5a890adc92c4"
+    },
+    {
+      "source": "nutlope/hallmark",
+      "commit": "13ac0ec7e148655948100b6396439e481361d690",
+      "sourcePath": "site/_tests/01-tide-podcast/index.html",
+      "path": "agents/site/_tests/01-tide-podcast/index.html",
+      "sha256": "51c34c8ca338ce1ee961985d8159d266e0cb734474f05f49618531dee0ada016"
+    },
+    {
+      "source": "nutlope/hallmark",
+      "commit": "13ac0ec7e148655948100b6396439e481361d690",
+      "sourcePath": "site/_tests/01-tide-podcast/style.css",
+      "path": "agents/site/_tests/01-tide-podcast/style.css",
+      "sha256": "f342ee7f0372ffde03c291e9c4764c9cba37914c16fa2252db2da256346731f9"
+    },
+    {
+      "source": "nutlope/hallmark",
+      "commit": "13ac0ec7e148655948100b6396439e481361d690",
+      "sourcePath": "site/_tests/01-tide-podcast/brief.md",
+      "path": "agents/site/_tests/01-tide-podcast/brief.md",
+      "sha256": "da2dcd9297b28c945fa443060a000d83f86f073c2128b8fc904863670437f63e"
+    },
+    {
+      "source": "cloudflare/skills",
+      "commit": "0e09df4cdbd66350c9d4d3b07e888fc58b3d229b",
+      "sourcePath": "skills/web-perf/SKILL.md",
+      "path": "agents/skills/web-perf/SKILL.md",
+      "sha256": "0160c9e7f1b73eb80347efd899a6082219d43bb9de30424667c8017628a48469"
+    },
+    {
+      "source": "vercel-labs/agent-skills",
+      "commit": "063bee94c3f4df8453406c830b0a7df0f2860278",
+      "sourcePath": "skills/composition-patterns/AGENTS.md",
+      "path": "agents/skills/vercel-composition-patterns/AGENTS.md",
+      "sha256": "89e3ddd58fcf99a53a50e25dfd21b8cde1be5f10b7df6bacd3dfa6796932f516"
+    },
+    {
+      "source": "vercel-labs/agent-skills",
+      "commit": "063bee94c3f4df8453406c830b0a7df0f2860278",
+      "sourcePath": "skills/composition-patterns/README.md",
+      "path": "agents/skills/vercel-composition-patterns/README.md",
+      "sha256": "85915a43a6f0b4efe525e3cf6398dd866166da2025837c4460468a24a940da94"
+    },
+    {
+      "source": "vercel-labs/agent-skills",
+      "commit": "063bee94c3f4df8453406c830b0a7df0f2860278",
+      "sourcePath": "skills/composition-patterns/SKILL.md",
+      "path": "agents/skills/vercel-composition-patterns/SKILL.md",
+      "sha256": "e38e0eaa609316b10423a9a138ed95e35099accd3f735585295c8a8f165c28a3"
+    },
+    {
+      "source": "vercel-labs/agent-skills",
+      "commit": "063bee94c3f4df8453406c830b0a7df0f2860278",
+      "sourcePath": "skills/composition-patterns/metadata.json",
+      "path": "agents/skills/vercel-composition-patterns/metadata.json",
+      "sha256": "49262ed5cb4186f31ee980cf8d990be0170c51efed4908d0464a1cff9905bd05"
+    },
+    {
+      "source": "vercel-labs/agent-skills",
+      "commit": "063bee94c3f4df8453406c830b0a7df0f2860278",
+      "sourcePath": "skills/composition-patterns/rules/_sections.md",
+      "path": "agents/skills/vercel-composition-patterns/rules/_sections.md",
+      "sha256": "a174213b87e6911e2b766995a2cbaf8d1534057076e82fb79fe3f0ecb38047df"
+    },
+    {
+      "source": "vercel-labs/agent-skills",
+      "commit": "063bee94c3f4df8453406c830b0a7df0f2860278",
+      "sourcePath": "skills/composition-patterns/rules/_template.md",
+      "path": "agents/skills/vercel-composition-patterns/rules/_template.md",
+      "sha256": "587f7d16b0660eb61fee4a4d3d7df2b3077d6835de170602c7d6e60bee559131"
+    },
+    {
+      "source": "vercel-labs/agent-skills",
+      "commit": "063bee94c3f4df8453406c830b0a7df0f2860278",
+      "sourcePath": "skills/composition-patterns/rules/architecture-avoid-boolean-props.md",
+      "path": "agents/skills/vercel-composition-patterns/rules/architecture-avoid-boolean-props.md",
+      "sha256": "007555ebb020f4d552582a2c4db194db71a1fd33094012e5187bcfa4f8c392d5"
+    },
+    {
+      "source": "vercel-labs/agent-skills",
+      "commit": "063bee94c3f4df8453406c830b0a7df0f2860278",
+      "sourcePath": "skills/composition-patterns/rules/architecture-compound-components.md",
+      "path": "agents/skills/vercel-composition-patterns/rules/architecture-compound-components.md",
+      "sha256": "f246af13dc269b521cf20eb8ad99a0cb645beac381c8c9b117262c34612c8457"
+    },
+    {
+      "source": "vercel-labs/agent-skills",
+      "commit": "063bee94c3f4df8453406c830b0a7df0f2860278",
+      "sourcePath": "skills/composition-patterns/rules/patterns-children-over-render-props.md",
+      "path": "agents/skills/vercel-composition-patterns/rules/patterns-children-over-render-props.md",
+      "sha256": "7c45a0d21b3c4126a32cba916ee31adeae195386ad1dbbe6634aedb7457aa0ad"
+    },
+    {
+      "source": "vercel-labs/agent-skills",
+      "commit": "063bee94c3f4df8453406c830b0a7df0f2860278",
+      "sourcePath": "skills/composition-patterns/rules/patterns-explicit-variants.md",
+      "path": "agents/skills/vercel-composition-patterns/rules/patterns-explicit-variants.md",
+      "sha256": "8c19e596e61807549d01ce8c6954c6358199f97a8511c0c02c625ec0efda8c0e"
+    },
+    {
+      "source": "vercel-labs/agent-skills",
+      "commit": "063bee94c3f4df8453406c830b0a7df0f2860278",
+      "sourcePath": "skills/composition-patterns/rules/react19-no-forwardref.md",
+      "path": "agents/skills/vercel-composition-patterns/rules/react19-no-forwardref.md",
+      "sha256": "881830adb7534c4b2d70db426556646ad9837f5478f744f35641f635ada22227"
+    },
+    {
+      "source": "vercel-labs/agent-skills",
+      "commit": "063bee94c3f4df8453406c830b0a7df0f2860278",
+      "sourcePath": "skills/composition-patterns/rules/state-context-interface.md",
+      "path": "agents/skills/vercel-composition-patterns/rules/state-context-interface.md",
+      "sha256": "09e73afbf9285fa416679cc864a287b9e8b821d0969272ab784295386d8c9bc3"
+    },
+    {
+      "source": "vercel-labs/agent-skills",
+      "commit": "063bee94c3f4df8453406c830b0a7df0f2860278",
+      "sourcePath": "skills/composition-patterns/rules/state-decouple-implementation.md",
+      "path": "agents/skills/vercel-composition-patterns/rules/state-decouple-implementation.md",
+      "sha256": "76a8c1eb29a70d8996ab3f71260345af2f7bc89deab815a421d6c87c6591a9c3"
+    },
+    {
+      "source": "vercel-labs/agent-skills",
+      "commit": "063bee94c3f4df8453406c830b0a7df0f2860278",
+      "sourcePath": "skills/composition-patterns/rules/state-lift-state.md",
+      "path": "agents/skills/vercel-composition-patterns/rules/state-lift-state.md",
+      "sha256": "74c54038a6c554c748fe31cec673b80861b5d920b7553cf78cdf10d18b4b759b"
+    },
+    {
+      "source": "shadcn-ui/ui",
+      "commit": "ba1503c64472b82256d9de95e2e62c5901a38e8b",
+      "sourcePath": "skills/shadcn/SKILL.md",
+      "path": "agents/skills/shadcn/SKILL.md",
+      "sha256": "93951e5e83f616a3e046491c00d770bd54c0a64164706cd1191822a233d27592"
+    },
+    {
+      "source": "shadcn-ui/ui",
+      "commit": "ba1503c64472b82256d9de95e2e62c5901a38e8b",
+      "sourcePath": "skills/shadcn/agents/openai.yml",
+      "path": "agents/skills/shadcn/agents/openai.yml",
+      "sha256": "35db91b1eef58b2abe01da9b88577de5a44e233b740cd93d692ddeeadd2afe4d"
+    },
+    {
+      "source": "shadcn-ui/ui",
+      "commit": "ba1503c64472b82256d9de95e2e62c5901a38e8b",
+      "sourcePath": "skills/shadcn/assets/shadcn-small.png",
+      "path": "agents/skills/shadcn/assets/shadcn-small.png",
+      "sha256": "0ecc62d682727f68fc4937eed19960c706714fa084d44f63028d611ae02bf3d7"
+    },
+    {
+      "source": "shadcn-ui/ui",
+      "commit": "ba1503c64472b82256d9de95e2e62c5901a38e8b",
+      "sourcePath": "skills/shadcn/assets/shadcn.png",
+      "path": "agents/skills/shadcn/assets/shadcn.png",
+      "sha256": "7d60ad6fec4d89a0d44ba5a3c9283d2fea0047af5467f9227040e20d927d39b7"
+    },
+    {
+      "source": "shadcn-ui/ui",
+      "commit": "ba1503c64472b82256d9de95e2e62c5901a38e8b",
+      "sourcePath": "skills/shadcn/assets/showcase/color-pair.tsx",
+      "path": "agents/skills/shadcn/assets/showcase/color-pair.tsx",
+      "sha256": "6028f0b677912216822fdaf76ae6b8863c429916ed4a9626b73f4de4506f8ee4"
+    },
+    {
+      "source": "shadcn-ui/ui",
+      "commit": "ba1503c64472b82256d9de95e2e62c5901a38e8b",
+      "sourcePath": "skills/shadcn/assets/showcase/preview-states.css",
+      "path": "agents/skills/shadcn/assets/showcase/preview-states.css",
+      "sha256": "8d9e3cec24dd01b11c5ba12196d0376a131797d9ad247ea624e66eb8bbf61b0e"
+    },
+    {
+      "source": "shadcn-ui/ui",
+      "commit": "ba1503c64472b82256d9de95e2e62c5901a38e8b",
+      "sourcePath": "skills/shadcn/assets/showcase/state-matrix.tsx",
+      "path": "agents/skills/shadcn/assets/showcase/state-matrix.tsx",
+      "sha256": "07794119fe05ff735358b3f8ca30a8297617ab64dfb3901dce4d89fe5f443458"
+    },
+    {
+      "source": "shadcn-ui/ui",
+      "commit": "ba1503c64472b82256d9de95e2e62c5901a38e8b",
+      "sourcePath": "skills/shadcn/cli.md",
+      "path": "agents/skills/shadcn/cli.md",
+      "sha256": "a381e35bf36fe7bb851952c13707e01e82434fd7a4a4e53f6df26c6370838904"
+    },
+    {
+      "source": "shadcn-ui/ui",
+      "commit": "ba1503c64472b82256d9de95e2e62c5901a38e8b",
+      "sourcePath": "skills/shadcn/customization.md",
+      "path": "agents/skills/shadcn/customization.md",
+      "sha256": "a19e81c78843df255e85755e52659268d793845add845b34ad8091f62bff3af9"
+    },
+    {
+      "source": "shadcn-ui/ui",
+      "commit": "ba1503c64472b82256d9de95e2e62c5901a38e8b",
+      "sourcePath": "skills/shadcn/design-system-page.md",
+      "path": "agents/skills/shadcn/design-system-page.md",
+      "sha256": "c541d661af159548744be3e27f79e7da710ab83f9afd448a4346f7ff1531d328"
+    },
+    {
+      "source": "shadcn-ui/ui",
+      "commit": "ba1503c64472b82256d9de95e2e62c5901a38e8b",
+      "sourcePath": "skills/shadcn/design-system.md",
+      "path": "agents/skills/shadcn/design-system.md",
+      "sha256": "9ed11e93e7e80e34c8795d5ba82e5420ca905e8e9949fef79cbe9239184fd06b"
+    },
+    {
+      "source": "shadcn-ui/ui",
+      "commit": "ba1503c64472b82256d9de95e2e62c5901a38e8b",
+      "sourcePath": "skills/shadcn/evals/evals.json",
+      "path": "agents/skills/shadcn/evals/evals.json",
+      "sha256": "e82c747326a5c21e37a1c962274d36b1bfebb3e6602ee368b98e2dba5db18369"
+    },
+    {
+      "source": "shadcn-ui/ui",
+      "commit": "ba1503c64472b82256d9de95e2e62c5901a38e8b",
+      "sourcePath": "skills/shadcn/mcp.md",
+      "path": "agents/skills/shadcn/mcp.md",
+      "sha256": "8d696b4e45b7d0e337367248513bd9acebe8f3bcfd7b748c775e5a337c8f38c8"
+    },
+    {
+      "source": "shadcn-ui/ui",
+      "commit": "ba1503c64472b82256d9de95e2e62c5901a38e8b",
+      "sourcePath": "skills/shadcn/registry.md",
+      "path": "agents/skills/shadcn/registry.md",
+      "sha256": "4f239be36bd2b58e17047db1ca80ab7da00e15a8b73242e5e4d50d113c4caa05"
+    },
+    {
+      "source": "shadcn-ui/ui",
+      "commit": "ba1503c64472b82256d9de95e2e62c5901a38e8b",
+      "sourcePath": "skills/shadcn/rules/base-vs-radix.md",
+      "path": "agents/skills/shadcn/rules/base-vs-radix.md",
+      "sha256": "2b2deb47d004285220c1fc6b38bb2edc2d0ccbcdafd031b0b189d5d8ed0d1ba8"
+    },
+    {
+      "source": "shadcn-ui/ui",
+      "commit": "ba1503c64472b82256d9de95e2e62c5901a38e8b",
+      "sourcePath": "skills/shadcn/rules/chat.md",
+      "path": "agents/skills/shadcn/rules/chat.md",
+      "sha256": "4b4610d487ddc9751f3cfe0c554a06560ac723fcc2460abad77a1d3c7c9a4b95"
+    },
+    {
+      "source": "shadcn-ui/ui",
+      "commit": "ba1503c64472b82256d9de95e2e62c5901a38e8b",
+      "sourcePath": "skills/shadcn/rules/composition.md",
+      "path": "agents/skills/shadcn/rules/composition.md",
+      "sha256": "f282df828d83a91132a846ddb62eea149a7c7c94822e9ca88cfddf85af01aa41"
+    },
+    {
+      "source": "shadcn-ui/ui",
+      "commit": "ba1503c64472b82256d9de95e2e62c5901a38e8b",
+      "sourcePath": "skills/shadcn/rules/forms.md",
+      "path": "agents/skills/shadcn/rules/forms.md",
+      "sha256": "29593e14381e34626f8e0e9c15c59f3394b92a0623af6a6ec94585400123853c"
+    },
+    {
+      "source": "shadcn-ui/ui",
+      "commit": "ba1503c64472b82256d9de95e2e62c5901a38e8b",
+      "sourcePath": "skills/shadcn/rules/icons.md",
+      "path": "agents/skills/shadcn/rules/icons.md",
+      "sha256": "d4a58266648872d9ee07d0c2368843a1cb88b8253b7f528dd7bda9d68b6c2535"
+    },
+    {
+      "source": "shadcn-ui/ui",
+      "commit": "ba1503c64472b82256d9de95e2e62c5901a38e8b",
+      "sourcePath": "skills/shadcn/rules/styling.md",
+      "path": "agents/skills/shadcn/rules/styling.md",
+      "sha256": "f88fbd72dff862805b786dc7d7e4c74c83030fc278c5b97c993e4e665001798c"
+    },
+    {
+      "source": "shadcn-ui/ui",
+      "commit": "ba1503c64472b82256d9de95e2e62c5901a38e8b",
+      "sourcePath": "skills/shadcn/scripts/showcase-coverage.mjs",
+      "path": "agents/skills/shadcn/scripts/showcase-coverage.mjs",
+      "sha256": "fb593e0806414d23b51354a46881f0b2873afc226bda0926a22f83cbd60af2fa"
+    },
+    {
+      "source": "Leonxlnx/imagegen-skills",
+      "commit": "beb16b0d0f4dae9a6f5cb04ea41e97b93a54ab8e",
+      "sourcePath": "skills/imagegen-frontend-web/SKILL.md",
+      "path": "agents/skills/imagegen-frontend-web/SKILL.md",
+      "sha256": "6b5c2256522fdba1e3313eafa3d743b960a7b13ec029d3e6586e04b23327c1f8"
+    },
+    {
+      "source": "Leonxlnx/imagegen-skills",
+      "commit": "beb16b0d0f4dae9a6f5cb04ea41e97b93a54ab8e",
+      "sourcePath": "skills/imagegen-frontend-mobile/SKILL.md",
+      "path": "agents/skills/imagegen-frontend-mobile/SKILL.md",
+      "sha256": "8a33389979f3074fa0926678e266ad2eb9234624472254469fc1ad916b9caa24"
+    }
+  ]
+}

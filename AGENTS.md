@@ -20,7 +20,7 @@ De-prioritize:
 
 ## First Steps
 
-1. Read this file. For privacy/security reviews, also read `PRIVACY.md` before classifying findings.
+1. Read this file. For privacy/security reviews, also read `PRIVACY.md` before classifying findings. For fresh Mac/Windows setup or adoption of an existing configuration, follow [docs/AGENT-SETUP.md](docs/AGENT-SETUP.md) before running any bootstrap or link step.
 2. If `.agent-memory/` exists in a local/private checkout, read `.agent-memory/index.yaml` and load relevant memory. Public checkouts may not include project memory.
 
 ## Project Structure
@@ -28,9 +28,13 @@ De-prioritize:
 ```text
 ~/.dotfiles/
 ├── Brewfile
-├── install.sh
+├── install.sh          # Mac bootstrap
+├── install.ps1         # Windows bootstrap (previews without -Apply)
+├── WINDOWS.md
 ├── Makefile
 ├── symlinks.tsv
+├── bin/                # dot (Mac), dot.cmd / dot.ps1 (Windows)
+├── docs/               # FORKING.md, AGENT-SETUP.md
 ├── zsh/
 ├── git/
 ├── starship/
@@ -44,6 +48,7 @@ De-prioritize:
 
 ## Key Rules
 
+- This repository is one person's policy. On anyone else's machine, follow `docs/AGENT-SETUP.md`: for existing setups, confirm backup status or explicit consent to migrate an unorganized setup without a backup and reconcile configuration and agent rules; set identity per `docs/FORKING.md` and obtain approval before applying migration or opinionated setup stages.
 - Never commit secrets. API keys, tokens, private SSH keys, and credentials live under `~/.secrets/`.
 - Brewfile is the package source of truth. Install via phased targets: `brew-base` → `node` → `brew-npm` → `brew-mas` (`make brew` runs that sequence).
 - `~/.agents` is a whole-directory symlink to `~/.dotfiles/agents/`.

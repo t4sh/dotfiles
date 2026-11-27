@@ -1,19 +1,31 @@
-.PHONY: help all link packages packages-check brew-check fonts restore-apps backup doctor verify-bootstrap hooks hooks-check upgrade shims skills skills-audit skills-manifest skills-update rules-audit brewfile-audit ssh-setup
+.PHONY: help all link packages packages-check brew-check fonts restore-apps backup doctor setup-status verify-bootstrap hooks hooks-check upgrade shims skills skills-audit skills-manifest skills-update rules-audit brewfile-audit ssh-setup test-public-windows-projection test-remediations
 DOT := "$(CURDIR)/bin/dot.cmd"
 help:
 	@$(DOT) help
 all:
-	@$(DOT) setup -Apply
+	@$(DOT) setup -Apply $(if $(APP_GROUPS),-AppGroups "$(APP_GROUPS)")
 link:
 	@$(DOT) link
+.PHONY: claude-settings claude-settings-check
+claude-settings:
+	@$(DOT) claude-settings -Apply
+claude-settings-check:
+	@$(DOT) claude-settings -Check
 packages:
-	@$(DOT) packages -Apply
+	@$(DOT) packages -Apply $(if $(APP_GROUPS),-AppGroups "$(APP_GROUPS)")
+setup-status:
+	@$(DOT) setup-status $(if $(APP_GROUPS),-AppGroups "$(APP_GROUPS)")
 packages-check brew-check:
 	@$(DOT) packages-check
 fonts:
 	@$(DOT) fonts -Apply
 restore-apps:
 	@$(DOT) restore-apps -Apply
+.PHONY: default-apps default-apps-check
+default-apps:
+	@$(DOT) default-apps -OpenSettings
+default-apps-check:
+	@$(DOT) default-apps -Check
 backup:
 	@$(DOT) backup -Apply
 doctor:
@@ -38,6 +50,10 @@ brewfile-audit:
 	@$(DOT) packages-check -CoverageOnly
 ssh-setup:
 	@$(DOT) ssh-setup
+test-public-windows-projection: ## Run public projection fixtures on native Windows
+	@pwsh -NoProfile -File tests/test_public_windows_projection.ps1
+test-remediations: ## Alias for public-owned Windows remediation fixtures
+	@$(MAKE) --no-print-directory test-public-windows-projection
 .PHONY: secrets-backup
 secrets-backup:
 	@$(DOT) secrets-backup -Apply
@@ -48,7 +64,7 @@ secrets-close:
 	@$(DOT) secrets-close -Apply $(if $(VIEW),-View "$(VIEW)")
 # Explicit rejection also covers names of existing directories (make would otherwise
 # report macos/services as already up to date, incorrectly implying success).
-MAC_ONLY := macos macos-user macos-dry-run macos-check dock services services-check brew brew-core brew-apps brew-base brew-mas brew-npm brew-without-mas node unlink terminal touch-id-sudo touch-id-sudo-check default-apps default-apps-check capture-default-apps post-vault secrets-backup-legacy secrets-compat-fixtures secrets-mount secrets-mount-legacy secrets-health secrets-manifest secrets-restore secrets-restore-apply secrets-pass secrets-pass-import restore-canary restore-shottr backup-canary backup-shottr
+MAC_ONLY := macos macos-user macos-dry-run macos-check dock services services-check brew brew-core brew-apps brew-base brew-mas brew-npm brew-without-mas node unlink terminal touch-id-sudo touch-id-sudo-check capture-default-apps post-vault secrets-backup-legacy secrets-compat-fixtures secrets-mount secrets-mount-legacy secrets-health secrets-manifest secrets-restore secrets-restore-apply secrets-pass secrets-pass-import restore-canary restore-shottr backup-canary backup-shottr
 .PHONY: $(MAC_ONLY)
 $(MAC_ONLY):
 	$(error $@ is macOS-only; use the Windows commands in WINDOWS.md)

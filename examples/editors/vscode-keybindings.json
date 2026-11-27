@@ -1,0 +1,18 @@
+[
+  {
+    "key": "ctrl+k ctrl+m",
+    "command": "editor.action.insertSnippet",
+    "when": "editorTextFocus && editorLangId == markdown",
+    "args": {
+      "name": "Portable meeting note"
+    }
+  },
+  {
+    "key": "ctrl+k ctrl+v",
+    "command": "editor.action.insertSnippet",
+    "when": "editorTextFocus && editorLangId == markdown",
+    "args": {
+      "name": "Portable verification note"
+    }
+  }
+]

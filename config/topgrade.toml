@@ -16,7 +16,8 @@ notify_end = "on_failure"
 # pi: installed as the Homebrew pi-coding-agent formula; avoid its redundant
 # self-updater (`pi update --self`), which cannot reliably resolve Brew installs.
 # skills: use the repository workflow so local curation holds are honored.
-disable = ["system", "emacs", "git_repos", "yarn", "pnpm", "pi", "skills"]
+# github_cli_skills: the same curated workflow owns skill updates, not gh skill.
+disable = ["system", "emacs", "git_repos", "yarn", "pnpm", "pi", "skills", "github_cli_skills"]
 
 # Non-fatal when the engine is down or the vendor check is slow/no-op.
 ignore_failures = ["containers", "microsoft_office"]
@@ -26,6 +27,10 @@ greedy_auto_updates = true
 autoremove = true
 
 [commands]
+# Aside owns its CLI and bridge; reconcile the shared copy after updating.
+"Aside" = 'aside update --yes && aside skills install --path "$HOME/.agents/skills"'
 "Skills" = "make -C ~/.dotfiles skills-update"
+# Repair the macOS Hermes gateway startup fix after Desktop updates.
+"Hermes gateway" = "python3 ~/.dotfiles/scripts/repair-hermes-gateway.py"
 # After brew/npm/etc.: fail the run if Brewfile declarations drift from system state.
 "Brewfile audit" = "bash ~/.dotfiles/scripts/audit-brewfile.sh --check"

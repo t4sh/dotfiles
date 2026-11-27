@@ -1,8 +1,8 @@
 # 22 — Environment dispatcher
 
-Activate when code is involved.
+Activate for package, runtime, dependency, or setup work.
 
-Before package, runtime, dependency, or setup commands, inspect manifests and lockfiles. Load task-touched ecosystems in one pass; load every relevant ecosystem only for repo-wide setup or cross-runtime work. With no match, load none. Add monorepo only when workspace configuration or package layout proves it.
+Repository presence alone is insufficient. Before package, runtime, dependency, or setup commands, inspect manifests and lockfiles. Load task-touched ecosystems in one pass; load every relevant ecosystem only for repo-wide setup or cross-runtime work. With no match, load none. Add monorepo only when workspace configuration or package layout proves it.
 
 | Evidence or intended command | Reference |
 | --- | --- |

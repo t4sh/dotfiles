@@ -52,7 +52,7 @@ export REPORTTIME=3
 export TIMEFMT="
 ${TIME_BRIGHT_BLACK}elapsed: ${TIME_WHITE}%*Es ${TIME_BRIGHT_BLACK}(user: ${TIME_WHITE}%*Us ${TIME_BRIGHT_BLACK}system: ${TIME_WHITE}%*Ss${TIME_BRIGHT_BLACK}) cpu: ${TIME_WHITE}%P ${TIME_BRIGHT_BLACK}memory: ${TIME_WHITE}%MK"
 
-# completion (compinit handled by zsh-autocomplete)
+# completion (compinit handled by zsh/lib/15-completion.zsh)
 setopt auto_list
 setopt auto_menu
 setopt always_to_end

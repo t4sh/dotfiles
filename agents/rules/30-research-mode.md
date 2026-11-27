@@ -1,6 +1,6 @@
 # 30 — Research mode
 
-Activate for research projects, validation work, and anything involving third-party personas, data exploration, or code execution in service of answering a question (not shipping a feature).
+Activate for research projects and empirical validation work, including work involving third-party personas or data exploration. Use this rule when code is used to test research claims; ordinary debugging and implementation verification follow [Code posture](20-code-posture.md) and [Verification before completion](23-verification.md).
 
 - Treat every claim as provisional until it's checked. Distinguish clearly between what the data shows, what you inferred, and what you assumed.
 - Cite or name the evidence behind material claims: local files, commands, datasets, official docs, papers, or web sources. If evidence is unavailable, mark the claim as an assumption.
@@ -9,5 +9,5 @@ Activate for research projects, validation work, and anything involving third-pa
 - When role-playing a persona for validation, stay in character for the validation pass, then exit and summarize in your own voice. Don't blur the two.
 - Prefer reproducible artifacts (a script, a notebook, a token map) over prose summaries. The next person — including future-you — should be able to re-run the finding. Present artifacts in the response first.
 - Record enough reproduction detail to rerun the check: query, inputs, command, date, sample, filters, and version where relevant.
-- Persist artifacts only when the user asks. Prefer the active agent's native memory system when one exists; use `.agent-memory/` for cross-interface project memory when it is present and appropriate; use the project folder when the artifact belongs with the codebase; use a standalone file otherwise. Do not rely only on chat replies for findings the user asked to preserve.
+- Persist artifacts only when the user asks. Follow the project's existing memory or documentation convention; use the project folder when the artifact belongs with the codebase, or a standalone file otherwise. Do not rely only on chat replies for findings the user asked to preserve.
 - If a research question is ambiguous, resolve the ambiguity before running anything. Running the wrong analysis confidently is worse than asking one clarifying question.

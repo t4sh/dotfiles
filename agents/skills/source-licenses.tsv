@@ -9,35 +9,44 @@
 # not silently become public-split-safe without review.
 ComposioHQ/awesome-claude-skills	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
 DietrichGebert/ponytail	MIT	GitHub repo root LICENSE; fetched 2026-08-24
-Jakubantalik/transitions.dev	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+Leonxlnx/imagegen-skills	MIT	https://github.com/Leonxlnx/imagegen-skills/blob/main/LICENSE; inspected 2026-10-19
 Leonxlnx/taste-skill	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+NVIDIA/SkillSpector	Apache-2.0	agents/skill-licenses/NVIDIA/SkillSpector/LICENSE; verified at upstream 48e0f942ea1f5fdb7aa096a6f65a0adeda2ecc4e
 anthropics/knowledge-work-plugins	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+arvindrk/extract-design-system	MIT	https://github.com/arvindrk/extract-design-system/blob/main/LICENSE; inspected 2026-10-15
 benjitaylor/agentation	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
 cerico/macfair	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
-coreyhaines31/marketingskills	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+coreyhaines31/marketingskills	MIT	agents/skill-licenses/coreyhaines31/marketingskills/LICENSE; verified at upstream 73573e94a06a39965978b3fa1f9c1eace8cebc7c
 dylantarre/animation-principles	MIT	GitHub repo root LICENSE; fetched 2026-07-03
-emilkowalski/skills	MIT	GitHub repo root LICENSE; fetched 2026-07-03
+echris6/motion-video-kit	MIT	https://github.com/echris6/motion-video-kit/blob/main/LICENSE; inspected 2026-10-01
+emilkowalski/skills	MIT	agents/skill-licenses/emilkowalski/skills/LICENSE; verified at upstream 64eb3deb9a5fbfa041faf783e0bc3fd635872e9c
 firebenders/sync-figma-token-skill	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
 github/awesome-copilot	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+gustavo-fior/craft	MIT	https://github.com/gustavo-fior/craft/blob/586e23b34b9c27e48b2ad8be660c67db587f26ad/README.md#license; inspected 2026-11-08
 index-how/vocabulary	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
-jakubkrehel/skills	MIT	GitHub repo root LICENSE; fetched 2026-08-02
+jakubkrehel/skills	MIT	agents/skill-licenses/jakubkrehel/skills/LICENSE; verified at upstream 547d415dc10a23e66088eba5aa6664e6e772432c
 josiahsiegel/claude-plugin-marketplace	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
 julianoczkowski/designer-skills	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+lucasmarkes/hairline	MIT	https://github.com/lucasmarkes/hairline/blob/20ebcd4/LICENSE; inspected 2026-10-03
 mattpocock/skills	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
 mblode/agent-skills	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
 mindmorass/reflex	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
-nextlevelbuilder/ui-ux-pro-max-skill	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+nextlevelbuilder/ui-ux-pro-max-skill	MIT	agents/skill-licenses/nextlevelbuilder/ui-ux-pro-max-skill/LICENSE; verified at upstream ed766d3bf62f32c8d27762ad49abdc3a4744c84f
 nodnarbnitram/claude-code-extensions	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
 notedit/happy-skills	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+mickadesign/fluid-functionalism	MIT	agents/skill-licenses/mickadesign/fluid-functionalism/LICENSE; verified at upstream f801409896c2bb3f34c67a82e1e70c3dd3f47c8e
 nutlope/hallmark	MIT	GitHub repo root LICENSE; fetched 2026-07-19
 obra/superpowers	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
-owl-listener/designer-skills	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+owl-listener/designer-skills	MIT	https://github.com/Owl-Listener/designer-skills/blob/main/LICENSE; inspected 2026-11-11
 owl-listener/designpowers	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
-pbakaus/impeccable	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+pbakaus/impeccable	Apache-2.0	agents/skill-licenses/pbakaus/impeccable/LICENSE; verified at upstream d41d9860b0094dcb68030657da63461212835aaa
 shadcn/improve	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
 squirrelscan/skills	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
-vercel-labs/agent-browser	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+vercel-labs/agent-browser	Apache-2.0	agents/skill-licenses/vercel-labs/agent-browser/LICENSE; verified at upstream 6f516b390e09c927c3eac499e5909ed00573f1aa
 vercel-labs/agent-skills	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
 vercel-labs/skills	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
 wondelai/skills	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
 wshobson/agents	reviewed	pre-existing tracked source before 2026-07-03 audit hardening
+cloudflare/skills	Apache-2.0	https://github.com/cloudflare/skills/blob/86505e44f87d801aa1864a3c4109e9a8ae5c409f/LICENSE; inspected 2026-10-20
+GoogleChrome/modern-web-guidance	Apache-2.0	agents/skill-licenses/GoogleChrome/modern-web-guidance/LICENSE; verified at upstream 64a6d708f5a43f2cd3fde5d4d7db3905ba1bdf65
+shadcn-ui/ui	MIT	https://github.com/shadcn-ui/ui/blob/ba1503c64472b82256d9de95e2e62c5901a38e8b/LICENSE.md; inspected 2026-10-20

@@ -29,7 +29,8 @@ verification remains pending; avoid a blanket restore to validate these settings
 
 `make backup` checks repeat rate, delay, and keyboard navigation against the
 managed policy and stops on drift. `make macos` applies the setup defaults.
-Input Sources and screenshot shortcuts retain their existing snapshot capture.
+In a terminal, backup reviews changes to the Input Sources and screenshot
+shortcut snapshots. Enter accepts a change and `n` keeps the saved value.
 
 Services and mouse/trackpad domains require separate privacy review before
 snapshots can be published. Public backup skips them. `make restore-apps`

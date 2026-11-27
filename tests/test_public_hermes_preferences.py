@@ -19,6 +19,60 @@ helper = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(helper)
 
 class HermesSkillBoundary(unittest.TestCase):
+    def test_keep_local_restore_adds_missing_preferences_and_keeps_local_edits(self):
+        live = {"model": {"default": "local", "api_key": "fixture-secret", "aliases": {"mine": "local/model", "design": "local/design"}},
+                "display": {"skin": "local-skin"},
+                "skills": {"create_dir": "~/elsewhere", "disabled": ["basin"], "external_dirs": ["~/team/skills"]},
+                "terminal": {"cwd": "local"}}
+        saved = {"model": {"default": "saved", "provider": "saved-provider", "aliases": {"design": "test/design", "new": "test/new"}},
+                 "display": {"skin": "saved-skin", "message_reactions": False},
+                 "skills": {"create_dir": "~/.agents/skills", "external_dirs": ["~/.agents/skills"]}}
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "config.yaml"
+            path.write_text(json.dumps(live), encoding="utf-8")
+            snapshot = Path(directory) / "snapshot.json"
+            snapshot.write_text(json.dumps(saved), encoding="utf-8")
+            merged = helper.merge(json.loads(json.dumps(live)), saved, keep_local=True)
+            self.assertEqual(merged["model"]["default"], "local")
+            self.assertEqual(merged["model"]["provider"], "saved-provider")
+            self.assertEqual(merged["model"]["api_key"], "fixture-secret")
+            self.assertEqual(merged["model"]["aliases"], {"mine": "local/model", "design": "local/design", "new": "test/new"})
+            self.assertEqual(merged["display"], {"skin": "local-skin", "message_reactions": False})
+            # The shared skill boundary is not a local preference.
+            self.assertEqual(merged["skills"]["create_dir"], "~/.agents/skills")
+            self.assertEqual(merged["skills"]["disabled"], ["basin"])
+            self.assertEqual(merged["skills"]["external_dirs"], ["~/team/skills", "~/.agents/skills"])
+            self.assertEqual(merged["terminal"], {"cwd": "local"})
+            # The default restore still applies the saved values.
+            self.assertEqual(helper.merge(json.loads(json.dumps(live)), saved)["display"]["skin"], "saved-skin")
+
+            with patch.object(helper.Path, "home", return_value=Path(directory)):
+                helper.write_atomic(path, helper.merge(helper.read_config(path), saved, keep_local=True))
+                first = path.read_bytes()
+                helper.write_atomic(path, helper.merge(helper.read_config(path), saved, keep_local=True))
+            self.assertEqual(path.read_bytes(), first)
+            check = subprocess.run([sys.executable, str(ROOT / "scripts/hermes-settings.py"), "check", "--keep-local",
+                                    "--live", str(path), "--snapshot", str(snapshot)], capture_output=True, text=True)
+            self.assertNotEqual(check.returncode, 0)
+            self.assertIn("only to restore", check.stderr)
+
+    def test_unchanged_restore_keeps_live_layout(self):
+        saved = {"model": {"default": "saved"}, "display": {"skin": "saved"}}
+        layout = '{ "model": {"default": "mine"},\n  "display":   {"skin": "mine"} }'
+        with tempfile.TemporaryDirectory() as directory:
+            live = Path(directory) / "config.yaml"
+            live.write_text(layout, encoding="utf-8")
+            snapshot = Path(directory) / "snapshot.json"
+            snapshot.write_text(json.dumps(saved), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(ROOT / "scripts/hermes-settings.py"), "restore", "--keep-local",
+                                     "--live", str(live), "--snapshot", str(snapshot)], capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertEqual(live.read_text(encoding="utf-8"), layout)
+
+    def test_mac_restore_target_keeps_local_edits(self):
+        script = (ROOT / "scripts/restore-apps.sh").read_text(encoding="utf-8")
+        self.assertIn('hermes-settings.py" restore --keep-local', script)
+
     def test_managed_yaml_uses_existing_hermes_dependency(self):
         with tempfile.TemporaryDirectory() as directory:
             config = Path(directory) / "config.yaml"

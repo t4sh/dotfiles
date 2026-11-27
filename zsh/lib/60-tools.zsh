@@ -43,13 +43,12 @@ if command -v direnv >/dev/null 2>&1; then
   eval "$(direnv hook zsh)"
 fi
 
-# docker compose plugin — `brew install docker-compose` ships the v2 binary
-# but doesn't register it as a Docker CLI plugin, so `docker compose` errors
-# with "unknown command". Self-heal by symlinking once if the brew binary
-# exists and the plugin is missing. Idempotent; cheap on hot shells.
-if [[ -x "${HOMEBREW_PREFIX:-/opt/homebrew}/opt/docker-compose/bin/docker-compose" \
-   && ! -e "$HOME/.docker/cli-plugins/docker-compose" ]]; then
-  mkdir -p "$HOME/.docker/cli-plugins"
-  ln -sfn "${HOMEBREW_PREFIX:-/opt/homebrew}/opt/docker-compose/bin/docker-compose" \
-    "$HOME/.docker/cli-plugins/docker-compose"
-fi
+# Make Homebrew's Compose and Buildx discoverable without starting Colima.
+for docker_plugin in docker-compose docker-buildx; do
+  docker_source="${HOMEBREW_PREFIX:-/opt/homebrew}/lib/docker/cli-plugins/$docker_plugin"
+  docker_target="$HOME/.docker/cli-plugins/$docker_plugin"
+  if [[ -x "$docker_source" && ! -e "$docker_target" ]]; then
+    mkdir -p "$HOME/.docker/cli-plugins" && ln -sfn "$docker_source" "$docker_target"
+  fi
+done
+unset docker_plugin docker_source docker_target

@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# Windows uses native entry points; reject before any Unix-path mutation.
+case "${OS:-}:$(uname -s)" in
+  Windows_NT:*|*:MINGW*|*:MSYS*) echo 'This is a macOS workflow. On Windows run bin/dot.cmd help.' >&2; exit 2 ;;
+esac
 # Validate and restore the canonical ~/.secrets tree from a finalized vault
 # snapshot. Check mode is read-only; mutation requires explicit --apply.
 set -euo pipefail
@@ -20,8 +24,15 @@ TARGET="${DOTFILES_SECRETS_DIR:-$HOME/.secrets}"
 info() { printf '\033[36m==>\033[0m %s\n' "$*"; }
 ok()   { printf '\033[32m  ✓\033[0m %s\n' "$*"; }
 die()  { printf '\033[31merror:\033[0m %s\n' "$*" >&2; exit 1; }
+has_dot_segment() {
+  case "/${1#/}/" in
+    *"/./"*|*"/../"*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
 
 [[ "$SOURCE_ROOT" == /* && -d "$SOURCE_ROOT" ]] || die "vault snapshot root unavailable: $SOURCE_ROOT"
+has_dot_segment "$SOURCE_ROOT" && die "vault snapshot root must not contain . or .. path components"
 if [[ -z "$STAMP" ]]; then
   STAMP="$(find "$SOURCE_ROOT" -maxdepth 1 -type d \
     -name '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9][0-9][0-9]' \
@@ -30,7 +41,7 @@ fi
 [[ "$STAMP" =~ ^[0-9]{8}-[0-9]{6}$ ]] || die "invalid finalized snapshot name: ${STAMP:-<none>}"
 
 SNAPSHOT="$SOURCE_ROOT/$STAMP"
-[[ -d "$SNAPSHOT" ]] || die "snapshot not found: $SNAPSHOT"
+[[ -d "$SNAPSHOT" && ! -L "$SNAPSHOT" ]] || die "snapshot missing or is not a real directory: $SNAPSHOT"
 if [[ -f "$SNAPSHOT/.dotfiles-snapshot.json" ]]; then
   SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
   python3 "$SCRIPT_DIR/vault-integrity.py" check "$SNAPSHOT"
@@ -56,10 +67,90 @@ else
     *) die "ambiguous legacy secrets payloads under $SNAPSHOT/Users; set DOTFILES_RESTORE_SECRETS_SOURCE explicitly" ;;
   esac
 fi
+has_dot_segment "$SNAPSHOT_SECRETS" && die "secrets restore source must not contain . or .. path components"
 [[ -d "$SNAPSHOT_SECRETS" ]] || die "canonical secrets payload missing: $SNAPSHOT_SECRETS"
 
-file_count="$(find "$SNAPSHOT_SECRETS" -type f | wc -l | tr -d '[:space:]')"
-(( file_count > 0 )) || die "secrets payload is empty: $SNAPSHOT_SECRETS"
+if ! file_count="$(python3 - "$SNAPSHOT" "$SNAPSHOT_SECRETS" <<'PY'
+import os
+import stat
+import sys
+
+
+def fail(reason):
+    print(f"invalid secrets restore source: {reason}", file=sys.stderr)
+    raise SystemExit(1)
+
+
+snapshot = os.path.abspath(sys.argv[1])
+payload = os.path.abspath(sys.argv[2])
+
+try:
+    snapshot_mode = os.lstat(snapshot).st_mode
+except OSError:
+    fail("snapshot directory is unavailable")
+if not stat.S_ISDIR(snapshot_mode):
+    fail("snapshot root is not a real directory")
+
+# For in-snapshot payloads, inspect each component between the snapshot and
+# the selected root. This catches a link in an ancestor even though walking
+# the final path alone would follow it. Explicit custom sources outside the
+# snapshot remain supported; their selected root and descendants are checked.
+try:
+    relative = os.path.relpath(payload, snapshot)
+    contained = os.path.commonpath((snapshot, payload)) == snapshot
+except ValueError:
+    contained = False
+    relative = ""
+
+if contained:
+    current = snapshot
+    for component in (() if relative == "." else relative.split(os.sep)):
+        current = os.path.join(current, component)
+        try:
+            mode = os.lstat(current).st_mode
+        except OSError:
+            fail("selected payload path is unavailable")
+        if stat.S_ISLNK(mode):
+            fail("selected snapshot or payload path contains a symlink")
+        if not stat.S_ISDIR(mode):
+            fail("selected payload path contains a non-directory ancestor")
+
+try:
+    root_mode = os.lstat(payload).st_mode
+except OSError:
+    fail("selected payload is unavailable")
+if not stat.S_ISDIR(root_mode):
+    fail("selected payload root is not a real directory")
+
+file_count = 0
+pending = [payload]
+while pending:
+    directory = pending.pop()
+    try:
+        with os.scandir(directory) as entries:
+            for entry in entries:
+                try:
+                    mode = entry.stat(follow_symlinks=False).st_mode
+                except OSError:
+                    fail("payload changed during validation")
+                if stat.S_ISLNK(mode):
+                    fail("payload contains a symlink")
+                if stat.S_ISDIR(mode):
+                    pending.append(entry.path)
+                elif stat.S_ISREG(mode):
+                    file_count += 1
+                else:
+                    fail("payload contains a special file")
+    except OSError:
+        fail("payload could not be read")
+
+if file_count == 0:
+    fail("secrets payload is empty")
+print(file_count)
+PY
+)"; then
+  die "secrets payload validation failed"
+fi
 size="$(du -sh "$SNAPSHOT_SECRETS" | awk '{print $1}')"
 info "snapshot: $STAMP"
 ok "validated canonical secrets payload ($file_count file(s), $size)"

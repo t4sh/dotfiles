@@ -8,16 +8,11 @@ KC_SERVICE="DotfilesSecretsVault"
   echo "interactive terminal required to import the recovered vault password" >&2
   exit 1
 }
-read -r -s -p "Recovered vault password: " pass
-echo ""
-[[ -n "$pass" ]] || {
-  echo "vault password was empty; Keychain was not changed" >&2
-  exit 1
-}
+# A bare final -w uses security's native prompt; the password never becomes a
+# process argument or a shell variable. Cancellation propagates as a failure.
 security add-generic-password \
   -a "$USER" -s "$KC_SERVICE" \
   -D "disk image password" \
   -l "Dotfiles Secrets Vault" \
-  -U -w "$pass"
-unset pass
+  -U -w
 echo "recovered vault password saved to the local login Keychain"

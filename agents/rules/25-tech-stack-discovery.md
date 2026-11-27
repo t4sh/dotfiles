@@ -1,10 +1,12 @@
 # 25 — Tech stack discovery (multi-runtime / cross-boundary)
 
-Activate when a task touches a repo with multiple runtimes, native code, generated outputs, CLI/desktop UI, bindings, or service boundaries.
+Activate for technical work involving runtime, native, generated, CLI/desktop, binding, or service boundaries.
+
+Select by the task: inspect, design, change, diagnose, or verify those behaviors or boundaries. Repository technology alone is insufficient; unrelated prose/planning does not activate this rule.
 
 ## Read manifests first
 
-Before editing anything, read the manifests that define the repo's shape: `package.json`, `Cargo.toml`, `pyproject.toml`, `requirements.txt`, `tauri.conf.json` / `tauri.conf.json5`, lockfiles, and workspace config. Understand what runtimes are present and how they relate before touching any layer.
+Before editing, read the task-relevant manifests: `package.json`, `Cargo.toml`, `pyproject.toml`, `requirements.txt`, `tauri.conf.json` / `tauri.conf.json5`, lockfiles, and workspace config. Understand what runtimes are present and how they relate before touching any layer.
 
 ## Identify the layer before editing
 

@@ -22,7 +22,7 @@ fi
 export PATH="/Applications/Sublime Text.app/Contents/SharedSupport/bin:$PATH"
 
 # Hermes Agent — ensure ~/.local/bin is on PATH
-export PATH="$HOME/.local/bin:$PATH"
+export PATH="$PATH:$HOME/.local/bin"
 
 # Login automation does not read .zshrc. Select the same npm inventory here,
 # after Homebrew's shellenv has prepended its own Node installation.

@@ -2,6 +2,8 @@
 
 Always on. These apply in every mode, every project, every tool.
 
+**Local web previews:** Before starting, opening, or sharing a local web preview, read and apply [Local preview URLs](21-web-stack.md#local-preview-urls). This includes a later preview request in an existing task.
+
 1. **Understand before you touch.** Read the relevant code, artifacts, or surrounding context first. Know what breaks downstream before editing upstream. For design work, read the existing token system and component variants before adding anything new.
 
 2. **Minimal, surgical changes.** Change only what needs to change. Don't refactor adjacent code unasked. Never delete something you don't fully understand — comment it, flag it, or ask.
@@ -14,11 +16,13 @@ Always on. These apply in every mode, every project, every tool.
 
 6. **Proactive review, in scope.** While working, flag bugs, dead code, type mismatches, security gaps, token violations, and unused variants in the area you're touching. Fix what's in scope; note what isn't.
 
-7. **No improvised workflows.** If a project defines a deploy path, test command, or skill, use it. If none exists, stop and ask — don't invent one.
+7. **Use established workflows.** If a project defines a deploy path, test command, or skill, use it. When no verification path exists, choose the smallest meaningful check within authorized scope, including temporary test artifacts. For other missing workflows, stop and ask.
 
-8. **Never auto-commit or auto-push.** Only `git commit` when the user explicitly says "commit"; only `git push` when the user says "push." "Sync to memory" means write files to `.agent-memory/`, not git commit. Exception: "commit push and deploy" is blanket authorization — do all three without extra confirmation.
+8. **Never auto-commit or auto-push.** Only `git commit` when the user explicitly says "commit"; only `git push` when the user says "push." Explicit authorization for the repository-approved merge or rebase integration includes commits inherently produced by that selected operation; it authorizes no standalone commit or rebase that repository policy does not select. "Sync to memory" means write files to `.agent-memory/`, not git commit. Exception: "commit push and deploy" is blanket authorization — do all three without extra confirmation.
 
-9. **A clean result is a result — earned after the work, never instead of it.** When the work genuinely checks out, say so plainly and stop. Never invent, inflate, or keep a weak finding to make a review, audit, or report look thorough. A clean verdict is a conclusion, never a starting position: it is reached only after exhausting the probes the task calls for — every check run, every surface inspected, every stated requirement traced to where it is satisfied or shown missing. A clean verdict must name what was checked; a check that could not run is reported as unrun, never counted as clean. Never soften, drop, or withhold a real finding to keep a report short, and never stop probing early because nothing has surfaced yet.
+9. **Earn a clean verdict.** Complete every required probe, inspect each required surface, and trace every requirement to evidence or a gap. Name what was checked; unavailable checks remain unrun. Never invent, inflate, retain weak findings, hide real findings for brevity, or stop probing because nothing has surfaced. When the work checks out, say so plainly and stop.
+
+10. **Preserve decisions and scope.** Complete the authorized task, including relevant edge cases and error paths; adjacent improvements remain proposals. Recover durable decisions from the project's existing context after session changes. Reconsider them only with new evidence or user direction; model agreement is neither proof nor authorization.
 
 ## Executing written plans
 

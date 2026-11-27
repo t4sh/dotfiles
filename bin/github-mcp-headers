@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Print the GitHub MCP Authorization header from gh's keyring login, so the
+# token never sits in Claude Code settings or the process environment.
+set +xv
+set -euo pipefail
+
+GH="${GH_BIN:-$(command -v gh || echo /opt/homebrew/bin/gh)}"
+
+if [[ ! -x "$GH" ]]; then
+  echo "github-mcp-headers: gh is unavailable; install it and run gh auth login" >&2
+  exit 1
+fi
+
+if ! token="$("$GH" auth token --hostname github.com 2>/dev/null)" || [[ -z "$token" ]]; then
+  echo "github-mcp-headers: gh has no github.com token; run gh auth login (details hidden)" >&2
+  exit 1
+fi
+
+if [[ "${1:-}" == "--check" ]]; then
+  echo "github-mcp-headers: gh token is available (value hidden)"
+  exit 0
+fi
+
+printf '{"Authorization": "Bearer %s"}\n' "$token"

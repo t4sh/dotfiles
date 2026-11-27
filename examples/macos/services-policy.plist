@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NSServicesStatus</key>
+	<dict>
+		<key>com.apple.Terminal - New Terminal at Folder - newTerminalAtFolder</key>
+		<dict>
+			<key>enabled_context_menu</key>
+			<integer>1</integer>
+			<key>enabled_services_menu</key>
+			<integer>1</integer>
+			<key>presentation_modes</key>
+			<dict>
+				<key>ContextMenu</key>
+				<integer>1</integer>
+				<key>ServicesMenu</key>
+				<integer>1</integer>
+			</dict>
+		</dict>
+	</dict>
+</dict>
+</plist>

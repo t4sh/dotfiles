@@ -1,0 +1,1 @@
+At session start and after context compaction, read ~/.cursor/rules/rulebook.mdc and follow its canonical rulebook loading procedure.

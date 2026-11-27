@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+# Launch Context7 MCP with the vault-backed API key, without placing the key in
+# editor settings or process arguments.
+set +xv
+set -euo pipefail
+
+SECRETS_ENV="${DOTFILES_SECRETS_DIR:-$HOME/.secrets}/config/env/context7.env"
+NODE_STABLE="${NODE_STABLE:-$HOME/.local/bin/node-stable}"
+NPX_STABLE="${NPX_STABLE:-$HOME/.local/bin/npx-stable}"
+
+if [[ ! -r "$SECRETS_ENV" ]]; then
+  echo "context7-mcp: missing readable secrets file: $SECRETS_ENV" >&2
+  exit 1
+fi
+
+# Load only this tool's file. Suppress source output (including tracing), and
+# reject inherited keys so an empty file cannot silently use an old credential.
+if ! context7_api_key="$(
+  unset CONTEXT7_API_KEY
+  set +u
+  # shellcheck disable=SC1090
+  if ! source "$SECRETS_ENV" >/dev/null 2>&1; then
+    exit 1
+  fi
+  set +xv 2>/dev/null
+  printf '%s' "${CONTEXT7_API_KEY:-}"
+)"; then
+  echo "context7-mcp: could not load credential file; details suppressed" >&2
+  exit 1
+fi
+
+# shellcheck source=../scripts/lib/keychain.sh
+source "$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../scripts/lib" && pwd)/keychain.sh"
+if ! context7_api_key="$(dotfiles_resolve_secret "$context7_api_key")"; then
+  echo "context7-mcp: Keychain credential unavailable or access denied (details hidden)" >&2
+  exit 1
+fi
+
+if [[ -z "$context7_api_key" ]]; then
+  echo "context7-mcp: CONTEXT7_API_KEY is absent or empty in $SECRETS_ENV" >&2
+  exit 1
+fi
+
+if [[ ! -x "$NODE_STABLE" || ! -e "$NPX_STABLE" ]]; then
+  echo "context7-mcp: node-stable/npx-stable shims are unavailable; run make shims" >&2
+  exit 1
+fi
+
+npx_target="$(readlink "$NPX_STABLE")"
+if [[ -z "$npx_target" || ! -f "$npx_target" ]]; then
+  echo "context7-mcp: npx-stable is not a valid symlink" >&2
+  exit 1
+fi
+
+if [[ "${1:-}" == "--check" ]]; then
+  echo "context7-mcp: dedicated secret and runtime are ready (value hidden)"
+  exit 0
+fi
+
+export CONTEXT7_API_KEY="$context7_api_key"
+unset context7_api_key
+exec "$NODE_STABLE" "$npx_target" --yes @upstash/context7-mcp@4.0.3 "$@"

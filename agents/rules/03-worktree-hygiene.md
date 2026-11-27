@@ -1,13 +1,14 @@
-# 03 — Git and worktree hygiene
+# 03 — Worktree hygiene
 
-Always on. Apply whenever the session is inside a Git repository or shared local workspace.
+Always on. Apply these rules whenever the session is inside a git repository or shared local workspace.
 
-- **Inspect before mutation.** Resolve the current branch, upstream, worktree/index state, and any in-progress merge, rebase, cherry-pick, revert, or bisect before editing or writing Git metadata. Stop on an unexpected operation or unresolved conflict.
-- **Protect user state.** Leave unrelated files, staged changes, branches, worktrees, and stashes untouched. Dirty unrelated worktrees are not blockers.
-- **Stage deliberately.** Stage only requested paths and verify the cached diff. When unrelated changes are already staged, use `git commit --only -- <path>…` only after the intended paths are fully staged and `git diff -- <path>…` is empty; otherwise stop rather than absorb unstaged content from those paths.
-- **Report complete commit references.** Render every commit as `<short-hash> <subject line>`, not a hash alone.
-- **Resolve worktrees yourself.** Parse `git worktree list --porcelain -z` as NUL-delimited `worktree`/`branch` records, then use the resolved absolute path through the tool's structured working directory or quoted `git -C "$worktree_path" …`. Never ask the user to find or open a worktree merely so the task can continue.
-- **Keep cleanup explicit.** Commands that discard data or rewrite refs remain governed by `01-authorization.md`; do not use reset, restore, clean, force deletion, or worktree removal as a way to obtain a clean slate.
+- **Check state before edits.** Inspect the branch, upstream, and dirty worktree before changing files when the task involves code, config, commits, or generated artifacts.
+- **Validate linked-worktree placement.** For a canonical repository under `~/Projects/`, before edits, locally commit-producing operations, or integration, resolve the current and target-owning worktrees with `git worktree list --porcelain -z`. The canonical checkout and linked worktrees under `<repo-root>/.worktrees/` are compliant. Any linked worktree elsewhere is inspection-only: report its path and hand migration to the user. Do not edit, commit, integrate, move, remove, or recreate it automatically.
+- **Commit references include identity and intent.** In every user-facing response, plan, status report, handoff, review, or issue/PR text, render each Git commit as `<short-hash> <subject line>` (for example, `abc12345 fix(web): correct routing`). When listing multiple commits, include this pair for every item; a hash alone is not a complete commit reference.
+- **Stop on unexpected repo states.** If the repo is mid-rebase, mid-merge, has unresolved conflicts, is in detached HEAD unexpectedly, or has an in-progress cherry-pick/revert/bisect, pause and report the state before editing. Continue only when the user confirms the intended path or the task explicitly concerns resolving that state.
+- **Protect user changes.** Never revert, overwrite, restage, or "clean up" changes you did not make unless the user explicitly asks. If unrelated changes exist, work around them and mention them only when they affect the task.
+- **Generated output is still a change.** Treat lockfiles, snapshots, screenshots, build artifacts, and formatter rewrites as intentional only when they are required for the task.
+- **No destructive cleanup by reflex.** Do not use `git reset`, `git checkout --`, `git restore`, `git clean`, `rm`, or worktree deletion to get a clean slate unless the user asked for that exact cleanup or approved it after seeing the risk.
+- **Keep hygiene in the background.** Apply repository checks silently. Surface branch, status, worktree, or staging details only when they block or materially constrain the requested work, or when the user asks for them.
 
-
-Worktree creation, integration, and cleanup are action-gated in [07-worktree-lifecycle.md](07-worktree-lifecycle.md).
+Worktree creation, branch creation, finishing, merge, cleanup, and post-merge handoff live in `07-worktree-lifecycle.md`. Load that rule immediately before those operations; do not preload it at task start.

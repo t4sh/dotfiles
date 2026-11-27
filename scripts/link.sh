@@ -5,13 +5,16 @@ case "${OS:-}:$(uname -s)" in
 esac
 # Apply symlinks declared in symlinks.tsv. Idempotent — re-run safe.
 # Missing sources leave destinations untouched. Existing destinations for valid
-# sources move to ~/.dotfiles-backup/<timestamp>/<absolute-path-mirror>.
+# sources move to private backups; secret-backed consumers stay inside ~/.secrets/recovery.
 set -euo pipefail
+umask 077
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 DOTFILES="${DOTFILES:-$(cd -- "$SCRIPT_DIR/.." && pwd -P)}"
 MANIFEST="$DOTFILES/symlinks.tsv"
-BACKUP_DIR="$HOME/.dotfiles-backup/$(date +%Y%m%d-%H%M%S)"
+BACKUP_STAMP="$(date +%Y%m%d-%H%M%S)"
+BACKUP_DIR="$HOME/.dotfiles-backup/$BACKUP_STAMP"
+SECRET_BACKUP_DIR="$HOME/.secrets/recovery/link-backups/$BACKUP_STAMP"
 DRY_RUN=0
 CHECK=0
 MISSING_SOURCES=0
@@ -22,10 +25,10 @@ usage() {
 Usage: link.sh [--dry-run | --check]
 
   --dry-run   Show what would be linked/backed up without changing files.
-  --check     Exit non-zero when a source is missing or a destination has drifted.
+  --check     Exit non-zero when a required source is missing or a destination has drifted.
 
 Environment:
-  DOTFILES_STRICT_LINK=1   Exit non-zero when any declared source is missing
+  DOTFILES_STRICT_LINK=1   Exit non-zero when any required source is missing
                            (normal apply mode; --check already fails on missing sources).
 EOF
 }
@@ -64,10 +67,13 @@ expand() {
 }
 
 backup_path_for() {
-    local dst="$1"
-    local rel backup n
+    local dst="$1" src="$2"
+    local rel backup n base="$BACKUP_DIR"
+    if [[ "$src" == "$HOME/.secrets/"* || "$dst" == "$HOME/.secrets/"* ]]; then
+        base="$SECRET_BACKUP_DIR"
+    fi
     rel="${dst#/}"
-    backup="$BACKUP_DIR/$rel"
+    backup="$base/$rel"
     if [[ ! -e "$backup" && ! -L "$backup" ]]; then
         printf '%s' "$backup"
         return
@@ -117,7 +123,7 @@ link_one() {
     fi
     if (( DRY_RUN )); then
         if [ -e "$dst" ] || [ -L "$dst" ]; then
-            backup="$(backup_path_for "$dst")"
+            backup="$(backup_path_for "$dst" "$src")"
             echo "  → backing up $dst → $backup"
         fi
         echo "  + would link $dst → $src"
@@ -136,11 +142,24 @@ link_one() {
     fi
 
     if [ -e "$dst" ] || [ -L "$dst" ]; then
-        backup="$(backup_path_for "$dst")"
+        backup="$(backup_path_for "$dst" "$src")"
         echo "  → backing up $dst → $backup"
+        if [[ "$backup" == "$SECRET_BACKUP_DIR/"* ]]; then
+            for private_dir in "$HOME/.secrets/recovery" "$HOME/.secrets/recovery/link-backups"; do
+                [[ ! -L "$private_dir" ]] || { echo "unsafe backup directory symlink" >&2; return 1; }
+                mkdir -p "$private_dir"
+                chmod 700 "$private_dir"
+            done
+        else
+            [[ ! -L "$HOME/.dotfiles-backup" ]] || { echo "unsafe backup directory symlink" >&2; return 1; }
+            mkdir -p "$HOME/.dotfiles-backup"
+            chmod 700 "$HOME/.dotfiles-backup"
+        fi
         mkdir -p "$(dirname "$backup")"
         if mv "$dst" "$backup"; then
-            :
+            if [[ "$backup" == "$SECRET_BACKUP_DIR/"* && ! -L "$backup" ]]; then
+                if [[ -d "$backup" ]]; then chmod 700 "$backup"; else chmod 600 "$backup"; fi
+            fi
         else
             status=$?
             rm -f -- "$candidate"
@@ -188,7 +207,8 @@ while IFS=$'\t' read -r src dst; do
 done < "$MANIFEST"
 
 if [[ "${DOTFILES_STRICT_LINK:-0}" == "1" ]] && (( ! CHECK )); then
-    for src in "${MANIFEST_SOURCES[@]}"; do
+    for i in "${!MANIFEST_SOURCES[@]}"; do
+        src="${MANIFEST_SOURCES[$i]}"
         if [[ ! -e "$src" ]]; then
             echo "  ⚠ strict preflight source missing: $src"
             MISSING_SOURCES=$((MISSING_SOURCES + 1))

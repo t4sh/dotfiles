@@ -80,11 +80,11 @@ if [[ "$mode" == restore ]]; then
   while IFS= read -r -d '' file; do
     grep -q '__HOMEBREW_PREFIX__' "$file" || continue
     if [[ -z "$homebrew_prefix" ]]; then
-      command -v brew >/dev/null 2>&1 || {
+      if ! command -v brew >/dev/null 2>&1 || ! homebrew_prefix="$(brew --prefix)" ||
+         [[ ! -d "$homebrew_prefix" ]]; then
         echo "Homebrew is required to materialize Sublime Text paths" >&2
         exit 1
-      }
-      homebrew_prefix="$(brew --prefix)"
+      fi
     fi
     HOMEBREW_PREFIX="$homebrew_prefix" perl -i -pe \
       's/__HOMEBREW_PREFIX__/$ENV{HOMEBREW_PREFIX}/g' "$file"

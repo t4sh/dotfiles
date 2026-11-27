@@ -1,6 +1,11 @@
+# ─── Taps ──────────────────────────────────────────────────────────────
 tap "deskflow/tap"
+
+# ─── brew-core: bootstrap formulae & uv tools ─────────────────────────
 # Static analysis and lint tool, for (ba)sh scripts
 brew "shellcheck"
+# Autoformat shell scripts
+brew "shfmt"
 # Static checker for GitHub Actions workflow files
 brew "actionlint"
 # Simple, modern, secure file encryption
@@ -25,8 +30,12 @@ brew "coreutils"
 brew "direnv"
 # Pack, ship and run any application as a lightweight container
 brew "docker"
+# Build images with BuildKit
+brew "docker-buildx"
 # Isolated development environments using Docker
 brew "docker-compose"
+# Store Docker registry credentials in the macOS Keychain
+brew "docker-credential-helper"
 # Select default apps for documents and URL schemes on macOS
 brew "duti"
 # Perl lib for reading and writing EXIF metadata
@@ -79,11 +88,13 @@ brew "mole"
 brew "moreutils"
 # Manage multiple Node.js versions
 brew "nvm"
+# OpenCode CLI; desktop app is declared separately below
+brew "opencode"
 # AI agent toolkit
 brew "pi-coding-agent"
 # PDF rendering library (based on the xpdf-3.0 code base)
 brew "poppler"
-# Stable named HTTPS URLs for local development servers
+# Replace port numbers with stable, named local URLs for humans and agents
 brew "portless"
 # Convert bitmaps to vector graphics
 brew "potrace"
@@ -121,18 +132,22 @@ brew "yq"
 brew "yt-dlp"
 # Shell extension to navigate your filesystem faster
 brew "zoxide"
-# Real-time type-ahead completion for Zsh
-brew "zsh-autocomplete"
 # Fish-like fast/unobtrusive autosuggestions for zsh
 brew "zsh-autosuggestions"
 # Fish shell like syntax highlighting for zsh
 brew "zsh-syntax-highlighting"
+
+# ─── uv tools (brew-core phase) ────────────────────────────────────────
+uv "browser-use"
+uv "nginx-language-server"
+
+# ─── brew-apps: casks ──────────────────────────────────────────────────
 # Collection of apps and services for photography, design, video, web, and UX
 cask "adobe-creative-cloud"
 # Image editing and design software
 cask "affinity"
-# Chromium based browser
-cask "arc"
+# Web browser with built-in AI assistant
+cask "aside"
 # Browse/extract images from .car files
 cask "asset-catalog-tinkerer"
 # Display management tool
@@ -155,10 +170,6 @@ cask "clop"
 cask "cloudflare-warp"
 # OpenAI's coding agent that runs in your terminal
 cask "codex"
-# Web browser with integrated AI assistant
-cask "comet"
-# Claude code parallelisation
-cask "conductor"
 # Native document editor
 cask "craft"
 # AI assistant for connecting and working across data sources
@@ -177,14 +188,106 @@ cask "devtoys"
 cask "discord"
 # Window peeking utility app
 cask "dockdoor"
-# App to build and share containerised applications and microservices
-cask "docker-desktop"
 # Web browser focusing on privacy
 cask "duckduckgo"
 # Collaborative team software
 cask "figma"
 # Web browser
 cask "firefox"
+# Tool that helps teams design every part of the product experience
+cask "framer"
+# Set of tools to manage resources and applications hosted on Google Cloud
+cask "gcloud-cli"
+# Web browser
+cask "google-chrome"
+# Native desktop AI assistant from Google
+cask "google-gemini"
+# Desktop automation application
+cask "hammerspoon"
+# Open-source video transcoder
+cask "handbrake-app"
+# Open-source desktop AI agent
+cask "hermes-desktop"
+# Free and open-source media player
+cask "iina"
+# Tool to optimise images to a smaller size
+cask "imageoptim"
+# Spot and merge differences in text and image files or folders
+cask "kaleidoscope"
+# Free cross-platform office suite, fresh version
+cask "libreoffice"
+# Graphic design software
+cask "lunacy"
+# Archive manager
+cask "macpacker"
+# Select text in any app and translate it
+cask "mate-translate"
+# Provides updates to various Microsoft products
+cask "microsoft-auto-update"
+# Multi-platform web browser
+cask "microsoft-edge"
+# Spreadsheet software
+cask "microsoft-excel"
+# Presentation software
+cask "microsoft-powerpoint"
+# Meet, chat, call, and collaborate in just one place
+cask "microsoft-teams"
+# Word processor
+cask "microsoft-word"
+# Mounts servers and cloud storages as a disk on the desktop
+cask "mountain-duck"
+# App to write, plan, collaborate, and get organised
+cask "notion"
+# Calendar for professionals and teams
+cask "notion-calendar"
+# Knowledge base that works on top of a local folder of plain text Markdown files
+cask "obsidian"
+# Verify system files structure, run miscellaneous maintenance and more
+cask "onyx"
+# Cross-platform GUI for youtube-dl made in Electron and node.js
+cask "open-video-downloader"
+# AI coding agent desktop client
+cask "opencode-desktop"
+# Design tool for creating interfaces and prototypes
+cask "paper-design"
+# Utility to uninstall apps and remove leftover files from old/uninstalled apps
+cask "pearcleaner"
+# AI-powered answer engine with Personal Computer agent
+cask "perplexity"
+# All-in-one bookmark manager
+cask "raindropio"
+# Control your tools with a few keystrokes
+cask "raycast"
+# Move and resize windows using keyboard shortcuts or snap areas
+cask "rectangle"
+# Screenshot measurement and annotation tool
+cask "shottr"
+# Package manager and inference UI for Stable Diffusion
+cask "stability-matrix"
+# Text editor for code, markup and prose
+cask "sublime-text"
+# Application for inspecting installer packages
+cask "suspicious-package"
+# Messaging app with a focus on speed and security
+cask "telegram"
+# Git client focusing on power and productivity
+cask "tower"
+# File transfer application
+cask "transmit"
+# Font manager application
+cask "typeface"
+# Open-source code editor
+cask "visual-studio-code"
+# Native desktop client for WhatsApp
+cask "whatsapp"
+# Multiplayer code editor
+cask "zed"
+# Gecko based web browser
+cask "zen"
+# Video communication and virtual meeting platform
+cask "zoom"
+
+# ─── brew-apps: fonts ──────────────────────────────────────────────────
 cask "font-anton"
 cask "font-architects-daughter"
 cask "font-bangers"
@@ -225,146 +328,8 @@ cask "font-overused-grotesk"
 cask "font-prociono"
 cask "font-roboto-flex"
 cask "font-satoshi"
-# Tool that helps teams design every part of the product experience
-cask "framer"
-# Set of tools to manage resources and applications hosted on Google Cloud
-cask "gcloud-cli"
-# Web browser
-cask "google-chrome"
-# Native desktop AI assistant from Google
-cask "google-gemini"
-# Desktop automation application
-cask "hammerspoon"
-# Open-source video transcoder
-cask "handbrake-app"
-# Open-source desktop AI agent
-cask "hermes-desktop"
-# Homebrew's official GUI
-cask "homebrew-app"
-# Free and open-source media player
-cask "iina"
-# Tool to optimise images to a smaller size
-cask "imageoptim"
-# Spot and merge differences in text and image files or folders
-cask "kaleidoscope"
-# Open-source keystroke visualiser
-cask "keycastr"
-# Utility that shows the latest app updates
-cask "latest"
-# Free cross-platform office suite, fresh version
-cask "libreoffice"
-# App to manage software development and track bugs
-cask "linear"
-# AI chat framework
-cask "lobehub"
-# Graphic design software
-cask "lunacy"
-# Clipboard manager
-cask "maccy"
-# Select text in any app and translate it
-cask "mate-translate"
-# Provides updates to various Microsoft products
-cask "microsoft-auto-update"
-# Multi-platform web browser
-cask "microsoft-edge"
-# Spreadsheet software
-cask "microsoft-excel"
-# Presentation software
-cask "microsoft-powerpoint"
-# Meet, chat, call, and collaborate in just one place
-cask "microsoft-teams"
-# Word processor
-cask "microsoft-word"
-# Mounts servers and cloud storages as a disk on the desktop
-cask "mountain-duck"
-# Visual workspace for building with Codex and Claude Code
-cask "nimbalyst"
-# App to write, plan, collaborate, and get organised
-cask "notion"
-# Calendar for professionals and teams
-cask "notion-calendar"
-# Knowledge base that works on top of a local folder of plain text Markdown files
-cask "obsidian"
-# Verify system files structure, run miscellaneous maintenance and more
-cask "onyx"
-# Cross-platform GUI for youtube-dl made in Electron and node.js
-cask "open-video-downloader"
-# AI coding agent desktop client
-cask "opencode-desktop"
-# Design tool for creating interfaces and prototypes
-cask "paper-design"
-# Self-hosted daemon for AI coding agents
-cask "paseo"
-# Utility to uninstall apps and remove leftover files from old/uninstalled apps
-cask "pearcleaner"
-# AI-powered answer engine with Personal Computer agent
-cask "perplexity"
-# All-in-one bookmark manager
-cask "raindropio"
-# Control your tools with a few keystrokes
-cask "raycast"
-# Move and resize windows using keyboard shortcuts or snap areas
-cask "rectangle"
-# Screenshot measurement and annotation tool
-cask "shottr"
-# Package manager and inference UI for Stable Diffusion
-cask "stability-matrix"
-# Text editor for code, markup and prose
-cask "sublime-text"
-# Application for inspecting installer packages
-cask "suspicious-package"
-# Messaging app with a focus on speed and security
-cask "telegram"
-# Menu bar manager
-cask "thaw"
-# Markdown knowledgebase manager
-cask "tolaria"
-# Git client focusing on power and productivity
-cask "tower"
-# File transfer application
-cask "transmit"
-# Font manager application
-cask "typeface"
-# AI image upscaler
-cask "upscayl"
-# Open-source code editor
-cask "visual-studio-code"
-# Native desktop client for WhatsApp
-cask "whatsapp"
-# Multiplayer code editor
-cask "zed"
-# Gecko based web browser
-cask "zen"
-# Video communication and virtual meeting platform
-cask "zoom"
-mas "Arattai", id: 1522469944
-mas "Battery Indicator", id: 1206020918
-mas "Canary Mail", id: 1236045954
-mas "CDRViewer", id: 600067300
-mas "Color Picker", id: 1545870783
-mas "Dato", id: 1470584107
-mas "Gapplin", id: 768053424
-mas "Ghostery AdBlocker for Privacy", id: 6504861501
-mas "Gifski", id: 1351639930
-mas "Hidden Bar", id: 1452453066
-mas "HP", id: 1474276998
-mas "HP Easy Scan", id: 967004861
-mas "Keynote", id: 409183694
-mas "Keynote", id: 361285480
-mas "Kindle", id: 302584613
-mas "Lungo", id: 1263070803
-mas "Numbers", id: 409203825
-mas "Numbers", id: 361304891
-mas "Pages", id: 361309726
-mas "Pages", id: 409201541
-mas "Prime Video", id: 545519333
-mas "QuickLookPro", id: 6812534537
-mas "Save to Raindrop.io", id: 1549370672
-mas "uBlock Origin Lite", id: 6745342698
-mas "Urban VPN Desktop", id: 1517772049
-mas "Velja", id: 1607635845
-mas "Wappalyzer - Technology profiler", id: 1520333300
-mas "WireGuard", id: 1451685025
+
+# ─── brew-apps: vscode extensions ──────────────────────────────────────
 vscode "1000ch.svgo"
 vscode "aaaaronzhou.nginx-config-formatter-vscode-extension"
 vscode "aaron-bond.better-comments"
@@ -474,6 +439,34 @@ vscode "yatki.vscode-surround"
 vscode "yoavbls.pretty-ts-errors"
 vscode "yzhang.markdown-all-in-one"
 vscode "zignd.html-css-class-completion"
-uv "browser-use"
-uv "nginx-language-server"
+
+# ─── brew-mas: App Store apps ──────────────────────────────────────────
+mas "Ahrefs SEO Toolbar", id: 6499265972
+mas "Arattai", id: 1522469944
+mas "Battery Indicator", id: 1206020918
+mas "CDRViewer", id: 600067300
+mas "Color Picker", id: 1545870783
+mas "Dato", id: 1470584107
+mas "Gapplin", id: 768053424
+mas "Gifski", id: 1351639930
+mas "HP", id: 1474276998
+mas "HP Easy Scan", id: 967004861
+mas "Keynote", id: 409183694
+mas "Keynote", id: 361285480
+mas "Kindle", id: 302584613
+mas "Lungo", id: 1263070803
+mas "Numbers", id: 409203825
+mas "Numbers", id: 361304891
+mas "Pages", id: 409201541
+mas "Pages", id: 361309726
+mas "Prime Video", id: 545519333
+mas "QuickLookPro", id: 6812534537
+mas "Save to Raindrop.io", id: 1549370672
+mas "uBlock Origin Lite", id: 6745342698
+mas "Urban VPN Desktop", id: 1517772049
+mas "Velja", id: 1607635845
+mas "Wappalyzer - Technology profiler", id: 1520333300
+mas "WireGuard", id: 1451685025
+
+# ─── brew-npm: npm globals ─────────────────────────────────────────────
 npm "corepack"

@@ -101,7 +101,7 @@ path_has_dot_segments() {
 }
 
 preflight_manifest() {
-  local line src count=0
+  local line src count=0 canonical_found=0
   while IFS= read -r line || [[ -n "$line" ]]; do
     line="${line%%#*}"
     line="${line#"${line%%[![:space:]]*}"}"
@@ -111,10 +111,12 @@ preflight_manifest() {
     [[ "$src" == /* ]] || die "manifest paths must resolve to absolute paths: $line"
     [[ -n "${src//\//}" ]] || die "manifest paths must not use filesystem root: $line"
     path_has_dot_segments "$src" && die "manifest paths must not contain dot segments: $line"
+    [[ "${src%/}" == "${SECRETS_DIR%/}" ]] && canonical_found=1
     MANIFEST_PATHS+=("$src")
     count=$((count + 1))
   done < "$MANIFEST"
   (( count > 0 )) || die "manifest contains no backup paths: $MANIFEST"
+  (( canonical_found )) || die "manifest must include the canonical secrets tree: $SECRETS_DIR"
 }
 
 # Reject invalid or relative paths before selecting a destination, taking the
@@ -246,7 +248,7 @@ printf '%s\n' "$DEST" > "$DEST_CACHE"
 # item. Recovery therefore requires a separately stored copy in a trusted,
 # independently synchronized password manager.
 #
-# `security -w` appends a trailing newline on stdout. `hdiutil -stdinpass`
+# `security -w` appends a trailing newline on stdout. Disk-image attachment
 # would treat that newline as part of the passphrase, while Finder's typed
 # password has none — causing Finder "wrong password" errors on double-click.
 # Use $() to strip the trailing newline and printf '%s' to emit raw bytes.
@@ -257,6 +259,23 @@ get_pass() {
   fi
   [[ -n "$p" ]] || return 1
   printf '%s' "$p"
+}
+
+attach_selected_vault() {
+  local mode="${1:-writable}"
+  if diskutil image attach --help >/dev/null 2>&1; then
+    if [[ "$mode" == readonly ]]; then
+      get_pass | diskutil image attach --stdinpassphrase --plist --readOnly \
+        --mountPoint "$MOUNT" --mountOptions nobrowse "$VAULT"
+    else
+      get_pass | diskutil image attach --stdinpassphrase --plist \
+        --mountPoint "$MOUNT" --mountOptions nobrowse "$VAULT"
+    fi
+  elif [[ "$mode" == readonly ]]; then
+    get_pass | hdiutil attach "$VAULT" -readonly -nobrowse -stdinpass -mountpoint "$MOUNT" -plist
+  else
+    get_pass | hdiutil attach "$VAULT" -stdinpass -mountpoint "$MOUNT" -nobrowse -plist
+  fi
 }
 
 if ! get_pass >/dev/null; then
@@ -370,7 +389,7 @@ resolve_selected_vault_attachment() {
   vault_real="$(cd "$(dirname "$VAULT")" && pwd -P)/$(basename "$VAULT")"
   image_index=0
   while :; do
-    image_path="$(/usr/bin/plutil -extract "images.$image_index.image-path" raw -o - "$info_plist" 2>/dev/null || true)"
+    image_path="$(/usr/bin/plutil -extract "images.$image_index.image-path" raw -o - "$info_plist" 2>/dev/null)" || image_path=""
     [[ -n "$image_path" ]] || break
     if [[ -e "$image_path" ]]; then
       image_real="$(cd "$(dirname "$image_path")" && pwd -P)/$(basename "$image_path")"
@@ -382,8 +401,8 @@ resolve_selected_vault_attachment() {
       first_mount=""
       entity_index=0
       while :; do
-        entity_device="$(/usr/bin/plutil -extract "images.$image_index.system-entities.$entity_index.dev-entry" raw -o - "$info_plist" 2>/dev/null || true)"
-        entity_mount="$(/usr/bin/plutil -extract "images.$image_index.system-entities.$entity_index.mount-point" raw -o - "$info_plist" 2>/dev/null || true)"
+        entity_device="$(/usr/bin/plutil -extract "images.$image_index.system-entities.$entity_index.dev-entry" raw -o - "$info_plist" 2>/dev/null)" || entity_device=""
+        entity_mount="$(/usr/bin/plutil -extract "images.$image_index.system-entities.$entity_index.mount-point" raw -o - "$info_plist" 2>/dev/null)" || entity_mount=""
         [[ -n "$entity_device" || -n "$entity_mount" ]] || break
         if [[ "$entity_mount" == "$MOUNT" && "$entity_device" == /dev/disk* ]]; then
           printf '%s\t%s' "$entity_device" "$entity_mount"
@@ -495,19 +514,20 @@ if [[ $WAS_MOUNTED -eq 1 ]]; then
 else
   info "attaching selected vault"
   ATTACH_PLIST="$(mktemp "${TMPDIR:-/tmp}/dotfiles-vault-attach.XXXXXX")"
-  if ! get_pass | hdiutil attach "$VAULT" -stdinpass -mountpoint "$MOUNT" -nobrowse -plist > "$ATTACH_PLIST"; then
+  if ! attach_selected_vault > "$ATTACH_PLIST"; then
     die "could not attach selected vault: $VAULT"
   fi
   # Own the mount for EXIT cleanup immediately — plist parse can still fail.
   MOUNTED_BY_US=1
 
-  # hdiutil's attach plist links the selected sparseimage to its /dev/disk node
-  # and mount point. A directory/mount name alone is not sufficient proof.
+  # Both attach commands return the selected image's device and mount point.
+  # diskutil omits /dev/ from dev-entry; hdiutil includes it.
   entity_index=0
   while :; do
-    entity_device="$(/usr/bin/plutil -extract "system-entities.$entity_index.dev-entry" raw -o - "$ATTACH_PLIST" 2>/dev/null || true)"
-    entity_mount="$(/usr/bin/plutil -extract "system-entities.$entity_index.mount-point" raw -o - "$ATTACH_PLIST" 2>/dev/null || true)"
+    entity_device="$(/usr/bin/plutil -extract "system-entities.$entity_index.dev-entry" raw -o - "$ATTACH_PLIST" 2>/dev/null)" || entity_device=""
+    entity_mount="$(/usr/bin/plutil -extract "system-entities.$entity_index.mount-point" raw -o - "$ATTACH_PLIST" 2>/dev/null)" || entity_mount=""
     [[ -n "$entity_device" || -n "$entity_mount" ]] || break
+    [[ "$entity_device" == disk[0-9]* ]] && entity_device="/dev/$entity_device"
     if [[ -z "$ATTACH_CLEANUP_DEVICE" && "$entity_device" == /dev/disk* ]]; then
       ATTACH_CLEANUP_DEVICE="$entity_device"
     fi
@@ -709,7 +729,7 @@ fi
 
 if (( PERSISTENT )); then
   # Reopen read-only to prove the finalized filesystem and all retained receipts.
-  get_pass | hdiutil attach "$VAULT" -readonly -nobrowse -stdinpass -mountpoint "$MOUNT" >/dev/null
+  attach_selected_vault readonly >/dev/null
   MOUNTED_BY_US=1
   ATTACHED_DEVICE="$MOUNT"
   python3 "$SCRIPT_DIR/vault-integrity.py" check-all "$MOUNT"

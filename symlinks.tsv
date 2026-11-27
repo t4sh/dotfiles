@@ -20,6 +20,7 @@ $DOTFILES/Brewfile	$HOME/.Brewfile
 $DOTFILES/git/gitconfig	$HOME/.gitconfig
 $DOTFILES/git/gitignore-global	$HOME/.config/git/ignore
 $DOTFILES/git/gitconfig-macos	$HOME/.gitconfig-platform
+$DOTFILES/git/global-hooks	$HOME/.config/git/hooks
 
 # SSH — config + keys live under ~/.secrets/ssh/ (vault-backed, never in repo);
 # config exposes prod infra so it stays out of git. Only allowed_signers
@@ -47,6 +48,7 @@ $DOTFILES/config/lldb/lldbinit	$HOME/.lldbinit
 $DOTFILES/config/gdb/gdbinit	$HOME/.gdbinit
 $DOTFILES/config/ccache/ccache.conf	$HOME/.ccache/ccache.conf
 $DOTFILES/config/valgrindrc	$HOME/.valgrindrc
+$DOTFILES/config/opencode/macos.jsonc	$HOME/.config/opencode/opencode.jsonc
 
 # Hammerspoon
 $DOTFILES/hammerspoon	$HOME/.hammerspoon
@@ -54,19 +56,13 @@ $DOTFILES/hammerspoon	$HOME/.hammerspoon
 # Agents — whole-directory symlink (must precede ~/.claude/* entries below)
 $DOTFILES/agents	$HOME/.agents
 $DOTFILES/config/codex/AGENTS.md	$HOME/.codex/AGENTS.md
-$DOTFILES/agents/skills/paseo	$HOME/.codex/skills/paseo
-$DOTFILES/agents/skills/paseo-advisor	$HOME/.codex/skills/paseo-advisor
-$DOTFILES/agents/skills/paseo-committee	$HOME/.codex/skills/paseo-committee
-$DOTFILES/agents/skills/paseo-handoff	$HOME/.codex/skills/paseo-handoff
-$DOTFILES/agents/skills/paseo-help	$HOME/.codex/skills/paseo-help
-$DOTFILES/agents/skills/paseo-loop	$HOME/.codex/skills/paseo-loop
-$DOTFILES/agents/skills/paseo-plugin	$HOME/.codex/skills/paseo-plugin
 $DOTFILES/config/zed/AGENTS.md	$HOME/.config/zed/AGENTS.md
+$DOTFILES/config/opencode/AGENTS.md	$HOME/.config/opencode/AGENTS.md
 $HOME/.agents/skills	$HOME/.cursor/skills
 $HOME/.agents/skills	$HOME/.claude/skills
 
 # Claude Code / Craft Agent — wire ~/.claude/ into the agents tree
-$HOME/.agents/AGENTS.md	$HOME/.claude/CLAUDE.md
+$DOTFILES/agents/AGENTS.md	$HOME/.claude/CLAUDE.md
 $HOME/.agents/agents	$HOME/.claude/agents
 $HOME/.agents/commands	$HOME/.claude/commands
 $HOME/.secrets/ssh/config	$HOME/.ssh/config
@@ -77,3 +73,7 @@ $HOME/.secrets/ssh/known_hosts	$HOME/.ssh/known_hosts
 
 # Hermes agent config — identity (SOUL.md), aliases, skills, scripts
 # Source of truth for rules stays at .dotfiles/agents/; Hermes config is mirrored here.
+$HOME/.secrets/config/env/shell.env	$HOME/.secrets/env.sh
+$DOTFILES/config/cursor/rulebook.mdc	$HOME/.cursor/rules/rulebook.mdc
+$DOTFILES/config/copilot/copilot-instructions.md	$HOME/.copilot/copilot-instructions.md
+$DOTFILES/config/antigravity/GEMINI.md	$HOME/.gemini/GEMINI.md

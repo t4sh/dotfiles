@@ -1,0 +1,46 @@
+{
+  "Portable meeting note": {
+    "scope": "markdown",
+    "prefix": "meeting-note",
+    "body": [
+      "# ${1:Meeting topic}",
+      "",
+      "Date: $CURRENT_YEAR-$CURRENT_MONTH-$CURRENT_DATE",
+      "",
+      "## Decisions",
+      "",
+      "- ${2:Decision}",
+      "",
+      "## Actions",
+      "",
+      "- [ ] ${3:Owner}: ${4:Action}",
+      "$0"
+    ],
+    "description": "Meeting decisions and action checklist"
+  },
+  "Portable verification note": {
+    "scope": "markdown",
+    "prefix": "verification-note",
+    "body": [
+      "## ${1:Change}",
+      "",
+      "- Expected: ${2:Observable behavior}",
+      "- Checked: ${3:Command or manual check}",
+      "- Result: ${4:Observed result}",
+      "- Unrun: ${5:Checks still needed}",
+      "$0"
+    ],
+    "description": "Record evidence and unrun checks"
+  },
+  "Portable comparison table": {
+    "scope": "markdown",
+    "prefix": "comparison-table",
+    "body": [
+      "| ${1:Option} | ${2:Benefit} | ${3:Tradeoff} |",
+      "| --- | --- | --- |",
+      "| ${4:Choice} | ${5:Benefit} | ${6:Tradeoff} |",
+      "$0"
+    ],
+    "description": "Three-column comparison table"
+  }
+}

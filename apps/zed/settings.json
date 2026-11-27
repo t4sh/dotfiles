@@ -1,6 +1,18 @@
 // Portable Zed preferences. Account, provider, and agent credentials stay in
 // Zed's Keychain-backed or agent-native authentication stores.
 {
+  "session": {
+    "trust_all_worktrees": false
+  },
+  "cursor_animation": {
+    "enabled": true
+  },
+  "language_models": {
+    "opencode": {
+      "show_go_models": false
+    }
+  },
+  "cli_default_open_behavior": "existing_window",
   "proxy": "",
   "collaboration_panel": {
     "button": false
@@ -30,8 +42,8 @@
 
   "theme": {
     "mode": "system",
-    "light": "One Light",
-    "dark": "Monokai Pro (CE)"
+    "light": "Zedokai Light (Filter Sun)",
+    "dark": "Zedokai Darker (Filter Ristretto)"
   },
   "auto_install_extensions": {
     "astro": true,
@@ -44,7 +56,8 @@
     "nunjucks": true,
     "prisma": true,
     "scss": true,
-    "toml": true
+    "toml": true,
+    "zedokai": true
   },
 
   "autosave": {

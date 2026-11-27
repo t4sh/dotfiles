@@ -2,21 +2,14 @@
 """Read-only Zed dependency check; authentication and activation are separate."""
 
 import argparse
-import json
 import os
 from pathlib import Path
 import re
 import shutil
 import sys
 
-
-def read_settings(path):
-    tokens = r'"(?:\\.|[^"\\])*"|//[^\n]*|/\*[\s\S]*?\*/'
-    text = re.sub(tokens, lambda m: m[0] if m[0].startswith('"') else " ",
-                  path.read_text(encoding="utf-8-sig"))
-    text = re.sub(r'"(?:\\.|[^"\\])*"|,\s*(?=[}\]])',
-                  lambda m: m[0] if m[0].startswith('"') else "", text)
-    return json.loads(text)
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from zed_settings import read_jsonc as read_settings, read_portable_settings
 
 
 def managed_matches(expected, actual):
@@ -28,8 +21,13 @@ def managed_matches(expected, actual):
 
 
 def check(repo, settings_dir, extensions_dir, snapshot_only=False):
-    expected = read_settings(repo / "apps/zed/settings.json")
-    keymap = read_settings(repo / "apps/zed/keymap.json")
+    settings_path, keymap_path = repo / "apps/zed/settings.json", repo / "apps/zed/keymap.json"
+    # A restore installs whichever snapshot is a regular file, so its preflight
+    # accepts one alone.
+    if snapshot_only and not (settings_path.is_file() or keymap_path.is_file()):
+        raise ValueError(f"no Zed snapshot found in {settings_path.parent}")
+    expected = {} if snapshot_only and not settings_path.is_file() else read_portable_settings(settings_path)
+    keymap = [] if snapshot_only and not keymap_path.is_file() else read_settings(keymap_path)
     if not isinstance(expected, dict) or not isinstance(keymap, list):
         raise ValueError("Zed settings must be an object and keymap must be an array")
     extensions = expected.get("auto_install_extensions", {})

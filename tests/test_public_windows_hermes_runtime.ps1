@@ -5,6 +5,8 @@ $fixture = Join-Path ([IO.Path]::GetTempPath()) ('public-hermes-runtime-' + [gui
 $previousHome = $env:HERMES_HOME
 $previousRoot = $env:HERMES_DESKTOP_HERMES_ROOT
 $previousLocal = $env:LOCALAPPDATA
+$previousPath = $env:PATH
+$previousSystemRoot = $env:SystemRoot
 try {
     New-Item -ItemType Directory -Force (Join-Path $fixture 'lib') | Out-Null
     $start = Join-Path $fixture 'start-windows-hermes.ps1'
@@ -68,6 +70,15 @@ function Invoke-DotfilesNativeUtf8($File, $Arguments) {
     Set-Content $explicitPython 'fixture interpreter'
     . (Join-Path $fixture 'lib/windows-common.ps1')
     . (Join-Path $fixture 'lib/windows-hermes.ps1')
+    if (!$IsWindows) {
+        # Simulate the OS directory and executable discovery for the portable
+        # fixture. The native Windows gate uses the actual OS and executables.
+        $env:SystemRoot = Join-Path $fixture 'windows'
+        New-Item -ItemType Directory -Force $env:SystemRoot | Out-Null
+        function Resolve-DotfilesPwsh { Join-Path $PSHOME 'pwsh' }
+    }
+    $gitDirectory = Split-Path (Get-Command git -ErrorAction Stop).Source
+    $pwshDirectory = Split-Path (Resolve-DotfilesPwsh)
     function Invoke-DotfilesNativeUtf8($File, $Arguments) {
         if ($File -eq $published) {
             if (($Arguments -join '|') -cne '--print-runtime-command') { throw 'Unexpected launcher query' }
@@ -76,23 +87,37 @@ function Invoke-DotfilesNativeUtf8($File, $Arguments) {
         if ($File -ne $explicitPython -or $env:HERMES_HOME -ne $explicitHome) { throw 'Managed runtime/profile selection failed' }
         if (($Arguments[0..2] -join '|') -cne ('-I|' + (Join-Path $fixture 'hermes-python.py') + '|' + $managedRoot)) { throw 'Managed bootstrap arguments changed' }
         if (($Arguments[3..5] -join '|') -cne '-c|print("quoted text")|space argument') { throw 'Python arguments changed' }
+        if ($env:PATH.Length -ge 8191) { throw 'Managed interpreter received an overlong PATH' }
+        $childDirectories = $env:PATH -split [regex]::Escape([string][IO.Path]::PathSeparator)
+        $requiredDirectories = @((Split-Path $explicitPython), (Split-Path $published),
+            $gitDirectory, $pwshDirectory, $env:SystemRoot)
+        if ($IsWindows) { $requiredDirectories += [Environment]::SystemDirectory }
+        foreach ($directory in $requiredDirectories) {
+            if ($directory -notin $childDirectories) { throw "Managed PATH omitted $directory" }
+        }
         if ($failManaged) { throw 'fixture runtime failure' }
     }
+    $unusedDirectory = Join-Path ([IO.Path]::GetPathRoot($fixture)) 'fixture-unused'
+    $longPath = $previousPath + (([string][IO.Path]::PathSeparator + $unusedDirectory) * 700)
+    $env:PATH = $longPath
     $env:HERMES_HOME = 'previous profile'
     $failManaged = $false
     Invoke-DotfilesHermesPython -HermesHome $explicitHome -HermesRoot $managedRoot -Arguments @('-c','print("quoted text")','space argument')
-    if ($env:HERMES_HOME -cne 'previous profile') { throw 'Managed invocation leaked profile environment' }
+    if ($env:HERMES_HOME -cne 'previous profile' -or $env:PATH -cne $longPath) { throw 'Managed invocation changed the caller environment' }
     $failManaged = $true
     try { Invoke-DotfilesHermesPython -HermesHome $explicitHome -HermesRoot $managedRoot -Arguments @('-c','print("quoted text")','space argument'); throw 'Expected failure' }
     catch { if ($_.Exception.Message -ne 'fixture runtime failure') { throw } }
-    if ($env:HERMES_HOME -cne 'previous profile') { throw 'Failed invocation leaked profile environment' }
-    Write-Output 'PASS: Hermes source launch defaults, environment, explicit overrides, guards and no-build flags.'
+    if ($env:HERMES_HOME -cne 'previous profile' -or $env:PATH -cne $longPath) { throw 'Failed invocation changed the caller environment' }
+    Write-Output 'PASS: Hermes source launch, runtime selection, compact PATH and caller restoration.'
 } finally {
     $env:HERMES_HOME = $previousHome
     $env:HERMES_DESKTOP_HERMES_ROOT = $previousRoot
     $env:LOCALAPPDATA = $previousLocal
+    $env:PATH = $previousPath
+    $env:SystemRoot = $previousSystemRoot
     Remove-Variable HermesStartCall,HermesStartChecked -Scope Global -ErrorAction SilentlyContinue
     $resolved = [IO.Path]::GetFullPath($fixture)
-    if ((Split-Path $resolved -Parent) -ine [IO.Path]::GetFullPath([IO.Path]::GetTempPath()).TrimEnd('\') -or (Split-Path $resolved -Leaf) -notmatch '^public-hermes-runtime-[0-9a-f]{32}$') { throw 'Unsafe fixture cleanup path' }
+    $tempRoot = [IO.Path]::TrimEndingDirectorySeparator([IO.Path]::GetFullPath([IO.Path]::GetTempPath()))
+    if ((Split-Path $resolved -Parent) -ine $tempRoot -or (Split-Path $resolved -Leaf) -notmatch '^public-hermes-runtime-[0-9a-f]{32}$') { throw 'Unsafe fixture cleanup path' }
     if (Test-Path -LiteralPath $resolved) { Remove-Item -LiteralPath $resolved -Recurse -Force }
 }

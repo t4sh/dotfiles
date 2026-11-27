@@ -44,7 +44,6 @@ $wanted = @(
     (Join-Path $env:LOCALAPPDATA 'Programs\Microsoft VS Code\bin')
     (Join-Path $env:LOCALAPPDATA 'Programs\cursor\resources\app\bin')
     (Join-Path $env:LOCALAPPDATA 'Programs\Zed\bin')
-    (Join-Path $env:LOCALAPPDATA 'Programs\Paseo\resources\bin')
     (Join-Path $env:ProgramFiles 'Sublime Text')
     (Join-Path $env:ProgramFiles 'gifski')
     (Join-Path $userRoot '.cargo\bin')

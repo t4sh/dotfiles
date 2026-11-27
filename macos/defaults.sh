@@ -58,14 +58,14 @@ fi
     exit 2
 }
 case "$MACOS_MAJOR" in
-    15|26) ;;
+    15|26|27) ;;
     *)
         if [[ "$MODE" == apply && "${DOTFILES_MACOS_ALLOW_UNTESTED:-0}" != "1" ]]; then
-            echo "macOS $MACOS_VERSION is outside the tested majors (15, 26)." >&2
+            echo "macOS $MACOS_VERSION is outside the supported majors (15, 26, 27)." >&2
             echo "Review the dry-run, then set DOTFILES_MACOS_ALLOW_UNTESTED=1 to proceed." >&2
             exit 1
         fi
-        echo "  ⚠ macOS $MACOS_VERSION is outside the tested majors (15, 26); $MODE remains read-only" >&2
+        echo "  ⚠ macOS $MACOS_VERSION is outside the supported majors (15, 26, 27); mode=$MODE" >&2
         ;;
 esac
 if (( MACOS_MAJOR >= 26 )); then
@@ -130,21 +130,42 @@ if [[ "$MODE" == check ]]; then
     exit $?
 fi
 
+# Bash 3.2's printf %q can split a UTF-8 character into a raw byte followed
+# by an escape, producing malformed UTF-8. Single quotes preserve the bytes.
+shell_quote() {
+    local remaining="$1" prefix replacement="'\\''"
+    printf "'"
+    while [[ "$remaining" == *"'"* ]]; do
+        prefix="${remaining%%\'*}"
+        printf '%s%s' "$prefix" "$replacement"
+        remaining="${remaining#*\'}"
+    done
+    printf "%s'" "$remaining"
+}
+
+print_shell_args() {
+    local arg
+    for arg in "$@"; do
+        printf ' '
+        shell_quote "$arg"
+    done
+}
+
 if [[ "$MODE" == dry-run ]]; then
     # sudo is wrapped too, so sudo-backed calls are printed as whole commands.
     # shellcheck disable=SC2032
-    defaults() { printf '  would run: defaults'; printf ' %q' "$@"; echo; }
-    osascript() { printf '  would run: osascript'; printf ' %q' "$@"; echo; }
+    defaults() { printf '  would run: defaults'; print_shell_args "$@"; echo; }
+    osascript() { printf '  would run: osascript'; print_shell_args "$@"; echo; }
     if (( PRIVILEGED )); then
-        sudo() { printf '  would run: sudo'; printf ' %q' "$@"; echo; }
+        sudo() { printf '  would run: sudo'; print_shell_args "$@"; echo; }
     else
-        sudo() { printf '  skipped privileged command:'; printf ' %q' "$@"; echo; }
+        sudo() { printf '  skipped privileged command:'; print_shell_args "$@"; echo; }
     fi
-    killall() { printf '  would run: killall'; printf ' %q' "$@"; echo; }
+    killall() { printf '  would run: killall'; print_shell_args "$@"; echo; }
     # shellcheck disable=SC2032
-    chflags() { printf '  would run: chflags'; printf ' %q' "$@"; echo; }
+    chflags() { printf '  would run: chflags'; print_shell_args "$@"; echo; }
 elif (( ! PRIVILEGED )); then
-    sudo() { printf '  - skipped privileged command:' >&2; printf ' %q' "$@" >&2; echo >&2; }
+    sudo() { printf '  - skipped privileged command:' >&2; print_shell_args "$@" >&2; echo >&2; }
 fi
 
 warn_on_fail() {
@@ -213,9 +234,9 @@ elif [ -z "$NewSysName" ] || [ -z "$RecoveryPhone" ] || [ -z "$RecoveryEmail" ];
     mkdir -p "$CACHE_DIR"
     {
         echo "# Cached by macos/defaults.sh — regenerate by deleting this file."
-        echo "NewSysName=$(printf '%q' "$NewSysName")"
-        echo "RecoveryPhone=$(printf '%q' "$RecoveryPhone")"
-        echo "RecoveryEmail=$(printf '%q' "$RecoveryEmail")"
+        echo "NewSysName=$(shell_quote "$NewSysName")"
+        echo "RecoveryPhone=$(shell_quote "$RecoveryPhone")"
+        echo "RecoveryEmail=$(shell_quote "$RecoveryEmail")"
     } > "$CACHE_FILE"
     chmod 600 "$CACHE_FILE"
     echo "  ✓ cached to $CACHE_FILE"
@@ -240,7 +261,13 @@ LoginMsg=$(printf '%s\n%s\n%s\n%s' \
 # Helper: PlistBuddy Set with Add fallback for fresh installs
 plist_set() {
     if [[ "$MODE" == dry-run ]]; then
-        printf '  would set plist key %q (%s) to %q in %q\n' "$1" "$2" "$3" "$4"
+        printf '  would set plist key '
+        shell_quote "$1"
+        printf ' (%s) to ' "$2"
+        shell_quote "$3"
+        printf ' in '
+        shell_quote "$4"
+        printf '\n'
         return 0
     fi
     /usr/libexec/PlistBuddy -c "Set ${1} ${3}" "${4}" 2>/dev/null ||

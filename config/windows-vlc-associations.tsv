@@ -1,0 +1,42 @@
+# Media extensions currently opened by IINA on the Mac; use VLC on Windows.
+# Captured 2026-10-15 with duti -x against IINA's declared file types.
+# IINA plugin packages are excluded. .ts stays with Cursor; .ogm/.ogv stay with Edge.
+# Keep only extensions advertised by the installed Windows VLC capabilities.
+extension
+.3g2
+.3gp
+.aif
+.aiff
+.amv
+.ape
+.asf
+.avi
+.cue
+.divx
+.dv
+.f4v
+.flac
+.flv
+.m2ts
+.m4a
+.m4v
+.mka
+.mkv
+.mov
+.mp3
+.mp4
+.mpeg
+.mpg
+.mts
+.mxf
+.oga
+.ogg
+.rm
+.rmvb
+.tta
+.vob
+.wav
+.webm
+.wma
+.wmv
+.wv

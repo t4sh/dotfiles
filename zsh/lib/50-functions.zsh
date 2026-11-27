@@ -107,7 +107,7 @@ port-info() {
   python3 "${DOTFILES:-$HOME/.dotfiles}/scripts/port-info.py" "$@"
 }
 
-# Auto-switch Node from the nearest parent .nvmrc and restore the dotfiles pin
+# Auto-switch Node from the nearest parent .nvmrc or .node-version and restore the dotfiles pin
 # after leaving that project tree. Keep the default fast PATH untouched until a
 # project actually requires NVM.
 typeset -g AUTO_NVM_ACTIVE=0
@@ -117,6 +117,10 @@ find_nvmrc_up() {
   while [[ "$dir" != "/" ]]; do
     if [[ -f "$dir/.nvmrc" ]]; then
       print -r -- "$dir/.nvmrc"
+      return 0
+    fi
+    if [[ -f "$dir/.node-version" ]]; then
+      print -r -- "$dir/.node-version"
       return 0
     fi
     dir="${dir:h}"

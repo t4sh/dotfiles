@@ -1,0 +1,36 @@
+diff --git a/hermes_cli/gateway_launchd_runtime.py b/hermes_cli/gateway_launchd_runtime.py
+index 0d770e79115..d67bec630b7 100644
+--- a/hermes_cli/gateway_launchd_runtime.py
++++ b/hermes_cli/gateway_launchd_runtime.py
+@@ -110,17 +110,24 @@ def start_gateway_job(command: list[str], *, env: dict[str, str], cwd: str | Pat
+     # launchd stamps XPC_SERVICE_NAME=<label> on the job; the gateway must still read as the
+     # unsupervised process it is, or /restart would exit for a respawn no KeepAlive provides.
+     wrapped = ["/usr/bin/env", "XPC_SERVICE_NAME=0", *command]
++    spec = {
++        "Label": label,
++        "ProgramArguments": launchd_program_arguments(wrapped, log_path, log_path),
++        "EnvironmentVariables": dict(env),
++        "WorkingDirectory": str(cwd),
++        "RunAtLoad": True,
++    }
++    try:
++        payload = plistlib.dumps(spec)
++    except ValueError:
++        # XML cannot encode every valid process environment (e.g. terminal color escapes).
++        # Let the caller start the gateway directly with the original environment.
++        return None
+     plist = log_path.parent / f".{label}.plist"
+     fd = os.open(plist, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)  # holds the launch env
+     try:
+         with os.fdopen(fd, "wb") as handle:
+-            plistlib.dump({
+-                "Label": label,
+-                "ProgramArguments": launchd_program_arguments(wrapped, log_path, log_path),
+-                "EnvironmentVariables": dict(env),
+-                "WorkingDirectory": str(cwd),
+-                "RunAtLoad": True,
+-            }, handle)
++            handle.write(payload)
+         done = _launchctl("bootstrap", f"gui/{os.getuid()}", str(plist),  # windows-footgun: ok — macOS-only
+                           timeout=_budget(deadline, 10))
+     finally:

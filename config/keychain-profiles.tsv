@@ -1,0 +1,7 @@
+# Required on-demand Keychain references: profile<TAB>variable.
+# Add only the tools you use; missing listed references fail recovery readiness.
+# Examples (uncomment after configuring the profile and Keychain item):
+# context7	CONTEXT7_API_KEY
+# figma	FIGMA_TOKEN
+# typesafe	TYPESAFE_API_KEY
+# Intentional file-only backup profiles do not belong in this list.

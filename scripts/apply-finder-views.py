@@ -142,7 +142,7 @@ end run
 def preference_changes(finder, global_prefs):
     changes = {"com.apple.finder": {}, "NSGlobalDomain": {}}
     f = changes["com.apple.finder"]
-    f.update(FXPreferredViewStyle="clmv", FXPreferredGroupBy="Date Modified", ShowPreviewPane=True, AppleShowAllFiles=True, _FXEnableColumnAutoSizing=True, FK_ArrangeBy="Date Modified")
+    f.update(FXPreferredViewStyle="clmv", FXPreferredGroupBy="Name", ShowPreviewPane=False, AppleShowAllFiles=True, _FXEnableColumnAutoSizing=True, FK_ArrangeBy="Date Modified")
     # Sorting within Finder groups is independent of the grouping field.
     f["FXArrangeGroupViewBy"] = "Name"
     for key in ("StandardViewOptions", "FK_StandardViewOptions2"):
@@ -158,8 +158,8 @@ def preference_changes(finder, global_prefs):
         f[key] = list_settings(finder.get(key, {}))
     g = changes["NSGlobalDomain"]
     for mode in ("Open", "Save"):
-        g[f"NSNavPanelFileListModeFor{mode}Mode2"] = 3
-        g[f"NSNavPanelFileLastListModeFor{mode}ModeKey"] = 3
+        g[f"NSNavPanelFileListModeFor{mode}Mode2"] = 1
+        g[f"NSNavPanelFileLastListModeFor{mode}ModeKey"] = 1
     g.update(NSNavPanelExpandedStateForSaveMode=True, NSNavPanelExpandedStateForSaveMode2=True)
     return {domain: {k: v for k, v in values.items() if original.get(k) != v}
             for (domain, values), original in zip(changes.items(), (finder, global_prefs))}
@@ -437,8 +437,8 @@ def main():
         print("Home and existing Applications folders: List / Name ascending (verified through Finder; grouping is not checked).")
     except (OSError, RuntimeError, subprocess.TimeoutExpired) as error:
         errors.append(str(error))
-    print("Finder defaults: Columns / Date Modified groups / Name within groups / previews / text 13 / automatic column sizing.")
-    print("Native Open/Save defaults: Columns / Date Modified. Reopen existing dialogs.")
+    print("Finder defaults: Columns / Name groups / Name within groups / preview column / preview pane disabled / text 13 / automatic column sizing.")
+    print("Native Open/Save defaults: captured view mode 1. Reopen existing dialogs.")
     if backup is not None:
         (backup / "result.json").write_text(json.dumps({"roots": list(map(str, roots)), "depth": args.depth, "removed": changed, "errors": errors}, indent=2))
         print(f"Reset {changed}/{len(stores)} metadata files; home and Applications metadata was excluded from deletion.")

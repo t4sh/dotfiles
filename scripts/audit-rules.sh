@@ -14,7 +14,10 @@ DOTFILES="${DOTFILES:-$(cd -- "$SCRIPT_DIR/.." && pwd -P)}"
 AGENTS_MD="$DOTFILES/agents/AGENTS.md"
 RULES_DIR="$DOTFILES/agents/rules"
 INIT_SKILL="$DOTFILES/agents/skills/init-rulebook/SKILL.md"
+INIT_EVALS="$DOTFILES/agents/skills/init-rulebook/assets/evals/scenarios.json"
+SKILL_CHECKER="$DOTFILES/scripts/check-skill-installation.py"
 ROUTING_RULE="$RULES_DIR/11-skill-routing.md"
+SKILL_OWNERS_RULE="$RULES_DIR/12-skill-owners.md"
 ROUTING_DIR="$RULES_DIR/routing"
 DESIGN_POSTURE_RULE="$RULES_DIR/10-design-posture.md"
 DESIGN_UX_ROUTING_RULE="$ROUTING_DIR/design-ux.md"
@@ -30,6 +33,13 @@ ENVIRONMENT_RULE="$RULES_DIR/22-environment.md"
 ENVIRONMENT_DIR="$RULES_DIR/environment"
 ATTRIBUTION_RULE="$RULES_DIR/02-attribution.md"
 ATTRIBUTION_DIR="$RULES_DIR/attribution"
+LIFECYCLE_RULE="$RULES_DIR/07-worktree-lifecycle.md"
+LIFECYCLE_DIR="$RULES_DIR/lifecycle"
+LIFECYCLE_TITLE_RULE="$LIFECYCLE_DIR/pr-title.md"
+LIFECYCLE_INTEGRATION_RULE="$LIFECYCLE_DIR/integration.md"
+LIFECYCLE_HANDOFF_RULE="$LIFECYCLE_DIR/handoff.md"
+MEMORY_RULE="$RULES_DIR/06-hermes-learning.md"
+MEMORY_DIR="$RULES_DIR/memory"
 ATTRIBUTION_STAGING_RULE="$ATTRIBUTION_DIR/staging.md"
 ATTRIBUTION_MESSAGE_RULE="$ATTRIBUTION_DIR/message.md"
 ATTRIBUTION_IDENTITY_RULE="$ATTRIBUTION_DIR/identity.md"
@@ -122,26 +132,59 @@ grep -Fq 'Do not preload an **Action-gated** rule' "$AGENTS_MD" \
 grep -Fq 'Re-evaluate task-conditional sections before later requests and action gates before later operations' "$AGENTS_MD" \
     || fail_contract "AGENTS.md must re-evaluate task and action applicability as scope changes"
 
-# Backticks are literal Markdown syntax.
-# shellcheck disable=SC2016
-grep -Fq 'enumerate every top-level `*.md` file' "$INIT_SKILL" \
-    || fail_contract "init-rulebook must discover every top-level rule from disk"
-grep -Fq 'compare the discovered inventory with the indexed inventory' "$INIT_SKILL" \
-    || fail_contract "init-rulebook must compare discovered and indexed inventories"
-grep -Fq 'selected count equals the successfully read count' "$INIT_SKILL" \
-    || fail_contract "init-rulebook must compare selected and successfully read counts"
-grep -Fq 'read every selected rule in one pass' "$INIT_SKILL" \
-    || fail_contract "init-rulebook must read every selected rule completely"
-grep -Fq 'loading a rule is distinct from applying it' "$INIT_SKILL" \
-    || fail_contract "init-rulebook must defer applicability to the rulebook"
-grep -Fq 'before acting on each later user request' "$INIT_SKILL" \
-    || fail_contract "init-rulebook must re-evaluate conditions for later requests"
-# Backticks are literal Markdown syntax.
-# shellcheck disable=SC2016
-grep -Fq 'Exclude every `Action-gated` rule from task-start selection' "$INIT_SKILL" \
-    || fail_contract "init-rulebook must not preload action-gated rules"
-grep -Fq 'immediately before each operation' "$INIT_SKILL" \
-    || fail_contract "init-rulebook must open action gates immediately before matching operations"
+# The shared loader is an upstream snapshot. Check its complete folder against
+# the current public lock record instead of binding this audit to upstream prose.
+if ! python3 - "$DOTFILES" "$SKILL_CHECKER" <<'PY'
+import importlib.util
+import json
+from pathlib import Path
+import sys
+
+root = Path(sys.argv[1])
+spec = importlib.util.spec_from_file_location("skill_checker", sys.argv[2])
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+lock = json.loads((root / "agents/.skill-lock.json").read_text())
+if "init-rulebook" not in lock.get("skills", {}):
+    print("init-rulebook: required source lock record is missing", file=sys.stderr)
+    raise SystemExit(1)
+errors = module.check_init_rulebook_snapshot(root, lock)
+for error in errors:
+    print(error, file=sys.stderr)
+raise SystemExit(1 if errors else 0)
+PY
+then
+    fail_contract "init-rulebook vendored tree must match its locked source snapshot"
+fi
+
+# Keep upstream replay inputs without coupling bootstrap to prompt wording or
+# assertions. Replaying these scenarios in a client is a separate check.
+if ! python3 - "$INIT_EVALS" <<'PY'
+import json
+import sys
+
+required_files = {
+    "load-custom-pointer": ("host/startup.md", "project/AGENTS.md"),
+    "status-inventory-errors": ("ruleset/rules/orphan.md",),
+    "load-truncated-read": ("session.json",),
+    "compaction-recovery": ("prior-context.json",),
+    "compaction-mid-operation": ("release/state.json",),
+    "action-gate-now": ("ruleset/rules/publish.md",),
+    "action-gate-production-now": ("ruleset/rules/ops.md",),
+}
+with open(sys.argv[1], encoding="utf-8") as stream:
+    cases = {case["id"]: case for case in json.load(stream)["cases"]}
+for name, paths in required_files.items():
+    case = cases.get(name, {})
+    assertions = case.get("assertions")
+    if not (isinstance(assertions, list) and assertions
+            and all(isinstance(item, str) and item.strip() for item in assertions)
+            and all(path in case.get("files", {}) for path in paths)):
+        sys.exit(f"Missing replay inputs or expectations for {name}")
+PY
+then
+    fail_contract "init-rulebook eval catalog must retain loader regression fixtures"
+fi
 
 if grep -Eq '[0-9]{2}-[A-Za-z0-9._-]+\.md' "$INIT_SKILL"; then
     fail_contract "init-rulebook must not contain a static top-level rule inventory"
@@ -169,7 +212,19 @@ while IFS= read -r rule; do
     fi
 done <<< "$on_disk"
 
+# Task gates are owned by the index; keep these rule declarations identical.
+for rule in 20-code-posture.md 21-web-stack.md 22-environment.md 24-frontend-verification.md 25-tech-stack-discovery.md; do
+    heading="$(awk -v target="(./rules/$rule)" '
+        /^## / { heading = substr($0, 4) }
+        index($0, target) { print heading }
+    ' "$AGENTS_MD")"
+    declaration="$(grep -m 1 '^Activate ' "$RULES_DIR/$rule" || true)"
+    [ "$declaration" = "$heading." ] \
+        || fail_contract "$rule task trigger differs from its index heading"
+done
+
 [ -f "$ROUTING_RULE" ] || fail_contract "missing canonical skill router: $ROUTING_RULE"
+[ -f "$SKILL_OWNERS_RULE" ] || fail_contract "missing skill discovery defaults: $SKILL_OWNERS_RULE"
 [ -d "$ROUTING_DIR" ] || fail_contract "missing routing reference directory: $ROUTING_DIR"
 
 if [ -d "$ROUTING_DIR" ] && [ -f "$ROUTING_RULE" ]; then
@@ -201,7 +256,7 @@ if [ -d "$ROUTING_DIR" ] && [ -f "$ROUTING_RULE" ]; then
     # Backticks are literal Markdown syntax.
     # shellcheck disable=SC2016
     routing_skill_tokens="$(grep -RhoE '`[A-Za-z0-9][A-Za-z0-9._-]*`' \
-        "$ROUTING_RULE" "$ROUTING_DIR" | tr -d '`' | sort -u)"
+        "$ROUTING_RULE" "$SKILL_OWNERS_RULE" "$ROUTING_DIR" | tr -d '`' | sort -u)"
     # Backticks are literal Markdown syntax.
     # shellcheck disable=SC2016
     retired_skill_tokens="$(sed -n '/following skills are retired/,/^## User-invoked preferences/p' "$ROUTING_RULE" \
@@ -248,8 +303,12 @@ fi
 check_nested_inventory "$DESIGN_INTERFACE_ROUTING_RULE" "$INTERFACE_ROUTING_DIR" "interface" "interface routing"
 check_nested_inventory "$ENVIRONMENT_RULE" "$ENVIRONMENT_DIR" "environment" "environment routing"
 check_nested_inventory "$ATTRIBUTION_RULE" "$ATTRIBUTION_DIR" "attribution" "attribution routing"
+check_nested_inventory "$LIFECYCLE_RULE" "$LIFECYCLE_DIR" "lifecycle" "lifecycle routing"
+check_nested_inventory "$MEMORY_RULE" "$MEMORY_DIR" "memory" "memory procedures"
+grep -Fq '(./rules/memory/lifecycle.md)' "$AGENTS_MD" \
+    || fail_contract "rulebook index must route memory operations to the shared procedure"
 
-[ -f "$DESIGN_POSTURE_RULE" ] || fail_contract "missing always-on design posture: $DESIGN_POSTURE_RULE"
+[ -f "$DESIGN_POSTURE_RULE" ] || fail_contract "missing conditional design posture: $DESIGN_POSTURE_RULE"
 [ -f "$DESIGN_UX_ROUTING_RULE" ] || fail_contract "missing UX design routing contract: $DESIGN_UX_ROUTING_RULE"
 [ -f "$DESIGN_INTERFACE_ROUTING_RULE" ] || fail_contract "missing interface design routing contract: $DESIGN_INTERFACE_ROUTING_RULE"
 [ -f "$DESIGN_SYSTEM_ROUTING_RULE" ] || fail_contract "missing system/content design routing contract: $DESIGN_SYSTEM_ROUTING_RULE"
@@ -407,6 +466,10 @@ if [ -f "$ENVIRONMENT_RULE" ] && [ -d "$ENVIRONMENT_DIR" ]; then
 fi
 
 if [ -f "$ATTRIBUTION_RULE" ] && [ -d "$ATTRIBUTION_DIR" ]; then
+    [ "$(grep -Fc 'creating a PR/MR or editing its title' "$AGENTS_MD" || true)" -eq 2 ] \
+        || fail_contract "both action gates must cover creating a PR/MR or editing its title"
+    grep -Fq 'commit message or PR/MR title' "$ATTRIBUTION_RULE" \
+        || fail_contract "attribution dispatcher must route PR/MR titles to the message contract"
     grep -Fq 'A complete local commit loads all three in that order' "$ATTRIBUTION_RULE" \
         || fail_contract "attribution dispatcher must preserve commit phase order"
     grep -Fq 'a planned commit does not preload a later contract' "$ATTRIBUTION_RULE" \
@@ -415,6 +478,30 @@ if [ -f "$ATTRIBUTION_RULE" ] && [ -d "$ATTRIBUTION_DIR" ]; then
         || fail_contract "attribution staging must protect unrelated staged changes"
     grep -Fq 'exactly one semantically appropriate Unicode emoji' "$ATTRIBUTION_MESSAGE_RULE" \
         || fail_contract "commit messages must retain the single Unicode emoji contract"
+    grep -Fq 'commit subjects and pull/merge request (PR/MR) titles' "$ATTRIBUTION_MESSAGE_RULE" \
+        || fail_contract "commit subjects and PR/MR titles must share the emoji contract"
+    grep -Fq 'Before committing or creating/editing a PR/MR title' "$ATTRIBUTION_MESSAGE_RULE" \
+        || fail_contract "PR/MR titles must be validated before creation or edits"
+    grep -Fq 'including the custom mappings above' "$ATTRIBUTION_MESSAGE_RULE" \
+        || fail_contract "title validation must apply the custom emoji mappings"
+    grep -Fq 'compare it exactly with the validated title' "$LIFECYCLE_TITLE_RULE" \
+        || fail_contract "PR/MR title verification must compare the saved provider title"
+    grep -Fq 'Correct any mismatch and repeat verification' "$LIFECYCLE_TITLE_RULE" \
+        || fail_contract "PR/MR title mismatches must be corrected and reverified"
+    grep -Fq 'PR/MR merge work loads message/emoji and identity/signing' "$ATTRIBUTION_RULE" \
+        || fail_contract "PR/MR merges must load message and identity contracts"
+    # Backticks are literal Markdown syntax.
+    # shellcheck disable=SC2016
+    grep -Fq 'exactly one trailing ` (#NNN)` with the original PR/MR numeric ID' "$LIFECYCLE_INTEGRATION_RULE" \
+        || fail_contract "PR/MR integration subjects must end with the original request ID"
+    grep -Fq 'read its actual subject' "$LIFECYCLE_INTEGRATION_RULE" \
+        || fail_contract "merge verification must read the actual integration commit subject"
+    grep -Fq 'compare the complete subject exactly with the validated subject' "$LIFECYCLE_INTEGRATION_RULE" \
+        || fail_contract "merge verification must compare the complete integration subject"
+    grep -Fq 'report the suffix check as not applicable' "$LIFECYCLE_INTEGRATION_RULE" \
+        || fail_contract "merges without an integration commit must report suffix verification as not applicable"
+    grep -Fq 'report incomplete merge-subject verification and stop before cleanup' "$LIFECYCLE_INTEGRATION_RULE" \
+        || fail_contract "merge-subject verification failures must block cleanup"
     grep -Fq 'Never add attribution trailers or tool branding' "$ATTRIBUTION_MESSAGE_RULE" \
         || fail_contract "commit messages must reject attribution trailers"
     grep -Fq 'footer explaining impact and migration' "$ATTRIBUTION_MESSAGE_RULE" \
@@ -429,8 +516,48 @@ if [ -f "$ATTRIBUTION_RULE" ] && [ -d "$ATTRIBUTION_DIR" ]; then
         || fail_contract "signing failure must stop integration"
 fi
 
-grep -Fq 'Before handing work back after branch, worktree, integration, PR, merge, or cleanup work:' "$RULES_DIR/07-worktree-lifecycle.md" \
+grep -Fq "Inspect the target repository's pipeline configuration at the target ref and candidate merge result" "$LIFECYCLE_INTEGRATION_RULE" \
+    || fail_contract "merge checks must discover CI/CD for the actual target and merge result"
+grep -Fq 'Resolve event, branch, path, and job conditions for this merge' "$LIFECYCLE_INTEGRATION_RULE" \
+    || fail_contract "merge checks must resolve pipeline applicability"
+# Backticks are literal Markdown syntax.
+# shellcheck disable=SC2016
+grep -Fq 'A standalone script such as `verify:ci`, a documented `verify` alias, or a broad test target does not establish that CI/CD exists' "$LIFECYCLE_INTEGRATION_RULE" \
+    || fail_contract "merge checks must not infer CI/CD from a verification script"
+grep -Fq 'Report the absence and use documented project validation or the smallest meaningful checks for the changed behavior' "$LIFECYCLE_INTEGRATION_RULE" \
+    && grep -Fq 'never infer permission to bypass it' "$LIFECYCLE_INTEGRATION_RULE" \
+    || fail_contract "absent CI must use relevant checks while preserving required gates"
+grep -Fq 'Local CI/CD emulation is permitted only for an applicable pipeline confirmed above' "$LIFECYCLE_INTEGRATION_RULE" \
+    || fail_contract "local CI/CD emulation must require a confirmed applicable pipeline"
+grep -Fq 'Every selected check must have valid passing local or hosted evidence before integration' "$LIFECYCLE_INTEGRATION_RULE" \
+    && grep -Fq 'the applicable configured validation jobs, explicitly requested checks, or the relevant project validation selected above' "$LIFECYCLE_INTEGRATION_RULE" \
+    || fail_contract "selected checks must pass before integration"
+grep -Fq 'Run selected checks that lack valid reusable evidence' "$LIFECYCLE_INTEGRATION_RULE" \
+    || fail_contract "selected checks without reusable evidence must execute before integration"
+grep -Fq 'Failed, pending, skipped, or unavailable selected checks block integration' "$LIFECYCLE_INTEGRATION_RULE" \
+    || fail_contract "unresolved selected checks must block integration"
+grep -Fq 'A local merge alone does not require another full run' "$LIFECYCLE_INTEGRATION_RULE" \
+    || fail_contract "merge checks must reuse valid evidence instead of unconditional reruns"
+grep -Fq 'diagnosis and safe repairs continue under the existing authorization' "$LIFECYCLE_INTEGRATION_RULE" \
+    && grep -Fq 'Stop repeating an unchanged failure' "$LIFECYCLE_INTEGRATION_RULE" \
+    || fail_contract "failure recovery must preserve authorization and require new evidence"
+grep -Fq 'Only apply time or attempt limits explicitly set by the user, or imposed by the actual tool or service' "$RULES_DIR/23-verification.md" \
+    || fail_contract "verification limits must come from the user or execution constraints"
+grep -Fq 'Ordinary change verification does not authorize a full integration suite' "$RULES_DIR/23-verification.md" \
+    || fail_contract "ordinary verification must defer merge check selection to lifecycle policy"
+if grep -Fq 'run the repository-defined integration or CI-equivalent gate' "$LIFECYCLE_INTEGRATION_RULE" \
+    || grep -Fq 'After any local merge, rerun the same integration/CI-equivalent gate' "$LIFECYCLE_INTEGRATION_RULE"; then
+    fail_contract "merge checks must not restore unconditional full-suite gates"
+fi
+
+grep -Fq 'Before handing work back after branch, worktree, integration, PR, merge, or cleanup work:' "$LIFECYCLE_HANDOFF_RULE" \
     || fail_contract "lifecycle handoff must match the index action gate"
+
+grep -Fq 'A title-only edit loads PR/MR title' "$LIFECYCLE_RULE" \
+    || fail_contract "lifecycle dispatcher must isolate title-only edits"
+if grep -Eq '10 minutes total|git branch -d|git reset --hard' "$LIFECYCLE_TITLE_RULE"; then
+    fail_contract "PR title contract must defer integration checks and cleanup"
+fi
 
 word_count() {
     wc -w < "$1" | tr -d '[:space:]'
@@ -451,8 +578,13 @@ check_path_budget() {
     fi
 }
 
-ALWAYS_ON_WORD_MAX=3429
+# Allow roughly 10% growth above the 2472-word kernel.
+ALWAYS_ON_WORD_MAX=2750
 ROUTER_WORD_MAX=650
+DEVELOPMENT_WORD_MAX=1100
+VERIFICATION_WORD_MAX=550
+HERMES_LEARNING_WORD_MAX=800
+MEMORY_PROCEDURES_WORD_MAX=600
 ENVIRONMENT_MONOLITH_WORDS=382
 ATTRIBUTION_MONOLITH_WORDS=1752
 INTERFACE_IMPLEMENTATION_PREVIOUS=1202
@@ -473,7 +605,7 @@ ENVIRONMENT_MONOREPO_WORD_MAX=150
 ATTRIBUTION_DISPATCHER_WORD_MAX=160
 ATTRIBUTION_STAGING_WORD_MAX=150
 ATTRIBUTION_MESSAGE_WORD_MAX=700
-ATTRIBUTION_IDENTITY_WORD_MAX=650
+ATTRIBUTION_IDENTITY_WORD_MAX=720
 
 always_words="$(word_count "$AGENTS_MD")"
 while IFS= read -r rule; do
@@ -484,6 +616,8 @@ if [ "$always_words" -gt "$ALWAYS_ON_WORD_MAX" ]; then
     fail_contract "always-on kernel is ${always_words} words; budget is ${ALWAYS_ON_WORD_MAX}"
 fi
 
+check_path_budget "PR title lifecycle" 450 "$LIFECYCLE_RULE" "$LIFECYCLE_TITLE_RULE"
+
 if [ -f "$ROUTING_RULE" ]; then
     router_words="$(word_count "$ROUTING_RULE")"
     if [ "$router_words" -gt "$ROUTER_WORD_MAX" ]; then
@@ -492,6 +626,10 @@ if [ -f "$ROUTING_RULE" ]; then
 fi
 
 for route_budget in \
+    "$DEVELOPMENT_ROUTING_RULE:$DEVELOPMENT_WORD_MAX" \
+    "$RULES_DIR/23-verification.md:$VERIFICATION_WORD_MAX" \
+    "$MEMORY_RULE:$HERMES_LEARNING_WORD_MAX" \
+    "$MEMORY_DIR/lifecycle.md:$MEMORY_PROCEDURES_WORD_MAX" \
     "$DESIGN_UX_ROUTING_RULE:$DESIGN_UX_WORD_MAX" \
     "$DESIGN_INTERFACE_ROUTING_RULE:$DESIGN_INTERFACE_WORD_MAX" \
     "$INTERFACE_IMPLEMENTATION_RULE:$INTERFACE_IMPLEMENTATION_WORD_MAX" \

@@ -21,6 +21,7 @@ Boundaries:
 
 - A sufficiently specified action request proceeds through the core workflow after reading relevant context. Do not manufacture a discovery, architecture, planning, TDD, multi-agent, or review approval gate.
 - Use `typesafe-ai` when TypeSafe is requested or already integrated, and for features where routing, ranking, extraction, scoring, or verification needs semantic judgment. Read its current docs for the chosen integration. Do not route ordinary TypeScript typing, deterministic rules, or every AI feature to it.
+- Local Codex/macOS: load TypeSafe credentials only for API commands, through `~/.dotfiles/bin/typesafe-env -- COMMAND [ARG...]`.
 - Disposable uncertainty prototypes are owned by [UX routing](design-ux.md); do not select an owner from this file.
 - `to-spec`, `to-tickets`, and `wayfinder` require explicit user invocation. `to-spec` synthesizes settled context and does not conduct the interview itself.
 - `improve plan` authors the plan but does not own execution. `to-tickets` owns tracker decomposition and dependency edges, not file-level instructions.
@@ -47,9 +48,22 @@ Boundaries:
 
 `07-worktree-lifecycle.md` is the sole authority for finishing development work, integration, pull requests, and branch/worktree cleanup. `03-worktree-hygiene.md` remains the always-on checkout-safety kernel. Do not invoke retired completion workflows.
 
+## Phase procedures and continuity
+
+Use these procedures inside the selected owner; they add no skills, mandatory phases, or approval gates. Skip phases the request does not need.
+
+| Phase | Procedure | Completion evidence |
+| --- | --- | --- |
+| Discovery | Ask for concrete examples; distinguish the observed problem from the proposed solution; challenge load-bearing assumptions. | Settled problem, constraints, assumptions, and cheapest useful validation |
+| Planning | Compare materially different approaches when useful; recommend holding, reducing, or expanding scope explicitly. Trace contracts, failure paths, recovery, and verification. | Accepted scope and acceptance criteria; expansion remains a proposal until authorized |
+| Inspection | Compare intent with the actual diff; report missing requirements and unrelated changes separately from defects. Reproduce or trace each finding before reporting it. | Findings with evidence, impact, and unresolved limitations; no product edits without authorization |
+| Verification | Consume the accepted criteria and prior findings; reproduce, then repair only when authorized, and rerun the original probe plus adjacent behavior. | Passed, failed, and unrun checks tied to the tested content |
+
+Carry phase results forward through the [verification and continuity contract](../23-verification.md); ordinary implementation uses that contract without loading this specialist reference.
+
 ## Skill authoring
 
-Use `skill-architect` for creating, editing, auditing, comparing, or evaluating agent skills. Treat `skill-creator` and standalone Skill Development material as supporting upstream references only.
+Default: `skill-architect` for authoring and evaluating skills. Explicit requests select compatible installed skills; otherwise `skill-creator` and Skill Development are references. Preserve scope, authorization, and quality.
 
 Every new or substantively updated shared skill must provide:
 
@@ -64,7 +78,7 @@ Before marking a shared skill ready, check duplicate names, resolve references, 
 
 ## Debugging and software interfaces
 
-Use `diagnosing-bugs` for hypothesis-driven bug and performance diagnosis. `debug` is explicit-invocation-only. Durable root-cause, layered-defense, condition-waiting, and three-failed-fixes guidance lives in `20-code-posture.md` and `23-verification.md`.
+Use `diagnosing-bugs` for hypothesis-driven bug and performance diagnosis. `debug` is explicit-invocation-only. Durable root-cause, layered-defense, condition-waiting, and failure-reassessment guidance lives in `20-code-posture.md` and `23-verification.md`.
 
 Use `system-design` when the requested interface is a module or API boundary. When alternatives are requested, compare distinct signatures and trade-offs before implementation. `better-interface` owns visual UI review, not module/API design.
 
@@ -72,8 +86,7 @@ Use `system-design` when the requested interface is a module or API boundary. Wh
 
 | Request | Primary owner |
 | --- | --- |
-| Current Vercel Web Interface Guidelines compliance | `web-design-guidelines` |
-| Measured screenshot redlines, overlays, layout rails, or visual QA artifacts | Core visual QA workflow |
+| Pinned Vercel guidelines (explicit review) | `web-design-guidelines` |
 | Whole-codebase bugs, security, performance, tests, architecture, roadmap, or executor-ready plans | `improve` |
 
-Use `web-design-guidelines` only for an explicit current external-standards pass. Use Core visual QA workflow only when measured visual artifacts are requested. `improve` is a read-only advisor and plan author, not an interface implementer.
+Use `web-design-guidelines` only for an explicit pinned-guidelines review. When asked for current guidance, verify upstream or disclose uncertainty. `improve` is a read-only advisor and plan author, not an interface implementer.

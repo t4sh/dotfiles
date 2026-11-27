@@ -1,0 +1,114 @@
+# Skill installation checks
+
+`make skills` checks the vendored inventory, licenses, generated manifest and the
+external resources listed in `config/skill-install-resources.json`. A matching
+upstream folder hash does not prove that referenced files outside that folder or
+runtime engines have been installed.
+
+The offline inventory also parses each locked skill's optional `agents/openai.yaml`
+and checks the Codex interface, dependency and invocation-policy fields. It uses
+the unmodified pure-Python `ruamel.yaml` 0.19.1 wheel under `scripts/vendor/`;
+the PyPI SHA-256 is `27592957fedf6e0b62f281e96effd28043345e0e66001f97683aa9a40c667c93`.
+The existing Hallmark file produces a warning keyed to its contents. Changed
+incompatible metadata fails the check. [Parser distribution](https://pypi.org/project/ruamel.yaml/0.19.1/#files)
+· [Hallmark correction](https://github.com/Nutlope/hallmark/pull/149)
+
+`make skills-runtime` also probes the exact Impeccable engine version named in the
+skill's `scripts/VERSION` and checks Fluid Functionalism's local Playwright
+package. It is offline and never installs or downloads anything.
+
+## Impeccable engine
+
+The engine is a per-machine cache, not a committed binary. On Mac, run
+`make skills-engine` to install it and verify the exact version; repeat runs reuse
+a working engine. The upstream launcher downloads the versioned platform asset,
+verifies its SHA-256 checksum before execution, and caches it under
+`~/.impeccable/bin/<version>/`. A failed setup returns nonzero with repair guidance.
+`make skills-update`, `make all`, and full Mac bootstrap run this setup step.
+`make skills-engine-check` and Mac doctor check readiness without downloading;
+`make skills-runtime` additionally checks the other runtime dependencies.
+Windows uses the existing `dot skill-engine -Apply`
+and verification-only `dot skill-engine` workflow. Engine installation is separate
+from refreshing SKILL.md and the lock record.
+
+### Impeccable finish review
+
+Start the finish reviewer in fresh context (`fork_turns: "none"`). When Codex
+lists `impeccable_finish_reviewer`, use it with the skill’s evidence packet.
+Otherwise give the registered read-only `reviewer` the
+[finish reviewer instructions](skills/impeccable/agents/impeccable_finish_reviewer.toml)
+and the evidence packet specified in [new work](skills/impeccable/reference/new-work.md).
+Report the substitution. If delegation is unavailable, follow the skill’s
+[degraded review](skills/impeccable/reference/degraded/finish-reviewer.md).
+
+## Browser helpers
+
+On Mac, `make skills-browser` installs Fluid Functionalism's declared
+`scripts/package.json` dependencies locally through stable Node/npm, with lifecycle
+scripts disabled and without generating a tracked lockfile. Mac full setup and
+curated refresh run this command so a replaced skill folder is repaired.
+`make skills-browser-check`, doctor and `make skills-runtime` verify that the
+installed package actually loads its Chromium launcher, without launching a
+browser or downloading anything. Its `node_modules` stays ignored and is not
+part of the public projection. Actual audits additionally need installed Chrome
+or a compatible Chromium (or `CHROME_PATH`), and a page URL; dependency readiness
+alone does not prove a browser can launch. This installer does not download browsers.
+
+Localhost Screenshots uses the target project's Playwright installation. Run its
+helpers with cwd at that project and the stable Node executable; follow its pinned
+Playwright version and browser setup instructions. The local loader fix is held
+against refresh until upstream includes it. Tests prove lookup from an unrelated
+project directory without launching a browser.
+
+Python libraries, project frameworks, browser downloads and authenticated service
+connections remain task-specific. Use the skill's isolated environment or the
+host's bundled runtime where applicable; do not install Python packages globally
+or treat missing optional credentials as a broken installation.
+
+## Repository-level references
+
+Six Anthropic skills link to `../../CONNECTORS.md`. The installed
+`agents/CONNECTORS.md` combines the upstream engineering and design category
+references with a routing introduction; it enables no integrations. Hallmark's
+external docs, tokens and worked examples live under `agents/docs/` and
+`agents/site/` so its original relative paths resolve. Two supplemental human-doc
+links are corrected for this installed layout. Upstream revisions, origins,
+checksums and assembly notes are in `config/skill-install-resources.json`.
+
+Keep these supplemental resources when refreshing or projecting the corresponding
+skills. Update their source records when their upstream content changes. A skill
+installer that copies only the skill directory will not restore these resources.
+
+Vercel Composition Patterns is held out of automated refresh in
+`config/skills-refresh-holds.json`: the skills installer deliberately excludes
+`metadata.json` when rebuilding its directory, while this repository keeps the
+complete pinned resource set. Update that skill manually with its supplemental
+resource checksums; retain the hold until refresh preserves the required file.
+
+## Ownership
+
+The shared tree is repository-managed. Personal orchestration preferences remain
+outside this tree.
+
+Aside's entry point is vendor-CLI-managed; its live guide comes from that CLI.
+`code-review-nextjs` is locally authored. Codex system and plugin-cache skills are
+owned by Codex/plugin updates and must not be overwritten with shared-tree copies.
+The nested `creative/typographic-poster-design` skill is also locally authored;
+inventory discovery includes nested tracked skills and excludes dependency trees.
+
+## Claude account skill cache
+
+Claude Code downloads account skills to `~/.claude/skills/synced/`. The dotfiles
+link puts that cache under `agents/skills/synced/`, where Git and the dotfiles
+skill checks skip it. Keep the shared skills link in place and let Claude manage
+the cached files.
+
+Manage enabled skills in Claude under **Plugins** using the Skills filter,
+or under **Customize → Skills** in the earlier layout. To check sync, start
+Claude Code signed in to the same account and run `/skills`. Look under
+**claude.ai sync**. Claude checks for account changes at startup and periodically
+during the session. Local edits can be overwritten on the next sync. To disable
+account skill sync for this machine, set `"syncClaudeAiSkills": false` in
+`~/.claude/settings.json` and restart Claude Code.
+[Claude skill settings](https://support.claude.com/en/articles/17740565-manage-plugins-skills-and-connectors-from-one-plugins-page) ·
+[Claude Code sync](https://code.claude.com/docs/en/skills#skills-synced-from-claudeai)

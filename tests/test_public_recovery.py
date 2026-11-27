@@ -114,7 +114,7 @@ class PublicRecoveryTests(unittest.TestCase):
         self.assertEqual(options['OtherView'], {'keep': 1})
         self.assertEqual(options['ColumnViewOptions']['ColumnWidth'], 300)
         self.assertEqual(changes['com.apple.finder']['FXArrangeGroupViewBy'], 'Name')
-        self.assertEqual(changes['NSGlobalDomain']['NSNavPanelFileListModeForOpenMode2'], 3)
+        self.assertEqual(changes['NSGlobalDomain']['NSNavPanelFileListModeForOpenMode2'], 1)
         effective = {**original, **changes['com.apple.finder']}
         self.assertFalse(any(finder.preference_changes(effective, changes['NSGlobalDomain']).values()))
 

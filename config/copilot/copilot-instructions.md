@@ -1,0 +1,5 @@
+# Copilot user bridge
+
+At session start and after context compaction, read `~/.agents/skills/init-rulebook/SKILL.md` and follow its load procedure for the canonical user rulebook at `~/.agents/AGENTS.md`. Invoke the `init-rulebook` skill when the client exposes it; otherwise follow the same procedure through file reads.
+
+Load the index and its always-on rules completely, then only task-conditional rules whose triggers match. Read action-gated rules immediately before the matching action. Preserve the host instruction hierarchy and project-specific instructions.

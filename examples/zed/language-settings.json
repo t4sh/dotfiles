@@ -1,0 +1,18 @@
+{
+  "enable_language_server": true,
+  "languages": {
+    "JSON": {
+      "format_on_save": "on",
+      "formatter": "language_server"
+    },
+    "TypeScript": {
+      "tab_size": 2,
+      "format_on_save": "on",
+      "formatter": "language_server"
+    },
+    "Python": {
+      "tab_size": 4,
+      "format_on_save": "off"
+    }
+  }
+}

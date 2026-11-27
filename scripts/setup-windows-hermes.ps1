@@ -42,4 +42,17 @@ if ($Apply) {
 }
 Invoke-DotfilesHermesPython -HermesHome $HermesHome -HermesRoot $HermesRoot -Python $Python -Arguments (@('-B',$helper,'check') + $options)
 Invoke-DotfilesHermesPython -HermesHome $HermesHome -HermesRoot $HermesRoot -Python $Python -Arguments @('-B','-c', 'import os,sys; from pathlib import Path; os.environ["HERMES_HOME"]=sys.argv[1]; from agent.skill_utils import get_skill_create_dir; actual=get_skill_create_dir(); sys.exit(0 if actual is not None and actual.resolve()==(Path.home()/".agents/skills").resolve() else "Hermes runtime did not resolve the shared skills directory")', $HermesHome)
-Invoke-DotfilesHermesPython -HermesHome $HermesHome -HermesRoot $HermesRoot -Python $Python -Arguments @('-B','-c', 'import os,sys; os.environ["HERMES_HOME"]=sys.argv[1]; from tools.skills_tool import _find_all_skills; names={s["name"] for s in _find_all_skills()}; missing={"init-rulebook","skill-architect"}-names; sys.exit("Shared skills missing from Hermes inventory: " + ", ".join(sorted(missing)) if missing else 0)', $HermesHome)
+$checkSharedSkills = @'
+import os
+import sys
+
+os.environ["HERMES_HOME"] = sys.argv[1]
+from tools import skills_tool
+
+discover = getattr(skills_tool, "find_all_skills", None)
+skills = discover(skip_disabled=True) if callable(discover) else skills_tool._find_all_skills()
+missing = {"init-rulebook", "skill-architect"} - {skill["name"] for skill in skills}
+if missing:
+    sys.exit("Shared skills missing from Hermes inventory: " + ", ".join(sorted(missing)))
+'@
+Invoke-DotfilesHermesPython -HermesHome $HermesHome -HermesRoot $HermesRoot -Python $Python -Arguments @('-B','-c',$checkSharedSkills,$HermesHome)

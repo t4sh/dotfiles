@@ -1,0 +1,39 @@
+#!/bin/sh
+# Registered as an additive hook in gitconfig-macos. Git runs repository hooks
+# itself; do not invoke them here (that would run commit-msg twice).
+set -eu
+
+msg=$1
+tmp=$(mktemp "${TMPDIR:-/tmp}/commit-msg.XXXXXX")
+trap 'rm -f "$tmp"' EXIT
+# Respect the comment prefix used by interactive commit-message editors.
+comment=$(git config --get core.commentString || git config --get core.commentChar || printf '#')
+awk -v comment="$comment" '
+  { lines[NR] = $0 }
+  END {
+    last = NR
+    while (last > 0 && (lines[last] ~ /^[[:space:]]*$/ ||
+           index(lines[last], comment) == 1)) last--
+    first = last
+    while (first > 1 && lines[first - 1] !~ /^[[:space:]]*$/) first--
+
+    # Only a final, blank-separated block of trailers qualifies. Preserve the
+    # subject, body examples, and ambiguous/malformed blocks unchanged.
+    trailers = first > 1 && lines[first] ~ /^[A-Za-z0-9-]+[ \t]*:/
+    for (i = first; i <= last; i++)
+      if (lines[i] !~ /^[A-Za-z0-9-]+[ \t]*:/ && lines[i] !~ /^[ \t]+/)
+        trailers = 0
+
+    for (i = 1; i <= NR; i++) {
+      line = tolower(lines[i])
+      continuation = i < last && lines[i + 1] ~ /^[ \t]+/
+      if (trailers && i >= first && i <= last && !continuation &&
+          (line ~ /^co-authored-by:[ \t]*[^<>]*<cursoragent@cursor[.]com>[ \t]*$/ ||
+           line ~ /^made-with:[ \t]*cursor[ \t]*$/)) continue
+      print lines[i]
+    }
+  }
+' "$msg" > "$tmp"
+cat "$tmp" > "$msg"
+trap - EXIT
+rm -f "$tmp"

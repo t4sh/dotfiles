@@ -1,7 +1,18 @@
 # 06 — Hermes learning
 
-Activate when Hermes captures learning or performs skill maintenance.
+Activate when Hermes recalls or captures learning, corrects memory, recovers missing prior context, or performs memory/skill maintenance.
 Shared skill authoring also follows `11-skill-routing.md`.
+
+## Memory lifecycle
+
+For those memory operations, read [memory procedures](memory/lifecycle.md).
+Keep native memory within its configured limits; consolidate or replace entries
+instead of enlarging budgets. Verify the tool receipt: pending approval is not
+a persisted write. Native memory is frozen at session start; verify new-session
+recall separately from the current tool response. Save a compact handoff before
+deliberately using `/new` at a task/topic boundary; a gateway restart may resume
+the same session. Use `session_search` narrowly for missing history and inspect
+the evidence. Profile-local memory is not cross-client continuity.
 
 ## Learning destinations (Hermes)
 

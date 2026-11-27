@@ -1,0 +1,9 @@
+[
+  {
+    "context": "Editor && mode == full",
+    "bindings": {
+      "secondary-k secondary-w": "editor::ToggleSoftWrap",
+      "secondary-k secondary-l": "editor::ToggleLineNumbers"
+    }
+  }
+]

@@ -1,0 +1,53 @@
+{
+  "display": {
+    "skin": "default",
+    "language": "en",
+    "resume_last_session": false,
+    "tui_auto_resume_recent": false,
+    "show_reasoning": false,
+    "show_commentary": true,
+    "timestamps": false,
+    "vim_mode": false,
+    "show_cost": false,
+    "friendly_tool_labels": true,
+    "suppress_warning_notifications": false
+  },
+  "compression": {
+    "enabled": true,
+    "threshold": 0.75,
+    "target_ratio": 0.2,
+    "protect_last_n": 20,
+    "min_tail_user_messages": 1,
+    "max_attempts": 3,
+    "progress_notices": false
+  },
+  "agent": {
+    "max_turns": 50,
+    "run_budget_seconds": 900,
+    "api_max_retries": 3
+  },
+  "approvals": {
+    "mode": "manual",
+    "timeout": 300,
+    "cron_mode": "deny",
+    "single_query_mode": "deny",
+    "unattended_mode": "deny"
+  },
+  "memory": {
+    "memory_enabled": false,
+    "user_profile_enabled": false,
+    "write_approval": true,
+    "memory_char_limit": 2200,
+    "user_char_limit": 1375
+  },
+  "skills": {
+    "external_dirs": [
+      "~/.agents/skills"
+    ],
+    "create_dir": "",
+    "project_discovery": false,
+    "trusted_project_dirs": [],
+    "inline_shell": false,
+    "write_approval": true
+  }
+}

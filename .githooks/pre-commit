@@ -49,8 +49,8 @@ if command -v gitleaks >/dev/null 2>&1; then
     exit 1
   }
 else
-  printf '\033[33m  ⚠\033[0m gitleaks not installed — skipping secret scan\n' >&2
-  printf '       install: brew install gitleaks\n' >&2
+  printf '\033[31m✗ commit blocked: gitleaks is required (install: brew install gitleaks)\033[0m\n' >&2
+  exit 1
 fi
 
 # --- 2. shellcheck (non-blocking warning pass) --------------------------------

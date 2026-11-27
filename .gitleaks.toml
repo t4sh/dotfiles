@@ -27,6 +27,25 @@ paths = ['''agents/skills/moltbook/tests/test_credential_manager\.py$''']
 description = "Exact Tower workflow icon bytes that resemble a Square access token"
 targetRules = ["square-access-token"]
 condition = "AND"
-regexTarget = "match"
+regexTarget = "secret"
 regexes = ['''^EAAAhCAAAQgAIGJCZS1I2zk3WKXtUtsZL8hnbjrOVD0MPnj$''']
 paths = ['''services/Open in Tower\.workflow/Contents/document\.wflow$''']
+
+[[allowlists]]
+description = "WebCrypto algorithm identifiers in the modern-web-guidance encryption example"
+targetRules = ["generic-api-key"]
+condition = "AND"
+regexTarget = "line"
+regexes = [
+  '''SubtleCrypto\.supports\('encapsulateKey', 'MLKEM768-X25519', 'ChaCha20-Poly1305'\)''',
+  '''SubtleCrypto\?\.supports\?\.\('encapsulateKey', 'MLKEM768-X25519', 'ChaCha20-Poly1305'\)''',
+]
+paths = ['''agents/skills/modern-web-guidance/guides/security/client-side-encryption\.md$''']
+
+[[allowlists]]
+description = "Cloudflare Workers best-practices anti-pattern placeholder, not a credential"
+targetRules = ["generic-api-key"]
+condition = "AND"
+regexTarget = "line"
+regexes = ['''"API_KEY": "sk-live-abc123\.\.\."  // Secret in version control''']
+paths = ['''agents/skills/workers-best-practices/references/configuration\.md$''']

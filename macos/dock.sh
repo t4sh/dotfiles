@@ -7,27 +7,31 @@ esac
 # backup`). The snapshot owns layout and carries a full-domain copy of Dock
 # policy because `defaults import` replaces the domain; defaults.sh remains the
 # policy authority, and regression tests require overlapping values to agree.
-# The hardcoded rebuild script lives at macos/dock-dev.sh for fallback / edit
-# mode (see header there).
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 DOTFILES="${DOTFILES:-$(cd -- "$SCRIPT_DIR/.." && pwd -P)}"
-PLIST="$DOTFILES/macos/dock-backup.plist"
+case "${1:-}" in
+    '') PLIST="$DOTFILES/macos/dock-backup.plist" ;;
+    --layout-only) PLIST="$DOTFILES/macos/dock-layout.plist" ;;
+    *) echo "usage: dock.sh [--layout-only]" >&2; exit 2 ;;
+esac
 
 if [ ! -f "$PLIST" ]; then
     echo "  ⚠ $PLIST not found."
-    echo "    Run 'bash macos/dock-dev.sh' to build the dock from the hardcoded list,"
-    echo "    then 'make backup' to capture it as dock-backup.plist."
+    if [[ -z "${1:-}" && -f "$DOTFILES/macos/dock-layout.plist" ]]; then
+        echo "    Use bash macos/dock-dev.sh to restore the saved tile layout."
+    fi
     exit 1
 fi
 
 materialized="$(mktemp -t dotfiles-dock.XXXXXX)"
 trap 'rm -f "$materialized"' EXIT
-python3 - "$PLIST" "$materialized" <<'PY'
+python3 - "$PLIST" "$materialized" "${1:-}" <<'PY'
 from pathlib import Path
 import plistlib
 import sys
+import subprocess
 from urllib.parse import quote
 data = plistlib.loads(Path(sys.argv[1]).read_bytes())
 for tile in data.get("persistent-apps", []):
@@ -35,8 +39,15 @@ for tile in data.get("persistent-apps", []):
     url = file_data.get("_CFURLString", "")
     if url.startswith("file://__HOME__/"):
         file_data["_CFURLString"] = "file://" + quote(str(Path.home()) + url[len("file://__HOME__"):], safe="/")
-Path(sys.argv[2]).write_bytes(plistlib.dumps(data))
+if sys.argv[3] == "--layout-only":
+    tiles = [plistlib.dumps(tile).decode("utf-8") for tile in data["persistent-apps"]]
+    subprocess.run(["defaults", "write", "com.apple.dock", "persistent-apps", "-array", *tiles], check=True)
+    subprocess.run(["defaults", "write", "com.apple.dock", "persistent-others", "-array"], check=True)
+else:
+    Path(sys.argv[2]).write_bytes(plistlib.dumps(data))
 PY
-defaults import com.apple.dock "$materialized"
+if [[ -z "${1:-}" ]]; then
+    defaults import com.apple.dock "$materialized"
+fi
 killall Dock
-echo "  ✓ Dock layout restored from dock-backup.plist"
+echo "  ✓ Dock layout restored from ${PLIST##*/}"

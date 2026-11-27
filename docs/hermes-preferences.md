@@ -4,19 +4,67 @@ Personal Hermes settings and model choices are not shipped in this public checko
 `apps/hermes/` is ignored. Keep backups outside Git; the generic helper accepts
 explicit `--live` and `--snapshot` paths for capture, check and restore. Stop Hermes
 sessions before restoring. Use an initialized Hermes Python environment when the
-live file is YAML. Capture requires an existing `model.default` and excludes auth
-fields; review the result before sharing it.
+live file is YAML. Full capture requires `model.default` in the live config or
+saved snapshot and excludes auth
+fields; review the result before sharing it. When capturing over an existing
+snapshot, omitted managed fields retain the saved policy; explicit live values,
+including nulls and empty alias maps, replace it. Saved fallback values undergo
+the same portability and credential validation as live values.
+
+For a drift comparison, copy your saved snapshot to a temporary file outside Git,
+capture into that seeded copy with explicit `--live` and `--snapshot` paths, and
+compare the resulting JSON with the saved policy. Omitted live fields remain
+clean; explicit changes still differ. The public app drift auditor does not
+capture or compare personal Hermes snapshots.
 
 ```sh
 python3 scripts/hermes-settings.py capture --live "$HOME/.hermes/config.yaml" --snapshot "$HOME/.dotfiles-local/hermes-preferences.json"
 python3 scripts/hermes-settings.py restore --live "$HOME/.hermes/config.yaml" --snapshot "$HOME/.dotfiles-local/hermes-preferences.json"
 ```
 
+Add `--keep-local` to restore missing preferences while keeping local values and model aliases. Shared skill directories merge, and the saved shared skill creation path still applies. An unchanged restore preserves the live file’s formatting.
+
 On Windows, pass the active profile's config path explicitly; the default is under
 `HERMES_HOME` when set, otherwise `%LOCALAPPDATA%/hermes`. Shared-skill preferences
 can be managed separately with `--skills-only`; restoration adds shared discovery
 without removing existing profile-specific directories. This public checkout does
 not install a Hermes profile or apply a personal model policy.
+
+## Portable model aliases
+
+`model.aliases` accepts model identifier strings and objects with required `model`
+and optional `provider`, `base_url` and `key_env` strings. For example:
+
+```json
+{
+  "model": {
+    "default": "example/default",
+    "aliases": {
+      "quick": "example/fast",
+      "local": {
+        "model": "example/coder",
+        "provider": "custom",
+        "base_url": "http://localhost:8080/v1",
+        "key_env": "LOCAL_MODEL_API_KEY"
+      }
+    }
+  }
+}
+```
+
+`key_env` names an environment variable; its value stays outside the snapshot.
+Literal credential fields, unknown object fields, malformed identifiers and URLs
+with embedded user-info, query strings, fragments, invalid ports/hostnames,
+whitespace/control characters, backslashes or malformed percent escapes are rejected
+before capture or restore writes. String aliases remain supported; skills-only
+operations leave aliases unmanaged. Capture and full check preserve the alias map;
+restore replaces that managed map while retaining unrelated live settings.
+`--preserve-model-selection` retains the live default/provider/endpoint while
+restoring aliases. Review your own model names and endpoints before sharing any
+snapshot; accepting a portable value does not make personal routing public-safe.
+
+These are generic helper capabilities. Native Windows, live model execution and
+fresh-profile restoration require separate verification.
 
 ## Disable Desktop message reactions
 
@@ -29,6 +77,18 @@ In Hermes Desktop, select the default/local backend and open **Settings → Appe
 a message and confirm no heart reaction or reaction feedback occurs. Repeat after
 restarting Desktop. This setting concerns message reactions; completion and prompt
 bells are separate preferences. Backend restoration alone does not verify the GUI.
+
+## macOS gateway startup fix
+
+Use `make hermes-update` from the dotfiles checkout for a deliberate Hermes
+runtime upgrade. After a successful update it restores the gateway startup
+fix for shell environments whose terminal color escapes cannot be represented
+in a launchd XML plist. If Hermes Desktop's built-in updater parks local source
+edits in a stash, run `make hermes-gateway-repair` for recovery. The repair
+changes only the Hermes gateway runtime file and stops for review if local
+edits or an incompatible release prevent patching. It does not install a login
+item or start a service. Topgrade reruns the repair after updates, while
+automatic Hermes runtime upgrades remain disabled.
 
 ## Windows source launcher and shared skills
 

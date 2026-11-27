@@ -37,8 +37,12 @@ repair an existing Mac with `uv tool install nginx-language-server`.
 
 Sublime's Package Control snapshot is normalized during backup and drift staging:
 package names are unique and alphabetically sorted, and other settings are
-preserved. Live files remain owned by Sublime. Thaw and Battery Indicator remain
-Mac snapshots; Windows has no corresponding app-preference restore.
+preserved. Live files remain owned by Sublime. Battery Indicator remains
+a Mac snapshot; Windows has no corresponding app-preference restore.
+
+Preserve third-party skill files unchanged. Report upstream defects rather than
+patching an installed snapshot locally; refresh from upstream when explicitly
+requested.
 
 Shared skill authoring uses `skill-architect`; the redundant standalone
 `skill-development` installation is retired. Use `interface-review` explicitly

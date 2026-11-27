@@ -38,6 +38,7 @@ list_group() {
         fi
     done
     [ $any -eq 1 ] && echo ""
+    return 0
 }
 
 usage() {

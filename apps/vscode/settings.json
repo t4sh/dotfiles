@@ -94,7 +94,7 @@
     "scss.lint.important": "warning",
     "scss.lint.importStatement": "warning",
     "search.useGlobalIgnoreFiles": true,
-    "security.workspace.trust.untrustedFiles": "open",
+    "security.workspace.trust.untrustedFiles": "prompt",
     "typescript.referencesCodeLens.enabled": true,
     "typescript.updateImportsOnFileMove.enabled": "always",
     "window.openFoldersInNewWindow": "on",
@@ -234,7 +234,7 @@
     "workbench.editor.empty.hint": "hidden",
     "application.shellEnvironmentResolutionTimeout": 100,
     "workbench.startupEditor": "none",
-    "git.allowNoVerifyCommit": true,
+    "git.allowNoVerifyCommit": false,
     "refreshNpmPackages.npmDefault": "npm i",
     "[NGINX]": {
         "editor.defaultFormatter": "hangxingliu.vscode-nginx-conf-hint"
@@ -243,7 +243,7 @@
         "editor.tabSize": 4,
         "editor.defaultFormatter": "ahmadalli.vscode-nginx-conf"
     },
-    "security.workspace.trust.enabled": false,
+    "security.workspace.trust.enabled": true,
     "redhat.telemetry.enabled": true,
     "yaml.format.singleQuote": true,
     "npm.enableRunFromFolder": true,
@@ -289,7 +289,7 @@
     "continue.enableNextEdit": false,
     "continue.enableTabAutocomplete": false,
     "chat.agent.maxRequests": 500,
-    "security.promptForLocalFileProtocolHandling": false,
+    "security.promptForLocalFileProtocolHandling": true,
     "chat.exploreAgent.defaultModel": "Claude Opus 4.6 (claude-code)",
     "chat.planAgent.defaultModel": "Claude Opus 4.6 (claude-code)",
     "githubPullRequests.createOnPublishBranch": "never",

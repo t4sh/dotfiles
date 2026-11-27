@@ -14,64 +14,75 @@ APPS="$DOTFILES/apps"
 NODE_DEFAULT="$(tr -d '[:space:]' < "$DOTFILES/.node-version" 2>/dev/null || printf 'v22.22.0')"
 # shellcheck disable=SC2088
 NVM_NODE_BIN="~/.nvm/versions/node/$NODE_DEFAULT/bin"
-PLISTBUDDY=/usr/libexec/PlistBuddy
 NODE_STABLE="$HOME/.local/bin/node-stable"
 HOMEBREW_TOKEN="__HOMEBREW_PREFIX__"
 
-plist_delete() {
-  local plist="$1" key="$2"
-  [[ -f "$plist" ]] || return 0
-  "$PLISTBUDDY" -c "Delete :$key" "$plist" >/dev/null 2>&1 || true
-}
+# All text editors work on a writable copy. The resulting bytes are installed
+# only after the transform succeeds, using the snapshot's own mode and metadata.
+edit_text_snapshot() (
+  local path="$1" work copy
+  shift
+  [[ -e "$path" || -L "$path" ]] || return 0
+  if [[ ! -f "$path" || -L "$path" ]]; then
+    echo "expected a regular preference snapshot: $path" >&2
+    return 1
+  fi
+  work="$(mktemp -d "${TMPDIR:-/tmp}/dotfiles-sanitize.XXXXXX")"
+  trap 'rm -rf -- "$work"' EXIT
+  copy="$work/$(basename "$path")"
+  cat "$path" > "$copy"
+  "$@" "$copy"
+  if ! cmp -s "$copy" "$path"; then
+    "${PYTHON_BIN:-python3}" "$SCRIPT_DIR/backup_metadata.py" "$copy" "$path"
+  fi
+)
 
-plist_set_bool() {
-  local plist="$1" key="$2" value="$3"
-  [[ -f "$plist" ]] || return 0
-  "$PLISTBUDDY" -c "Set :$key $value" "$plist" 2>/dev/null ||
-    "$PLISTBUDDY" -c "Add :$key bool $value" "$plist"
-}
+# Public-only bookmark and device-inventory policies still apply after the
+# shared app-plist sanitation. Work on disposable bytes so protected snapshots
+# retain their original metadata when the sanitizer changes content.
+edit_public_app_plist() (
+  local path="$1" work copy
+  [[ -e "$path" || -L "$path" ]] || return 0
+  if [[ ! -f "$path" || -L "$path" ]]; then
+    echo "expected a regular preference snapshot: $path" >&2
+    return 1
+  fi
+  work="$(mktemp -d "${TMPDIR:-/tmp}/dotfiles-sanitize.XXXXXX")"
+  trap 'rm -rf -- "$work"' EXIT
+  copy="$work/$(basename "$path")"
+  cat "$path" > "$copy"
+  python3 "$SCRIPT_DIR/public-plist-bookmarks.py" sanitize "$copy"
+  python3 - "$copy" "$(basename "$(dirname "$path")")" <<'PY'
+import plistlib
+import re
+import sys
+from pathlib import Path
 
-plist_top_level_keys_matching() {
-  local plist="$1" pattern="$2"
-  [[ -f "$plist" ]] || return 0
-  LC_ALL=C "$PLISTBUDDY" -c Print "$plist" 2>/dev/null |
-    LC_ALL=C awk -v pattern="$pattern" '
-      /^    [^ ].* =/ {
-        key = $0
-        sub(/^    /, "", key)
-        sub(/ =.*$/, "", key)
-        if (key ~ pattern) print key
-      }
-    '
-}
-
-normalize_tower_toolbar() {
-  local plist="$1" idx=0 item
-  [[ -f "$plist" ]] || return 0
-  while item="$("$PLISTBUDDY" -c \
-    "Print :\"NSToolbar Configuration MainWindowToolbar.BigSur\":\"TB Item Identifiers\":$idx" \
-    "$plist" 2>/dev/null)"; do
-    case "$item" in
-      GTToolbarItemIdentifierDetailTrackingSeparator.0x*)
-        "$PLISTBUDDY" -c \
-          "Set :\"NSToolbar Configuration MainWindowToolbar.BigSur\":\"TB Item Identifiers\":$idx GTToolbarItemIdentifierDetailTrackingSeparator" \
-          "$plist"
-        ;;
-    esac
-    idx=$((idx + 1))
-  done
-}
-
-# Secure Keyboard Entry blocks other processes from observing Terminal input,
-# but it also prevents the system Touch ID authorization panel from taking
-# focus. Keep that security/UX choice local to each Mac instead of restoring it
-# from a portable Terminal profile snapshot.
-plist_delete "$APPS/terminal/terminal.plist" SecureKeyboardEntry
+path = Path(sys.argv[1])
+app = sys.argv[2]
+raw = path.read_bytes()
+prefs = plistlib.loads(raw)
+if not isinstance(prefs, dict):
+    raise ValueError("preference root must be a dictionary")
+for key in list(prefs):
+    if (re.search(r"Paddle|Zephyr|SUUpdateGroupIdentifier", key)
+        or (app == "clop" and key == "savedPipelines")
+        or (app == "thaw" and (key.startswith("MenuBarItemManager.")
+            or key in ("KnownDisplays", "DisplayIceBarConfigurations",
+                       "GlobalDisplayConfiguration", "NewItemsPlacementData",
+                       "MenuBarAppearanceConfigurationV2", "UnconfirmedSpacingProfileScope")))):
+        del prefs[key]
+path.write_bytes(plistlib.dumps(prefs, fmt=plistlib.FMT_BINARY if raw.startswith(b"bplist") else plistlib.FMT_XML))
+PY
+  if ! cmp -s "$copy" "$path"; then
+    "${PYTHON_BIN:-python3}" "$SCRIPT_DIR/backup_metadata.py" "$copy" "$path"
+  fi
+)
 
 # Normalize Package Control's captured dependency list in backup and drift
 # staging. Never rewrite the running editor merely to sort its package list.
-if [[ -f "$APPS/sublime-text/Package Control.sublime-settings" ]]; then
-  "${PYTHON_BIN:-python3}" - "$APPS/sublime-text/Package Control.sublime-settings" <<'PY'
+normalize_sublime_packages() {
+  "${PYTHON_BIN:-python3}" - "$1" <<'PY'
 import json
 from pathlib import Path
 import re
@@ -90,43 +101,99 @@ if "installed_packages" in settings:
     settings["installed_packages"] = sorted(set(packages), key=lambda name: (name.casefold(), name))
 path.write_text(json.dumps(settings, indent=2, sort_keys=True) + "\n")
 PY
-fi
+}
 
-f="$APPS/sublime-text/SublimeLinter.sublime-settings"
-if [[ -f "$f" ]]; then
+normalize_sublime_linter() {
   perl -i -pe '
     s#/Users/[^/]+/\.nvm/versions/node/[^"/]+/bin#'"$NVM_NODE_BIN"'#g;
     s#~/\.nvm/versions/node/[^"/]+/bin#'"$NVM_NODE_BIN"'#g;
-  ' "$f"
-fi
+  ' "$1"
+  normalize_homebrew_paths "$1"
+}
 
 # External-agent default/favorite options are machine-local runtime and
 # security state, not portable preference policy. Remove these observed fields
 # for every configured agent before backups reach Git.
-if [[ -f "$APPS/zed/settings.json" ]]; then
+sanitize_zed_settings() {
+  # Remove root agent/context_servers members by JSONC structure: comments and
+  # strings are masked first, so braces inside them never count, and invalid
+  # input fails closed without rewriting the snapshot.
+  python3 - "$1" <<'PY'
+import json
+import re
+import sys
+
+path = sys.argv[1]
+text = open(path, encoding="utf-8").read()
+tokens = r'"(?:\\.|[^"\\])*"|//[^\n]*|/\*[\s\S]*?\*/'
+# Both masks keep every offset: comments become spaces, so commas stay visible
+# in `uncommented` for the separator scan; `masked` also drops trailing commas.
+uncommented = re.sub(tokens, lambda m: m[0] if m[0].startswith('"') else
+                     re.sub(r"[^\n]", " ", m[0]), text)
+masked = re.sub(r'"(?:\\.|[^"\\])*"|,(?=\s*[}\]])',
+                lambda m: m[0] if m[0].startswith('"') else " ", uncommented)
+try:
+    if not isinstance(json.loads(masked), dict):
+        raise ValueError("root is not an object")
+    decoder = json.JSONDecoder()
+    pos = masked.index("{") + 1
+    removals = []
+    while True:
+        while masked[pos].isspace() or masked[pos] == ",":
+            pos += 1
+        if masked[pos] == "}":
+            break
+        key_start = pos
+        key, pos = decoder.raw_decode(masked, pos)
+        pos = masked.index(":", pos) + 1
+        while masked[pos].isspace():
+            pos += 1
+        _, end = decoder.raw_decode(masked, pos)
+        if key in ("agent", "context_servers"):
+            line_start = text.rfind("\n", 0, key_start) + 1
+            start = line_start if not text[line_start:key_start].strip() else key_start
+            # The member's separator may follow comments or newlines; remove it
+            # with the member. Trim real whitespace only, preserving whole comments.
+            after = re.compile(r"\s*").match(uncommented, end).end()
+            if uncommented[after] == ",":
+                end = after + 1
+            end = re.compile(r"[ \t]*\n?").match(text, end).end()
+            removals.append((start, end))
+        pos = end
+except (ValueError, IndexError) as error:
+    print(f"invalid Zed JSONC: {path}: {error}", file=sys.stderr)
+    sys.exit(1)
+for start, end in reversed(removals):
+    text = text[:start] + text[end:]
+# Never write a result that no longer parses or still holds a removed member.
+check = re.sub(tokens, lambda m: m[0] if m[0].startswith('"') else " ", text)
+check = re.sub(r'"(?:\\.|[^"\\])*"|,(?=\s*[}\]])',
+               lambda m: m[0] if m[0].startswith('"') else " ", check)
+try:
+    result = json.loads(check)
+except ValueError:
+    result = None
+if not isinstance(result, dict) or {"agent", "context_servers"} & set(result):
+    print(f"invalid Zed JSONC after sanitizing: {path}", file=sys.stderr)
+    sys.exit(1)
+open(path, "w", encoding="utf-8").write(text)
+PY
   perl -0i -pe '
-    s/^  "(?:agent|context_servers)"\s*:\s*\{.*?^  \},?\n//msg;
     for my $key (qw(default_config_options favorite_config_option_values)) {
       s/,\s*"\Q$key\E"\s*:\s*\{[^{}]*\}//g;
       s/"\Q$key\E"\s*:\s*\{[^{}]*\}\s*,?//g;
     }
     s/^[ \t]+$//mg;
     s/\{\n(?:[ \t]*\n)+([ \t]*"type"\s*:\s*"registry")/\{\n$1/g;
-  ' "$APPS/zed/settings.json"
-fi
+  ' "$1"
+  sanitize_editor_settings "$1"
+}
 
-for f in \
-  "$APPS/sublime-text/GutterColor.sublime-settings" \
-  "$APPS/sublime-text/SublimeLinter.sublime-settings" \
-  "$APPS/vscode/settings.json" \
-  "$APPS/cursor/settings.json" \
-  "$APPS/zed/settings.json" \
-  "$APPS/zed/keymap.json"; do
-  [[ -f "$f" ]] || continue
+normalize_homebrew_paths() {
   HOMEBREW_TOKEN="$HOMEBREW_TOKEN" perl -i -pe '
     s#/(?:opt/homebrew|usr/local)(?=/(?:bin|sbin)(?:/|"))#$ENV{HOMEBREW_TOKEN}#g;
-  ' "$f"
-done
+  ' "$1"
+}
 
 resolve_node() {
   if [[ -x "$NODE_STABLE" ]]; then
@@ -143,7 +210,8 @@ resolve_node() {
 
 sanitize_editor_settings() {
   local path="$1" node_bin
-  [[ -f "$path" ]] && grep -q '/Users/' "$path" 2>/dev/null || return 0
+  normalize_homebrew_paths "$path"
+  grep -q '/Users/' "$path" || return 0
   if ! node_bin="$(resolve_node)"; then
     echo "sanitize-app-prefs: need node to strip machine paths from $path" >&2
     echo "  fix: ln -sf \"\$NVM_DIR/versions/node/\$(<.node-version)/bin/node\" ~/.local/bin/node-stable" >&2
@@ -358,153 +426,87 @@ if (output !== s) fs.writeFileSync(path, output);
 NODE
 }
 
-sanitize_editor_settings "$APPS/vscode/settings.json"
-sanitize_editor_settings "$APPS/cursor/settings.json"
-sanitize_editor_settings "$APPS/zed/settings.json"
-# Zed keymaps are arrays; this call only redacts machine paths in comments.
-sanitize_editor_settings "$APPS/zed/keymap.json"
+edit_text_snapshot "$APPS/sublime-text/Package Control.sublime-settings" normalize_sublime_packages
+edit_text_snapshot "$APPS/sublime-text/GutterColor.sublime-settings" normalize_homebrew_paths
+edit_text_snapshot "$APPS/sublime-text/SublimeLinter.sublime-settings" normalize_sublime_linter
+edit_text_snapshot "$APPS/vscode/settings.json" sanitize_editor_settings
+edit_text_snapshot "$APPS/cursor/settings.json" sanitize_editor_settings
+edit_text_snapshot "$APPS/zed/settings.json" sanitize_zed_settings
+# Zed keymaps are arrays. The editor sanitizer only rewrites portable paths.
+edit_text_snapshot "$APPS/zed/keymap.json" sanitize_editor_settings
 
-# BetterZip records recent archive log names and absolute source paths. This is
-# runtime history, not portable preference policy, and must never enter backups.
-plist_delete "$APPS/betterzip/betterzip.plist" "MIBLogs"
-plist_delete "$APPS/betterzip/betterzip.plist" "MIBTempFolders"
-if [[ -f "$APPS/betterzip/betterzip.plist" ]]; then
-  "${PYTHON_BIN:-python3}" - "$APPS/betterzip/betterzip.plist" <<'PY'
-import plistlib
-from pathlib import Path
-import sys
-
-path = Path(sys.argv[1])
-original = path.read_bytes()
-prefs = plistlib.loads(original)
-changed = prefs.pop("MIBRegCode", None) is not None
-for preset in prefs.get("MIBSavePresets", []):
-    if isinstance(preset, dict) and "password" in preset:
-        del preset["password"]
-        changed = True
-if changed:
-    fmt = plistlib.FMT_BINARY if original.startswith(b"bplist00") else plistlib.FMT_XML
-    with path.open("wb") as stream:
-        plistlib.dump(prefs, stream, fmt=fmt, sort_keys=False)
-PY
-fi
-
-# Tower stores license state, App Center device/session identity, repository-ID
-# migration caches, and home-directory quick-open state. Remove those values,
-# but preserve the main-window toolbar layout while normalizing its
-# process-derived tracking-separator identifier.
-for key in \
-  GTLicenseActivationLastUpdatedDate \
-  GTLicenseActivationState \
-  GTUserDefaultsMigratedPinnedBranchesRepositories \
-  GTUserDefaultsMigratedStackedBranchesRepositories \
-  MSAppCenterInstallId \
-  MSAppCenterPastDevices \
-  MSAppCenterSessionIdHistory \
-  MSAppCenterUserIdHistory \
-  NSOSPLastRootDirectory; do
-  plist_delete "$APPS/tower/tower.plist" "$key"
-done
-if [[ -f "$APPS/tower/tower.plist" ]]; then
-  "$PLISTBUDDY" -c "Set :GTUserDefaultsDefaultCloningDirectory ~/Projects" \
-    "$APPS/tower/tower.plist" 2>/dev/null || true
-  plist_delete "$APPS/tower/tower.plist" "GTUserDefaultsQuickOpenIgnoredFilePaths"
-  normalize_tower_toolbar "$APPS/tower/tower.plist"
-  while IFS= read -r key; do
-    plist_delete "$APPS/tower/tower.plist" "\"$key\""
-  done < <(plist_top_level_keys_matching \
-    "$APPS/tower/tower.plist" '^(NSWindow Frame|NSSplitView Subview Frames)')
-fi
-
-# Clop stores output folders, recent directories, and security-scoped bookmarks.
-for key in \
-  workdir imageDirs videoDirs NSOSPLastRootDirectory; do
-  plist_delete "$APPS/clop/clop.plist" "$key"
-done
-
-# Gifski stores the last save/open directories, including cloud-account paths.
-for key in \
-  previousSaveDirectory NSOSPLastRootDirectory; do
-  plist_delete "$APPS/gifski/gifski.plist" "$key"
-done
-
-# IINA stores screenshot and last-played paths.
-for key in \
-  screenShotFolder NSOSPLastRootDirectory iinaLastPlayedFilePath; do
-  plist_delete "$APPS/iina/iina.plist" "$key"
-done
-
-# Pearcleaner stores user-specific app folder choices.
-plist_delete "$APPS/pearcleaner/pearcleaner.plist" "settings.folders.apps"
-plist_delete "$APPS/pearcleaner/pearcleaner.plist" "settings.lipo.excludedApps"
-
-# Dock binary bookmarks encode local machine/account data and can trip secret
-# scanners. Keep app tile URLs and bundle identifiers, but drop bookmark blobs
-# and right-side folder tiles from the committed backup.
-if [[ -f "$DOTFILES/macos/dock-backup.plist" ]]; then
-  # Preserve the declared locked-Dock policy even if macOS rewrites these flags
-  # before a backup: fixed size/position/items and auto-hide permanently off.
-  plist_set_bool "$DOTFILES/macos/dock-backup.plist" "size-immutable" true
-  plist_set_bool "$DOTFILES/macos/dock-backup.plist" "position-immutable" true
-  plist_set_bool "$DOTFILES/macos/dock-backup.plist" "contents-immutable" true
-  plist_set_bool "$DOTFILES/macos/dock-backup.plist" "autohide" false
-  plist_set_bool "$DOTFILES/macos/dock-backup.plist" "autohide-immutable" true
-  for key in \
-    mod-count \
-    last-analytics-stamp \
-    trash-full \
-    lastShowIndicatorTime; do
-    plist_delete "$DOTFILES/macos/dock-backup.plist" "$key"
-  done
-
-  idx=0
-  while "$PLISTBUDDY" -c "Print :persistent-apps:$idx" "$DOTFILES/macos/dock-backup.plist" \
-    >/dev/null 2>&1; do
-    plist_delete "$DOTFILES/macos/dock-backup.plist" "persistent-apps:$idx:tile-data:book"
-    plist_delete "$DOTFILES/macos/dock-backup.plist" "persistent-apps:$idx:tile-data:file-mod-date"
-    plist_delete "$DOTFILES/macos/dock-backup.plist" "persistent-apps:$idx:tile-data:parent-mod-date"
-    idx=$((idx + 1))
-  done
-  # Some apps (Hermes Desktop) are installed beneath the operator's home.
-  # Store a portable marker; dock.sh expands it only at restore time.
-  python3 - "$DOTFILES/macos/dock-backup.plist" <<'PY'
+public_dock_capture=""
+trap '[[ -z "$public_dock_capture" ]] || rm -f -- "$public_dock_capture"' EXIT
+if (( $# > 0 )) && [[ "$1" != --* ]]; then
+  dock_source="$1"
+  allowlist="$DOTFILES/macos/dock-layout.plist"
+  if [[ ! -f "$allowlist" || -L "$allowlist" ]]; then
+    echo "missing public Dock layout allowlist" >&2
+    exit 1
+  fi
+  if [[ -f "$dock_source" ]]; then
+    public_dock_capture="$(mktemp "${TMPDIR:-/tmp}/dotfiles-dock-public.XXXXXX")"
+    python3 - "$dock_source" "$allowlist" "$DOTFILES/macos/dock-backup.plist" "$public_dock_capture" <<'PY_DOCK_ALLOWLIST'
+from copy import deepcopy
 from pathlib import Path
 import plistlib
 import sys
-from urllib.parse import unquote
-p = Path(sys.argv[1])
-raw = p.read_bytes()
-data = plistlib.loads(raw)
-home = str(Path.home())
-for tile in data.get("persistent-apps", []):
-    file_data = tile.get("tile-data", {}).get("file-data", {})
-    url = file_data.get("_CFURLString", "")
-    if unquote(url).startswith("file://" + home + "/"):
-        file_data["_CFURLString"] = "file://__HOME__" + unquote(url)[len("file://" + home):]
-p.write_bytes(plistlib.dumps(data, fmt=plistlib.FMT_BINARY if raw.startswith(b"bplist") else plistlib.FMT_XML))
-PY
-fi
-plist_delete "$DOTFILES/macos/dock-backup.plist" "persistent-others"
+from urllib.parse import unquote, urlsplit
 
-# Public snapshots exclude app identity and device/application inventories.
-DOTFILES="$DOTFILES" python3 - <<'PUBLIC_PREFS'
-import os, plistlib, re
-from pathlib import Path
-root = Path(os.environ['DOTFILES']) / 'apps'
-for path in root.rglob('*.plist'):
-    app = path.parent.name
-    if not path.exists():
-        continue
-    data = plistlib.loads(path.read_bytes())
-    original = dict(data)
-    for key in list(data):
-        if (re.search(r'Paddle|Zephyr|SUUpdateGroupIdentifier', key)
-            or (app == 'clop' and key == 'savedPipelines')
-            or (app == 'thaw' and (key.startswith('MenuBarItemManager.')
-                or key in ('KnownDisplays', 'DisplayIceBarConfigurations',
-                           'GlobalDisplayConfiguration', 'NewItemsPlacementData',
-                           'MenuBarAppearanceConfigurationV2', 'UnconfirmedSpacingProfileScope')))):
-            del data[key]
-    if data != original:
-        path.write_bytes(plistlib.dumps(data, fmt=plistlib.FMT_BINARY))
-PUBLIC_PREFS
+source, allowlist, saved_path, destination = map(Path, sys.argv[1:])
+if allowlist.is_symlink() or not allowlist.is_file():
+    raise SystemExit("missing public Dock layout allowlist")
+raw = source.read_bytes()
+capture = plistlib.loads(raw)
+saved = plistlib.loads(saved_path.read_bytes()) if saved_path.is_file() and not saved_path.is_symlink() else {}
+approved = plistlib.loads(allowlist.read_bytes()).get("persistent-apps", [])
+tiles = capture.get("persistent-apps", [])
+if not isinstance(approved, list) or not all(isinstance(tile, dict) for tile in approved):
+    raise SystemExit("invalid public Dock layout allowlist")
+if not isinstance(tiles, list) or not all(isinstance(tile, dict) for tile in tiles):
+    raise SystemExit("invalid Dock capture")
+
+def app_name(tile):
+    url = tile.get("tile-data", {}).get("file-data", {}).get("_CFURLString", "")
+    if not isinstance(url, str):
+        return ""
+    return Path(unquote(urlsplit(url).path).rstrip("/")).name.removesuffix(".app").casefold()
+
+public_tiles = {app_name(tile): tile for tile in approved if app_name(tile)}
+selected = []
+for tile in tiles:
+    identity = app_name(tile)
+    if identity in public_tiles:
+        # Reuse only the reviewed public template, never live labels, URLs,
+        # bookmarks, GUIDs, or other Dock metadata.
+        selected.append(deepcopy(public_tiles[identity]))
+    elif tile.get("tile-type") in {"spacer-tile", "small-spacer-tile"}:
+        selected.append({"tile-type": tile["tile-type"]})
+public_capture = deepcopy(saved) if isinstance(saved, dict) else {}
+public_capture["persistent-apps"] = selected
+if "recent-apps" in capture or "recent-apps" in public_capture:
+    public_capture["recent-apps"] = []
+public_capture.pop("persistent-others", None)
+destination.write_bytes(plistlib.dumps(
+    public_capture, fmt=plistlib.FMT_BINARY if raw.startswith(b"bplist") else plistlib.FMT_XML,
+    sort_keys=False))
+PY_DOCK_ALLOWLIST
+    shift
+    set -- "$public_dock_capture" "$@"
+  fi
+fi
+"${PYTHON_BIN:-python3}" "$SCRIPT_DIR/sanitize-app-plists.py" "$DOTFILES" "$@"
+
+if [[ -d "$APPS" ]]; then
+  while IFS= read -r -d '' bookmark_snapshot; do
+    edit_public_app_plist "$bookmark_snapshot"
+  done < <(find "$APPS" -type f -name '*.plist' -print0)
+fi
+
+# Editor trust and confirmation policy applies even when a capture has no
+# machine path to trigger the path-redaction transform.
+for editor in zed vscode cursor; do
+  editor_snapshot="$APPS/$editor/settings.json"
+  [[ -f "$editor_snapshot" ]] || continue
+  edit_text_snapshot "$editor_snapshot" python3 "$SCRIPT_DIR/public-editor-policy.py" sanitize --editor "$editor"
+done

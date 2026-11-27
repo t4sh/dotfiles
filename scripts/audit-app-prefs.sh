@@ -8,8 +8,8 @@ command -v rg >/dev/null 2>&1 || { echo 'Preference audit requires ripgrep (rg);
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 DOTFILES="${DOTFILES:-$(cd -- "$SCRIPT_DIR/.." && pwd -P)}"
 ROOTS=("$DOTFILES/apps" "$DOTFILES/macos" "$DOTFILES/services")
-TMPDIR="$(mktemp -d)"
-trap 'rm -rf "$TMPDIR"' EXIT
+AUDIT_TMP_DIR="$(mktemp -d)"
+trap 'rm -rf "$AUDIT_TMP_DIR"' EXIT
 
 issues=0
 
@@ -31,6 +31,17 @@ fi
 echo "Auditing app/macOS preference snapshots …"
 
 APPS="$DOTFILES/apps"
+if ! plist_audit="$(python3 "$SCRIPT_DIR/sanitize-app-plists.py" "$DOTFILES" --check 2>&1)"; then
+  report "$plist_audit"
+fi
+# Parse editor JSONC so whitespace, comments and escaped keys cannot hide bypasses.
+for editor in zed vscode cursor; do
+  f="$APPS/$editor/settings.json"
+  [[ -f "$f" ]] || continue
+  python3 "$SCRIPT_DIR/public-editor-policy.py" check --editor "$editor" "$f" ||
+    report "unsafe public editor trust or confirmation policy: apps/$editor/settings.json"
+done
+
 if [[ -f "$APPS/cursor/cli-config.json" ]]; then
   python3 "$SCRIPT_DIR/cursor-cli-settings.py" audit --snapshot "$APPS/cursor/cli-config.json" || report "invalid Cursor CLI attribution snapshot"
 fi
@@ -62,12 +73,44 @@ scan_file() {
 
   case "$f" in
     *.plist)
-      tmp="$TMPDIR/${rel//\//__}.xml"
+      tmp="$AUDIT_TMP_DIR/${rel//\//__}.xml"
       if ! plutil -convert xml1 -o "$tmp" "$f" 2>/dev/null; then
         report "unreadable or malformed plist: $rel"
         return 0
       fi
       scan="$tmp"
+      ;;
+  esac
+
+  # Backup sanitation must not publish malformed editor snapshots. Reuse Zed's
+  # JSONC reader so comments/trailing commas remain valid and capture fails closed.
+  case "$rel" in
+    apps/zed/settings.json|apps/zed/keymap.json)
+      if ! python3 - "$SCRIPT_DIR/check-zed.py" "$f" <<'PY'
+from pathlib import Path
+import runpy
+import sys
+
+try:
+    value = runpy.run_path(sys.argv[1])["read_settings"](Path(sys.argv[2]))
+    expected = list if Path(sys.argv[2]).name == "keymap.json" else dict
+    if not isinstance(value, expected):
+        raise ValueError("wrong Zed snapshot type")
+except (OSError, ValueError) as error:
+    print("invalid Zed JSONC: " + str(error), file=sys.stderr)
+    sys.exit(1)
+PY
+      then
+        report "invalid Zed JSONC: $rel"
+      fi
+      ;;
+  esac
+
+  case "$rel" in
+    apps/*.plist)
+      if ! python3 "$SCRIPT_DIR/public-plist-bookmarks.py" check "$f"; then
+        report "non-portable filesystem bookmark or invalid snapshot: $rel"
+      fi
       ;;
   esac
 

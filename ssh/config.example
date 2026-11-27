@@ -1,0 +1,20 @@
+# Generic OpenSSH example. Review and merge into your local configuration.
+# This file is not installed by bootstrap. See docs/FORKING.md.
+# Keep specific hosts before defaults: OpenSSH uses the first matching value.
+
+Host github.com
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/github_ed25519
+    IdentitiesOnly yes
+
+# Reserved documentation domain; replace locally with your own server details.
+Host example-server
+    HostName server.example.invalid
+    User example-user
+    IdentityFile ~/.secrets/ssh/example_ed25519
+    IdentitiesOnly yes
+
+Host *
+    ForwardAgent no
+    StrictHostKeyChecking ask

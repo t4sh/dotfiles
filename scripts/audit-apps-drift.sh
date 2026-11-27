@@ -33,12 +33,14 @@ SANITIZER="$DOTFILES/scripts/sanitize-app-prefs.sh"
 
 CHECK=0
 STRICT=0
+MACHINE_STATUS=0
 while (($# > 0)); do
   case "$1" in
     -c|--check) CHECK=1 ;;
     --strict) STRICT=1 ;;
+    --machine-status) MACHINE_STATUS=1 ;;
     -h|--help)
-      echo "usage: audit-apps-drift.sh [--check] [--strict]"
+      echo "usage: audit-apps-drift.sh [--check] [--strict] [--machine-status]"
       exit 0
       ;;
     *) echo "unknown option: $1" >&2; exit 2 ;;
@@ -52,7 +54,11 @@ warn() { printf '\033[33m  ⚠\033[0m %s\n' "$*"; }
 die()  { printf '\033[31merror:\033[0m %s\n' "$*" >&2; exit 1; }
 
 skip_or_die() {
-  [[ $CHECK -eq 1 ]] && { warn "$1 — app preference drift audit skipped"; exit 0; }
+  if [[ $CHECK -eq 1 ]]; then
+    warn "$1 — app preference drift audit skipped"
+    (( MACHINE_STATUS == 1 )) && exit 3
+    exit 0
+  fi
   die "$1"
 }
 
@@ -115,6 +121,18 @@ while IFS=$'\t' read -r domain label plist _rest || [[ -n "${domain:-}" ]]; do
 
   staged_rows+=("$domain"$'\t'"$label"$'\t'"$plist")
 done < "$MANIFEST"
+
+# Check the account path before the public sanitizer removes it.
+if [[ -f "$stage/apps/iina/iina.plist" ]]; then
+  iina_capture_dir="$(plutil -extract screenShotFolder raw -o - "$stage/apps/iina/iina.plist" 2>/dev/null || true)"
+  saved_capture_dir="$(python3 "$DOTFILES/scripts/macos-preferences.py" capture-dir)"
+  saved_capture_dir="${DOTFILES_CAPTURE_DIR:-$saved_capture_dir}"
+  [[ -n "$saved_capture_dir" ]] || saved_capture_dir="$(python3 "$DOTFILES/scripts/macos-preferences.py" fallback-dir)"
+  if [[ "$saved_capture_dir" != /* || -z "${saved_capture_dir//\//}" || "$iina_capture_dir" != "$saved_capture_dir" ]]; then
+    printf '  ✗ IINA Screengrabs folder differs from the macOS screenshot policy\n' >> "$report"
+    drifted=$((drifted + 1))
+  fi
+fi
 
 # Irregular repo-captured surfaces that do not fit apps.tsv.
 stage_defaults() {

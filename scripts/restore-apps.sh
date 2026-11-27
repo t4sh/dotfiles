@@ -24,18 +24,33 @@ case "$*" in
 esac
 bash "$DOTFILES/scripts/validate-manifests.sh" apps
 
+# Print the Homebrew prefix that replaces __HOMEBREW_PREFIX__ in $1. An empty
+# or missing prefix would silently turn those paths into root paths.
+editor_homebrew_prefix() {
+    local prefix
+    if ! command -v brew >/dev/null 2>&1 || ! prefix="$(brew --prefix)" || [[ ! -d "$prefix" ]]; then
+        echo "Homebrew is required to materialize editor paths in $1" >&2
+        return 1
+    fi
+    printf '%s\n' "$prefix"
+}
+
+editor_destination_is_file() {
+    if [[ -e "$1" || -L "$1" ]] && [[ ! -f "$1" ]]; then
+        echo "$1 is not a regular file; move it aside, then rerun the restore" >&2
+        return 1
+    fi
+}
+
 materialize_editor_file() {
     local source="$1" destination="$2" prefix tmp
+    editor_destination_is_file "$destination" || return 1
     mkdir -p "$(dirname "$destination")"
     if ! grep -q '__HOMEBREW_PREFIX__' "$source"; then
         cp "$source" "$destination"
         return
     fi
-    command -v brew >/dev/null 2>&1 || {
-        echo "Homebrew is required to materialize editor paths in $source" >&2
-        return 1
-    }
-    prefix="$(brew --prefix)"
+    prefix="$(editor_homebrew_prefix "$source")" || return 1
     tmp="$(mktemp "$(dirname "$destination")/.dotfiles-editor.XXXXXX")"
     if ! HOMEBREW_PREFIX="$prefix" perl -pe \
         's/__HOMEBREW_PREFIX__/$ENV{HOMEBREW_PREFIX}/g' "$source" > "$tmp"; then
@@ -53,17 +68,18 @@ source "$DOTFILES/scripts/lib/running-app-gate.sh"
 trap restore_reopen_apps EXIT
 
 restore_zed() {
-    if restore_app_is_deferred "Zed"; then
+    if is_restore_host_app "Zed" || restore_app_is_deferred "Zed"; then
         echo "  - Zed settings skipped because it hosts this restore"
         return
     fi
-    local file
-    for file in settings.json keymap.json; do
-        [ -f "$DOTFILES/apps/zed/$file" ] || continue
-        materialize_editor_file "$DOTFILES/apps/zed/$file" "$HOME/.config/zed/$file"
-    done
-    echo "  ✓ Zed settings and keymap restored"
+    python3 "$SCRIPT_DIR/zed_settings.py" restore \
+        --repo "$DOTFILES" --settings-dir "$HOME/.config/zed" || return 1
     echo "    Launch Zed for automatic extension installation, then run make zed-check."
+}
+
+zed_restore_preflight() {
+    python3 "$SCRIPT_DIR/zed_settings.py" restore --preflight \
+        --repo "$DOTFILES" --settings-dir "$HOME/.config/zed"
 }
 
 if [[ "$*" == '--only cursor-cli' ]]; then
@@ -79,7 +95,7 @@ if [[ "$*" == '--only hermes' ]]; then
         echo "Hermes is the restore host; run make restore-hermes from another terminal." >&2
         exit 1
     fi
-    python3 "$SCRIPT_DIR/hermes-settings.py" restore
+    python3 "$SCRIPT_DIR/hermes-settings.py" restore --keep-local
     echo "  ✓ Hermes backend preferences restored; Desktop UI restoration is not verified."
     echo "    In Hermes Desktop, select the default/local backend, then open Settings → Appearance → Message Reactions."
     echo "    Match your saved display.message_reactions value: false = Off, true = On."
@@ -89,8 +105,16 @@ if [[ "$*" == '--only hermes' ]]; then
 fi
 
 if [[ "$*" == '--only zed' ]]; then
+    if is_restore_host_app "Zed"; then
+        echo "Zed is the restore host; run make restore-zed from another terminal." >&2
+        exit 1
+    fi
     # Parse both snapshots before quitting the app or replacing either file.
-    python3 "$SCRIPT_DIR/check-zed.py" --snapshot-only
+    if ! zed_snapshot_check="$(python3 "$SCRIPT_DIR/check-zed.py" --snapshot-only)"; then
+        echo "$zed_snapshot_check" >&2
+        exit 1
+    fi
+    zed_restore_preflight
     restore_running_app_gate "Zed:Zed"
     if restore_app_is_deferred "Zed"; then
         echo "Zed is the restore host; run make restore-zed from another terminal." >&2
@@ -100,6 +124,17 @@ if [[ "$*" == '--only zed' ]]; then
     exit 0
 fi
 
+# A Zed-hosted shell must restore the other apps even if its own snapshot or
+# live settings cannot be merged. Preflight Zed only when this run will apply it.
+if ! is_restore_host_app "Zed" &&
+   [[ -f "$DOTFILES/apps/zed/settings.json" || -f "$DOTFILES/apps/zed/keymap.json" ]]; then
+    if ! zed_snapshot_check="$(python3 "$SCRIPT_DIR/check-zed.py" --repo "$DOTFILES" --snapshot-only)"; then
+        echo "$zed_snapshot_check" >&2
+        exit 1
+    fi
+    zed_restore_preflight
+fi
+
 echo "Restoring app preferences..."
 
 # Derive regular applications from apps.tsv so new restore rows cannot bypass
@@ -107,7 +142,7 @@ echo "Restoring app preferences..."
 RESTORE_GATE_ENTRIES=()
 append_restore_gate_entry() {
     local label="$1" app_name="$2" existing
-    for existing in "${RESTORE_GATE_ENTRIES[@]}"; do
+    for existing in ${RESTORE_GATE_ENTRIES[@]+"${RESTORE_GATE_ENTRIES[@]}"}; do
         [[ "${existing#*:}" == "$app_name" ]] && return 0
     done
     RESTORE_GATE_ENTRIES+=("$label:$app_name")
@@ -132,7 +167,7 @@ if [[ -f "$DOTFILES/apps/zed/settings.json" || -f "$DOTFILES/apps/zed/keymap.jso
     append_restore_gate_entry "Zed" "Zed"
 fi
 
-restore_running_app_gate "${RESTORE_GATE_ENTRIES[@]}"
+restore_running_app_gate ${RESTORE_GATE_ENTRIES[@]+"${RESTORE_GATE_ENTRIES[@]}"}
 
 # Whole-domain macOS system snapshots (Keyboard Shortcuts and Input Sources)
 # are imported via `defaults import`, but cfprefsd caches these domains. Track
@@ -153,7 +188,23 @@ while IFS=$'\t' read -r domain label plist app_name; do
         continue
     fi
     if [ -f "$DOTFILES/$plist" ]; then
+        if [[ "$domain" == com.colliderli.iina ]]; then
+            iina_capture_dir="$(python3 "$SCRIPT_DIR/macos-preferences.py" capture-dir)"
+            iina_capture_dir="${DOTFILES_CAPTURE_DIR:-$iina_capture_dir}"
+            [[ -n "$iina_capture_dir" ]] || iina_capture_dir="$(python3 "$SCRIPT_DIR/macos-preferences.py" fallback-dir)"
+            [[ "$iina_capture_dir" == /* && -n "${iina_capture_dir//\//}" ]] || {
+                echo 'IINA Screengrabs restore needs an absolute non-root screenshot location' >&2
+                exit 1
+            }
+        fi
         defaults import "$domain" "$DOTFILES/$plist"
+        if [[ "$domain" == com.colliderli.iina ]]; then
+            defaults write "$domain" screenShotFolder -string "$iina_capture_dir"
+            [[ "$(defaults read "$domain" screenShotFolder)" == "$iina_capture_dir" ]] || {
+                echo 'IINA Screengrabs location did not read back after restore' >&2
+                exit 1
+            }
+        fi
         echo "  ✓ $label"
         # Keep in sync with the two macos/ rows in apps.tsv (no owning app; cfprefsd caches them).
         case "$domain" in

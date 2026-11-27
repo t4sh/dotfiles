@@ -137,7 +137,10 @@ class BackupAppsReviewWiringTests(unittest.TestCase):
         apps = (ROOT / 'scripts/backup-apps.sh').read_text(encoding='utf-8')
         self.assertIn('scripts/brewfile-review.py', apps)
         self.assertIn('--saved "$SOURCE_DOTFILES/Brewfile"', apps)
-        self.assertIn('--candidate "$STAGE/Brewfile"', apps)
+        self.assertIn('dump "$CAPTURE/Brewfile"', apps)
+        candidate = '--candidate "$CAPTURE/Brewfile"'
+        self.assertIn(candidate, apps)
+        self.assertGreater(apps.index('install_capture Brewfile'), apps.index(candidate))
 
 
 if __name__ == '__main__':

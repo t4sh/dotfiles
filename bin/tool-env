@@ -1,0 +1,172 @@
+#!/usr/bin/env python3
+"""Load credentials for a child command or a configured literal env-file consumer."""
+import os
+from pathlib import Path
+import pwd
+import re
+import shlex
+import signal
+import subprocess
+import sys
+import tempfile
+
+
+ROOT = Path(__file__).resolve().parents[1]
+NAME = r'[A-Za-z0-9_.-]+'
+KEY = r'[A-Za-z_][A-Za-z0-9_]*'
+SHELL_SETTINGS = ('BASH_ENV', 'ENV', 'SHELLOPTS', 'BASHOPTS')
+USAGE = '''Usage: tool-env PROFILE --check | tool-env PROFILE -- COMMAND [ARG...]
+       tool-env --adapter NAME --check | tool-env --adapter NAME -- COMMAND [ARG...]'''
+
+
+def adapter_settings(name):
+    path = Path(os.environ.get('TOOL_ENV_ADAPTERS', str(ROOT / 'config/tool-env-adapters.tsv')))
+    adapters = {}
+    for line in path.read_text().splitlines():
+        if not line.strip() or line.lstrip().startswith('#'):
+            continue
+        fields = line.split('\t')
+        if len(fields) != 5:
+            raise ValueError()
+        label, override, suffix, loader, required = fields
+        keys = required.split(',') if required else []
+        if (not re.fullmatch(NAME, label) or label in adapters
+                or not re.fullmatch(KEY, override) or override in SHELL_SETTINGS
+                or not re.fullmatch(NAME, suffix) or not loader
+                or any(not re.fullmatch(KEY, key) for key in keys)):
+            raise ValueError()
+        adapters[label] = (override, suffix, ROOT / Path(loader).expanduser(), keys)
+    return adapters[name]
+
+
+def adapter_profile(suffix, override):
+    if os.environ.get(override):
+        return Path(os.environ[override])
+    env_dir = Path(os.environ.get('XDG_CONFIG_HOME') or Path.home() / '.config') / 'env'
+    path = env_dir / (pwd.getpwuid(os.getuid()).pw_name + '.' + suffix + '.env')
+    if path.is_file():
+        return path
+    return next((p for p in sorted(env_dir.glob('*.' + suffix + '.env')) if p.is_file()), path)
+
+
+def profile_values(path, *, literal=False, override=None, required=()):
+    values = {}
+    for line in path.read_text().splitlines():
+        line = line.lstrip('\ufeff').strip()
+        if not line or line.startswith(('#', '-')):
+            continue
+        match = re.fullmatch(r'(?:export\s+)?(' + KEY + r')\s*=\s*(.*)', line)
+        if not match or match[1] in values:
+            raise ValueError()
+        key, value = match.groups()
+        if literal:
+            if key in (*SHELL_SETTINGS, override):
+                raise ValueError()
+            value = value.strip()
+            if len(value) >= 2 and value[0] == value[-1] and value[0] in ('"', "'"):
+                value = value[1:-1]
+        else:
+            # Preserve the existing named-profile parsing and inline-comment behavior.
+            parts = shlex.split(value, comments=True)
+            if len(parts) != 1:
+                raise ValueError()
+            value = parts[0]
+        if value.startswith('keychain://'):
+            service = value[len('keychain://'):]
+            if not service:
+                raise ValueError()
+            result = subprocess.run(['/usr/bin/security', 'find-generic-password',
+                                     '-s', service, '-a', pwd.getpwuid(os.getuid()).pw_name,
+                                     '-w'], capture_output=True, text=True)
+            value = result.stdout.removesuffix('\n')
+            if result.returncode or not value:
+                raise ValueError()
+        if (not literal and not value) or (literal and any(char in value for char in '\r\n\0')):
+            raise ValueError()
+        values[key] = value
+    if not values or any(not values.get(key) for key in required):
+        raise ValueError()
+    return values
+
+
+def run_adapter(loader, override, values, command):
+    if not loader.is_file():
+        raise ValueError()
+    env = {key: value for key, value in os.environ.items() if key not in SHELL_SETTINGS}
+    process = None
+    stop_signal = None
+
+    def interrupt(signum, _frame):
+        nonlocal stop_signal
+        stop_signal = signum
+        if process is not None:
+            process.send_signal(signum)
+
+    previous_handlers = {sig: signal.signal(sig, interrupt)
+                         for sig in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP)}
+    try:
+        with tempfile.TemporaryDirectory(prefix='dotfiles-tool-env-') as directory:
+            path = Path(directory) / 'credentials.env'
+            with os.fdopen(os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600), 'w') as stream:
+                for key, value in values.items():
+                    # The configured loader must parse these assignments as data, not source them.
+                    stream.write(f"{key}='{value}'\n")
+            env[override] = str(path)
+            if stop_signal is not None:
+                return 128 + stop_signal
+            process = subprocess.Popen([
+                '/bin/bash', '+x', '+v', '-e', '-c',
+                'source "$1"; shift; exec "$@"', 'tool-env', str(loader), *command,
+            ], env=env)
+            if stop_signal is not None:
+                process.send_signal(stop_signal)
+            code = process.wait()
+            if stop_signal is not None:
+                return 128 + stop_signal
+            return code if code >= 0 else 128 - code
+    finally:
+        for sig, handler in previous_handlers.items():
+            signal.signal(sig, handler)
+
+
+def main():
+    args = sys.argv[1:]
+    if args in (['--help'], ['-h']):
+        print(USAGE)
+        return 0
+    # Preserve PROFILE --check / PROFILE -- COMMAND when PROFILE is --adapter.
+    adapter = len(args) > 1 and args[0] == '--adapter' and args[1] not in ('--check', '--')
+    if adapter:
+        args = args[1:]
+    if len(args) < 2 or not re.fullmatch(NAME, args[0]):
+        print(USAGE, file=sys.stderr)
+        return 2
+    profile, mode, *command = args
+    if (mode == '--check' and command) or (mode == '--' and not command) or mode not in ('--check', '--'):
+        return 2
+    try:
+        if adapter:
+            override, suffix, loader, required = adapter_settings(profile)
+            values = profile_values(adapter_profile(suffix, override), literal=True,
+                                    override=override, required=required)
+            code = run_adapter(loader, override, values, ['/usr/bin/true'] if mode == '--check' else command)
+            if mode == '--check' and code == 0:
+                print('tool-env: profile and loader ready (values hidden; remote access unverified)')
+            return code
+        root = Path(os.environ.get('DOTFILES_SECRETS_DIR', str(Path.home() / '.secrets')))
+        values = profile_values(root / 'config/env' / (profile + '.env'))
+    except (OSError, UnicodeError, ValueError, KeyError):
+        print('tool-env: profile invalid, credential missing, or Keychain access denied (details hidden)', file=sys.stderr)
+        return 1
+    if mode == '--check':
+        print('tool-env: profile ready (values hidden)')
+        return 0
+    try:
+        os.execvpe(command[0], command, {**os.environ, **values})
+    except (OSError, ValueError):
+        print('tool-env: could not launch command (details hidden)', file=sys.stderr)
+        return 1
+
+
+if __name__ == '__main__':
+    sys.exit(main())

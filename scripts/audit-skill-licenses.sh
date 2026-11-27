@@ -88,7 +88,14 @@ meta_for() {
 source_license_for() {
   local source="$1"
   [[ -n "$source" && -f "$SOURCE_LICENSES" ]] || return 1
-  awk -F '\t' -v s="$source" '$1 == s {print $2; found=1; exit} END {exit found ? 0 : 1}' "$SOURCE_LICENSES"
+  # GitHub may return the same owner/repository with different casing on refresh.
+  # Set the locale through env: assigning LC_ALL for one command here makes
+  # Homebrew bash 5.3 crash intermittently (exit 139, no message).
+  env LC_ALL=C awk -F '\t' -v s="$source" '
+    BEGIN {s = tolower(s)}
+    tolower($1) == s {print $2; found=1; exit}
+    END {exit found ? 0 : 1}
+  ' "$SOURCE_LICENSES"
 }
 
 # Classify a reviewed source-level license identifier from source-licenses.tsv.
@@ -135,6 +142,7 @@ listed_in_gitignore() {
 RESTRICTED=()
 REVIEW=()
 MANUAL=()
+skill_count=0
 permissible_n=0
 firstparty_n=0
 source_reviewed_n=0
@@ -142,6 +150,8 @@ source_reviewed_n=0
 for dir in "$SKILLS_DIR"/*/; do
   [[ -d "$dir" ]] || continue
   name="$(basename "$dir")"
+  [[ "$name" == synced ]] && continue  # Claude account cache
+  skill_count=$((skill_count + 1))
   lic="$(/usr/bin/find "$dir" -maxdepth 1 -type f \( -iname 'LICENSE*' -o -iname 'COPYING*' \) 2>/dev/null | head -1)"
   meta_line="$(meta_for "$name")"
   source_type="$(printf '%s' "$meta_line" | awk -F '\t' '{print $2}')"
@@ -181,7 +191,6 @@ for dir in "$SKILLS_DIR"/*/; do
   esac
 done
 
-skill_count="$(/usr/bin/find "$SKILLS_DIR" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')"
 info "skill license audit ($skill_count skills)"
 ok   "permissible local licenses (kept public): $permissible_n"
 ok   "reviewed source-level licenses (kept public): $source_reviewed_n"

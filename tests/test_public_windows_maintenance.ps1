@@ -29,7 +29,12 @@ try {
         try {
             if ($operation -eq 'check') { Get-DotfilesLinkMode $source $target | Out-Null }
             else { Set-DotfilesLink $source $target | Out-Null }
-        } catch { $blocked = $_.Exception.Message -match 'redirected into an MSIX LocalCache' }
+        } catch {
+            $blocked = $_.Exception.Message -match 'redirected into an MSIX LocalCache'
+            if (-not $_.Exception.Message.Contains($target) -or -not $_.Exception.Message.Contains($physical)) {
+                throw 'Redirection diagnostic omitted requested or physical path'
+            }
+        }
         if (-not $blocked) { throw "Hidden cache file accepted during $operation" }
         if ([IO.File]::ReadAllText($physical) -cne '{"original":true}') { throw 'Redirected file was changed' }
     }
@@ -50,6 +55,14 @@ try {
     }
     $skillsLog = Join-Path $dotfiles 'checks.log'
     $runner = Get-Content (Join-Path $root 'scripts/update-windows.ps1') -Raw
+    $tokens = $null; $errors = $null
+    $ast = [Management.Automation.Language.Parser]::ParseInput($runner, [ref]$tokens, [ref]$errors)
+    if ($errors.Count) { throw $errors[0] }
+    foreach ($name in @('Get-DotfilesUpdateOutputColor', 'Write-DotfilesUpdateOutput')) {
+        $function = $ast.Find({ param($node) $node -is [Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq $name }, $true)
+        if (-not $function) { throw "Missing public feedback function: $name" }
+        Invoke-Expression $function.Extent.Text
+    }
     $pattern = '(?ms)^\s*\$env:PYTHON_BIN = \$python\r?\n(?<commands>.*?)^\s*& \(Join-Path \$dotfiles ''scripts\\setup-windows-skill-engine\.ps1''\)'
     $match = [regex]::Match($runner, $pattern)
     if (-not $match.Success) { throw 'Cannot locate public refresh commands' }
@@ -57,7 +70,7 @@ try {
     [Console]::OutputEncoding = [Text.Encoding]::GetEncoding(437)
     $env:PYTHONIOENCODING = 'ascii'
     $env:PYTHON_BIN = $python
-    $output = @(& $commands)
+    $output = @(& $commands 6>&1 | ForEach-Object { [string]$_ })
     $expected = [string][char]0x2713 + ' fixture'
     if ($output.Count -ne 2 -or $output[0] -cne 'Checking for skill updates...' -or $output[1] -cne $expected) { throw 'Public refresh progress output is incorrect' }
     $checks = @(Get-Content -LiteralPath $skillsLog)

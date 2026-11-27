@@ -1,10 +1,22 @@
 # Windows workflow
+
+For fresh setup or adoption of existing configuration, follow [the agent setup runbook](docs/AGENT-SETUP.md) before [Setup](#setup). Existing setups require backup-status confirmation and an approved migration plan; real directories at managed link destinations must be reconciled before linking. The maintenance notes below apply after setup.
+
 ## Maintenance scope and diagnostics
 
 Use `update-all -SkipSkills` for apps only, or `update-all -SkipApps` for skills.
 Each stage reports elapsed seconds. Topgrade output is retained in
 `%TEMP%/dotfiles-topgrade-*.log`; failures point to that run's log. Retry only the
 named failing step instead of repeating all maintenance.
+A second maintenance invocation for the same Windows user exits before its first stage.
+Windows package maintenance pins Topgrade to 17.15.0, the upstream build that
+ran under Application Control on the reference Windows host. Code Integrity
+blocked 17.16.0. The stage log records Win32 error 4551 if a launch is denied.
+TLDR can rebuild its uv tool with an installed Python that passes socket
+and TLS imports if Application Control blocks a runtime dependency.
+Feedback uses blue for progress, green for success, yellow for warnings or reboot
+requests, and red for failures. Topgrade logs retain UTF-8 text without ANSI colors;
+the caller's encoding and color environment are restored after the stage.
 Codex's desktop-bundled CLI is maintained with the desktop app; Topgrade's
 standalone Codex updater is disabled.
 
@@ -21,6 +33,17 @@ failures with the OS error and exact executable path in
 `%TEMP%/dotfiles-hermes-update-*.log`. After a successful update it repairs the
 source shortcut and checks shared skills. See
 [Hermes Windows setup](docs/hermes-preferences.md#windows-source-launcher-and-shared-skills).
+
+Managed Hermes calls use a compact process-local PATH. Windows cmd.exe can
+drop inherited PATH values over 8,191 characters, and pnpm adds directories
+for nested lifecycle scripts. The managed runtime starts with the host tools it
+needs, then Hermes supplies its pinned tools to child processes. The caller's
+PATH and profile environment are restored after success or failure.
+
+After launching an editor with Settings Sync enabled, rerun its targeted
+extension check. Sync can replace a restored extension pin. For example, use
+`dot extensions -Editor code -Check` to confirm Shell Format still reports
+the declared version.
 
 Maintenance prepares gcloud's copied update Python only for Topgrade and restores
 the caller's `CLOUDSDK_PYTHON` afterward. After Topgrade, VS Code and Cursor
@@ -41,9 +64,14 @@ separate manifests under `config/windows-*.tsv` and `apps/windows/`.
 ## Setup
 
 Use a Git checkout, Windows Terminal, winget (Microsoft App Installer), and
-standard PowerShell 7.4 or newer. Store-packaged PowerShell is excluded because
-its filesystem redirection can reach different preference files. Windows
-PowerShell 5.1 is supported only as the bootstrap bridge.
+standard PowerShell 7.4 or newer. On a machine without Git, install it first
+(`winget install --id Git.Git -e`) so the clone below works. Developer Mode is
+not required; links fall back to hardlinks and junctions. Store-packaged
+PowerShell is excluded because its filesystem redirection can reach different
+preference files. Windows PowerShell 5.1 is supported only as the bootstrap
+bridge.
+Bootstrap and manifest maintenance select the latest PowerShell 7.6 LTS MSI from
+WinGet. PowerShell 7.7 ships only as MSIX in WinGet.
 
 The scripts require a persistent RemoteSigned policy (existing Unrestricted or
 Bypass also works). Set it explicitly before setup, then open a fresh console:
@@ -65,6 +93,41 @@ Link checks and repair reject existing files hidden behind MSIX cache redirectio
 If reported, open standard PowerShell directly from Windows Run or Explorer and
 retry so the workflow reaches the actual configuration files.
 
+App selection defaults to `all`, preserving full bootstrap behavior. Use
+`-AppGroups 'development,utilities'` with `install.ps1` or `dot setup`, or
+`make all APP_GROUPS=development,utilities`, to select optional groups. A named
+selection includes `essentials`. `none` keeps the native CLI/runtime baseline
+but defers app casks, Windows App Store counterparts, fonts and editor
+extensions. `fonts` selects Brewfile fonts; `development` selects Brewfile editor
+extensions. Every non-font cask has exactly one group in
+`config/app-groups.tsv`; invalid, missing or stale mappings stop setup before
+installation. Partial selections skip aggregate preference restore, preserving
+settings for deferred apps. An explicit `dot restore-apps -Apply` still applies
+its full template scope. Windows App Store counterparts are all-only; select
+`all` with `-Only <package-id>` for a specific counterpart.
+
+Bootstrap reports completed, failed and skipped stages with retry commands.
+Run `dot setup-status -AppGroups 'development,utilities'` or
+`make setup-status APP_GROUPS=development,utilities` for selected/deferred app
+counts, package inventory and local link, hook, skill and preference checks.
+The command installs no apps and does not restore preferences or accept WinGet
+source agreements; WinGet may query configured sources during inventory.
+PowerShell, managed Python and pinned Node are checked locally. Individual
+uv/Volta tool versions, fonts, account sign-ins, paid activation, default-app
+choices, secret recovery and GUI behavior remain manual verification.
+
+Arc, Latest, Linear, LobeHub, Maccy, Nimbalyst, Tolaria and Upscayl are retired
+from automatic Mac and Windows installation. Existing app settings are retained;
+setup does not uninstall these apps.
+
+## Retired Paseo setup
+
+If this machine previously used Paseo, follow the explicit preview/apply steps in
+[the retirement guide](docs/PASEO-RETIREMENT.md). Removing package/link manifest
+rows and rerunning `dot path` does not remove old links or an existing User PATH
+entry. The cleanup verifies link ownership and preserves saved data and custom
+install locations; review those separately. Native cleanup acceptance is pending.
+
 ## Daily commands
 
 Run from the checkout, or use `dot` after setup adds its directory to PATH:
@@ -75,13 +138,21 @@ Run from the checkout, or use `dot` after setup adds its directory to PATH:
 | `bin\dot.cmd doctor -Strict` | Check runtime, policy and configured surfaces |
 | `bin\dot.cmd packages-check` | Compare declared packages |
 | `bin\dot.cmd packages -Apply` | Install declared package counterparts |
+| `bin\dot.cmd setup-status` / `make setup-status` | Report selected and deferred apps with local setup checks |
 | `bin\dot.cmd restore-apps` | Preview template restoration |
 | `bin\dot.cmd restore-apps -Apply` | Merge shipped template settings; close affected apps first |
+| `bin\dot.cmd default-apps -OpenSettings` | Open Settings to choose VLC for supported media types |
+| `bin\dot.cmd default-apps -Check` | Verify the declared VLC file associations |
 | `bin\dot.cmd backup -Apply` | Retain curated public app templates |
 | `bin\dot.cmd upgrade` | Update apps, runtimes and skills |
 | `bin\dot.cmd hermes -Apply` | Apply shared-skill paths and source launcher; close Hermes first |
 | `bin\dot.cmd hermes-launcher -Check` | Verify Start → Hermes selects source launch |
 | `make skills` | Verify checked-in skill metadata |
+
+OpenCode CLI updates belong to the outer WinGet stage through `Anomaly.OpenCode`.
+Its duplicate Topgrade step is disabled: Topgrade 17.13 rejects the CLI's bare
+version output before attempting an update. This does not disable WinGet updates
+for the CLI or the separately declared OpenCode Desktop package.
 
 Skill checks and refresh output use UTF-8 even in a legacy-code-page console;
 the caller's encoding is restored afterward. Native failures remain failures.
@@ -130,6 +201,37 @@ does not prevent the other restore stages from being attempted; the command
 reports the combined failures at the end. Personal keybindings, snippets, tasks,
 profiles and extension state are not part of the curated public templates.
 
+### VLC file associations
+
+`config/windows-vlc-associations.tsv` lists 37 media extensions supported by
+VLC's Windows registration. `.ts` remains with Cursor; `.ogm` and `.ogv` remain
+with Edge. IINA plugin packages and formats not advertised by VLC are excluded.
+
+After installing VLC, run `dot default-apps -OpenSettings` or
+`make default-apps`, then choose VLC for the listed extensions in Windows
+Settings. Restore does not write protected `UserChoice` registry keys.
+Run `dot default-apps -Check` or `make default-apps-check` to verify the result.
+The checker reports differing choices and formats not advertised by the current
+VLC installation. On Windows 11, when `AppDefaults` `HashVersion` is 1, the
+active choice is `UserChoiceLatest\ProgId`; the older `UserChoice` remains as a
+rollback value. The checker prefers that latest choice for hash version 1, uses
+the legacy choice for older hash versions, then falls back to the latest or
+registered association when no user choice exists. It reads associations only.
+Full `dot restore-apps -Check` and strict doctor include this check; the Settings
+selection remains a manual setup step.
+
+### Deskflow
+
+Install Deskflow with `dot packages -Apply -Only Deskflow.Deskflow`. Package
+installation and upgrades select and pin the newest permitted three-part stable
+WinGet release. Four-part continuous builds are excluded; unsigned stable
+`1.27.0` is blocked by Smart App Control, so the selected release is currently
+`1.26.0`. If an installed stable or continuous version is blocked, the package
+workflow replaces it with the permitted release. Keep Windows security enabled.
+Client identity, server address and other machine-specific Deskflow settings are
+not part of the public templates.
+
+
 ## Candidate validation
 
 Mac checks cannot establish native Windows readiness. In an isolated Windows
@@ -146,6 +248,7 @@ isolated dummy preference roots and verifies that public templates remain intact
 pwsh -NoProfile -File tests/test_public_windows.ps1
 pwsh -NoProfile -File tests/test_public_windows_editors.ps1
 pwsh -NoProfile -File tests/test_public_windows_maintenance.ps1
+pwsh -NoProfile -File tests/test_public_windows_projection.ps1
 pwsh -NoProfile -File tests/test_windows_skills_prompt.ps1
 pwsh -NoProfile -File tests/test_windows_python_discovery.ps1
 pwsh -NoProfile -File tests/test_windows_update_reporting.ps1
@@ -154,3 +257,21 @@ pwsh -NoProfile -File tests/test_public_windows_hermes.ps1
 
 The PowerShell `port-info <port>` helper inspects connections. The misleading former
 `free-port` name is removed when the profile reloads; it never terminated listeners.
+
+## Agent settings and Hermes commands
+
+Windows bootstrap merges the saved Claude attribution settings while preserving
+other user settings. Run `dot claude-settings -Apply` to restore them or
+`dot claude-settings -Check` to verify them. `CLAUDE_CONFIG_DIR` overrides the
+default `%USERPROFILE%\.claude` directory. The equivalent Make targets are
+`claude-settings` and `claude-settings-check`.
+
+`dot link` links OpenCode's global `opencode.jsonc` and `AGENTS.md` under
+`%USERPROFILE%\.config\opencode`. Windows uses the shared skill permissions in
+`config/opencode/opencode.jsonc`. Browse lives in the Mac configuration.
+
+`dot hermes-runtime -Check` checks the Hermes interpreter.
+`dot hermes-update -DryRun` previews the standalone updater; close Hermes
+before applying `dot hermes-update`. Personal model choices and credentials
+remain local. Live update and GUI acceptance require an initialized test
+installation; fixture success alone does not establish those results.

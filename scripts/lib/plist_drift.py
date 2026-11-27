@@ -91,13 +91,38 @@ def strip_volatile(value):
             return value
         # Several Swift apps store Codable settings as plist Data. Compare
         # their JSON meaning, not serialization key order.
-        return strip_volatile(decoded)
+        return json.dumps(strip_volatile(decoded), sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return value
+
+
+def same_value(left, right):
+    """Compare plist values recursively, keeping Boolean, integer, real and Data distinct."""
+    if type(left) is not type(right):
+        return False
+    if isinstance(left, dict):
+        return left.keys() == right.keys() and all(same_value(v, right[k]) for k, v in left.items())
+    if isinstance(left, list):
+        return len(left) == len(right) and all(same_value(a, b) for a, b in zip(left, right))
+    return left == right
+
+
+def normalize(value):
+    value = strip_volatile(value)
+    # macOS 27 rewrites this disabled shortcut's type without changing its
+    # behavior. Keep enabled state, bindings and unknown type values meaningful.
+    if isinstance(value, dict):
+        hotkeys = value.get("AppleSymbolicHotKeys", {})
+        entry = hotkeys.get("176") if isinstance(hotkeys, dict) else None
+        if isinstance(entry, dict) and entry.get("enabled") is False:
+            binding = entry.get("value")
+            if isinstance(binding, dict) and binding.get("type") == "SAE1.0":
+                binding["type"] = "standard"
     return value
 
 
 def load(path: str):
     with open(path, "rb") as handle:
-        return strip_volatile(plistlib.load(handle))
+        return normalize(plistlib.load(handle))
 
 
 def describe(value) -> str:
@@ -123,11 +148,11 @@ def main() -> int:
         return 2
 
     if not isinstance(live, dict) or not isinstance(repo, dict):
-        return 0 if live == repo else 1
+        return 0 if same_value(live, repo) else 1
 
     only_live = sorted(set(live) - set(repo))
     only_repo = sorted(set(repo) - set(live))
-    changed = sorted(key for key in set(live) & set(repo) if live[key] != repo[key])
+    changed = sorted(key for key in set(live) & set(repo) if not same_value(live[key], repo[key]))
 
     if not (only_live or only_repo or changed):
         return 0

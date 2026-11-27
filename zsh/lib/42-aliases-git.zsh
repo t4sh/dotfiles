@@ -14,8 +14,12 @@ dot-backup() {
   local -a backup_paths=(
     Brewfile Skillsfile THIRD_PARTY_NOTICES.md
     apps services agents/.skill-lock.json agents/skills
-    macos/dock-backup.plist macos/hitoolbox.plist macos/symbolichotkeys.plist
+    macos/dock-backup.plist macos/dock-layout.plist
   )
+  local domain label plist owner
+  while IFS=$'\t' builtin read -r domain label plist owner; do
+    [[ "$plist" == macos/*.plist && -f "$plist" ]] && backup_paths+=("$plist")
+  done < apps.tsv
   echo "Backup changes proposed:"
   git status --short -- "${backup_paths[@]}"
   git diff --stat -- "${backup_paths[@]}"

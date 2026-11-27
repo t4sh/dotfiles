@@ -44,6 +44,10 @@ elseif (-not $Apply) { Write-Output "Preview Restore : $target" }
 }
 Invoke-RestoreStep 'Editor preferences' { & (Join-Path $PSScriptRoot 'sync-windows-apps.ps1') @options }
 if ($Only -notin @('vscode','cursor')) { Invoke-RestoreStep 'Extended preferences' { & (Join-Path $PSScriptRoot 'sync-windows-extra-apps.ps1') @options } }
+if (-not $Only) {
+    if ($Check) { Invoke-RestoreStep 'VLC file associations' { & (Join-Path $PSScriptRoot 'check-windows-vlc-associations.ps1') -Check } }
+    else { Write-Output 'VLC file associations require Windows Settings: dot default-apps; then dot default-apps -Check.' }
+}
 foreach ($editor in @('vscode','cursor')) {
     if ($Only -and $Only -ne $editor) { continue }
     $extensionOptions=@{Editor=$(if($editor -eq 'vscode'){'code'}else{'cursor'});Apply=$Apply;Check=$Check}

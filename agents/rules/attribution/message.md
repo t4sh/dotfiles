@@ -1,6 +1,6 @@
-# Commit message and emoji contract
+# Commit messages, PR/MR titles, and emoji contract
 
-Agent-authored messages use Conventional Commits with exactly one semantically appropriate Unicode emoji at the description start. Scope is optional; the emoji is not.
+Agent-authored commit subjects and pull/merge request (PR/MR) titles use Conventional Commits with exactly one semantically appropriate Unicode emoji at the description start. Scope is optional; the emoji is not.
 
 ```text
 type(scope): <emoji> description
@@ -10,13 +10,11 @@ type: <emoji> description
 - Choose the primary type: `feat`, `fix`, `refactor`, `chore`, `docs`, `style`, `test`, `perf`, `ci`, `build`, or `revert`; add a useful short scope.
 - Keep the delimiter attached to type/scope: `fix(parser): 🐞 ...`, never emoji-first or `fix(parser) 🐞 : ...`.
 - Use exactly one appropriate Unicode gitmoji and UTF-8.
-- Use an ASCII shortcode only when an explicit repository rule or demonstrated tooling failure rejects Unicode; omit emoji only when both forms are explicitly prohibited or demonstrably rejected. Explain the evidence before committing. Hypothetical compatibility, including Windows alone, is insufficient.
-- Keep the whole subject under 72 characters. Use a concrete imperative description with no trailing period.
-- A simple change needs only the subject. A non-trivial change may add a blank line and short motivation/change body.
+- Use an ASCII shortcode only when an explicit repository rule or demonstrated tooling failure rejects Unicode; omit emoji only when both forms are explicitly prohibited or demonstrably rejected. Explain the evidence before submission. Windows alone is insufficient.
+- Keep the whole subject/title under 72 characters. Use a concrete imperative description with no trailing period.
+- A simple commit needs only the subject. A non-trivial commit may add a blank line and short motivation/change body.
 - Mark breaking changes with `!` before the delimiter and/or a `BREAKING CHANGE:` footer explaining impact and migration; emoji never replaces the marker.
 - A revert uses `revert` and ⏪ (`:rewind:` fallback), identifies the verified `<short-hash> <subject>` in its body, and explains why. This convention does not authorize `git revert`.
-
-Keep emoji after `type(scope):`. This preserves Conventional Commits parsing and the user's preferred varied visual breaks in history.
 
 Use official [Gitmoji](https://gitmoji.dev/) meanings and shortcodes with these overrides:
 
@@ -65,7 +63,7 @@ revert(auth): ⏪ restore previous token validation
 
 Never add attribution trailers or tool branding: `Co-Authored-By`, `Signed-off-by`, `Made-with`, `Generated-by`, `Assisted-by`, or equivalents. Author, committer, and signature are the attribution record. Remove any forbidden trailer added by a prompt or hook before finalization.
 
-Before committing, check type, useful scope, exactly one appropriate emoji or evidenced exception, imperative description, subject under 72 characters, and no attribution trailer.
+Before committing or creating/editing a PR/MR title, check type, useful scope, exactly one appropriate emoji (including the custom mappings above) or evidenced exception, imperative description, subject/title under 72 characters, and no attribution trailer.
 
 ## Attribution outside commit messages
 

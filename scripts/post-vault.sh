@@ -5,7 +5,7 @@ case "${OS:-}:$(uname -s)" in
 esac
 # After ~/.secrets lands: wire consumers, prove SSH, restore vault-backed prefs.
 #
-# Prerequisite (operator): secrets-restore[-apply] → secrets-pass-import
+# Prerequisite: restore vault + passphrase, restore tool Keychain items, gh auth login.
 # Usage: make post-vault
 #        bash scripts/post-vault.sh
 set -euo pipefail
@@ -36,11 +36,26 @@ run_make() {
 info "post-vault: install backup manifest"
 run_make secrets-manifest
 
-info "post-vault: link all declared consumers"
+info "post-vault: prepare legacy shell settings"
+python3 "$DOTFILES/scripts/migrate-shell-env.py"
+
+info "post-vault: link required consumers"
 DOTFILES_STRICT_LINK=1 run_make link
 
+info "post-vault: credential recovery readiness (presence only)"
+if ! python3 "$DOTFILES/scripts/check-keychain-profiles.py"; then
+  warn "Tool Keychain items remain pending; run: make keychain-list, restore items, then make keychain-check"
+  PENDING+=("Tool Keychain items")
+fi
+
 info "post-vault: ssh-setup"
-run_make ssh-setup
+if ! command -v gh >/dev/null 2>&1 || ! GH_HOST=github.com gh auth status --hostname github.com >/dev/null 2>&1; then
+  warn "SSH registration deferred; run: gh auth login -h github.com, then make post-vault"
+  PENDING+=("GitHub CLI authentication / SSH registration")
+elif ! run_make ssh-setup; then
+  warn "SSH setup incomplete; repair it and rerun make post-vault; continuing independent app restores"
+  PENDING+=("SSH setup")
+fi
 
 if [[ -f "$SHOTTR_PLIST" ]]; then
   info "post-vault: restore-shottr"
@@ -87,7 +102,7 @@ if ((${#PENDING[@]} > 0)); then
     echo "failed to publish post-vault pending marker" >&2
     exit 1
   fi
-  warn "post-vault automation has pending app restores"
+  warn "post-vault automation has pending recovery steps"
 else
   rm -f "$PENDING_FILE"
   ok "post-vault automation complete"
@@ -96,9 +111,11 @@ fi
 cat <<'EOF'
 
 GUI leftovers:
+  • Tool credentials: make keychain-list → recreate/recover items → make keychain-check
+  • Keychain presence does not prove access or API validity; run the tool-specific checks when ready
+  • GitHub CLI authentication if pending: gh auth login -h github.com → make post-vault
   • If deferred earlier: App Store sign-in → make brew-mas
   • Import Raycast / Transmit (/ VS Code MCP) from ~/.secrets/apps/
-  • Import the saved Thaw profile from ~/.secrets/apps/thaw/ after installing Thaw
   • Sign into apps; Hammerspoon Login + Accessibility
   • Dato once → make restore-apps   (if used)
   • Full Dato settings when present → make restore-dato

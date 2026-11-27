@@ -12,6 +12,8 @@ Required artifact: a rendered specialized experience or comparable in-context va
 
 Select one primary creative workflow. Do not automatically stack them. `variant` builds alternatives in their real page context and does not own whole-page design or select a winner unasked.
 
-Treat broad third-party style skills—`emil-design-eng`, `ui-ux-pro-max`, `creative-design`, `minimalist-ui`, `industrial-brutalist-ui`, `redesign-existing-projects`, `stitch-design-taste`, `hallmark`, and `gpt-taste`—as bounded reference material unless the user names the skill, platform, method, or aesthetic. If the runtime loads one automatically, the selected artifact, project design authority, and implementation quality contract still control the work.
+Treat broad third-party style skills—`emil-design-eng`, `ui-ux-pro-max`, `creative-design`, and `hallmark`—as bounded reference material unless the user names the skill, platform, method, or aesthetic. If the runtime loads one automatically, the selected artifact, project design authority, and implementation quality contract still control the work.
 
 Use `pick-ui-library` only when the user explicitly asks for a curated library recommendation. It does not own general interface implementation or motion work.
+
+Minimalism and brutalism are brief constraints; follow existing direction/implementation phases. Google Stitch has no installed specialist; state the gap.

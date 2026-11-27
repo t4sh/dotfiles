@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Capture/check/merge explicitly managed Hermes preferences, never auth stores."""
 import argparse
+import ipaddress
 import json
 import os
 from pathlib import Path
@@ -102,13 +103,74 @@ def external_dirs(value):
     return value
 
 
-def project(data, skills_only=False, preserve_model_selection=False):
+def validate_base_url(value, label):
+    # urlsplit silently strips tabs/newlines and leading controls; reject the
+    # original input before parsing so snapshot URLs have one interpretation.
+    if not isinstance(value, str) or any(char.isspace() or ord(char) < 32 or ord(char) == 127 for char in value) or "\\" in value:
+        raise ValueError(f"Invalid {label} base_url; config retained")
+    if re.search(r"%(?![0-9A-Fa-f]{2})", value):
+        raise ValueError(f"{label} base_url has an invalid percent escape; config retained")
+    try:
+        url = urlsplit(value)
+    except ValueError:
+        raise ValueError(f"Invalid {label} base_url; config retained") from None
+    if url.scheme not in ("http", "https") or not url.hostname or "@" in url.netloc or "?" in value or "#" in value:
+        raise ValueError(f"{label} base_url must have no embedded credentials, query or fragment")
+    if url.netloc.startswith("["):
+        if not re.fullmatch(r"\[[^\]]+\](?::[0-9]+)?", url.netloc):
+            raise ValueError(f"{label} base_url has an invalid IPv6 authority; config retained")
+        try:
+            ipaddress.IPv6Address(url.hostname)
+        except ValueError:
+            raise ValueError(f"{label} base_url has an invalid IPv6 host; config retained") from None
+    elif not re.fullmatch(r"[\w.-]+", url.hostname):
+        raise ValueError(f"{label} base_url has an invalid host; config retained")
+    if not url.netloc.startswith("[") and ":" in url.netloc:
+        _, _, raw_port = url.netloc.rpartition(":")
+        if not re.fullmatch(r"[0-9]+", raw_port):
+            raise ValueError(f"{label} base_url has an invalid port; config retained")
+    try:
+        url.port
+    except ValueError:
+        raise ValueError(f"{label} base_url has an invalid port; config retained") from None
+
+
+def validate_model_aliases(aliases):
+    if not isinstance(aliases, dict):
+        raise ValueError("Model aliases must map names to model identifiers or alias objects")
+    for name, alias in aliases.items():
+        if not isinstance(name, str) or not re.fullmatch(r"[\w./:@+-]+", name):
+            raise ValueError("Invalid model alias name")
+        if isinstance(alias, str):
+            fields = {"model": alias}
+        elif isinstance(alias, dict):
+            # Reject unowned fields rather than silently dropping per-alias auth or routing.
+            if "model" not in alias or set(alias) - {"model", "provider", "base_url", "key_env"}:
+                raise ValueError("Model alias objects require model and allow only provider, base_url, key_env; credentials stay live")
+            fields = alias
+        else:
+            raise ValueError("Model aliases must map names to model identifiers or alias objects")
+        for key, value in fields.items():
+            if not isinstance(value, str) or (key == "model" and not value):
+                raise ValueError("Invalid model alias field type or missing model")
+            if re.search(r"(?:^sk-|^ghp_|^glpat-|/Users/|Bearer |\$\{)", value):
+                raise ValueError("Nonportable or credential-like model alias field")
+            if key in ("model", "provider") and value and not re.fullmatch(r"[\w./:@+-]+", value):
+                raise ValueError("Invalid model alias identifier")
+            if key == "key_env" and value and not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", value):
+                raise ValueError("Model alias key_env must be an environment variable name")
+            if key == "base_url" and value:
+                validate_base_url(value, "Model alias")
+
+
+def project(data, skills_only=False, preserve_model_selection=False, *, fallback=None):
     result = {}
     fields = {"skills": "create_dir"} if skills_only else FIELDS
     for path, keys in fields.items():
         if preserve_model_selection and path == "model":
             continue
-        src = section(data, path)
+        # Capture keeps saved policy when live omits a key; explicit values win.
+        src = {**section(fallback or {}, path), **section(data, path)}
         for key in keys.split():
             if key not in src:
                 continue
@@ -119,28 +181,23 @@ def project(data, skills_only=False, preserve_model_selection=False):
                 raise ValueError("Invalid preference type: " + path + "." + key)
             if isinstance(value, str) and re.search(r"(?:sk-|ghp_|glpat-|/Users/|Bearer |\$\{)", value):
                 raise ValueError("Nonportable or credential-like preference: " + path + "." + key)
-            if key == "base_url" and value:
-                url = urlsplit(value)
-                if url.scheme not in ("http", "https") or not url.hostname or url.username or url.password or url.query or url.fragment:
-                    raise ValueError("Model base_url must have no embedded credentials, query or fragment")
+            if key == "base_url" and value not in (None, ""):
+                validate_base_url(value, "Model")
             put(result, path, key, value)
-    if "external_dirs" in section(data, "skills"):
+    skills = {**section(fallback or {}, "skills"), **section(data, "skills")}
+    if "external_dirs" in skills:
         # Snapshot owns only this required entry, never the user's other paths.
-        entries = external_dirs(section(data, "skills")["external_dirs"])
+        entries = external_dirs(skills["external_dirs"])
         shared = (Path.home() / ".agents/skills").resolve()
         # Relative paths belong to the active Hermes home, not this process's cwd.
         # Only normalize unambiguous absolute paths; restore adds the canonical entry.
         expanded = (Path(os.path.expandvars(entry)).expanduser() for entry in entries if entry)
         discovered = any(path.is_absolute() and path.resolve() == shared for path in expanded)
         put(result, "skills", "external_dirs", ["~/.agents/skills"] if discovered else [])
-    aliases = None if skills_only else section(data, "model").get("aliases")
+    aliases = None if skills_only else {**section(fallback or {}, "model"),
+                                        **section(data, "model")}.get("aliases")
     if aliases is not None:
-        if not isinstance(aliases, dict) or any(
-            not isinstance(k, str) or not isinstance(v, str) or
-            not re.fullmatch(r"[\w./:@+-]+", k) or not re.fullmatch(r"[\w./:@+-]+", v)
-            for k, v in aliases.items()
-        ):
-            raise ValueError("Model aliases must map names to model identifiers")
+        validate_model_aliases(aliases)
         put(result, "model", "aliases", aliases)
     if not skills_only and not preserve_model_selection and not result.get("model", {}).get("default"):
         raise ValueError("Hermes model.default is missing; prior snapshot retained")
@@ -162,16 +219,27 @@ def write_atomic(path, data):
             os.unlink(name)
 
 
-def merge(base, saved):
+# Required for the shared skill boundary, so --keep-local never yields it.
+ENFORCED = {("skills", "create_dir")}
+
+
+def merge(base, saved, keep_local=False, path=()):
+    """Merge saved preferences; with keep_local, existing live values win."""
     for key, value in saved.items():
-        if isinstance(value, dict) and key != "aliases":
+        where = (*path, key)
+        if key == "aliases":
+            local = base.get(key, {})
+            if keep_local and not isinstance(local, dict):
+                raise ValueError("Cannot merge Hermes model aliases")
+            base[key] = {**value, **local} if keep_local else value
+        elif isinstance(value, dict):
             if key in base and not isinstance(base[key], dict):
                 raise ValueError("Cannot merge Hermes section: " + key)
-            merge(base.setdefault(key, {}), value)
+            merge(base.setdefault(key, {}), value, keep_local, where)
         elif key == "external_dirs":
             entries = list(external_dirs(base.get(key)))
             base[key] = entries + [entry for entry in value if entry not in entries]
-        else:
+        elif not keep_local or where in ENFORCED or key not in base:
             base[key] = value
     return base
 
@@ -253,10 +321,14 @@ def main():
     parser.add_argument("--skills-only", action="store_true", help="Manage portable skill creation and additive shared discovery")
     parser.add_argument("--preserve-model-selection", action="store_true",
                         help="Restore/check shared preferences and aliases without changing the live model/provider/endpoint")
+    parser.add_argument("--keep-local", action="store_true",
+                        help="Restore only adds saved preferences missing from the live config; local values win")
     parser.add_argument("--snapshot", type=Path, default=Path(os.environ.get("DOTFILES", Path(__file__).resolve().parents[1])) / "apps/hermes/config.json")
     args = parser.parse_args()
     if args.preserve_model_selection and (args.skills_only or args.mode not in ("restore", "check")):
         parser.error("--preserve-model-selection requires a full restore or check")
+    if args.keep_local and args.mode != "restore":
+        parser.error("--keep-local applies only to restore")
     try:
         if args.mode == "isolate-skills":
             isolate_shared_skills(args.live)
@@ -267,7 +339,8 @@ def main():
             print("Hermes skill boundary: check passed")
             return 0
         if args.mode == "capture":
-            write_atomic(args.snapshot, project(read_config(args.live), args.skills_only))
+            saved = read_config(args.snapshot) if args.snapshot.exists() else None
+            write_atomic(args.snapshot, project(read_config(args.live), args.skills_only, fallback=saved))
         else:
             saved = read_config(args.snapshot)
             if project(saved, args.skills_only) != saved:
@@ -279,7 +352,10 @@ def main():
                 raise ValueError("Hermes preferences differ; use this helper with capture or restore and the same --live, --snapshot and --skills-only options. See docs/hermes-preferences.md.")
             if args.mode == "restore":
                 base = read_config(args.live) if args.live.exists() else {}
-                write_atomic(args.live, merge(base, saved))
+                merged = merge(json.loads(json.dumps(base)), saved, args.keep_local)
+                # An unchanged merge leaves the live YAML's own layout alone.
+                if merged != base or not args.live.exists():
+                    write_atomic(args.live, merged)
         print("Hermes preferences: " + args.mode + " passed")
         return 0
     except (OSError, ValueError) as error:

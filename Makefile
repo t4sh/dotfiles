@@ -5,19 +5,108 @@ ifeq ($(OS),Windows_NT)
 include windows.mk
 else
 
+.PHONY: skills-runtime skills-engine skills-engine-check skills-browser skills-browser-check brew-base agent-clients-check
+agent-clients-check: ## Check instruction bridges; runtime evidence is in agents/CLIENTS.md
+	@bash scripts/check-agent-clients.sh
+
+.PHONY: keychain-list keychain-check
+keychain-list: ## List configured Keychain references without reading passwords
+	@python3 scripts/check-keychain-profiles.py --list
+
+keychain-check: ## Check Keychain item presence only; no password or API access
+	@python3 scripts/check-keychain-profiles.py
+
+.PHONY: context7 context7-check claude-mcp claude-mcp-check
+.PHONY: figma-check figma-api-check
+figma-check: ## Check the dedicated Figma REST API token without displaying it
+	@bin/figma-env --check
+
+figma-api-check: ## Make one read-only Figma request; hide token and account data
+	@bin/figma-env -- python3 scripts/check-figma-api.py
+
+context7: ## Wire Cursor, Zed, VS Code and Claude Code to the dedicated Context7 secret (Mac)
+	@bin/context7-mcp --check
+	@python3 scripts/context7-clients.py setup
+
+context7-check: ## Check Context7 credential/runtime and all four client configurations
+	@bin/context7-mcp --check
+	@python3 scripts/context7-clients.py check
+
+claude-mcp: ## Wire Claude Code to Paper, brilliant and GitHub (gh keyring token) (Mac)
+	@bin/github-mcp-headers --check
+	@python3 scripts/claude-mcp-servers.py setup
+
+claude-mcp-check: ## Check gh token availability and Claude Code Paper/brilliant/GitHub wiring
+	@bin/github-mcp-headers --check
+	@python3 scripts/claude-mcp-servers.py check
+
+
 .PHONY: all help link unlink brew brew-without-mas brew-core brew-apps node brew-npm brew-mas brew-check brewfile-audit shims macos macos-user macos-dry-run macos-check touch-id-sudo touch-id-sudo-check dock terminal services services-check restore-apps restore-canary restore-shottr post-vault backup backup-canary backup-shottr audit-apps apps-drift hooks hooks-check ssh-setup skills-audit skills skills-update skills-manifest secrets-backup secrets-backup-legacy secrets-compat-fixtures secrets-mount secrets-mount-legacy secrets-health secrets-manifest secrets-restore secrets-restore-apply secrets-pass secrets-pass-import upgrade rules-audit default-apps default-apps-check capture-default-apps doctor verify-bootstrap docs-audit
 
 export DOTFILES := $(CURDIR)
+APP_GROUPS ?= all
+export APP_GROUPS
 
-.PHONY: cursor-extensions vscode-extensions restore-zed zed-check restore-cursor-cli cursor-cli-check backup-text-replacements
+.PHONY: app-groups setup-status
+app-groups: ## List optional app groups and the current APP_GROUPS selection
+	@python3 scripts/app_groups.py list
+
+setup-status: ## Read-only setup report with deferred steps and next commands
+	@bash scripts/setup-status.sh
+
+
+.PHONY: hermes-gateway-repair hermes-update
+hermes-gateway-repair: ## Restore the macOS gateway startup fix after a Hermes update
+	@python3 scripts/repair-hermes-gateway.py
+
+hermes-update: ## Update Hermes on macOS and restore its gateway startup fix
+	@"$(HOME)/.hermes/hermes-agent/.hermes/bin/hermes" update
+	@python3 scripts/repair-hermes-gateway.py
+
+.PHONY: restore-codex-rtk codex-rtk-check restore-claude-rtk claude-rtk-check restore-claude-settings claude-settings-check
+restore-codex-rtk: ## Merge the RTK PreToolUse hook into Codex user hooks
+	@python3 scripts/rtk-hook.py restore --client codex
+	@python3 scripts/rtk-hook.py check --client codex
+
+codex-rtk-check: ## Check Codex has exactly one current RTK hook
+	@python3 scripts/rtk-hook.py check --client codex
+
+restore-claude-rtk: ## Merge the RTK PreToolUse hook into Claude Code user settings
+	@python3 scripts/rtk-hook.py restore
+	@python3 scripts/rtk-hook.py check
+
+claude-rtk-check: ## Check Claude Code has exactly one current RTK hook
+	@python3 scripts/rtk-hook.py check
+
+restore-claude-settings: ## Merge saved Claude Code attribution and skill listing overrides
+	@python3 scripts/claude-settings.py restore
+	@python3 scripts/claude-settings.py check
+
+claude-settings-check: ## Check Claude Code attribution against the saved snapshot
+	@python3 scripts/claude-settings.py check
+
+.PHONY: restore-claude-rulebook claude-rulebook-check
+restore-claude-rulebook: ## Merge Claude Code startup load enforcement hooks (Mac)
+	@if command -v claude >/dev/null 2>&1; then \
+		python3 scripts/claude-rulebook.py restore && python3 scripts/claude-rulebook.py check; \
+	else echo "Claude startup hooks deferred: install Claude Code, then run make restore-claude-rulebook"; fi
+
+claude-rulebook-check: ## Check Claude Code startup load enforcement hooks
+	@if command -v claude >/dev/null 2>&1; then python3 scripts/claude-rulebook.py check; \
+	else echo "Claude startup hook check deferred: install Claude Code, then run make restore-claude-rulebook"; fi
+
+.PHONY: cursor-extensions cursor-shell-format vscode-extensions restore-zed zed-check restore-cursor-cli cursor-cli-check backup-text-replacements
 restore-cursor-cli: ## Merge saved Cursor CLI attribution preferences
 	@bash scripts/restore-apps.sh --only cursor-cli
 
 cursor-cli-check: ## Check Cursor CLI attribution against the saved snapshot
 	@python3 scripts/cursor-cli-settings.py check
 
-cursor-extensions: ## Install the minimal reviewed Cursor extension set
+cursor-extensions: cursor-shell-format ## Install the minimal reviewed Cursor extension set
 	@cursor --install-extension esbenp.prettier-vscode
+
+cursor-shell-format: ## Install the pinned Shell Format VSIX in Cursor on macOS
+	@bash scripts/install-cursor-shell-format.sh
 
 vscode-extensions: ## Apply the verified formatter version; upstream 7.2.8 is broken
 	@code --install-extension foxundermoon.shell-format@7.2.5 --force
@@ -29,17 +118,27 @@ zed-check: ## Check Zed settings, keymap, declared extensions and theme assets
 	@python3 scripts/check-zed.py
 
 all: ## Re-apply the full existing-Mac setup, including node shims, in a fixed order
+	@python3 scripts/app_groups.py list
 	@$(MAKE) --no-print-directory link
 	@$(MAKE) --no-print-directory rules-audit
 	@$(MAKE) --no-print-directory skills-audit
 	@$(MAKE) --no-print-directory brew-without-mas
 	@$(MAKE) --no-print-directory shims
+	@$(MAKE) --no-print-directory skills-engine
+	@$(MAKE) --no-print-directory skills-browser
+	@$(MAKE) --no-print-directory browse-install
+	@$(MAKE) --no-print-directory restore-codex-rtk
+	@$(MAKE) --no-print-directory restore-claude-rtk
+	@$(MAKE) --no-print-directory restore-claude-settings
+	@$(MAKE) --no-print-directory restore-claude-rulebook
 	@$(MAKE) --no-print-directory services
-	@$(MAKE) --no-print-directory restore-apps
+	@if [ "$(APP_GROUPS)" = all ]; then $(MAKE) --no-print-directory restore-apps; \
+	else echo "App preference restore deferred for partial selection; settings retained. Explicit full restore: make restore-apps"; fi
 	@$(MAKE) --no-print-directory dock
 	@$(MAKE) --no-print-directory hooks
 	@$(MAKE) --no-print-directory macos
-	@echo "Full setup complete."
+	@echo "Setup stages finished; recovery, sign-ins and verification may remain."
+	@echo "Next: make setup-status APP_GROUPS=$(APP_GROUPS)"
 # macos last: defaults.sh has interactive prompts; a Ctrl-C there previously
 # aborted the sequence before dock/hooks could run.
 # post-vault / ssh-setup stay manual: never touch canonical key material
@@ -132,13 +231,28 @@ skills-manifest: ## Regenerate Skillsfile and skills README from the skill lockf
 skills: skills-audit ## Verify the vendored global skills restored by make link
 	@python3 scripts/gen-skillsfile.py --check
 	@python3 agents/compareskills.py --check
+	@python3 scripts/check-skill-installation.py
 	@echo "  ✓ vendored skills are repo-managed at $(CURDIR)/agents/skills"
 	@echo "  → upstream refresh is explicit: make skills-update"
+
+skills-engine: ## Install or repair the pinned Impeccable engine (network if missing)
+	@python3 scripts/check-skill-installation.py --install-engine
+
+skills-engine-check: ## Check the pinned Impeccable engine without downloading
+	@python3 scripts/check-skill-installation.py --engine-only
+
+skills-browser: ## Install Fluid Functionalism audit dependencies without lifecycle scripts
+	@python3 scripts/check-skill-installation.py --install-browser
+
+skills-browser-check: ## Check Fluid Functionalism audit dependency loading offline
+	@python3 scripts/check-skill-installation.py --browser-only
 
 skills-update: ## Explicitly refresh vendored skills from current upstream sources
 	@bash Skillsfile
 	@$(MAKE) --no-print-directory skills-manifest
 	@$(MAKE) --no-print-directory skills-audit
+	@$(MAKE) --no-print-directory skills-engine
+	@$(MAKE) --no-print-directory skills-browser
 	@git status --short -- Skillsfile agents/.skill-lock.json agents/skills agents/skills/README.md
 
 hooks: ## Install local git hooks and diff drivers
@@ -171,17 +285,18 @@ brew-without-mas: ## Install all non-App-Store Brewfile phases
 	@echo "  - App Store phase deferred; after sign-in run: make brew-mas"
 
 brew-base: ## Install Brewfile except npm and App Store entries
-	@DOTFILES="$(CURDIR)" bash scripts/brewfile.sh base
-	@$(MAKE) --no-print-directory vscode-extensions
-	@$(MAKE) --no-print-directory cursor-extensions
+	@$(MAKE) --no-print-directory brew-core
+	@$(MAKE) --no-print-directory brew-apps
 
 brew-core: ## Install bootstrap taps, formulae, and uv tools
 	@DOTFILES="$(CURDIR)" bash scripts/brewfile.sh core
 
-brew-apps: ## Install casks, fonts, and editor extensions (resumable phase)
+brew-apps: ## Install selected APP_GROUPS; default all (resumable phase)
 	@DOTFILES="$(CURDIR)" bash scripts/brewfile.sh apps
-	@$(MAKE) --no-print-directory vscode-extensions
-	@$(MAKE) --no-print-directory cursor-extensions
+	@if python3 scripts/app_groups.py includes development; then \
+		$(MAKE) --no-print-directory vscode-extensions && \
+		$(MAKE) --no-print-directory cursor-extensions; \
+	fi
 
 node: ## Install and activate the exact Node version from .node-version
 	@DOTFILES="$(CURDIR)" bash scripts/setup-node.sh
@@ -198,6 +313,13 @@ shims: ## Create/repair node-stable + npx-stable shims from .node-version
 
 brew-check: ## Check whether Brewfile entries are installed
 	@DOTFILES="$(CURDIR)" bash scripts/brewfile.sh check
+
+.PHONY: browse-install browse-check
+browse-install: ## Install OpenCode's Mac Browse binary; browser pairing is manual
+	@bash scripts/opencode-browse.sh install
+
+browse-check: ## Verify the managed Mac config, executable and live Browse MCP connection
+	@bash scripts/opencode-browse.sh check
 
 macos: ## Apply interactive macOS defaults
 	@bash macos/defaults.sh
@@ -293,6 +415,10 @@ verify-bootstrap: ## Fail unless the post-vault Mac bootstrap is complete
 	@$(MAKE) --no-print-directory rules-audit
 	@$(MAKE) --no-print-directory skills
 	@$(MAKE) --no-print-directory audit-apps
+	@$(MAKE) --no-print-directory codex-rtk-check
+	@$(MAKE) --no-print-directory claude-rtk-check
+	@$(MAKE) --no-print-directory claude-settings-check
+	@$(MAKE) --no-print-directory claude-rulebook-check
 	@bash scripts/link.sh --check
 	@$(MAKE) --no-print-directory services-check
 	@$(MAKE) --no-print-directory hooks-check
@@ -302,7 +428,7 @@ verify-bootstrap: ## Fail unless the post-vault Mac bootstrap is complete
 
 docs-audit: ## Check docs/scripts for typos when typos is installed
 	@if command -v typos >/dev/null 2>&1; then \
-		typos README.md AGENTS.md WINDOWS.md SECRETS-WINDOWS.md Makefile windows.mk install.sh install.ps1 scripts macos zsh powershell config hammerspoon bin git starship; \
+		typos README.md AGENTS.md WINDOWS.md SECRETS-WINDOWS.md Makefile windows.mk install.sh install.ps1 scripts macos zsh powershell config hammerspoon bin git starship docs; \
 	else \
 		echo "  - typos not installed; run 'make brew' first"; \
 	fi
@@ -318,8 +444,14 @@ audit-apps: ## Scan app preference snapshots for secrets/local paths
 apps-drift: ## Check app preference snapshots against current system state
 	@bash scripts/audit-apps-drift.sh
 
-backup: ## Check macOS policy, refresh public snapshots, and capture vault preferences
-	@$(MAKE) --no-print-directory macos-check SKIP_FINDER_VIEWS=1 || { echo "macOS preferences differ or could not be checked. Review and confirm each difference before backup; update policy or restore the saved value, then retry."; exit 1; }
+backup: export DOTFILES_REVIEW_MAC_PREFERENCES ?= $(shell test -t 0 && echo 1 || echo 0)
+ifeq ($(OVERRIDE),1)
+backup: export DOTFILES_REVIEW_MAC_PREFERENCES := 0
+endif
+backup: ## Review app and system snapshot changes in a terminal; check the public macOS policy first
+	@case "$(OVERRIDE)" in ""|0|1) ;; *) echo "OVERRIDE must be 0 or 1" >&2; exit 2 ;; esac
+	@for d in .backup-rollback.*; do if [ -d "$$d" ] && [ ! -L "$$d" ] && [ -e "$$d/journal.jsonl" ]; then bash scripts/backup-apps.sh --recovery-check || exit 1; fi; done
+	@$(MAKE) --no-print-directory macos-check SKIP_FINDER_VIEWS=1 || { echo "macOS preferences differ or could not be checked. Update policy or restore the saved value, then retry."; exit 1; }
 	@OVERRIDE="$(OVERRIDE)" bash scripts/backup-apps.sh
 	@if [ -f "$(HOME)/Library/Containers/com.sindresorhus.Dato/Data/Library/Preferences/com.sindresorhus.Dato.plist" ]; then $(MAKE) --no-print-directory backup-dato; else echo "Dato private capture skipped: launch Dato first; previous backup retained."; fi
 	@if defaults read cc.ffitch.shottr >/dev/null 2>&1; then $(MAKE) --no-print-directory backup-shottr; else echo "Shottr private capture skipped: preferences unavailable; previous backup retained."; fi
@@ -360,3 +492,6 @@ secrets-pass: ## Copy the local vault password from Keychain
 secrets-pass-import: ## Import a recovered vault password into the local Keychain
 	@bash scripts/secrets-pass-import.sh
 endif
+
+skills-runtime: ## Verify skill resources and the version-matched local Impeccable engine
+	@python3 scripts/check-skill-installation.py --runtime

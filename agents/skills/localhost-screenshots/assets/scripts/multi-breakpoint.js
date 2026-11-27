@@ -1,17 +1,22 @@
 #!/usr/bin/env node
 // Multi-breakpoint screenshot set for a single localhost URL.
 //
-// Usage:
-//   node assets/scripts/multi-breakpoint.js [URL] [OUT_DIR] [BREAKPOINTS] [WAIT_UNTIL] [WAIT_FOR_SELECTOR]
+// Usage (run from the project root; relative OUT_DIR lands in that project's _screenshots/):
+//   node "<skill-dir>/assets/scripts/multi-breakpoint.js" [URL] [OUT_DIR] [BREAKPOINTS] [WAIT_UNTIL] [WAIT_FOR_SELECTOR]
 // Defaults:
 //   URL=http://localhost:3000
 //   OUT_DIR=_screenshots/home
 //   BREAKPOINTS='mobile:375x812,tablet:768x1024,desktop:1280x800'
 //
 // BREAKPOINTS is a comma-separated list of `name:WIDTHxHEIGHT` entries.
+// Playwright resolves from the current project first, then from beside this script.
+// Requires local-guard.js from the same folder (URL policy and the navigation guard).
 
 const fs = require('fs');
 const path = require('path');
+const {
+  localUrlProblem, gotoLocal, assertLocalPage, captureVerifiedPng, loadChromium, PLAYWRIGHT_MISSING,
+} = require('./local-guard.js');
 
 const DEFAULT_BREAKPOINTS = 'mobile:375x812,tablet:768x1024,desktop:1280x800';
 
@@ -35,50 +40,6 @@ function parseBreakpoints(spec) {
   });
 }
 
-function isLocalUrl(value) {
-  try {
-    const parsed = new URL(value);
-    const host = parsed.hostname.toLowerCase();
-    return (parsed.protocol === 'http:' || parsed.protocol === 'https:')
-      && (host === 'localhost' || host === '127.0.0.1' || host === '[::1]' || host.endsWith('.localhost'));
-  } catch {
-    return false;
-  }
-}
-
-function validateLocalUrl(value) {
-  try {
-    new URL(value);
-  } catch {
-    console.error(`Invalid URL: ${value}`);
-    process.exit(1);
-  }
-  if (!isLocalUrl(value)) {
-    console.error('Refusing non-localhost URL. Use http(s)://localhost, 127.0.0.1, [::1], or *.localhost.');
-    process.exit(1);
-  }
-}
-
-async function gotoLocal(page, value, options) {
-  let blockedUrl = '';
-  await page.route('**/*', async (route) => {
-    const request = route.request();
-    if (request.isNavigationRequest() && request.frame() === page.mainFrame() && !isLocalUrl(request.url())) {
-      blockedUrl = request.url();
-      await route.abort('blockedbyclient');
-      return;
-    }
-    await route.continue();
-  });
-  try {
-    await page.goto(value, options);
-  } catch (err) {
-    if (blockedUrl) throw new Error(`Refusing non-localhost main-frame redirect: ${blockedUrl}`);
-    throw err;
-  }
-  if (!isLocalUrl(page.url())) throw new Error(`Refusing non-localhost final URL: ${page.url()}`);
-}
-
 const url = process.argv[2] || 'http://localhost:3000';
 const outDir = process.argv[3] || '_screenshots/home';
 let breakpoints;
@@ -91,32 +52,35 @@ try {
 }
 const waitUntil = process.argv[5] || 'load';
 const waitForSelector = process.argv[6] || '';
-validateLocalUrl(url);
-
-function loadChromium() {
-  try {
-    return require('playwright').chromium;
-  } catch (err) {
-    if (err && err.code === 'MODULE_NOT_FOUND') {
-      console.error('Missing dependency: playwright. Run npm install --save-dev playwright@1.62.0 in the project root before using this helper.');
-      process.exit(1);
-    }
-    throw err;
-  }
+const urlProblem = localUrlProblem(url);
+if (urlProblem) {
+  console.error(urlProblem);
+  process.exit(1);
 }
 
 (async () => {
   fs.mkdirSync(outDir, { recursive: true });
   const chromium = loadChromium();
+  if (!chromium) {
+    console.error(PLAYWRIGHT_MISSING);
+    process.exit(1);
+  }
   const browser = await chromium.launch();
   try {
     for (const bp of breakpoints) {
       const page = await browser.newPage();
       await page.setViewportSize({ width: bp.width, height: bp.height });
       await gotoLocal(page, url, { waitUntil });
-      if (waitForSelector) await page.waitForSelector(waitForSelector, { timeout: 10000 });
+      if (waitForSelector) {
+        // A blocked navigation is the real cause when the wait fails on a browser error page.
+        await page.waitForSelector(waitForSelector, { timeout: 10000 }).catch((err) => {
+          assertLocalPage(page);
+          throw err;
+        });
+      }
       const file = path.join(outDir, `${bp.name}-${bp.width}x${bp.height}.png`);
-      await page.screenshot({ path: file, fullPage: true });
+      const { png } = await captureVerifiedPng(page, { width: bp.width, height: bp.height }, { fullPage: true });
+      fs.writeFileSync(file, png);
       await page.close();
       console.log(`saved ${file}`);
     }

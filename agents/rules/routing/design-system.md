@@ -4,7 +4,7 @@ Load this reference for design systems, tokens, reusable component libraries, pa
 
 ## Select system or content mode
 
-Choose by artifact. Reusable authorities, libraries, tokens, palettes, and type systems use system mode; font research and conversion copy use content mode. Applied screen copy or typography belongs to the interface design route. A one-off content change stays with its narrow consumer instead of expanding into system work.
+Reusable authorities, libraries, tokens, and palettes use system mode; font research and conversion copy use content mode. Applied screen copy or typography belongs to the interface design route. A one-off content change stays with its narrow consumer.
 
 ## Design systems and tokens
 
@@ -17,13 +17,16 @@ Choose by artifact. Reusable authorities, libraries, tokens, palettes, and type 
 | --- | --- |
 | Audit, document, or extend an entire component system | `design-system` |
 | Measure hard-coded values, token adoption, duplicates, deprecations, or gaps | `design-token-audit` |
-| Generate portable static CSS, JSON, or theme tokens | `design-tokens` |
+| Extract starter tokens from a public URL | `extract-design-system` |
+| Generate portable CSS, JSON, or theme tokens | `design-tokens` |
 | Implement a Tailwind CSS v4 component library or migrate Tailwind v3 → v4 | `tailwind-design-system` |
 | Generate or assess only palettes, contrast, gamut, or color semantics | `better-colors` |
 
-Audit the reusable system with `design-system` and a rendered screen or flow with `better-interface`. Use `design-token-audit` for quantitative inventory, `design-tokens` for portable output, and `tailwind-design-system` for Tailwind v4 implementation. Load the interface design route only when the request also requires a screen or flow artifact.
+Audit the reusable system with `design-system` and a rendered screen or flow with `better-interface`. Use `design-token-audit` for quantitative inventory, `extract-design-system` for public website evidence, `design-tokens` for portable output, and `tailwind-design-system` for Tailwind v4 implementation. Load the interface design route only when the request also requires a screen or flow artifact.
 
 Required artifact: a system audit, token package, working library or migration, or palette specification with verification evidence.
+
+In design-token-audit, resolve upstream design-token references to installed `design-tokens`; follow normal routing.
 
 ## Typography and writing
 

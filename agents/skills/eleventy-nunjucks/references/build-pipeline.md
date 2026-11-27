@@ -1,5 +1,7 @@
 # Build pipeline reference
 
+> **Example deployment profile.** This file describes one project's deployment setup, not Eleventy or Nunjucks guidance. Load it only when the user asks for this kind of deployment work or the project already uses this pattern.
+
 The dev/build/lint anatomy. Read this when setting up a new project's tooling or debugging a build that "worked yesterday."
 
 ## Dev mode — what's actually running
@@ -10,9 +12,9 @@ $ pnpm dev
   └── concurrently --kill-others-on-fail --names tw,11ty
         ├── pnpm run dev:tailwind                          # tailwind --watch (continuous)
         │     └── writes to src/assets/css/tailwind.css
-        └── pnpm run dev:eleventy --port=3000              # eleventy --serve
+        └── pnpm run dev:eleventy                          # eleventy --serve --port=3000
               ├── reads src/assets/css/tailwind.css (passed through)
-              ├── watches src/, src/assets/ (addWatchTarget)
+              ├── watches templates and passthrough files; gitignored tailwind.css needs conventions.md § Asset watch target
               └── serves http://localhost:3000 with live reload
 ```
 
@@ -23,10 +25,12 @@ concurrently \
   --kill-others-on-fail \
   --names tw,11ty \
   --prefix-colors blue,green \
-  'pnpm run dev:tailwind' 'pnpm run dev:eleventy --port=3000'
+  'pnpm run dev:tailwind' 'pnpm run dev:eleventy'
 ```
 
-**`--kill-others-on-fail` is load-bearing.** Without it:
+Set the port once, inside the `dev:eleventy` script (`conventions.md` § Scripts shape). Passing `--port` a second time on this command line makes the dev server fail to start with an invalid `port` option (verified on Eleventy 3.1.8, 2026-11-21).
+
+**`--kill-others-on-fail` is load-bearing.** When either process exits non-zero, `concurrently` kills the other, so the failure stops `pnpm dev` visibly. It does not restart or recover anything. Without it:
 - Tailwind's input CSS has a syntax error → tailwind exits with code 1 → 11ty keeps running against stale `tailwind.css` → the screen looks fine but new utilities don't apply
 - 11ty's config has a syntax error → 11ty exits → tailwind keeps writing → CI thinks the build is happy
 
@@ -99,6 +103,8 @@ $ du -sh out/                            # total size
 
 ### CLI invocation
 
+The `tailwindcss` binary is provided by the `@tailwindcss/cli` package, not by `tailwindcss` v4 itself; install both as dev dependencies.
+
 ```bash
 # Watch mode (dev)
 tailwindcss -i styles/tailwind.input.css -o src/assets/css/tailwind.css --watch
@@ -154,17 +160,20 @@ pnpm lint:fix:js    # eslint --fix
 
 ### Stylelint (CSS)
 
+`.stylelintrc.json` (JSON allows no comments):
+
 ```json
-// .stylelintrc.json
 {
   "extends": ["stylelint-config-standard"],
   "rules": {
-    "selector-class-pattern": null,         // allow utility-style class names
-    "no-descending-specificity": null,      // common in component CSS
-    "color-function-notation": "modern"     // oklch(0 0 0) not oklch(0, 0, 0)
+    "selector-class-pattern": null,
+    "no-descending-specificity": null,
+    "color-function-notation": "modern"
   }
 }
 ```
+
+The two `null` rules allow utility-style class names and the specificity ordering common in component CSS; `"modern"` requires space-separated color functions such as `oklch(0 0 0)`.
 
 Run:
 
@@ -175,8 +184,9 @@ pnpm lint:fix:css   # stylelint --fix
 
 ### Prettier with `prettier-plugin-jinja-template`
 
+`.prettierrc`:
+
 ```json
-// .prettierrc
 {
   "plugins": ["prettier-plugin-jinja-template"],
   "overrides": [
@@ -191,7 +201,8 @@ pnpm lint:fix:css   # stylelint --fix
 out/
 out-*/
 node_modules/
-src/assets/css/tailwind.css    # generated; don't format
+# generated; don't format
+src/assets/css/tailwind.css
 ```
 
 Run:
@@ -253,11 +264,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
-        with: { version: 10 }
-      - uses: actions/setup-node@v4
-        with: { node-version: "22", cache: "pnpm" }
+      # Majors current on 2026-11-21; pin full commit SHAs if your policy requires it.
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6   # reads the pnpm version from package.json "packageManager"
+      - uses: actions/setup-node@v7
+        with: { node-version: "26", cache: "pnpm" }   # Active LTS on 2026-11-21; 24 and 22 are maintenance LTS
       - run: pnpm install --frozen-lockfile
       - run: pnpm verify          # lint + format:check + any project-specific checks
       - name: Build metadata
@@ -307,7 +318,7 @@ Turborepo caches `out/` by input hash. A rebuild that touches nothing under `src
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | `dev` shows no styles initially | `build:tailwind` not run before `concurrently` | Add `pnpm run build:tailwind &&` to the dev script |
-| Edits to CSS don't trigger reload | `addWatchTarget("src/assets/")` missing | Add to `.eleventy.js` |
+| Edits to CSS don't trigger reload | The generated stylesheet is gitignored, and Eleventy does not watch gitignored paths even under `addWatchTarget` | `setServerPassthroughCopyBehavior("passthrough")`; see `conventions.md` § Asset watch target |
 | Build is fast locally, slow in CI | Different runtime, cold caches, or repeated work | Compare timings and inputs before changing flags |
 | `out/` has dev-only files (e.g. `tailwind.css.map`) | Source-maps enabled in dev, not gated for prod | Inspect the active tool’s map flags and remove maps only under the project’s output policy |
 | Prettier mangles `.njk` indentation | Plugin not installed or wrong parser | `pnpm add -D prettier-plugin-jinja-template` and check `.prettierrc` |

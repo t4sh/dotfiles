@@ -1,0 +1,106 @@
+#!/usr/bin/env bash
+# Load only the dedicated Figma REST API credential for one command and its children.
+set +xv
+set -euo pipefail
+
+secrets_root="${DOTFILES_SECRETS_DIR:-$HOME/.secrets}"
+secrets_file="$secrets_root/config/env/figma.env"
+check_only=0
+
+usage() {
+  cat <<'USAGE'
+Usage: figma-env --init
+       figma-env --check
+       figma-env -- COMMAND [ARG...]
+
+--init   Create a private Keychain reference file; preserve any existing file.
+--check  Check that the dedicated reference resolves to a key, without printing it.
+--       Load FIGMA_TOKEN for this command and its children only.
+
+Credential file: ~/.secrets/config/env/figma.env
+DOTFILES_SECRETS_DIR overrides ~/.secrets for recovery and isolated fixtures.
+USAGE
+}
+
+case "${1:-}" in
+  --help|-h)
+    usage
+    exit 0
+    ;;
+  --init)
+    [[ $# -eq 1 ]] || { usage >&2; exit 2; }
+    if [[ -e "$secrets_file" || -L "$secrets_file" ]]; then
+      printf 'figma-env: existing path preserved: %s\n' "$secrets_file"
+      exit 0
+    fi
+    umask 077
+    mkdir -p -- "$(dirname -- "$secrets_file")"
+    # Noclobber also protects a file created between the existence check and write.
+    (
+      set -o noclobber
+      cat > "$secrets_file" <<'ENV'
+# Private Figma REST API credential. Store the value in Keychain under the service below, account = login username.
+# Loaded only by ~/.dotfiles/bin/figma-env for explicit Figma REST API commands.
+# Keep this file out of git; back it up with make secrets-backup.
+export FIGMA_TOKEN='keychain://dotfiles/figma/FIGMA_TOKEN'
+ENV
+    )
+    printf 'figma-env: created private credential file: %s\n' "$secrets_file"
+    exit 0
+    ;;
+  --check)
+    [[ $# -eq 1 ]] || { usage >&2; exit 2; }
+    check_only=1
+    ;;
+  --)
+    shift
+    [[ $# -gt 0 ]] || { usage >&2; exit 2; }
+    ;;
+  *)
+    usage >&2
+    exit 2
+    ;;
+esac
+
+if [[ ! -f "$secrets_file" || ! -r "$secrets_file" ]]; then
+  printf 'figma-env: credential file is missing or unreadable; run --init first\n' >&2
+  exit 1
+fi
+
+# Keep file output and unrelated exports inside the subshell. An inherited key
+# must not mask an empty or broken dedicated file.
+if ! figma_token="$(
+  unset FIGMA_TOKEN
+  set +u
+  # shellcheck disable=SC1090
+  if ! source "$secrets_file" >/dev/null 2>&1; then
+    exit 1
+  fi
+  set +xv 2>/dev/null
+  printf '%s' "${FIGMA_TOKEN:-}"
+)"; then
+  printf 'figma-env: could not load the credential file; details suppressed\n' >&2
+  exit 1
+fi
+
+# Resolve Keychain references only at invocation, never during shell startup.
+# shellcheck source=../scripts/lib/keychain.sh
+source "$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../scripts/lib" && pwd)/keychain.sh"
+if ! figma_token="$(dotfiles_resolve_secret "$figma_token")"; then
+  printf 'figma-env: Keychain credential unavailable or access denied (details hidden)\n' >&2
+  exit 1
+fi
+
+if [[ -z "$figma_token" ]]; then
+  printf 'figma-env: FIGMA_TOKEN reference is empty; configure %s\n' "$secrets_file" >&2
+  exit 1
+fi
+
+if [[ "$check_only" -eq 1 ]]; then
+  printf 'figma-env: dedicated key is configured (value hidden)\n'
+  exit 0
+fi
+
+export FIGMA_TOKEN="$figma_token"
+unset figma_token
+exec "$@"
